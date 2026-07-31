@@ -1,0 +1,18 @@
+:root {
+  --vav-color-ink: #24322f;
+  --vav-color-muted: #66736f;
+  --vav-color-surface: #fffdf9;
+  --vav-color-surface-soft: #f4f1ea;
+  --vav-color-primary: #8c4f5e;
+  --vav-color-primary-strong: #713b49;
+  --vav-color-accent: #c9985b;
+  --vav-color-success: #3d7869;
+  --vav-color-danger: #a84545;
+  --vav-color-border: #ded8ce;
+  --vav-radius-sm: 0.5rem;
+  --vav-radius-md: 1rem;
+  --vav-radius-lg: 1.5rem;
+  --vav-shadow-soft: 0 18px 55px rgb(73 55 48 / 10%);
+  --vav-font-sans: Inter, "Noto Sans SC", "PingFang SC", system-ui, sans-serif;
+}
+

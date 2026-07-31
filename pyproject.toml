@@ -1,0 +1,27 @@
+[project]
+name = "vav-platform-workspace"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+dependencies = []
+
+[dependency-groups]
+dev = [
+  "pip-licenses==5.0.0",
+  "pre-commit==4.2.0",
+  "pyyaml==6.0.2",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["services/api", "services/worker"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["alembic.*", "celery.*"]
+ignore_missing_imports = true

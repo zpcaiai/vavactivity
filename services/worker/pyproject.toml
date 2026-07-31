@@ -1,0 +1,20 @@
+[project]
+name = "vav-worker"
+version = "0.1.0"
+description = "VAV Celery worker"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "celery[redis]==5.5.3",
+  "vav-platform-api",
+]
+
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/vav_worker"]
+
+[tool.uv.sources]
+vav-platform-api = {workspace = true}
+

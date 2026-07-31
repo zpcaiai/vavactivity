@@ -1,0 +1,58 @@
+[project]
+name = "vav-platform-api"
+version = "0.1.0"
+description = "VAV modular-monolith API"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "alembic==1.16.4",
+  "asyncpg==0.30.0",
+  "fastapi==0.116.1",
+  "greenlet==3.2.3",
+  "opentelemetry-api==1.36.0",
+  "opentelemetry-exporter-otlp-proto-http==1.36.0",
+  "opentelemetry-instrumentation-fastapi==0.57b0",
+  "opentelemetry-sdk==1.36.0",
+  "pydantic==2.11.7",
+  "pydantic-settings==2.10.1",
+  "redis==5.2.1",
+  "sqlalchemy==2.0.42",
+  "structlog==25.4.0",
+  "uvicorn[standard]==0.35.0",
+]
+
+[dependency-groups]
+dev = [
+  "httpx==0.28.1",
+  "mypy==1.17.0",
+  "pytest==8.4.1",
+  "pytest-asyncio==1.1.0",
+  "ruff==0.12.7",
+]
+
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/vav"]
+
+[tool.pytest.ini_options]
+addopts = "-q --strict-markers"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "ASYNC"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+packages = ["vav"]
+
+[[tool.mypy.overrides]]
+module = ["alembic.*", "celery.*"]
+ignore_missing_imports = true
