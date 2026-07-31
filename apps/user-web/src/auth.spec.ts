@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { router } from "@/router";
+import { normalizeLoginIdentifier } from "@/stores/auth";
 
 describe("user authentication routes", () => {
   it("exposes every account recovery and session route", () => {
@@ -17,5 +18,11 @@ describe("user authentication routes", () => {
         "account-sessions"
       ])
     );
+  });
+
+  it("maps the visible test login to its seeded email identity", () => {
+    expect(normalizeLoginIdentifier("test")).toBe("test@vav.local");
+    expect(normalizeLoginIdentifier(" Test ")).toBe("test@vav.local");
+    expect(normalizeLoginIdentifier("member@example.com")).toBe("member@example.com");
   });
 });

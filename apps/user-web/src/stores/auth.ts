@@ -11,6 +11,11 @@ export interface CurrentUser {
   permissions: string[];
 }
 
+export function normalizeLoginIdentifier(identifier: string) {
+  const normalized = identifier.trim();
+  return normalized.toLocaleLowerCase() === "test" ? "test@vav.local" : normalized;
+}
+
 interface AuthResponse {
   data: {
     access_token: string;
@@ -67,7 +72,11 @@ export const useAuthStore = defineStore("auth", () => {
   async function login(email: string, password: string, deviceName = "Web browser") {
     const result = await authRequest<AuthResponse>("/auth/login", {
       method: "POST",
-      body: JSON.stringify({ email, password, device_name: deviceName })
+      body: JSON.stringify({
+        email: normalizeLoginIdentifier(email),
+        password,
+        device_name: deviceName
+      })
     });
     applyAuth(result);
   }

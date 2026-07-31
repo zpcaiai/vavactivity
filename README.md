@@ -49,4 +49,6 @@ make verify
 提交到 `main` 的数据库迁移会在后端质量门禁通过后自动应用到 Neon。连接密钥、执行顺序和
 失败处理见 `docs/runbooks/neon-migrations.md`。
 
+用户端测试登录账号为 `test`，密码为 `test`。该账号无管理权限，仅供测试环境使用。
+
 # vavactivity

@@ -75,11 +75,11 @@ async function submit() {
         @submit.prevent="submit"
       >
         <label>
-          邮箱
+          {{ mode === "login" ? "邮箱或账号" : "邮箱" }}
           <input
             v-model.trim="email"
-            type="email"
-            autocomplete="email"
+            :type="mode === 'login' ? 'text' : 'email'"
+            :autocomplete="mode === 'login' ? 'username' : 'email'"
             required
           >
         </label>
@@ -89,11 +89,17 @@ async function submit() {
             v-model="password"
             type="password"
             :autocomplete="mode === 'login' ? 'current-password' : 'new-password'"
-            minlength="12"
+            :minlength="mode === 'register' ? 12 : undefined"
             maxlength="128"
             required
           >
         </label>
+        <p
+          v-if="mode === 'login'"
+          class="auth-hint"
+        >
+          测试账号：test / test
+        </p>
         <label
           v-if="mode === 'register'"
           class="checkbox-row"

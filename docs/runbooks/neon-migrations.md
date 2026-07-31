@@ -4,7 +4,8 @@
 
 每次代码推送到 `main` 后，`Backend CI` 会先在隔离的 PostgreSQL 服务中执行后端测试、
 完整 Alembic 迁移和模型漂移检查。只有这些检查全部通过，`Apply migrations to Neon`
-任务才会对 Neon 执行一次幂等的 `alembic upgrade head`，随后再次检查线上 schema。
+任务才会对 Neon 执行一次幂等的 `alembic upgrade head`，随后再次检查线上 schema。空库
+第一次会完整执行所有迁移；以后 Alembic 根据 `alembic_version` 只执行尚未应用的新版本。
 
 迁移任务按 `neon-production-migrations` 并发组串行运行。迁移失败会让 Backend CI
 失败，不能被当作数据库发布成功。Pull Request 和本地 `pre-commit` 不访问 Neon，避免
@@ -22,6 +23,11 @@
 
 连接串只能保存在 GitHub Actions secret 或受控的运行环境中，不得写入仓库、日志、Issue
 或验收报告。应用运行时可以另外使用池化连接；迁移密钥只负责 schema 变更。
+
+首次迁移还会幂等补齐权限种子，并创建无管理权限的前端测试身份 `test@vav.local`。用户端
+登录页将输入账号 `test` 映射到该身份，因此可使用 `test / test` 登录。该弱口令账号是用户
+明确要求的测试入口；种子命令必须传入 `--confirm-insecure-test-account`，且账号一旦存在就
+不会在后续提交中重置密码或覆盖资料。
 
 ## 验证与故障处理
 
