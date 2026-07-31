@@ -575,9 +575,7 @@ async def save_attempt_draft(
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     attempt = await session.scalar(
-        select(ExerciseAttempt)
-        .where(ExerciseAttempt.id == attempt_id)
-        .with_for_update()
+        select(ExerciseAttempt).where(ExerciseAttempt.id == attempt_id).with_for_update()
     )
     if attempt is None or attempt.user_id != principal.user.id:
         raise VavError("EXERCISE_ATTEMPT_NOT_FOUND", "Attempt was not found.", status_code=404)
@@ -1441,11 +1439,6 @@ async def admin_certificates(
         ).all()
     )
     return success(
-        {
-            "items": [
-                {"id": str(item.id), **certificate_payload(item)}
-                for item in values
-            ]
-        },
+        {"items": [{"id": str(item.id), **certificate_payload(item)} for item in values]},
         request_id_from_request(request),
     )

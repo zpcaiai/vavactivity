@@ -247,9 +247,7 @@ async def curriculum_payload(
             prerequisite_rows = list(
                 (
                     await session.scalars(
-                        select(LessonPrerequisite).where(
-                            LessonPrerequisite.lesson_id == lesson.id
-                        )
+                        select(LessonPrerequisite).where(LessonPrerequisite.lesson_id == lesson.id)
                     )
                 ).all()
             )
@@ -323,9 +321,7 @@ class PublicationService:
             .limit(1)
         )
         if instructor is None:
-            errors.append(
-                {"field": "instructors", "message": "An active instructor is required."}
-            )
+            errors.append({"field": "instructors", "message": "An active instructor is required."})
         modules = list(
             (
                 await session.scalars(
@@ -426,8 +422,7 @@ class PublicationService:
                         ).all()
                     )
                     if exercise.grading_mode in {"automatic", "hybrid"} and any(
-                        question.question_type
-                        in {"single_choice", "multiple_choice", "true_false"}
+                        question.question_type in {"single_choice", "multiple_choice", "true_false"}
                         and question.answer_key_encrypted is None
                         for question in questions
                     ):
@@ -865,10 +860,12 @@ class ProgressService:
             )
         )
         progress = await session.scalar(
-            select(LessonProgress).where(
+            select(LessonProgress)
+            .where(
                 LessonProgress.enrollment_id == enrollment.id,
                 LessonProgress.lesson_id == lesson.id,
-            ).with_for_update()
+            )
+            .with_for_update()
         )
         if progress is None:
             progress = LessonProgress(
@@ -882,10 +879,7 @@ class ProgressService:
             session.add(progress)
             await session.flush()
         if existing_event is not None:
-            if (
-                existing_event.lesson_id != lesson.id
-                or existing_event.event_type != event_type
-            ):
+            if existing_event.lesson_id != lesson.id or existing_event.event_type != event_type:
                 raise VavError(
                     "LEARNING_EVENT_CONFLICT",
                     "The idempotency key or event sequence was reused for another event.",
@@ -1191,10 +1185,15 @@ async def complete_assessment_lesson(
 ) -> LessonProgress | None:
     exercise = await session.get(CourseExercise, attempt.exercise_id)
     lesson = await session.get(CourseLesson, exercise.lesson_id) if exercise else None
-    if exercise is None or lesson is None or lesson.completion_mode not in {
-        "exercise_pass",
-        "assignment_graded",
-    }:
+    if (
+        exercise is None
+        or lesson is None
+        or lesson.completion_mode
+        not in {
+            "exercise_pass",
+            "assignment_graded",
+        }
+    ):
         return None
     progress = await session.scalar(
         select(LessonProgress).where(

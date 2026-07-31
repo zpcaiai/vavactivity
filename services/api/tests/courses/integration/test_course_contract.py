@@ -8,10 +8,7 @@ def test_course_routes_are_in_openapi(client) -> None:
     assert "/api/v1/public/courses/{course_id}/lessons/{lesson_id}" in paths
     assert "/api/v1/courses/{course_id}/enroll" in paths
     assert "/api/v1/account/courses/{enrollment_id}" in paths
-    assert (
-        "/api/v1/account/courses/{enrollment_id}/exercises/{exercise_id}/attempts"
-        in paths
-    )
+    assert "/api/v1/account/courses/{enrollment_id}/exercises/{exercise_id}/attempts" in paths
     assert "/api/v1/account/exercise-attempts/{attempt_id}/submit" in paths
     assert "/api/v1/account/exercise-attempts/{attempt_id}/draft" in paths
     assert "/api/v1/admin/courses" in paths

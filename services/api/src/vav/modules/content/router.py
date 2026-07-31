@@ -1171,9 +1171,7 @@ async def admin_navigation(
                     NavigationItemLocalization.locale,
                     NavigationItemLocalization.label,
                 ).where(
-                    NavigationItemLocalization.navigation_item_id.in_(
-                        [item.id for item in items]
-                    )
+                    NavigationItemLocalization.navigation_item_id.in_([item.id for item in items])
                 )
             )
         ).all()
@@ -1211,9 +1209,7 @@ async def update_navigation(
     menu_code: str,
     payload: NavigationMenuUpdateRequest,
     request: Request,
-    principal: AuthenticatedPrincipal = Depends(
-        require_permission("content.navigation.manage")
-    ),
+    principal: AuthenticatedPrincipal = Depends(require_permission("content.navigation.manage")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     menu = await session.scalar(

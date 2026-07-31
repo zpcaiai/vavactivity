@@ -44,11 +44,7 @@ def detected_media_type(payload: bytes) -> str | None:
         return "image/png"
     if len(payload) >= 12 and payload[:4] == b"RIFF" and payload[8:12] == b"WEBP":
         return "image/webp"
-    if (
-        len(payload) >= 12
-        and payload[4:8] == b"ftyp"
-        and payload[8:12] in {b"avif", b"avis"}
-    ):
+    if len(payload) >= 12 and payload[4:8] == b"ftyp" and payload[8:12] in {b"avif", b"avis"}:
         return "image/avif"
     if payload.startswith(b"%PDF-"):
         return "application/pdf"

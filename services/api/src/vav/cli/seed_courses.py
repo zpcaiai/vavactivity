@@ -334,9 +334,7 @@ async def seed_courses() -> None:
             ExerciseQuestionLocalization(
                 question_id=question.id,
                 locale="zh-CN",
-                prompt_blocks=[
-                    {"type": "paragraph", "text": "健康边界应以自愿和尊重为基础。"}
-                ],
+                prompt_blocks=[{"type": "paragraph", "text": "健康边界应以自愿和尊重为基础。"}],
                 options=[
                     {"value": True, "label": "正确"},
                     {"value": False, "label": "错误"},
