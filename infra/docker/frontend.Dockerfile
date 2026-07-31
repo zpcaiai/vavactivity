@@ -8,10 +8,16 @@ RUN corepack enable
 WORKDIR /workspace
 
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
-COPY apps ./apps
-COPY packages ./packages
+COPY apps/user-web/package.json ./apps/user-web/package.json
+COPY apps/admin-web/package.json ./apps/admin-web/package.json
+COPY packages/api-client/package.json ./packages/api-client/package.json
+COPY packages/contracts/package.json ./packages/contracts/package.json
+COPY packages/design-tokens/package.json ./packages/design-tokens/package.json
+COPY packages/eslint-config/package.json ./packages/eslint-config/package.json
 
 RUN corepack pnpm install --frozen-lockfile
 
-CMD ["corepack", "pnpm", "--filter", "@vav/user-web", "dev"]
+COPY apps ./apps
+COPY packages ./packages
 
+CMD ["corepack", "pnpm", "--filter", "@vav/user-web", "dev"]

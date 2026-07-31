@@ -9,9 +9,8 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 COPY services ./services
 
-RUN uv sync --frozen --all-packages --no-dev
+RUN uv sync --frozen --all-packages --all-groups
 
 WORKDIR /app/services/api
 
 CMD ["uvicorn", "vav.main:app", "--host", "0.0.0.0", "--port", "8000"]
-
