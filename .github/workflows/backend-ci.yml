@@ -43,6 +43,8 @@ jobs:
           python-version: "3.12"
           enable-cache: true
       - run: uv sync --frozen --all-packages --all-groups
+      - name: Generate ephemeral test signing keys
+        run: ./scripts/generate-dev-auth-keys.sh
       - run: uv run ruff check services
       - run: uv run ruff format --check services
       - run: uv run mypy services/api/src services/worker/src
