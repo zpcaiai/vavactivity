@@ -51,3 +51,36 @@ jobs:
       - run: uv run --package vav-platform-api python scripts/check_migration_heads.py
       - run: uv run --package vav-platform-api alembic -c services/api/alembic.ini check
 
+  neon-migrations:
+    name: Apply migrations to Neon
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: neon-production-migrations
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Neon migration connection
+        env:
+          NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: python scripts/validate_neon_database_url.py
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.8.3"
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync --frozen --package vav-platform-api --no-dev
+      - name: Verify a single migration head
+        run: uv run --package vav-platform-api python scripts/check_migration_heads.py
+      - name: Apply pending migrations to Neon
+        env:
+          DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: uv run --package vav-platform-api alembic -c services/api/alembic.ini upgrade head
+      - name: Verify the live Neon schema
+        env:
+          DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: |
+          uv run --package vav-platform-api alembic -c services/api/alembic.ini current
+          uv run --package vav-platform-api alembic -c services/api/alembic.ini check

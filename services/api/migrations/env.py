@@ -4,9 +4,10 @@ import asyncio
 from logging.config import fileConfig
 
 from alembic import context
-from sqlalchemy.ext.asyncio import async_engine_from_config
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from vav.core.config import get_settings
+from vav.core.database import asyncpg_engine_configuration
 from vav.models import Base
 
 config = context.config
@@ -37,9 +38,10 @@ def do_run_migrations(connection: object) -> None:
 
 
 async def run_async_migrations() -> None:
-    connectable = async_engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
+    database_url, connect_args = asyncpg_engine_configuration(get_settings().database_url)
+    connectable = create_async_engine(
+        database_url,
+        connect_args=connect_args,
         pool_pre_ping=True,
     )
     async with connectable.connect() as connection:

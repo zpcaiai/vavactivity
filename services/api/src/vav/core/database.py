@@ -5,6 +5,7 @@ from typing import cast
 
 from redis.asyncio import Redis
 from sqlalchemy import text
+from sqlalchemy.engine import URL, make_url
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -16,17 +17,35 @@ from sqlalchemy.pool import NullPool
 from vav.core.config import get_settings
 
 
+def asyncpg_engine_configuration(database_url: str) -> tuple[URL, dict[str, object]]:
+    """Translate libpq-style TLS options into asyncpg connect arguments."""
+    url = make_url(database_url)
+    if url.drivername != "postgresql+asyncpg":
+        return url, {}
+
+    ssl_mode = url.query.get("sslmode")
+    url = url.difference_update_query(["sslmode", "channel_binding"])
+    if ssl_mode is None:
+        return url, {}
+    if not isinstance(ssl_mode, str):
+        ssl_mode = ssl_mode[-1]
+    return url, {"ssl": ssl_mode}
+
+
 @lru_cache
 def get_engine() -> AsyncEngine:
     settings = get_settings()
+    database_url, connect_args = asyncpg_engine_configuration(settings.database_url)
     if settings.environment == "test":
         return create_async_engine(
-            settings.database_url,
+            database_url,
+            connect_args=connect_args,
             pool_pre_ping=True,
             poolclass=NullPool,
         )
     return create_async_engine(
-        settings.database_url,
+        database_url,
+        connect_args=connect_args,
         pool_pre_ping=True,
         pool_recycle=1800,
     )

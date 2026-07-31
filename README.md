@@ -46,4 +46,7 @@ make verify
 
 更多资料见 `docs/product`、`docs/architecture`、`docs/security`、`docs/runbooks` 和 `docs/acceptance`。
 
+提交到 `main` 的数据库迁移会在后端质量门禁通过后自动应用到 Neon。连接密钥、执行顺序和
+失败处理见 `docs/runbooks/neon-migrations.md`。
+
 # vavactivity
