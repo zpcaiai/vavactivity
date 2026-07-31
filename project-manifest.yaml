@@ -30,15 +30,15 @@ applications:
     status: foundation_in_progress
 
 module_registry:
-  public_site: {owner: product, status: planned, phase: phase_1}
-  identity: {owner: backend, status: planned, phase: phase_1}
-  activities: {owner: product, status: planned, phase: phase_1}
-  courses: {owner: product, status: planned, phase: phase_1}
+  public_site: {owner: product, status: foundation_in_progress, phase: phase_1}
+  identity: {owner: backend, status: foundation_in_progress, phase: phase_1}
+  activities: {owner: product, status: foundation_in_progress, phase: phase_1}
+  courses: {owner: product, status: foundation_in_progress, phase: phase_1}
   counseling: {owner: product, status: planned, phase: phase_1}
   ai_assistant: {owner: ai, status: planned, phase: phase_1}
-  catalog: {owner: backend, status: planned, phase: phase_1}
-  orders: {owner: backend, status: planned, phase: phase_1}
-  payments: {owner: backend, status: planned, phase: phase_1}
+  catalog: {owner: backend, status: foundation_in_progress, phase: phase_1}
+  orders: {owner: backend, status: foundation_in_progress, phase: phase_1}
+  payments: {owner: backend, status: foundation_in_progress, phase: phase_1}
   admin: {owner: frontend, status: foundation_in_progress, phase: phase_1}
   dating_profile: {owner: product, status: planned, phase: phase_2}
   partner_preferences: {owner: product, status: planned, phase: phase_2}
@@ -47,7 +47,7 @@ module_registry:
   matches: {owner: matchmaking, status: planned, phase: phase_2}
   introductions: {owner: matchmaking, status: planned, phase: phase_2}
   relationship_state: {owner: matchmaking, status: planned, phase: phase_2}
-  memberships: {owner: backend, status: planned, phase: phase_2}
+  memberships: {owner: backend, status: foundation_in_progress, phase: phase_2}
   moderation: {owner: trust_and_safety, status: planned, phase: phase_2}
 
 phases:
@@ -114,6 +114,66 @@ pending_decisions:
     owner: product
     status: undecided
     value: null
+  activity_eligibility_policy:
+    owner: product_and_legal
+    status: undecided
+    value: null
+  activity_participant_visibility:
+    owner: trust_and_safety
+    status: undecided
+    value: null
+  activity_cancellation_refund_policy:
+    owner: operations_and_finance
+    status: undecided
+    value: null
+  activity_contact_exchange_policy:
+    owner: trust_and_safety
+    status: undecided
+    value: null
+  activity_no_show_choice_policy:
+    owner: product_and_trust
+    status: undecided
+    value: null
+  course_video_hosting:
+    owner: product_and_platform
+    status: undecided
+    value: null
+  course_video_download_policy:
+    owner: product_and_legal
+    status: undecided
+    value: null
+  course_certificate_name_visibility:
+    owner: product_and_privacy
+    status: undecided
+    value: null
+  course_access_expiry_policy:
+    owner: product_and_legal
+    status: undecided
+    value: null
+  course_membership_access_policy:
+    owner: product
+    status: undecided
+    value: null
+  counseling_cancellation_policy:
+    owner: operations_and_finance
+    status: undecided
+    value: null
+  counseling_no_show_policy:
+    owner: operations_and_legal
+    status: undecided
+    value: null
+  counseling_recording_policy:
+    owner: legal_and_privacy
+    status: undecided
+    value: null
+  counseling_record_retention:
+    owner: privacy_and_legal
+    status: undecided
+    value: null
+  counseling_professional_scope:
+    owner: legal_and_service_owner
+    status: undecided
+    value: null
 
 quality:
   credentials_committed: false
@@ -121,4 +181,3 @@ quality:
   backend_authoritative_for_permissions: true
   backend_authoritative_for_payments: true
   ai_failure_must_not_block_core_services: true
-

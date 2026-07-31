@@ -11,14 +11,22 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
+from sqlalchemy.pool import NullPool
 
 from vav.core.config import get_settings
 
 
 @lru_cache
 def get_engine() -> AsyncEngine:
+    settings = get_settings()
+    if settings.environment == "test":
+        return create_async_engine(
+            settings.database_url,
+            pool_pre_ping=True,
+            poolclass=NullPool,
+        )
     return create_async_engine(
-        get_settings().database_url,
+        settings.database_url,
         pool_pre_ping=True,
         pool_recycle=1800,
     )
@@ -48,7 +56,12 @@ async def check_redis() -> None:
 
 
 async def close_resources() -> None:
-    if get_engine.cache_info().currsize:
-        await get_engine().dispose()
     if get_redis.cache_info().currsize:
-        await get_redis().aclose()
+        redis = get_redis()
+        await redis.aclose()
+        get_redis.cache_clear()
+    if get_engine.cache_info().currsize:
+        engine = get_engine()
+        await engine.dispose()
+        get_session_factory.cache_clear()
+        get_engine.cache_clear()

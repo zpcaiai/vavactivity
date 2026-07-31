@@ -22,6 +22,21 @@ const locale = computed(() => String(route.params.locale));
     <p v-if="isAuthenticated">
       {{ accountName }}
     </p>
+    <nav
+      v-if="isAuthenticated"
+      class="commerce-actions"
+      aria-label="账户功能"
+    >
+      <RouterLink
+        class="primary-button"
+        :to="`/${locale}/account/courses`"
+      >
+        我的课程
+      </RouterLink>
+      <RouterLink :to="`/${locale}/account/orders`">
+        我的订单
+      </RouterLink>
+    </nav>
     <EmptyState
       v-else
       :title="t('account.title')"
@@ -36,4 +51,3 @@ const locale = computed(() => String(route.params.locale));
     </EmptyState>
   </section>
 </template>
-

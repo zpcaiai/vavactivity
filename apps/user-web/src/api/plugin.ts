@@ -11,9 +11,9 @@ export const apiPlugin = {
   install(app: App) {
     const request = createApiClient({
       baseUrl: import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1",
-      getAccessToken: () => useAuthStore().accessToken
+      getAccessToken: () => useAuthStore().accessToken,
+      refreshAccessToken: () => useAuthStore().refresh()
     });
     app.provide(apiKey, request);
   }
 };
-

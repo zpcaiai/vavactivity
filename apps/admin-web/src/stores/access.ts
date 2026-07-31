@@ -1,10 +1,39 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
+export interface AdminUser {
+  id: string;
+  email: string;
+  status: string;
+  email_verified: boolean;
+  permissions: string[];
+}
+
+interface AuthResponse {
+  data: {
+    access_token: string;
+    expires_in: number;
+    user: AdminUser;
+  };
+}
+
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
+
+function csrfToken() {
+  return document.cookie
+    .split("; ")
+    .find((cookie) => cookie.startsWith("vav_csrf="))
+    ?.split("=")
+    .slice(1)
+    .join("=");
+}
+
 export const useAccessStore = defineStore("access", () => {
   const accessToken = ref<string>();
   const permissions = ref<string[]>([]);
-  const foundationPreview = ref(import.meta.env.DEV);
+  const user = ref<AdminUser | null>(null);
+  const status = ref<"unknown" | "authenticated" | "anonymous" | "refreshing">("unknown");
+  const foundationPreview = ref(false);
   const isAuthenticated = computed(() => Boolean(accessToken.value));
 
   function hasPermission(required: string | string[]) {
@@ -15,15 +44,102 @@ export const useAccessStore = defineStore("access", () => {
   function clearSession() {
     accessToken.value = undefined;
     permissions.value = [];
+    user.value = null;
+    status.value = "anonymous";
+  }
+
+  async function requestAuth(path: string, init: RequestInit = {}) {
+    const headers = new Headers(init.headers);
+    if (init.body) {
+      headers.set("Content-Type", "application/json");
+    }
+    const response = await fetch(`${baseUrl}${path}`, {
+      ...init,
+      credentials: "include",
+      headers
+    });
+    const result = (await response.json()) as AuthResponse & {
+      error?: { message: string };
+    };
+    if (!response.ok) {
+      throw new Error(result.error?.message ?? "管理员认证失败");
+    }
+    return result;
+  }
+
+  function applyAuth(result: AuthResponse) {
+    accessToken.value = result.data.access_token;
+    permissions.value = result.data.user.permissions;
+    user.value = result.data.user;
+    status.value = "authenticated";
+  }
+
+  async function login(email: string, password: string) {
+    const result = await requestAuth("/admin/auth/login", {
+      method: "POST",
+      body: JSON.stringify({
+        email,
+        password,
+        device_name: "Admin web browser"
+      })
+    });
+    applyAuth(result);
+  }
+
+  async function refresh() {
+    status.value = "refreshing";
+    try {
+      const csrf = csrfToken();
+      if (!csrf) {
+        clearSession();
+        return false;
+      }
+      const result = await requestAuth("/admin/auth/refresh", {
+        method: "POST",
+        headers: { "X-CSRF-Token": csrf }
+      });
+      applyAuth(result);
+      return true;
+    } catch {
+      clearSession();
+      return false;
+    }
+  }
+
+  async function bootstrap() {
+    if (status.value === "unknown") {
+      await refresh();
+    }
+  }
+
+  async function logout() {
+    if (!accessToken.value) {
+      clearSession();
+      return;
+    }
+    const csrf = csrfToken();
+    await requestAuth("/admin/auth/logout", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken.value}`,
+        ...(csrf ? { "X-CSRF-Token": csrf } : {})
+      }
+    });
+    clearSession();
   }
 
   return {
     accessToken,
     permissions,
+    user,
+    status,
     foundationPreview,
     isAuthenticated,
     hasPermission,
+    login,
+    refresh,
+    bootstrap,
+    logout,
     clearSession
   };
 });
-

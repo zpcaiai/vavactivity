@@ -1,5 +1,31 @@
 <script setup lang="ts">
-const isDevelopment = import.meta.env.DEV;
+import { ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+
+import { useAdminAuthStore } from "@/stores/admin-auth";
+
+const auth = useAdminAuthStore();
+const route = useRoute();
+const router = useRouter();
+const email = ref("");
+const password = ref("");
+const busy = ref(false);
+const error = ref("");
+
+async function submit() {
+  busy.value = true;
+  error.value = "";
+  try {
+    await auth.login(email.value, password.value);
+    const returnTo =
+      typeof route.query.returnTo === "string" ? route.query.returnTo : "/admin/dashboard";
+    await router.replace(returnTo);
+  } catch (cause) {
+    error.value = cause instanceof Error ? cause.message : "登录失败";
+  } finally {
+    busy.value = false;
+  }
+}
 </script>
 
 <template>
@@ -14,25 +40,50 @@ const isDevelopment = import.meta.env.DEV;
       </p>
       <h1>让每一次运营动作，都有边界和记录。</h1>
       <p>
-        管理端与用户端完全分离。正式登录将在身份与 RBAC 批次接入，所有权限由后端验证。
+        管理端与用户端使用不同 Token Audience。所有菜单与敏感操作都由后端权限再次确认。
       </p>
     </section>
     <section class="login-card">
-      <span class="login-status">FOUNDATION READY</span>
+      <span class="login-status">SECURE ACCESS</span>
       <h2>运营人员登录</h2>
-      <p>当前版本不接收账户或密码，避免在认证服务完成前形成不安全的临时入口。</p>
-      <el-alert
-        title="开发环境可预览工作台框架；生产构建会自动关闭预览通道。"
-        type="info"
-        :closable="false"
-        show-icon
-      />
+      <form @submit.prevent="submit">
+        <label>
+          管理员邮箱
+          <el-input
+            v-model="email"
+            type="email"
+            autocomplete="email"
+          />
+        </label>
+        <label>
+          密码
+          <el-input
+            v-model="password"
+            type="password"
+            autocomplete="current-password"
+            show-password
+          />
+        </label>
+        <el-alert
+          v-if="error"
+          :title="error"
+          type="error"
+          :closable="false"
+          show-icon
+        />
+        <el-button
+          native-type="submit"
+          type="primary"
+          :loading="busy"
+        >
+          安全登录
+        </el-button>
+      </form>
       <RouterLink
-        v-if="isDevelopment"
         class="preview-link"
-        to="/admin/dashboard"
+        to="/admin/accept-invitation"
       >
-        进入工程预览
+        接受管理员邀请
       </RouterLink>
     </section>
   </main>

@@ -1,41 +1,70 @@
 <script setup lang="ts">
 import {
-  Calendar,
-  Collection,
-  CreditCard,
   DataAnalysis,
   Document,
   Goods,
   House,
-  List,
   Lock,
-  MagicStick,
   Setting,
-  User,
-  UserFilled
+  User
 } from "@element-plus/icons-vue";
-import { computed, ref } from "vue";
+import { computed, ref, watchEffect } from "vue";
 import { useRoute } from "vue-router";
 
+import { adminLocales, type AdminLocale, useAdminLocale } from "@/i18n";
+import { useAdminAuthStore } from "@/stores/admin-auth";
+
 const route = useRoute();
+const auth = useAdminAuthStore();
+const { locale, setLocale, t } = useAdminLocale();
 const collapsed = ref(false);
 const pageTitle = computed(() => String(route.meta.title ?? "工作台"));
 
 const menu = [
-  { path: "/admin/dashboard", label: "工作台", icon: House },
-  { path: "/admin/users", label: "用户", icon: User },
-  { path: "/admin/content", label: "内容", icon: Document },
-  { path: "/admin/activities", label: "活动", icon: Calendar },
-  { path: "/admin/courses", label: "课程", icon: Collection },
-  { path: "/admin/counseling", label: "辅导", icon: UserFilled },
-  { path: "/admin/catalog", label: "服务目录", icon: Goods },
-  { path: "/admin/orders", label: "订单", icon: List },
-  { path: "/admin/payments", label: "支付", icon: CreditCard },
-  { path: "/admin/ai", label: "AI 辅导", icon: MagicStick },
-  { path: "/admin/moderation", label: "安全审核", icon: Lock },
-  { path: "/admin/settings", label: "系统设置", icon: Setting },
-  { path: "/admin/audit", label: "审计日志", icon: DataAnalysis }
+  { path: "/admin/dashboard", labelKey: "menu.dashboard", icon: House },
+  { path: "/admin/users", labelKey: "menu.users", icon: User },
+  { path: "/admin/content/pages", labelKey: "menu.pages", icon: Document },
+  { path: "/admin/content/media", labelKey: "menu.media", icon: Document },
+  { path: "/admin/content/navigation", labelKey: "menu.navigation", icon: Document },
+  { path: "/admin/catalog/products", labelKey: "menu.catalog", icon: Goods },
+  { path: "/admin/commerce/orders", labelKey: "menu.commerce", icon: Goods },
+  { path: "/admin/activities", labelKey: "menu.activities", icon: Goods },
+  { path: "/admin/courses", labelKey: "menu.courses", icon: Document },
+  { path: "/admin/counseling", labelKey: "menu.counseling", icon: User },
+  { path: "/admin/content/settings", labelKey: "menu.settings", icon: Setting },
+  { path: "/admin/access/admins", labelKey: "menu.admins", icon: Lock },
+  { path: "/admin/audit/auth", labelKey: "menu.audit", icon: DataAnalysis }
 ];
+const visibleMenu = computed(() =>
+  menu.filter((item) => {
+    const permissionByPath: Record<string, string> = {
+      "/admin/users": "users.read",
+      "/admin/content/pages": "content.pages.read",
+      "/admin/content/media": "content.media.read",
+      "/admin/content/navigation": "content.navigation.read",
+      "/admin/catalog/products": "catalog.products.read",
+      "/admin/commerce/orders": "commerce.orders.read",
+      "/admin/activities": "activities.read",
+      "/admin/courses": "courses.read",
+      "/admin/counseling": "counseling.appointments.read",
+      "/admin/content/settings": "content.settings.read",
+      "/admin/access/admins": "admins.read",
+      "/admin/audit/auth": "audit.read"
+    };
+    const required = permissionByPath[item.path];
+    return !required || auth.hasPermission(required);
+  })
+);
+
+function changeLocale(value: string) {
+  if (adminLocales.includes(value as AdminLocale)) {
+    setLocale(value as AdminLocale);
+  }
+}
+
+watchEffect(() => {
+  document.documentElement.lang = locale.value;
+});
 </script>
 
 <template>
@@ -48,7 +77,7 @@ const menu = [
         >V</span>
         <div v-if="!collapsed">
           <strong>VAV</strong>
-          <small>运营工作台</small>
+          <small>{{ t("shell.workspace") }}</small>
         </div>
       </div>
       <el-menu
@@ -57,13 +86,13 @@ const menu = [
         :collapse="collapsed"
       >
         <el-menu-item
-          v-for="item in menu"
+          v-for="item in visibleMenu"
           :key="item.path"
           :index="item.path"
         >
           <el-icon><component :is="item.icon" /></el-icon>
           <template #title>
-            {{ item.label }}
+            {{ t(item.labelKey) }}
           </template>
         </el-menu-item>
       </el-menu>
@@ -72,7 +101,7 @@ const menu = [
         type="button"
         @click="collapsed = !collapsed"
       >
-        {{ collapsed ? "展开" : "收起导航" }}
+        {{ collapsed ? t("shell.expand") : t("shell.collapse") }}
       </button>
     </aside>
 
@@ -80,28 +109,45 @@ const menu = [
       <header class="admin-header">
         <div>
           <p class="admin-kicker">
-            VAV OPERATIONS
+            {{ t("shell.operations") }}
           </p>
           <h1>{{ pageTitle }}</h1>
         </div>
-        <div class="operator-chip">
-          <span class="status-dot" />
-          <div>
-            <strong>Foundation preview</strong>
-            <small>非生产授权会话</small>
+        <div class="operator-actions">
+          <label class="admin-locale-select">
+            <span>{{ t("shell.language") }}</span>
+            <el-select
+              data-testid="admin-locale-select"
+              :model-value="locale"
+              size="small"
+              @change="changeLocale"
+            >
+              <el-option
+                label="简体中文"
+                value="zh-CN"
+              />
+              <el-option
+                label="繁體中文"
+                value="zh-TW"
+              />
+              <el-option
+                label="English"
+                value="en"
+              />
+            </el-select>
+          </label>
+          <div class="operator-chip">
+            <span class="status-dot" />
+            <div>
+              <strong>{{ auth.user?.email }}</strong>
+              <small>{{ t("shell.authorizedSession") }}</small>
+            </div>
           </div>
         </div>
       </header>
-      <div
-        class="preview-banner"
-        role="note"
-      >
-        当前为工程基座预览。正式环境必须由后端验证管理员身份、角色和每次操作权限。
-      </div>
       <main class="admin-main">
         <RouterView />
       </main>
     </section>
   </div>
 </template>
-

@@ -62,7 +62,9 @@ services:
       - |
         mc alias set local http://minio:9000 "$${MINIO_ROOT_USER}" "$${MINIO_ROOT_PASSWORD}"
         mc mb --ignore-existing "local/$${MINIO_BUCKET}"
+        mc mb --ignore-existing "local/${MEDIA_S3_BUCKET_PUBLIC:-vav-public}"
         mc anonymous set none "local/$${MINIO_BUCKET}"
+        mc anonymous set download "local/${MEDIA_S3_BUCKET_PUBLIC:-vav-public}"
 
   mailpit:
     image: axllent/mailpit:v1.21.8
@@ -84,6 +86,17 @@ services:
       dockerfile: infra/docker/backend.Dockerfile
     env_file:
       - .env
+    environment:
+      AUTH_PRIVATE_KEY_FILE: /run/secrets/auth-private.pem
+      AUTH_PUBLIC_KEY_FILE: /run/secrets/auth-public.pem
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      MEDIA_S3_ENDPOINT: ${MEDIA_S3_ENDPOINT:-http://minio:9000}
+      MEDIA_S3_PUBLIC_ENDPOINT: ${MEDIA_S3_PUBLIC_ENDPOINT:-http://localhost:9000}
+      MEDIA_S3_ACCESS_KEY: ${MEDIA_S3_ACCESS_KEY:-vav_minio_local}
+      MEDIA_S3_SECRET_KEY: ${MEDIA_S3_SECRET_KEY:-vav_minio_local_development_only}
+      MEDIA_S3_BUCKET_PUBLIC: ${MEDIA_S3_BUCKET_PUBLIC:-vav-public}
+      MEDIA_S3_BUCKET_PRIVATE: ${MEDIA_S3_BUCKET_PRIVATE:-vav-private}
     command:
       - /bin/sh
       - -ec
@@ -101,6 +114,9 @@ services:
         condition: service_healthy
     ports:
       - "8000:8000"
+    volumes:
+      - ./.dev-secrets/auth-private.pem:/run/secrets/auth-private.pem:ro
+      - ./.dev-secrets/auth-public.pem:/run/secrets/auth-public.pem:ro
     healthcheck:
       test:
         [
@@ -119,6 +135,17 @@ services:
       dockerfile: infra/docker/backend.Dockerfile
     env_file:
       - .env
+    environment:
+      AUTH_PRIVATE_KEY_FILE: /run/secrets/auth-private.pem
+      AUTH_PUBLIC_KEY_FILE: /run/secrets/auth-public.pem
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      MEDIA_S3_ENDPOINT: ${MEDIA_S3_ENDPOINT:-http://minio:9000}
+      MEDIA_S3_PUBLIC_ENDPOINT: ${MEDIA_S3_PUBLIC_ENDPOINT:-http://localhost:9000}
+      MEDIA_S3_ACCESS_KEY: ${MEDIA_S3_ACCESS_KEY:-vav_minio_local}
+      MEDIA_S3_SECRET_KEY: ${MEDIA_S3_SECRET_KEY:-vav_minio_local_development_only}
+      MEDIA_S3_BUCKET_PUBLIC: ${MEDIA_S3_BUCKET_PUBLIC:-vav-public}
+      MEDIA_S3_BUCKET_PRIVATE: ${MEDIA_S3_BUCKET_PRIVATE:-vav-private}
     working_dir: /app
     command:
       [
@@ -134,6 +161,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    volumes:
+      - ./.dev-secrets/auth-private.pem:/run/secrets/auth-private.pem:ro
+      - ./.dev-secrets/auth-public.pem:/run/secrets/auth-public.pem:ro
     healthcheck:
       test:
         [
@@ -143,6 +173,41 @@ services:
       interval: 20s
       timeout: 10s
       retries: 10
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: infra/docker/backend.Dockerfile
+    env_file:
+      - .env
+    environment:
+      AUTH_PRIVATE_KEY_FILE: /run/secrets/auth-private.pem
+      AUTH_PUBLIC_KEY_FILE: /run/secrets/auth-public.pem
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      MEDIA_S3_ENDPOINT: ${MEDIA_S3_ENDPOINT:-http://minio:9000}
+      MEDIA_S3_PUBLIC_ENDPOINT: ${MEDIA_S3_PUBLIC_ENDPOINT:-http://localhost:9000}
+      MEDIA_S3_ACCESS_KEY: ${MEDIA_S3_ACCESS_KEY:-vav_minio_local}
+      MEDIA_S3_SECRET_KEY: ${MEDIA_S3_SECRET_KEY:-vav_minio_local_development_only}
+      MEDIA_S3_BUCKET_PUBLIC: ${MEDIA_S3_BUCKET_PUBLIC:-vav-public}
+      MEDIA_S3_BUCKET_PRIVATE: ${MEDIA_S3_BUCKET_PRIVATE:-vav-private}
+    working_dir: /app
+    command:
+      [
+        "celery",
+        "--app",
+        "vav_worker.celery_app:celery_app",
+        "beat",
+        "--loglevel=INFO"
+      ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./.dev-secrets/auth-private.pem:/run/secrets/auth-private.pem:ro
+      - ./.dev-secrets/auth-public.pem:/run/secrets/auth-public.pem:ro
 
   user-web:
     build:
@@ -196,4 +261,3 @@ volumes:
   postgres_data:
   redis_data:
   minio_data:
-

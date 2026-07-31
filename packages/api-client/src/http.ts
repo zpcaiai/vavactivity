@@ -23,15 +23,18 @@ export class ApiError extends Error {
 export interface ApiClientOptions {
   baseUrl: string;
   getAccessToken?: () => string | undefined;
+  refreshAccessToken?: () => Promise<boolean>;
   fetchImpl?: typeof fetch;
 }
 
 export function createApiClient(options: ApiClientOptions) {
   const fetchImpl = options.fetchImpl ?? fetch;
+  let refreshPromise: Promise<boolean> | undefined;
 
   return async function request<T>(
     path: string,
-    init: RequestInit = {}
+    init: RequestInit = {},
+    alreadyRetried = false
   ): Promise<T> {
     const token = options.getAccessToken?.();
     const headers = new Headers(init.headers);
@@ -46,11 +49,25 @@ export function createApiClient(options: ApiClientOptions) {
 
     const response = await fetchImpl(`${options.baseUrl}${path}`, {
       ...init,
+      credentials: init.credentials ?? "include",
       headers
     });
     const body = (await response.json()) as T | ApiErrorBody;
     if (!response.ok) {
       const failure = body as ApiErrorBody;
+      if (
+        !alreadyRetried &&
+        options.refreshAccessToken &&
+        response.status === 401 &&
+        ["TOKEN_EXPIRED", "AUTH_SESSION_INVALID"].includes(failure.error?.code)
+      ) {
+        refreshPromise ??= options.refreshAccessToken().finally(() => {
+          refreshPromise = undefined;
+        });
+        if (await refreshPromise) {
+          return request<T>(path, init, true);
+        }
+      }
       throw new ApiError(
         response.status,
         failure.error?.code ?? "HTTP_ERROR",
@@ -62,4 +79,3 @@ export function createApiClient(options: ApiClientOptions) {
     return body as T;
   };
 }
-

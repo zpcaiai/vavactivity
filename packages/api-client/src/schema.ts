@@ -4,6 +4,4172 @@
  */
 
 export interface paths {
+    "/api/v1/account/activities/{activity_id}/choices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Post Event Choices */
+        get: operations["my_post_event_choices_api_v1_account_activities__activity_id__choices_get"];
+        /** Submit Post Event Choice */
+        put: operations["submit_post_event_choice_api_v1_account_activities__activity_id__choices_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/activities/{activity_id}/choices/{participant_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Withdraw Post Event Choice */
+        delete: operations["withdraw_post_event_choice_api_v1_account_activities__activity_id__choices__participant_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/activities/{activity_id}/group": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Activity Group */
+        get: operations["my_activity_group_api_v1_account_activities__activity_id__group_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/activities/{activity_id}/participant-profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Upsert Participant Profile */
+        put: operations["upsert_participant_profile_api_v1_account_activities__activity_id__participant_profile_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/activities/{activity_id}/participants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Eligible Participants */
+        get: operations["eligible_participants_api_v1_account_activities__activity_id__participants_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/activity-interaction-restrictions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Interaction Restriction */
+        post: operations["create_interaction_restriction_api_v1_account_activity_interaction_restrictions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/activity-mutual-choices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Activity Mutual Choices */
+        get: operations["my_activity_mutual_choices_api_v1_account_activity_mutual_choices_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/activity-registrations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Activity Registrations */
+        get: operations["my_activity_registrations_api_v1_account_activity_registrations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/activity-registrations/{activity_id}/accept-waitlist-offer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept Waitlist Offer */
+        post: operations["accept_waitlist_offer_api_v1_account_activity_registrations__activity_id__accept_waitlist_offer_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/activity-registrations/{activity_id}/access": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Confirmed Activity Access */
+        get: operations["confirmed_activity_access_api_v1_account_activity_registrations__activity_id__access_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/activity-registrations/{activity_id}/checkin-credential": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Get Checkin Credential */
+        post: operations["get_checkin_credential_api_v1_account_activity_registrations__activity_id__checkin_credential_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/activity-registrations/{registration_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Activity Registration */
+        get: operations["my_activity_registration_api_v1_account_activity_registrations__registration_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/activity-registrations/{registration_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel My Activity Registration */
+        post: operations["cancel_my_activity_registration_api_v1_account_activity_registrations__registration_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/activity-waitlist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Activity Waitlist */
+        get: operations["my_activity_waitlist_api_v1_account_activity_waitlist_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/activity-waitlist/{entry_id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept Activity Waitlist Entry */
+        post: operations["accept_activity_waitlist_entry_api_v1_account_activity_waitlist__entry_id__accept_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/activity-waitlist/{entry_id}/decline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decline Activity Waitlist Entry */
+        post: operations["decline_activity_waitlist_entry_api_v1_account_activity_waitlist__entry_id__decline_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/certificates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Certificates */
+        get: operations["my_certificates_api_v1_account_certificates_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/counseling/appointments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Own Appointments */
+        get: operations["own_appointments_api_v1_account_counseling_appointments_get"];
+        put?: never;
+        /** Create Appointment */
+        post: operations["create_appointment_api_v1_account_counseling_appointments_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/counseling/appointments/{appointment_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Own Appointment Detail */
+        get: operations["own_appointment_detail_api_v1_account_counseling_appointments__appointment_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/counseling/appointments/{appointment_id}/accept-proposal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept Proposal */
+        post: operations["accept_proposal_api_v1_account_counseling_appointments__appointment_id__accept_proposal_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/counseling/appointments/{appointment_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel Appointment */
+        post: operations["cancel_appointment_api_v1_account_counseling_appointments__appointment_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/counseling/appointments/{appointment_id}/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Join Session */
+        post: operations["join_session_api_v1_account_counseling_appointments__appointment_id__join_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/counseling/session-access/{session_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Session Access */
+        get: operations["session_access_api_v1_account_counseling_session_access__session_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/counseling/slot-holds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Hold */
+        post: operations["create_hold_api_v1_account_counseling_slot_holds_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/course-certificates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Certificates */
+        get: operations["my_certificates_api_v1_account_course_certificates_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/course-enrollments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Courses */
+        get: operations["my_courses_api_v1_account_course_enrollments_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/course-enrollments/{enrollment_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Learning Dashboard */
+        get: operations["learning_dashboard_api_v1_account_course_enrollments__enrollment_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/courses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Courses */
+        get: operations["my_courses_api_v1_account_courses_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/courses/{enrollment_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Learning Dashboard */
+        get: operations["learning_dashboard_api_v1_account_courses__enrollment_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/courses/{enrollment_id}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record Learning Event */
+        post: operations["record_learning_event_api_v1_account_courses__enrollment_id__events_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/courses/{enrollment_id}/exercises/{exercise_id}/attempts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start Attempt */
+        post: operations["start_attempt_api_v1_account_courses__enrollment_id__exercises__exercise_id__attempts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/courses/{enrollment_id}/lessons/{lesson_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Learning Lesson */
+        get: operations["learning_lesson_api_v1_account_courses__enrollment_id__lessons__lesson_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/courses/{enrollment_id}/lessons/{lesson_id}/playback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start Playback */
+        post: operations["start_playback_api_v1_account_courses__enrollment_id__lessons__lesson_id__playback_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/exercise-attempts/{attempt_id}/draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Save Attempt Draft */
+        put: operations["save_attempt_draft_api_v1_account_exercise_attempts__attempt_id__draft_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/exercise-attempts/{attempt_id}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Attempt */
+        post: operations["submit_attempt_api_v1_account_exercise_attempts__attempt_id__submit_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/playback/{session_id}/heartbeat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Playback Heartbeat */
+        post: operations["playback_heartbeat_api_v1_account_playback__session_id__heartbeat_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/activities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Public Activities */
+        get: operations["list_public_activities_api_v1_activities_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/activities/{activity_id}/registrations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register For Activity */
+        post: operations["register_for_activity_api_v1_activities__activity_id__registrations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/activities/{activity_id}/ticket-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Activity Ticket Types */
+        get: operations["public_activity_ticket_types_api_v1_activities__activity_id__ticket_types_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/activities/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Activity Detail */
+        get: operations["public_activity_detail_api_v1_activities__slug__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin List Activities */
+        get: operations["admin_list_activities_api_v1_admin_activities_get"];
+        put?: never;
+        /** Admin Create Activity */
+        post: operations["admin_create_activity_api_v1_admin_activities_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activities/{activity_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Activity Detail */
+        get: operations["admin_activity_detail_api_v1_admin_activities__activity_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Admin Update Activity */
+        patch: operations["admin_update_activity_api_v1_admin_activities__activity_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/activities/{activity_id}/attendance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Activity Attendance */
+        get: operations["admin_activity_attendance_api_v1_admin_activities__activity_id__attendance_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activities/{activity_id}/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Activity Audit */
+        get: operations["admin_activity_audit_api_v1_admin_activities__activity_id__audit_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activities/{activity_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin Cancel Activity */
+        post: operations["admin_cancel_activity_api_v1_admin_activities__activity_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activities/{activity_id}/grouping-plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Grouping Plans */
+        get: operations["admin_grouping_plans_api_v1_admin_activities__activity_id__grouping_plans_get"];
+        put?: never;
+        /** Admin Create Grouping */
+        post: operations["admin_create_grouping_api_v1_admin_activities__activity_id__grouping_plans_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activities/{activity_id}/localizations/{locale}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Admin Upsert Localization */
+        put: operations["admin_upsert_localization_api_v1_admin_activities__activity_id__localizations__locale__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activities/{activity_id}/locations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin Add Location */
+        post: operations["admin_add_location_api_v1_admin_activities__activity_id__locations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activities/{activity_id}/post-event/analytics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Activity Post Event Analytics */
+        get: operations["admin_activity_post_event_analytics_api_v1_admin_activities__activity_id__post_event_analytics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activities/{activity_id}/registration-form": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Admin Upsert Form */
+        put: operations["admin_upsert_form_api_v1_admin_activities__activity_id__registration_form_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activities/{activity_id}/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin Add Session */
+        post: operations["admin_add_session_api_v1_admin_activities__activity_id__sessions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activities/{activity_id}/tickets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin Link Ticket */
+        post: operations["admin_link_ticket_api_v1_admin_activities__activity_id__tickets_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activities/{activity_id}/transition": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin Transition Activity */
+        post: operations["admin_transition_activity_api_v1_admin_activities__activity_id__transition_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activities/{activity_id}/waitlist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Activity Waitlist */
+        get: operations["admin_activity_waitlist_api_v1_admin_activities__activity_id__waitlist_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activity-checkins": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin Checkin */
+        post: operations["admin_checkin_api_v1_admin_activity_checkins_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activity-grouping-plans/{plan_id}/lock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin Lock Grouping Plan */
+        post: operations["admin_lock_grouping_plan_api_v1_admin_activity_grouping_plans__plan_id__lock_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activity-grouping-plans/{plan_id}/unlock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin Unlock Grouping Plan */
+        post: operations["admin_unlock_grouping_plan_api_v1_admin_activity_grouping_plans__plan_id__unlock_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activity-groups/{group_id}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin Move Group Member */
+        post: operations["admin_move_group_member_api_v1_admin_activity_groups__group_id__members_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activity-mutual-choices/{match_id}/suspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin Suspend Activity Match */
+        post: operations["admin_suspend_activity_match_api_v1_admin_activity_mutual_choices__match_id__suspend_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activity-registrations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin List Registrations */
+        get: operations["admin_list_registrations_api_v1_admin_activity_registrations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activity-registrations/{registration_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Registration Detail */
+        get: operations["admin_registration_detail_api_v1_admin_activity_registrations__registration_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activity-registrations/{registration_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin Cancel Registration */
+        post: operations["admin_cancel_registration_api_v1_admin_activity_registrations__registration_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activity-registrations/{registration_id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin Review Registration */
+        post: operations["admin_review_registration_api_v1_admin_activity_registrations__registration_id__review_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activity-registrations/{registration_id}/sensitive-response": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Registration Sensitive Response */
+        get: operations["admin_registration_sensitive_response_api_v1_admin_activity_registrations__registration_id__sensitive_response_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activity-waitlist/{entry_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin Cancel Waitlist */
+        post: operations["admin_cancel_waitlist_api_v1_admin_activity_waitlist__entry_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activity-waitlist/{entry_id}/offer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin Offer Waitlist */
+        post: operations["admin_offer_waitlist_api_v1_admin_activity_waitlist__entry_id__offer_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/activity-waitlist/{entry_id}/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin Reorder Waitlist */
+        post: operations["admin_reorder_waitlist_api_v1_admin_activity_waitlist__entry_id__reorder_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/admins": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Admins */
+        get: operations["list_admins_api_v1_admin_admins_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/admins/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Invitations */
+        get: operations["list_invitations_api_v1_admin_admins_invitations_get"];
+        put?: never;
+        /** Invite Admin */
+        post: operations["invite_admin_api_v1_admin_admins_invitations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/admins/invitations/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept Invitation */
+        post: operations["accept_invitation_api_v1_admin_admins_invitations_accept_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/admins/invitations/{invitation_id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Revoke Invitation */
+        post: operations["revoke_invitation_api_v1_admin_admins_invitations__invitation_id__revoke_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/admins/{user_id}/disable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Disable Admin */
+        post: operations["disable_admin_api_v1_admin_admins__user_id__disable_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/admins/{user_id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Restore Admin */
+        post: operations["restore_admin_api_v1_admin_admins__user_id__restore_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/audit/security-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Security Events */
+        get: operations["list_security_events_api_v1_admin_audit_security_events_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin Login */
+        post: operations["admin_login_api_v1_admin_auth_login_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin Logout */
+        post: operations["admin_logout_api_v1_admin_auth_logout_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Me */
+        get: operations["admin_me_api_v1_admin_auth_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin Refresh */
+        post: operations["admin_refresh_api_v1_admin_auth_refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/auth/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Sessions */
+        get: operations["admin_sessions_api_v1_admin_auth_sessions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/auth/sessions/{session_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Revoke Admin Session */
+        delete: operations["revoke_admin_session_api_v1_admin_auth_sessions__session_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Categories */
+        get: operations["admin_categories_api_v1_admin_catalog_categories_get"];
+        put?: never;
+        /** Create Category */
+        post: operations["create_category_api_v1_admin_catalog_categories_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/coupons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Coupons */
+        get: operations["admin_coupons_api_v1_admin_catalog_coupons_get"];
+        put?: never;
+        /** Create Coupon */
+        post: operations["create_coupon_api_v1_admin_catalog_coupons_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/coupons/bulk-create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Bulk Create Coupons */
+        post: operations["bulk_create_coupons_api_v1_admin_catalog_coupons_bulk_create_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/coupons/{coupon_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Coupon */
+        patch: operations["update_coupon_api_v1_admin_catalog_coupons__coupon_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/coupons/{coupon_id}/disable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Disable Coupon */
+        post: operations["disable_coupon_api_v1_admin_catalog_coupons__coupon_id__disable_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/inventory": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Inventory */
+        get: operations["admin_inventory_api_v1_admin_catalog_inventory_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/inventory/{sku_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Admin Inventory */
+        get: operations["get_admin_inventory_api_v1_admin_catalog_inventory__sku_id__get"];
+        /** Configure Inventory */
+        put: operations["configure_inventory_api_v1_admin_catalog_inventory__sku_id__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/inventory/{sku_id}/adjust": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Adjust Inventory */
+        post: operations["adjust_inventory_api_v1_admin_catalog_inventory__sku_id__adjust_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/inventory/{sku_id}/movements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Inventory Movements */
+        get: operations["inventory_movements_api_v1_admin_catalog_inventory__sku_id__movements_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/price-books": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Price Books */
+        get: operations["price_books_api_v1_admin_catalog_price_books_get"];
+        put?: never;
+        /** Create Price Book */
+        post: operations["create_price_book_api_v1_admin_catalog_price_books_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/price-books/{book_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Price Book */
+        patch: operations["update_price_book_api_v1_admin_catalog_price_books__book_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/price-books/{book_id}/activate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Activate Price Book */
+        post: operations["activate_price_book_api_v1_admin_catalog_price_books__book_id__activate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/price-books/{book_id}/deactivate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Deactivate Price Book */
+        post: operations["deactivate_price_book_api_v1_admin_catalog_price_books__book_id__deactivate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/prices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Prices */
+        get: operations["admin_prices_api_v1_admin_catalog_prices_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/prices/{price_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Price */
+        get: operations["get_price_api_v1_admin_catalog_prices__price_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/prices/{price_id}/activate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Activate Price */
+        post: operations["activate_price_api_v1_admin_catalog_prices__price_id__activate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/prices/{price_id}/expire": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Expire Price */
+        post: operations["expire_price_api_v1_admin_catalog_prices__price_id__expire_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/prices/{price_id}/supersede": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Supersede Price */
+        post: operations["supersede_price_api_v1_admin_catalog_prices__price_id__supersede_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/pricing/simulate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Simulate Pricing */
+        post: operations["simulate_pricing_api_v1_admin_catalog_pricing_simulate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Products */
+        get: operations["admin_products_api_v1_admin_catalog_products_get"];
+        put?: never;
+        /** Create Product */
+        post: operations["create_product_api_v1_admin_catalog_products_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/products/{product_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Admin Product */
+        get: operations["get_admin_product_api_v1_admin_catalog_products__product_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Product */
+        patch: operations["update_product_api_v1_admin_catalog_products__product_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/products/{product_id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Archive Product */
+        post: operations["archive_product_api_v1_admin_catalog_products__product_id__archive_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/products/{product_id}/localizations/{locale}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update Product Localization */
+        put: operations["update_product_localization_api_v1_admin_catalog_products__product_id__localizations__locale__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/products/{product_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish Product */
+        post: operations["publish_product_api_v1_admin_catalog_products__product_id__publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/products/{product_id}/skus": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Product Skus */
+        get: operations["product_skus_api_v1_admin_catalog_products__product_id__skus_get"];
+        put?: never;
+        /** Create Sku */
+        post: operations["create_sku_api_v1_admin_catalog_products__product_id__skus_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/products/{product_id}/submit-review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Product Review */
+        post: operations["submit_product_review_api_v1_admin_catalog_products__product_id__submit_review_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/products/{product_id}/unpublish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Unpublish Product */
+        post: operations["unpublish_product_api_v1_admin_catalog_products__product_id__unpublish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/promotions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Promotions */
+        get: operations["admin_promotions_api_v1_admin_catalog_promotions_get"];
+        put?: never;
+        /** Create Promotion */
+        post: operations["create_promotion_api_v1_admin_catalog_promotions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/promotions/{promotion_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Promotion */
+        get: operations["get_promotion_api_v1_admin_catalog_promotions__promotion_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Promotion */
+        patch: operations["update_promotion_api_v1_admin_catalog_promotions__promotion_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/promotions/{promotion_id}/activate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Activate Promotion */
+        post: operations["activate_promotion_api_v1_admin_catalog_promotions__promotion_id__activate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/promotions/{promotion_id}/deactivate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Deactivate Promotion */
+        post: operations["deactivate_promotion_api_v1_admin_catalog_promotions__promotion_id__deactivate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/skus/{sku_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Sku */
+        get: operations["get_sku_api_v1_admin_catalog_skus__sku_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Sku */
+        patch: operations["update_sku_api_v1_admin_catalog_skus__sku_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/skus/{sku_id}/activate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Activate Sku */
+        post: operations["activate_sku_api_v1_admin_catalog_skus__sku_id__activate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/skus/{sku_id}/deactivate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Deactivate Sku */
+        post: operations["deactivate_sku_api_v1_admin_catalog_skus__sku_id__deactivate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/catalog/skus/{sku_id}/prices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Sku Prices */
+        get: operations["sku_prices_api_v1_admin_catalog_skus__sku_id__prices_get"];
+        put?: never;
+        /** Create Price */
+        post: operations["create_price_api_v1_admin_catalog_skus__sku_id__prices_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/commerce/entitlements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Entitlements */
+        get: operations["admin_entitlements_api_v1_admin_commerce_entitlements_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/commerce/entitlements/{entitlement_id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Revoke Entitlement */
+        post: operations["revoke_entitlement_api_v1_admin_commerce_entitlements__entitlement_id__revoke_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/commerce/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Orders */
+        get: operations["admin_orders_api_v1_admin_commerce_orders_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/commerce/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Payments */
+        get: operations["admin_payments_api_v1_admin_commerce_payments_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/commerce/reconciliation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Reconciliation */
+        get: operations["admin_reconciliation_api_v1_admin_commerce_reconciliation_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/commerce/reconciliation/scan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Scan Reconciliation */
+        post: operations["scan_reconciliation_api_v1_admin_commerce_reconciliation_scan_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/commerce/reconciliation/{discrepancy_id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resolve Reconciliation */
+        post: operations["resolve_reconciliation_api_v1_admin_commerce_reconciliation__discrepancy_id__resolve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/commerce/refunds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Refunds */
+        get: operations["admin_refunds_api_v1_admin_commerce_refunds_get"];
+        put?: never;
+        /** Request Refund */
+        post: operations["request_refund_api_v1_admin_commerce_refunds_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/commerce/refunds/{refund_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve Refund */
+        post: operations["approve_refund_api_v1_admin_commerce_refunds__refund_id__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/commerce/refunds/{refund_id}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Refund */
+        post: operations["submit_refund_api_v1_admin_commerce_refunds__refund_id__submit_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/commerce/subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Subscriptions */
+        get: operations["admin_subscriptions_api_v1_admin_commerce_subscriptions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/commerce/webhooks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Webhooks */
+        get: operations["admin_webhooks_api_v1_admin_commerce_webhooks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/commerce/webhooks/{event_id}/replay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Replay Webhook */
+        post: operations["replay_webhook_api_v1_admin_commerce_webhooks__event_id__replay_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/contact-submissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Contact Submissions */
+        get: operations["admin_contact_submissions_api_v1_admin_contact_submissions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/contact-submissions/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Export Contact Submissions */
+        post: operations["export_contact_submissions_api_v1_admin_contact_submissions_export_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/contact-submissions/{submission_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Contact Submission */
+        get: operations["get_contact_submission_api_v1_admin_contact_submissions__submission_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/contact-submissions/{submission_id}/assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Assign Contact Submission */
+        post: operations["assign_contact_submission_api_v1_admin_contact_submissions__submission_id__assign_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/contact-submissions/{submission_id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resolve Contact Submission */
+        post: operations["resolve_contact_submission_api_v1_admin_contact_submissions__submission_id__resolve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/contact-submissions/{submission_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Contact Status */
+        patch: operations["update_contact_status_api_v1_admin_contact_submissions__submission_id__status_patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/content/articles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Articles */
+        get: operations["admin_articles_api_v1_admin_content_articles_get"];
+        put?: never;
+        /** Create Article */
+        post: operations["create_article_api_v1_admin_content_articles_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content/articles/{entry_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Article */
+        get: operations["get_article_api_v1_admin_content_articles__entry_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Article */
+        patch: operations["update_article_api_v1_admin_content_articles__entry_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/content/articles/{entry_id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Content Articles Archive */
+        post: operations["content_articles_archive_api_v1_admin_content_articles__entry_id__archive_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content/articles/{entry_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Content Articles Publish */
+        post: operations["content_articles_publish_api_v1_admin_content_articles__entry_id__publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content/articles/{entry_id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Content Articles Restore */
+        post: operations["content_articles_restore_api_v1_admin_content_articles__entry_id__restore_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content/articles/{entry_id}/submit-review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Content Articles Submit Review */
+        post: operations["content_articles_submit_review_api_v1_admin_content_articles__entry_id__submit_review_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content/pages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Pages */
+        get: operations["admin_pages_api_v1_admin_content_pages_get"];
+        put?: never;
+        /** Create Page */
+        post: operations["create_page_api_v1_admin_content_pages_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content/pages/{entry_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Page */
+        get: operations["get_page_api_v1_admin_content_pages__entry_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Page */
+        delete: operations["delete_page_api_v1_admin_content_pages__entry_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Page */
+        patch: operations["update_page_api_v1_admin_content_pages__entry_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/content/pages/{entry_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Content Page Approve */
+        post: operations["content_page_approve_api_v1_admin_content_pages__entry_id__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content/pages/{entry_id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Content Page Archive */
+        post: operations["content_page_archive_api_v1_admin_content_pages__entry_id__archive_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content/pages/{entry_id}/localizations/{locale}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update Page Localization */
+        put: operations["update_page_localization_api_v1_admin_content_pages__entry_id__localizations__locale__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content/pages/{entry_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Content Page Publish */
+        post: operations["content_page_publish_api_v1_admin_content_pages__entry_id__publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content/pages/{entry_id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Content Page Reject */
+        post: operations["content_page_reject_api_v1_admin_content_pages__entry_id__reject_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content/pages/{entry_id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Content Page Restore */
+        post: operations["content_page_restore_api_v1_admin_content_pages__entry_id__restore_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content/pages/{entry_id}/schedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Schedule Page */
+        post: operations["schedule_page_api_v1_admin_content_pages__entry_id__schedule_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content/pages/{entry_id}/submit-review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Content Page Submit Review */
+        post: operations["content_page_submit_review_api_v1_admin_content_pages__entry_id__submit_review_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content/pages/{entry_id}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Content Versions */
+        get: operations["content_versions_api_v1_admin_content_pages__entry_id__versions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content/pages/{entry_id}/versions/{version_number}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Restore Content Version */
+        post: operations["restore_content_version_api_v1_admin_content_pages__entry_id__versions__version_number__restore_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content/testimonials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Testimonials */
+        get: operations["admin_testimonials_api_v1_admin_content_testimonials_get"];
+        put?: never;
+        /** Create Testimonial */
+        post: operations["create_testimonial_api_v1_admin_content_testimonials_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content/testimonials/{entry_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Testimonial */
+        get: operations["get_testimonial_api_v1_admin_content_testimonials__entry_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Testimonial */
+        patch: operations["update_testimonial_api_v1_admin_content_testimonials__entry_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/content/testimonials/{entry_id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Content Testimonials Archive */
+        post: operations["content_testimonials_archive_api_v1_admin_content_testimonials__entry_id__archive_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content/testimonials/{entry_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Content Testimonials Publish */
+        post: operations["content_testimonials_publish_api_v1_admin_content_testimonials__entry_id__publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content/testimonials/{entry_id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Content Testimonials Restore */
+        post: operations["content_testimonials_restore_api_v1_admin_content_testimonials__entry_id__restore_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content/testimonials/{entry_id}/submit-review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Content Testimonials Submit Review */
+        post: operations["content_testimonials_submit_review_api_v1_admin_content_testimonials__entry_id__submit_review_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/content/{entry_id}/preview-token": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Preview Token */
+        post: operations["create_preview_token_api_v1_admin_content__entry_id__preview_token_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/counseling/appointments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Appointments */
+        get: operations["admin_appointments_api_v1_admin_counseling_appointments_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/counseling/appointments/{appointment_id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Complete Appointment */
+        post: operations["complete_appointment_api_v1_admin_counseling_appointments__appointment_id__complete_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/counseling/appointments/{appointment_id}/follow-ups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Followup */
+        post: operations["create_followup_api_v1_admin_counseling_appointments__appointment_id__follow_ups_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/counseling/appointments/{appointment_id}/propose-time": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Propose Time */
+        post: operations["propose_time_api_v1_admin_counseling_appointments__appointment_id__propose_time_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/counseling/appointments/{appointment_id}/safety-referrals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Safety Referral */
+        post: operations["create_safety_referral_api_v1_admin_counseling_appointments__appointment_id__safety_referrals_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/counseling/appointments/{appointment_id}/transition": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin Transition */
+        post: operations["admin_transition_api_v1_admin_counseling_appointments__appointment_id__transition_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/counseling/availability-rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Rule */
+        post: operations["create_rule_api_v1_admin_counseling_availability_rules_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/counseling/mentors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Mentors */
+        get: operations["admin_mentors_api_v1_admin_counseling_mentors_get"];
+        put?: never;
+        /** Create Mentor */
+        post: operations["create_mentor_api_v1_admin_counseling_mentors_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/counseling/mentors/{mentor_id}/activate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Activate Mentor */
+        post: operations["activate_mentor_api_v1_admin_counseling_mentors__mentor_id__activate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/counseling/mentors/{mentor_id}/localizations/{locale}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Localize Mentor */
+        put: operations["localize_mentor_api_v1_admin_counseling_mentors__mentor_id__localizations__locale__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/counseling/services": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Services */
+        get: operations["admin_services_api_v1_admin_counseling_services_get"];
+        put?: never;
+        /** Create Service */
+        post: operations["create_service_api_v1_admin_counseling_services_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/counseling/services/{service_id}/localizations/{locale}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Localize Service */
+        put: operations["localize_service_api_v1_admin_counseling_services__service_id__localizations__locale__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/counseling/services/{service_id}/mentors/{mentor_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Link Mentor Service */
+        post: operations["link_mentor_service_api_v1_admin_counseling_services__service_id__mentors__mentor_id__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/counseling/services/{service_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish Service */
+        post: operations["publish_service_api_v1_admin_counseling_services__service_id__publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/counseling/sessions/{session_id}/records": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Record */
+        post: operations["create_record_api_v1_admin_counseling_sessions__session_id__records_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/course-certificates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Certificates */
+        get: operations["admin_certificates_api_v1_admin_course_certificates_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/course-certificates/{certificate_id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Revoke Certificate */
+        post: operations["revoke_certificate_api_v1_admin_course_certificates__certificate_id__revoke_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/course-enrollments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Enrollments */
+        get: operations["admin_enrollments_api_v1_admin_course_enrollments_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/course-enrollments/{enrollment_id}/{action}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enrollment Action */
+        post: operations["enrollment_action_api_v1_admin_course_enrollments__enrollment_id___action__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/course-exercises": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Exercise */
+        post: operations["create_exercise_api_v1_admin_course_exercises_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/course-exercises/{exercise_id}/questions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Question */
+        post: operations["create_question_api_v1_admin_course_exercises__exercise_id__questions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/course-instructors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Course Instructors */
+        get: operations["admin_course_instructors_api_v1_admin_course_instructors_get"];
+        put?: never;
+        /** Create Course Instructor */
+        post: operations["create_course_instructor_api_v1_admin_course_instructors_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/course-lessons/{lesson_id}/prerequisites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Prerequisite */
+        post: operations["create_prerequisite_api_v1_admin_course_lessons__lesson_id__prerequisites_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/course-lessons/{lesson_id}/video": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Attach Video */
+        put: operations["attach_video_api_v1_admin_course_lessons__lesson_id__video_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/course-modules/{module_id}/lessons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Lesson */
+        post: operations["create_lesson_api_v1_admin_course_modules__module_id__lessons_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/course-progress/{progress_id}/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reset Progress */
+        post: operations["reset_progress_api_v1_admin_course_progress__progress_id__reset_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/courses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Courses */
+        get: operations["admin_courses_api_v1_admin_courses_get"];
+        put?: never;
+        /** Create Course */
+        post: operations["create_course_api_v1_admin_courses_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/courses/{course_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Course Detail */
+        get: operations["admin_course_detail_api_v1_admin_courses__course_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Course */
+        patch: operations["update_course_api_v1_admin_courses__course_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/courses/{course_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Transition Course Action */
+        post: operations["transition_course_action_api_v1_admin_courses__course_id__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/courses/{course_id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Transition Course Action */
+        post: operations["transition_course_action_api_v1_admin_courses__course_id__archive_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/courses/{course_id}/catalog-mappings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Course Catalog Mappings */
+        get: operations["course_catalog_mappings_api_v1_admin_courses__course_id__catalog_mappings_get"];
+        put?: never;
+        /** Map Course Sku */
+        post: operations["map_course_sku_api_v1_admin_courses__course_id__catalog_mappings_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/courses/{course_id}/catalog-mappings/{mapping_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Course Catalog Mapping */
+        delete: operations["delete_course_catalog_mapping_api_v1_admin_courses__course_id__catalog_mappings__mapping_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/courses/{course_id}/close-enrollment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Transition Course Action */
+        post: operations["transition_course_action_api_v1_admin_courses__course_id__close_enrollment_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/courses/{course_id}/enrollments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Grant Enrollment */
+        post: operations["grant_enrollment_api_v1_admin_courses__course_id__enrollments_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/courses/{course_id}/instructors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Assign Course Instructor */
+        post: operations["assign_course_instructor_api_v1_admin_courses__course_id__instructors_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/courses/{course_id}/instructors/{instructor_id}/{role}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove Course Instructor */
+        delete: operations["remove_course_instructor_api_v1_admin_courses__course_id__instructors__instructor_id___role__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/courses/{course_id}/localizations/{locale}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Upsert Course Localization */
+        put: operations["upsert_course_localization_api_v1_admin_courses__course_id__localizations__locale__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/courses/{course_id}/modules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Module */
+        post: operations["create_module_api_v1_admin_courses__course_id__modules_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/courses/{course_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Transition Course Action */
+        post: operations["transition_course_action_api_v1_admin_courses__course_id__publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/courses/{course_id}/schedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Transition Course Action */
+        post: operations["transition_course_action_api_v1_admin_courses__course_id__schedule_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/courses/{course_id}/sku-mapping": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Map Course Sku */
+        put: operations["map_course_sku_api_v1_admin_courses__course_id__sku_mapping_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/courses/{course_id}/submit-review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Transition Course Action */
+        post: operations["transition_course_action_api_v1_admin_courses__course_id__submit_review_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/courses/{course_id}/transition": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Transition Course */
+        post: operations["transition_course_api_v1_admin_courses__course_id__transition_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/courses/{course_id}/unpublish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Transition Course Action */
+        post: operations["transition_course_action_api_v1_admin_courses__course_id__unpublish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/exercise-attempts/{attempt_id}/grade": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Manual Grade */
+        post: operations["manual_grade_api_v1_admin_exercise_attempts__attempt_id__grade_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/media": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Media */
+        get: operations["list_media_api_v1_admin_media_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/media/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Media Upload */
+        post: operations["create_media_upload_api_v1_admin_media_uploads_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/media/uploads/{asset_id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Complete Media Upload */
+        post: operations["complete_media_upload_api_v1_admin_media_uploads__asset_id__complete_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/media/{asset_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Media */
+        get: operations["get_media_api_v1_admin_media__asset_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Media */
+        delete: operations["delete_media_api_v1_admin_media__asset_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Media */
+        patch: operations["update_media_api_v1_admin_media__asset_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/media/{asset_id}/references": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Media References */
+        get: operations["media_references_api_v1_admin_media__asset_id__references_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/navigation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Navigation */
+        get: operations["admin_navigation_api_v1_admin_navigation_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/navigation/{menu_code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update Navigation */
+        put: operations["update_navigation_api_v1_admin_navigation__menu_code__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Roles */
+        get: operations["list_roles_api_v1_admin_roles_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/site-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Admin Site Settings */
+        get: operations["admin_site_settings_api_v1_admin_site_settings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/site-settings/{setting_key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update Site Setting */
+        put: operations["update_site_setting_api_v1_admin_site_settings__setting_key__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Users */
+        get: operations["list_users_api_v1_admin_users_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/{user_id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Restore User */
+        post: operations["restore_user_api_v1_admin_users__user_id__restore_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/{user_id}/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Assign Role */
+        post: operations["assign_role_api_v1_admin_users__user_id__roles_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/{user_id}/roles/{role_code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Revoke Role */
+        delete: operations["revoke_role_api_v1_admin_users__user_id__roles__role_code__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/{user_id}/suspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Suspend User */
+        post: operations["suspend_user_api_v1_admin_users__user_id__suspend_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/email-verification/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm Verification */
+        post: operations["confirm_verification_api_v1_auth_email_verification_confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/email-verification/send": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resend Verification */
+        post: operations["resend_verification_api_v1_auth_email_verification_send_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** User Login */
+        post: operations["user_login_api_v1_auth_login_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** User Logout */
+        post: operations["user_logout_api_v1_auth_logout_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/logout-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Logout All */
+        post: operations["logout_all_api_v1_auth_logout_all_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** User Me */
+        get: operations["user_me_api_v1_auth_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/password/change": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Change Password */
+        post: operations["change_password_api_v1_auth_password_change_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/password/forgot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Forgot Password */
+        post: operations["forgot_password_api_v1_auth_password_forgot_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/password/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reset Password */
+        post: operations["reset_password_api_v1_auth_password_reset_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** User Refresh */
+        post: operations["user_refresh_api_v1_auth_refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register */
+        post: operations["register_api_v1_auth_register_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** User Sessions */
+        get: operations["user_sessions_api_v1_auth_sessions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/sessions/{session_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Revoke User Session */
+        delete: operations["revoke_user_session_api_v1_auth_sessions__session_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cart": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Cart */
+        get: operations["get_cart_api_v1_cart_get"];
+        put?: never;
+        post?: never;
+        /** Clear Cart */
+        delete: operations["clear_cart_api_v1_cart_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cart/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Cart Item */
+        post: operations["add_cart_item_api_v1_cart_items_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cart/items/{item_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Cart Item */
+        delete: operations["delete_cart_item_api_v1_cart_items__item_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Cart Item */
+        patch: operations["update_cart_item_api_v1_cart_items__item_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/certificates/verify/{verification_token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Verify Certificate */
+        get: operations["verify_certificate_api_v1_certificates_verify__verification_token__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/checkout/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Order */
+        post: operations["create_order_api_v1_checkout_orders_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/checkout/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Checkout Preview */
+        post: operations["checkout_preview_api_v1_checkout_preview_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Courses */
+        get: operations["list_courses_api_v1_courses_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/enroll": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Free Enroll */
+        post: operations["free_enroll_api_v1_courses__course_id__enroll_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/enroll-free": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Free Enroll */
+        post: operations["free_enroll_api_v1_courses__course_id__enroll_free_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Course Detail */
+        get: operations["course_detail_api_v1_courses__slug__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/entitlements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** User Entitlements */
+        get: operations["user_entitlements_api_v1_entitlements_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health/live": {
         parameters: {
             query?: never;
@@ -32,6 +4198,754 @@ export interface paths {
         get: operations["readiness_api_v1_health_ready_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/internal/catalog/coupon-redemptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reserve Coupon Redemption */
+        post: operations["reserve_coupon_redemption_api_v1_internal_catalog_coupon_redemptions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/internal/catalog/coupon-redemptions/{reservation_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm Coupon Redemption */
+        post: operations["confirm_coupon_redemption_api_v1_internal_catalog_coupon_redemptions__reservation_id__confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/internal/catalog/coupon-redemptions/{reservation_id}/release": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Release Coupon Redemption */
+        post: operations["release_coupon_redemption_api_v1_internal_catalog_coupon_redemptions__reservation_id__release_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/internal/entitlements/{entitlement_id}/consume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Consume Entitlement */
+        post: operations["consume_entitlement_api_v1_internal_entitlements__entitlement_id__consume_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/internal/inventory/reservations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Inventory Reservation */
+        post: operations["create_inventory_reservation_api_v1_internal_inventory_reservations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/internal/inventory/reservations/{reservation_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm Inventory Reservation */
+        post: operations["confirm_inventory_reservation_api_v1_internal_inventory_reservations__reservation_id__confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/internal/inventory/reservations/{reservation_id}/release": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Release Inventory Reservation */
+        post: operations["release_inventory_reservation_api_v1_internal_inventory_reservations__reservation_id__release_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/playback/{session_id}/manifest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Playback Manifest */
+        get: operations["playback_manifest_api_v1_learning_playback__session_id__manifest_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** User Orders */
+        get: operations["user_orders_api_v1_orders_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orders/{order_number}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** User Order */
+        get: operations["user_order_api_v1_orders__order_number__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orders/{order_number}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel Order */
+        post: operations["cancel_order_api_v1_orders__order_number__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orders/{order_number}/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Payment */
+        post: operations["create_payment_api_v1_orders__order_number__payments_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/articles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Articles */
+        get: operations["public_articles_api_v1_public_articles_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/articles/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Article */
+        get: operations["public_article_api_v1_public_articles__slug__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/catalog/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Categories */
+        get: operations["public_categories_api_v1_public_catalog_categories_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/catalog/categories/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Category */
+        get: operations["public_category_api_v1_public_catalog_categories__slug__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/catalog/coupons/validate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Validate Coupon */
+        post: operations["validate_coupon_api_v1_public_catalog_coupons_validate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/catalog/currencies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Currencies */
+        get: operations["public_currencies_api_v1_public_catalog_currencies_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/catalog/pricing/quote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Pricing Quote */
+        post: operations["create_pricing_quote_api_v1_public_catalog_pricing_quote_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/catalog/pricing/quotes/{quote_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Pricing Quote */
+        get: operations["get_pricing_quote_api_v1_public_catalog_pricing_quotes__quote_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/catalog/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Products */
+        get: operations["public_products_api_v1_public_catalog_products_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/catalog/products/{product_id}/availability": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Product Availability */
+        get: operations["public_product_availability_api_v1_public_catalog_products__product_id__availability_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/catalog/products/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Product */
+        get: operations["public_product_api_v1_public_catalog_products__slug__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/contact-submissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Contact */
+        post: operations["submit_contact_api_v1_public_contact_submissions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/content/pages/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Page */
+        get: operations["public_page_api_v1_public_content_pages__slug__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/content/pages/{slug}/locales/{locale}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Page Locale */
+        get: operations["public_page_locale_api_v1_public_content_pages__slug__locales__locale__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/counseling/availability": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Availability */
+        get: operations["public_availability_api_v1_public_counseling_availability_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/counseling/mentors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Mentors */
+        get: operations["public_mentors_api_v1_public_counseling_mentors_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/counseling/mentors/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Mentor */
+        get: operations["public_mentor_api_v1_public_counseling_mentors__slug__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/counseling/services": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Services */
+        get: operations["public_services_api_v1_public_counseling_services_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/counseling/services/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Service */
+        get: operations["public_service_api_v1_public_counseling_services__slug__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/courses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Courses */
+        get: operations["list_courses_api_v1_public_courses_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/courses/{course_id}/access-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Access Summary */
+        get: operations["public_access_summary_api_v1_public_courses__course_id__access_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/courses/{course_id}/curriculum": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Curriculum */
+        get: operations["public_curriculum_api_v1_public_courses__course_id__curriculum_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/courses/{course_id}/lessons/{lesson_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Preview Lesson */
+        get: operations["public_preview_lesson_api_v1_public_courses__course_id__lessons__lesson_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/courses/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Course Detail */
+        get: operations["course_detail_api_v1_public_courses__slug__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/media/{asset_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Media */
+        get: operations["public_media_api_v1_public_media__asset_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/navigation/{menu_code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Navigation */
+        get: operations["public_navigation_api_v1_public_navigation__menu_code__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/preview/{raw_token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Preview Content */
+        get: operations["preview_content_api_v1_public_preview__raw_token__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/site-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Site Settings */
+        get: operations["public_site_settings_api_v1_public_site_settings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/testimonials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Testimonials */
+        get: operations["public_testimonials_api_v1_public_testimonials_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/testimonials/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public Testimonial */
+        get: operations["public_testimonial_api_v1_public_testimonials__slug__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** User Subscriptions */
+        get: operations["user_subscriptions_api_v1_subscriptions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscriptions/{subscription_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel Subscription */
+        post: operations["cancel_subscription_api_v1_subscriptions__subscription_id__cancel_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -72,10 +4986,2637 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/webhooks/{provider_name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Payment Webhook */
+        post: operations["payment_webhook_api_v1_webhooks__provider_name__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: never;
+    schemas: {
+        /** Action */
+        Action: {
+            /** Href */
+            href: string;
+            /** Label */
+            label: string;
+        };
+        /** ActivityCancelRequest */
+        ActivityCancelRequest: {
+            /**
+             * Notify Participants
+             * @default true
+             */
+            notify_participants: boolean;
+            /** Reason */
+            reason: string;
+            /** Reason Code */
+            reason_code: string;
+            /**
+             * Refund Policy Action
+             * @default manual_review
+             * @enum {string}
+             */
+            refund_policy_action: "manual_review" | "request_refunds";
+        };
+        /** ActivityCreateRequest */
+        ActivityCreateRequest: {
+            /** Activity Code */
+            activity_code: string;
+            /**
+             * Activity Format
+             * @enum {string}
+             */
+            activity_format: "in_person" | "online" | "hybrid";
+            /**
+             * Approval Policy
+             * @default automatic
+             * @enum {string}
+             */
+            approval_policy: "automatic" | "manual" | "rule_assisted";
+            /**
+             * Default Locale
+             * @default zh-CN
+             */
+            default_locale: string;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /** Internal Name */
+            internal_name: string;
+            /** Maximum Age */
+            maximum_age?: number | null;
+            /** Minimum Age */
+            minimum_age?: number | null;
+            /**
+             * Payment Timing Policy
+             * @default before_approval
+             * @enum {string}
+             */
+            payment_timing_policy: "before_approval" | "after_approval" | "not_required";
+            /** Post Event Choice Closes At */
+            post_event_choice_closes_at?: string | null;
+            /**
+             * Post Event Choice Enabled
+             * @default false
+             */
+            post_event_choice_enabled: boolean;
+            /** Post Event Choice Opens At */
+            post_event_choice_opens_at?: string | null;
+            /** Registration Closes At */
+            registration_closes_at?: string | null;
+            /** Registration Opens At */
+            registration_opens_at?: string | null;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /**
+             * Timezone
+             * @default Asia/Shanghai
+             */
+            timezone: string;
+            /**
+             * Waitlist Enabled
+             * @default true
+             */
+            waitlist_enabled: boolean;
+        };
+        /** ActivityTransitionRequest */
+        ActivityTransitionRequest: {
+            /** Reason */
+            reason: string;
+            /**
+             * Target Status
+             * @enum {string}
+             */
+            target_status: "draft" | "in_review" | "scheduled" | "published" | "registration_open" | "registration_closed" | "in_progress" | "completed" | "cancelled" | "archived";
+        };
+        /** ActivityUpdateRequest */
+        ActivityUpdateRequest: {
+            /** Approval Policy */
+            approval_policy?: ("automatic" | "manual" | "rule_assisted") | null;
+            /** Ends At */
+            ends_at?: string | null;
+            /** Expected Version */
+            expected_version: number;
+            /** Internal Name */
+            internal_name?: string | null;
+            /** Maximum Age */
+            maximum_age?: number | null;
+            /** Minimum Age */
+            minimum_age?: number | null;
+            /** Payment Timing Policy */
+            payment_timing_policy?: ("before_approval" | "after_approval" | "not_required") | null;
+            /** Post Event Choice Closes At */
+            post_event_choice_closes_at?: string | null;
+            /** Post Event Choice Enabled */
+            post_event_choice_enabled?: boolean | null;
+            /** Post Event Choice Opens At */
+            post_event_choice_opens_at?: string | null;
+            /** Registration Closes At */
+            registration_closes_at?: string | null;
+            /** Registration Opens At */
+            registration_opens_at?: string | null;
+            /** Starts At */
+            starts_at?: string | null;
+            /** Timezone */
+            timezone?: string | null;
+            /** Visibility */
+            visibility?: ("public" | "unlisted" | "private") | null;
+            /** Waitlist Enabled */
+            waitlist_enabled?: boolean | null;
+        };
+        /** AdminEnrollmentGrantRequest */
+        AdminEnrollmentGrantRequest: {
+            /** Access Duration Days */
+            access_duration_days?: number | null;
+            /** Reason */
+            reason: string;
+            /**
+             * User Id
+             * Format: uuid
+             */
+            user_id: string;
+        };
+        /** AdminInvitationAcceptRequest */
+        AdminInvitationAcceptRequest: {
+            /** Password */
+            password: string;
+            /**
+             * Preferred Locale
+             * @default zh-CN
+             */
+            preferred_locale: string;
+            /** Privacy Version */
+            privacy_version: string;
+            /** Terms Version */
+            terms_version: string;
+            /**
+             * Timezone
+             * @default UTC
+             */
+            timezone: string;
+            /** Token */
+            token: string;
+        };
+        /** AdminInvitationRequest */
+        AdminInvitationRequest: {
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Reason */
+            reason: string;
+            /** Role Codes */
+            role_codes: string[];
+        };
+        /** AppointmentRequest */
+        AppointmentRequest: {
+            /** Idempotency Key */
+            idempotency_key: string;
+            /** Intake Response */
+            intake_response: {
+                [key: string]: unknown;
+            };
+            /**
+             * Intake Schema Version
+             * @default 1
+             */
+            intake_schema_version: number;
+            /** Mentor Id */
+            mentor_id?: string | null;
+            /**
+             * Service Id
+             * Format: uuid
+             */
+            service_id: string;
+            /** Slot Hold Id */
+            slot_hold_id?: string | null;
+            /** User Timezone */
+            user_timezone: string;
+        };
+        /** ArticleCreateRequest */
+        ArticleCreateRequest: {
+            /** Canonical Slug */
+            canonical_slug: string;
+            /** Change Summary */
+            change_summary: string;
+            /**
+             * Default Locale
+             * @default zh-CN
+             */
+            default_locale: string;
+            /** Internal Name */
+            internal_name: string;
+            localization: components["schemas"]["LocalizationInput"];
+            /** @default {
+             *       "featured": false
+             *     } */
+            metadata: components["schemas"]["ArticleMetadataInput"];
+        };
+        /** ArticleMetadataInput */
+        ArticleMetadataInput: {
+            /** Author Display Name */
+            author_display_name?: string | null;
+            /** Category */
+            category?: string | null;
+            /**
+             * Featured
+             * @default false
+             */
+            featured: boolean;
+            /** Reading Time Minutes */
+            reading_time_minutes?: number | null;
+            /** Source Reference */
+            source_reference?: string | null;
+        };
+        /** AttemptSaveRequest */
+        AttemptSaveRequest: {
+            /** Responses */
+            responses: {
+                [key: string]: unknown;
+            };
+        };
+        /** AttemptSubmitRequest */
+        AttemptSubmitRequest: {
+            /** Responses */
+            responses: {
+                [key: string]: unknown;
+            };
+        };
+        /** AvailabilityRuleRequest */
+        AvailabilityRuleRequest: {
+            /** Daily Limit */
+            daily_limit?: number | null;
+            /**
+             * Local End Time
+             * Format: time
+             */
+            local_end_time: string;
+            /**
+             * Local Start Time
+             * Format: time
+             */
+            local_start_time: string;
+            /**
+             * Mentor Id
+             * Format: uuid
+             */
+            mentor_id: string;
+            /** Service Id */
+            service_id?: string | null;
+            /** Timezone */
+            timezone: string;
+            /**
+             * Valid From
+             * Format: date
+             */
+            valid_from: string;
+            /** Valid Until */
+            valid_until?: string | null;
+            /** Weekday */
+            weekday: number;
+            /** Weekly Limit */
+            weekly_limit?: number | null;
+        };
+        /**
+         * BillingType
+         * @enum {string}
+         */
+        BillingType: "one_time" | "recurring" | "free";
+        /** CallToActionBlock */
+        CallToActionBlock: {
+            data: components["schemas"]["CallToActionData"];
+            /** Id */
+            id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "call_to_action";
+            /**
+             * Version
+             * @default 1
+             */
+            version: number;
+        };
+        /** CallToActionData */
+        CallToActionData: {
+            button: components["schemas"]["Action"];
+            /** Description */
+            description?: string | null;
+            /** Title */
+            title: string;
+        };
+        /** CartItemCreateRequest */
+        CartItemCreateRequest: {
+            /** Anonymous Session Id */
+            anonymous_session_id?: string | null;
+            /** Coupon Code */
+            coupon_code?: string | null;
+            /** Currency Code */
+            currency_code: string;
+            /**
+             * Quantity
+             * @default 1
+             */
+            quantity: number;
+            /**
+             * Sku Id
+             * Format: uuid
+             */
+            sku_id: string;
+        };
+        /** CartItemUpdateRequest */
+        CartItemUpdateRequest: {
+            /** Coupon Code */
+            coupon_code?: string | null;
+            /** Expected Version */
+            expected_version: number;
+            /** Quantity */
+            quantity: number;
+        };
+        /** CartOwnerRequest */
+        CartOwnerRequest: {
+            /** Anonymous Session Id */
+            anonymous_session_id?: string | null;
+            /**
+             * Currency Code
+             * @default USD
+             */
+            currency_code: string;
+        };
+        /** CategoryCreateRequest */
+        CategoryCreateRequest: {
+            /** Category Code */
+            category_code: string;
+            /** Internal Name */
+            internal_name: string;
+            /** Localizations */
+            localizations: components["schemas"]["CategoryLocalizationInput"][];
+            /** Parent Id */
+            parent_id?: string | null;
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+        };
+        /** CategoryLocalizationInput */
+        CategoryLocalizationInput: {
+            /** Description */
+            description?: string | null;
+            /** Locale */
+            locale: string;
+            /** Name */
+            name: string;
+            /** Slug */
+            slug: string;
+        };
+        /** CheckinRequest */
+        CheckinRequest: {
+            /**
+             * Action
+             * @default check_in
+             * @enum {string}
+             */
+            action: "check_in" | "revoke";
+            /** Device Reference */
+            device_reference?: string | null;
+            /** Reason */
+            reason?: string | null;
+            /** Registration Number */
+            registration_number?: string | null;
+            /** Session Id */
+            session_id?: string | null;
+            /** Token */
+            token?: string | null;
+        };
+        /** CheckoutOrderRequest */
+        CheckoutOrderRequest: {
+            /** Anonymous Session Id */
+            anonymous_session_id?: string | null;
+            /**
+             * Billing Email
+             * Format: email
+             */
+            billing_email: string;
+            /** Billing Name */
+            billing_name?: string | null;
+            /**
+             * Cart Id
+             * Format: uuid
+             */
+            cart_id: string;
+            /** Expected Total Minor */
+            expected_total_minor?: number | null;
+            /**
+             * Locale
+             * @default zh-CN
+             */
+            locale: string;
+            /** Privacy Version */
+            privacy_version: string;
+            /** Refund Policy Version */
+            refund_policy_version: string;
+            /** Region Code */
+            region_code?: string | null;
+            /** Terms Version */
+            terms_version: string;
+        };
+        /** CheckoutPreviewRequest */
+        CheckoutPreviewRequest: {
+            /** Anonymous Session Id */
+            anonymous_session_id?: string | null;
+            /**
+             * Cart Id
+             * Format: uuid
+             */
+            cart_id: string;
+            /**
+             * Locale
+             * @default zh-CN
+             */
+            locale: string;
+            /** Region Code */
+            region_code?: string | null;
+        };
+        /** CollectionBlock */
+        CollectionBlock: {
+            data: components["schemas"]["CollectionData"];
+            /** Id */
+            id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "activity_list" | "article_list" | "counseling_list" | "course_list" | "divider" | "faq" | "feature_grid" | "story_list";
+            /**
+             * Version
+             * @default 1
+             */
+            version: number;
+        };
+        /** CollectionData */
+        CollectionData: {
+            /**
+             * Limit
+             * @default 3
+             */
+            limit: number;
+            /** Title */
+            title?: string | null;
+        };
+        /** ContactAssignRequest */
+        ContactAssignRequest: {
+            /**
+             * Assigned To
+             * Format: uuid
+             */
+            assigned_to: string;
+            /** Reason */
+            reason: string;
+        };
+        /** ContactResolveRequest */
+        ContactResolveRequest: {
+            /** Resolution */
+            resolution: string;
+        };
+        /** ContactStatusRequest */
+        ContactStatusRequest: {
+            /** Reason */
+            reason: string;
+            /** Status */
+            status: string;
+        };
+        /** ContactSubmissionRequest */
+        ContactSubmissionRequest: {
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Form Started At */
+            form_started_at?: string | null;
+            /** Locale */
+            locale: string;
+            /** Message */
+            message: string;
+            /** Name */
+            name: string;
+            /** Privacy Consent Version */
+            privacy_consent_version: string;
+            /** Region */
+            region?: string | null;
+            /** Source Page */
+            source_page?: string | null;
+            /** Subject */
+            subject?: string | null;
+            /** Submission Type */
+            submission_type: string;
+            /**
+             * Website
+             * @default
+             */
+            website: string;
+        };
+        /** ContentCreateRequest */
+        ContentCreateRequest: {
+            /** Canonical Slug */
+            canonical_slug: string;
+            /** Change Summary */
+            change_summary: string;
+            /**
+             * Default Locale
+             * @default zh-CN
+             */
+            default_locale: string;
+            /** Internal Name */
+            internal_name: string;
+            localization: components["schemas"]["LocalizationInput"];
+        };
+        /** ContentUpdateRequest */
+        ContentUpdateRequest: {
+            /** Change Summary */
+            change_summary: string;
+            /** Expected Version */
+            expected_version: number;
+            /** Internal Name */
+            internal_name?: string | null;
+            /** Visibility */
+            visibility?: string | null;
+        };
+        /** CouponBulkCreateRequest */
+        CouponBulkCreateRequest: {
+            /** Count */
+            count: number;
+            /** Prefix */
+            prefix: string;
+            /**
+             * Promotion Id
+             * Format: uuid
+             */
+            promotion_id: string;
+            /** Valid Until */
+            valid_until?: string | null;
+        };
+        /** CouponCreateRequest */
+        CouponCreateRequest: {
+            /** Assigned User Id */
+            assigned_user_id?: string | null;
+            /** Code */
+            code: string;
+            /** Per User Redemption Limit */
+            per_user_redemption_limit?: number | null;
+            /**
+             * Promotion Id
+             * Format: uuid
+             */
+            promotion_id: string;
+            /** Total Redemption Limit */
+            total_redemption_limit?: number | null;
+            /** Valid From */
+            valid_from?: string | null;
+            /** Valid Until */
+            valid_until?: string | null;
+        };
+        /** CouponRedemptionReservationRequest */
+        CouponRedemptionReservationRequest: {
+            /** Coupon Id */
+            coupon_id?: string | null;
+            /**
+             * Pricing Quote Id
+             * Format: uuid
+             */
+            pricing_quote_id: string;
+            /**
+             * Promotion Id
+             * Format: uuid
+             */
+            promotion_id: string;
+            /** User Id */
+            user_id?: string | null;
+        };
+        /** CouponUpdateRequest */
+        CouponUpdateRequest: {
+            /** Assigned User Id */
+            assigned_user_id?: string | null;
+            /** Per User Redemption Limit */
+            per_user_redemption_limit?: number | null;
+            /** Reason */
+            reason: string;
+            /** Total Redemption Limit */
+            total_redemption_limit?: number | null;
+            /** Valid From */
+            valid_from?: string | null;
+            /** Valid Until */
+            valid_until?: string | null;
+        };
+        /** CouponValidationRequest */
+        CouponValidationRequest: {
+            /**
+             * Anonymous Session Id
+             * Format: uuid
+             */
+            anonymous_session_id: string;
+            /** Coupon Code */
+            coupon_code: string;
+            /** Quantity */
+            quantity: number;
+            /** Requested Currency */
+            requested_currency: string;
+            /**
+             * Sku Id
+             * Format: uuid
+             */
+            sku_id: string;
+            /** Subtotal Minor */
+            subtotal_minor: number;
+        };
+        /** CourseCreateRequest */
+        CourseCreateRequest: {
+            /** Course Code */
+            course_code: string;
+            /**
+             * Course Type
+             * @default self_paced
+             * @enum {string}
+             */
+            course_type: "self_paced" | "cohort" | "hybrid";
+            /**
+             * Default Locale
+             * @default zh-CN
+             */
+            default_locale: string;
+            /** Difficulty Level */
+            difficulty_level?: ("beginner" | "intermediate" | "advanced") | null;
+            /** Free Access Policy */
+            free_access_policy?: "free_enrollment" | null;
+            /** Internal Name */
+            internal_name: string;
+            /**
+             * Visibility
+             * @default public
+             * @enum {string}
+             */
+            visibility: "public" | "authenticated" | "private";
+        };
+        /** CourseLocalizationRequest */
+        CourseLocalizationRequest: {
+            /** Description Blocks */
+            description_blocks?: {
+                [key: string]: unknown;
+            }[];
+            /** Instructor Summary */
+            instructor_summary?: string | null;
+            /** Learning Outcomes */
+            learning_outcomes?: {
+                [key: string]: unknown;
+            }[];
+            /** Locale */
+            locale: string;
+            /** Prerequisites */
+            prerequisites?: {
+                [key: string]: unknown;
+            }[];
+            /** Refund Notice */
+            refund_notice?: string | null;
+            /** Slug */
+            slug: string;
+            /** Subtitle */
+            subtitle?: string | null;
+            /** Summary */
+            summary?: string | null;
+            /** Target Audience */
+            target_audience?: {
+                [key: string]: unknown;
+            }[];
+            /** Title */
+            title: string;
+            /**
+             * Translation Status
+             * @default draft
+             * @enum {string}
+             */
+            translation_status: "draft" | "ready";
+        };
+        /** CourseTransitionRequest */
+        CourseTransitionRequest: {
+            /** Reason */
+            reason: string;
+            /**
+             * Target Status
+             * @enum {string}
+             */
+            target_status: "draft" | "in_review" | "scheduled" | "published" | "enrollment_closed" | "unpublished" | "archived";
+        };
+        /** CourseUpdateRequest */
+        CourseUpdateRequest: {
+            /** Difficulty Level */
+            difficulty_level?: ("beginner" | "intermediate" | "advanced") | null;
+            /** Estimated Duration Minutes */
+            estimated_duration_minutes?: number | null;
+            /** Expected Version */
+            expected_version: number;
+            /** Featured */
+            featured?: boolean | null;
+            /** Free Access Policy */
+            free_access_policy?: "free_enrollment" | null;
+            /** Internal Name */
+            internal_name?: string | null;
+            /** Sort Order */
+            sort_order?: number | null;
+            /** Visibility */
+            visibility?: ("public" | "authenticated" | "private") | null;
+        };
+        /** EmailRequest */
+        EmailRequest: {
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+        };
+        /** EnrollmentActionRequest */
+        EnrollmentActionRequest: {
+            /** Reason */
+            reason: string;
+        };
+        /** EntitlementActionRequest */
+        EntitlementActionRequest: {
+            /** Reason */
+            reason: string;
+        };
+        /** EntitlementConsumeRequest */
+        EntitlementConsumeRequest: {
+            /** Expected Version */
+            expected_version: number;
+            /** Idempotency Key */
+            idempotency_key: string;
+            /** Quantity */
+            quantity: number;
+        };
+        /** ExerciseCreateRequest */
+        ExerciseCreateRequest: {
+            /** Cooldown Minutes */
+            cooldown_minutes?: number | null;
+            /** Exercise Code */
+            exercise_code: string;
+            /**
+             * Exercise Type
+             * @default quiz
+             * @enum {string}
+             */
+            exercise_type: "quiz" | "reflection" | "assignment";
+            /**
+             * Grading Mode
+             * @default automatic
+             * @enum {string}
+             */
+            grading_mode: "automatic" | "manual" | "hybrid";
+            /**
+             * Lesson Id
+             * Format: uuid
+             */
+            lesson_id: string;
+            /**
+             * Maximum Attempts
+             * @default 3
+             */
+            maximum_attempts: number | null;
+            /**
+             * Passing Score Basis Points
+             * @default 7000
+             */
+            passing_score_basis_points: number | null;
+            /**
+             * Reveal Answers Policy
+             * @default after_pass
+             * @enum {string}
+             */
+            reveal_answers_policy: "never" | "after_pass" | "after_final_attempt";
+        };
+        /** FollowUpCreateRequest */
+        FollowUpCreateRequest: {
+            /** Content */
+            content: {
+                [key: string]: unknown;
+            };
+            /** Due At */
+            due_at?: string | null;
+            /**
+             * Follow Up Type
+             * @enum {string}
+             */
+            follow_up_type: "action_item" | "course" | "activity" | "counseling" | "external_support";
+        };
+        /** FormUpsertRequest */
+        FormUpsertRequest: {
+            /** Consent Requirements */
+            consent_requirements?: {
+                [key: string]: unknown;
+            }[];
+            /** Form Schema */
+            form_schema: {
+                [key: string]: unknown;
+            };
+            /** Schema Version */
+            schema_version: number;
+        };
+        /**
+         * FulfillmentType
+         * @enum {string}
+         */
+        FulfillmentType: "event_admission" | "digital_access" | "appointment_credits" | "ai_credits" | "membership_entitlement" | "manual_fulfillment";
+        /** GroupMemberMoveRequest */
+        GroupMemberMoveRequest: {
+            /** Reason */
+            reason: string;
+            /**
+             * Registration Id
+             * Format: uuid
+             */
+            registration_id: string;
+        };
+        /** GroupingRequest */
+        GroupingRequest: {
+            /**
+             * Checked In Only
+             * @default true
+             */
+            checked_in_only: boolean;
+            /** Plan Name */
+            plan_name: string;
+            /**
+             * Publish
+             * @default false
+             */
+            publish: boolean;
+            /** Seed */
+            seed: string;
+            /** Target Group Size */
+            target_group_size: number;
+        };
+        /** GroupingStatusRequest */
+        GroupingStatusRequest: {
+            /** Reason */
+            reason: string;
+        };
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
+        };
+        /** HeartbeatRequest */
+        HeartbeatRequest: {
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+            /**
+             * Playback Rate
+             * @default 1
+             */
+            playback_rate: number;
+            /** Played Seconds */
+            played_seconds: number;
+            /** Position Seconds */
+            position_seconds: number;
+            /** Sequence */
+            sequence: number;
+        };
+        /** HeroBlock */
+        HeroBlock: {
+            data: components["schemas"]["HeroData"];
+            /** Id */
+            id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "hero";
+            /**
+             * Version
+             * @default 1
+             */
+            version: number;
+        };
+        /** HeroData */
+        HeroData: {
+            /** Background Media Id */
+            background_media_id?: string | null;
+            /** Heading */
+            heading: string;
+            primary_action?: components["schemas"]["Action"] | null;
+            secondary_action?: components["schemas"]["Action"] | null;
+            /** Subheading */
+            subheading?: string | null;
+        };
+        /** ImageBlock */
+        ImageBlock: {
+            data: components["schemas"]["ImageData"];
+            /** Id */
+            id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "image";
+            /**
+             * Version
+             * @default 1
+             */
+            version: number;
+        };
+        /** ImageData */
+        ImageData: {
+            /**
+             * Decorative
+             * @default false
+             */
+            decorative: boolean;
+            /**
+             * Media Id
+             * Format: uuid
+             */
+            media_id: string;
+        };
+        /** InstructorAssignmentRequest */
+        InstructorAssignmentRequest: {
+            /**
+             * Instructor Id
+             * Format: uuid
+             */
+            instructor_id: string;
+            /**
+             * Role
+             * @default lead
+             * @enum {string}
+             */
+            role: "lead" | "co_instructor" | "guest";
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+        };
+        /** InstructorCreateRequest */
+        InstructorCreateRequest: {
+            /** Display Name */
+            display_name: string;
+            /** Instructor Code */
+            instructor_code: string;
+            /** Linked User Id */
+            linked_user_id?: string | null;
+            /**
+             * Status
+             * @default active
+             * @enum {string}
+             */
+            status: "active" | "inactive";
+        };
+        /** InventoryAdjustRequest */
+        InventoryAdjustRequest: {
+            /** Expected Version */
+            expected_version: number;
+            /** Quantity Delta */
+            quantity_delta: number;
+            /** Reason */
+            reason: string;
+        };
+        /** InventoryConfigureRequest */
+        InventoryConfigureRequest: {
+            /**
+             * Oversell Limit
+             * @default 0
+             */
+            oversell_limit: number;
+            /**
+             * Overselling Allowed
+             * @default false
+             */
+            overselling_allowed: boolean;
+            /** Reason */
+            reason: string;
+            /**
+             * Safety Stock
+             * @default 0
+             */
+            safety_stock: number;
+            /** Total Capacity */
+            total_capacity?: number | null;
+        };
+        /**
+         * InventoryPolicy
+         * @enum {string}
+         */
+        InventoryPolicy: "unlimited" | "finite" | "service_capacity" | "external";
+        /** InventoryReservationRequest */
+        InventoryReservationRequest: {
+            /** Anonymous Session Id */
+            anonymous_session_id?: string | null;
+            /** Pricing Quote Id */
+            pricing_quote_id?: string | null;
+            /** Quantity */
+            quantity: number;
+            /**
+             * Sku Id
+             * Format: uuid
+             */
+            sku_id: string;
+            /** User Id */
+            user_id?: string | null;
+        };
+        /** LearningEventRequest */
+        LearningEventRequest: {
+            /** Event Sequence */
+            event_sequence: number;
+            /**
+             * Event Type
+             * @enum {string}
+             */
+            event_type: "lesson_opened" | "manual_completed";
+            /** Idempotency Key */
+            idempotency_key: string;
+            /**
+             * Lesson Id
+             * Format: uuid
+             */
+            lesson_id: string;
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+            /** Payload */
+            payload?: {
+                [key: string]: unknown;
+            };
+        };
+        /** LessonCreateRequest */
+        LessonCreateRequest: {
+            /**
+             * Completion Mode
+             * @enum {string}
+             */
+            completion_mode: "video_watch" | "manual" | "exercise_pass" | "assignment_graded";
+            /** Content Blocks */
+            content_blocks?: {
+                [key: string]: unknown;
+            }[];
+            /** Estimated Duration Minutes */
+            estimated_duration_minutes?: number | null;
+            /** Internal Name */
+            internal_name: string;
+            /** Lesson Code */
+            lesson_code: string;
+            /**
+             * Lesson Type
+             * @enum {string}
+             */
+            lesson_type: "video" | "rich_text" | "audio" | "document" | "exercise" | "assignment" | "external_activity";
+            /**
+             * Locale
+             * @default zh-CN
+             */
+            locale: string;
+            /**
+             * Preview Policy
+             * @default none
+             * @enum {string}
+             */
+            preview_policy: "none" | "public" | "authenticated";
+            /** Release At */
+            release_at?: string | null;
+            /** Release Offset Days */
+            release_offset_days?: number | null;
+            /**
+             * Required
+             * @default true
+             */
+            required: boolean;
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+            /**
+             * Status
+             * @default draft
+             * @enum {string}
+             */
+            status: "draft" | "published";
+            /** Title */
+            title: string;
+        };
+        /** LocalizationInput */
+        LocalizationInput: {
+            /**
+             * Content Blocks
+             * @default []
+             */
+            content_blocks: (components["schemas"]["HeroBlock"] | components["schemas"]["RichTextBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["QuoteBlock"] | components["schemas"]["CallToActionBlock"] | components["schemas"]["CollectionBlock"])[];
+            /** Cover Media Id */
+            cover_media_id?: string | null;
+            /** Excerpt */
+            excerpt?: string | null;
+            /** Locale */
+            locale: string;
+            /** Localized Slug */
+            localized_slug?: string | null;
+            /** Plain Text */
+            plain_text?: string | null;
+            /** Seo Description */
+            seo_description?: string | null;
+            /** Seo Title */
+            seo_title?: string | null;
+            /** Social Description */
+            social_description?: string | null;
+            /** Social Title */
+            social_title?: string | null;
+            /** Subtitle */
+            subtitle?: string | null;
+            /** Title */
+            title: string;
+            /** @default draft */
+            translation_status: components["schemas"]["TranslationStatus"];
+        };
+        /** LocalizationUpdateRequest */
+        LocalizationUpdateRequest: {
+            /** Change Summary */
+            change_summary: string;
+            /**
+             * Content Blocks
+             * @default []
+             */
+            content_blocks: (components["schemas"]["HeroBlock"] | components["schemas"]["RichTextBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["QuoteBlock"] | components["schemas"]["CallToActionBlock"] | components["schemas"]["CollectionBlock"])[];
+            /** Cover Media Id */
+            cover_media_id?: string | null;
+            /** Excerpt */
+            excerpt?: string | null;
+            /** Expected Version */
+            expected_version: number;
+            /** Locale */
+            locale: string;
+            /** Localized Slug */
+            localized_slug?: string | null;
+            /** Plain Text */
+            plain_text?: string | null;
+            /** Seo Description */
+            seo_description?: string | null;
+            /** Seo Title */
+            seo_title?: string | null;
+            /** Social Description */
+            social_description?: string | null;
+            /** Social Title */
+            social_title?: string | null;
+            /** Subtitle */
+            subtitle?: string | null;
+            /** Title */
+            title: string;
+            /** @default draft */
+            translation_status: components["schemas"]["TranslationStatus"];
+        };
+        /** LocalizationUpsertRequest */
+        LocalizationUpsertRequest: {
+            /** Address Display Text */
+            address_display_text?: string | null;
+            /** Cancellation Notice */
+            cancellation_notice?: string | null;
+            /** Description Blocks */
+            description_blocks?: {
+                [key: string]: unknown;
+            }[];
+            /** Locale */
+            locale: string;
+            /** Participation Notes */
+            participation_notes?: {
+                [key: string]: unknown;
+            }[];
+            /** Slug */
+            slug: string;
+            /** Summary */
+            summary?: string | null;
+            /** Title */
+            title: string;
+            /**
+             * Translation Status
+             * @default draft
+             * @enum {string}
+             */
+            translation_status: "draft" | "ready";
+            /** Venue Display Name */
+            venue_display_name?: string | null;
+        };
+        /** LocationCreateRequest */
+        LocationCreateRequest: {
+            /** Address Line 1 */
+            address_line_1?: string | null;
+            /** Address Line 2 */
+            address_line_2?: string | null;
+            /** City */
+            city?: string | null;
+            /** Country Code */
+            country_code?: string | null;
+            /**
+             * Location Type
+             * @enum {string}
+             */
+            location_type: "in_person" | "online";
+            /** Online Join Url */
+            online_join_url?: string | null;
+            /** Online Provider */
+            online_provider?: string | null;
+            /** Postal Code */
+            postal_code?: string | null;
+            /**
+             * Public Address Precision
+             * @default city_only
+             * @enum {string}
+             */
+            public_address_precision: "city_only" | "district" | "full";
+            /** Region */
+            region?: string | null;
+            /** Venue Name */
+            venue_name?: string | null;
+        };
+        /** LoginRequest */
+        LoginRequest: {
+            /**
+             * Device Name
+             * @default Browser
+             */
+            device_name: string;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Password */
+            password: string;
+        };
+        /** ManualGradeRequest */
+        ManualGradeRequest: {
+            /** Feedback */
+            feedback?: string | null;
+            /** Score Basis Points */
+            score_basis_points: number;
+        };
+        /** MediaCompleteRequest */
+        MediaCompleteRequest: {
+            /** Checksum Sha256 */
+            checksum_sha256: string;
+        };
+        /** MediaUpdateRequest */
+        MediaUpdateRequest: {
+            /** Accessibility Description */
+            accessibility_description?: string | null;
+            /** Alt Text */
+            alt_text?: string | null;
+            /** Caption */
+            caption?: string | null;
+            /** Locale */
+            locale: string;
+            /** Visibility */
+            visibility?: string | null;
+        };
+        /** MediaUploadRequest */
+        MediaUploadRequest: {
+            /** Byte Size */
+            byte_size: number;
+            /** Checksum Sha256 */
+            checksum_sha256: string;
+            /** Filename */
+            filename: string;
+            /** Mime Type */
+            mime_type: string;
+            /**
+             * Visibility
+             * @default private
+             */
+            visibility: string;
+        };
+        /** MentorCreateRequest */
+        MentorCreateRequest: {
+            /** Display Name */
+            display_name: string;
+            /** Linked User Id */
+            linked_user_id?: string | null;
+            /** Mentor Code */
+            mentor_code: string;
+            /** Service Languages */
+            service_languages?: string[];
+            /** Specialty Topics */
+            specialty_topics?: string[];
+            /** Timezone */
+            timezone: string;
+        };
+        /** MentorLocalizationRequest */
+        MentorLocalizationRequest: {
+            /** Biography Blocks */
+            biography_blocks?: {
+                [key: string]: unknown;
+            }[];
+            /** Headline */
+            headline?: string | null;
+            /** Public Name */
+            public_name: string;
+            /** Scope Statement */
+            scope_statement: string;
+            /** Slug */
+            slug: string;
+            /**
+             * Translation Status
+             * @default draft
+             * @enum {string}
+             */
+            translation_status: "draft" | "ready";
+        };
+        /** ModuleCreateRequest */
+        ModuleCreateRequest: {
+            /** Internal Name */
+            internal_name: string;
+            /**
+             * Locale
+             * @default zh-CN
+             */
+            locale: string;
+            /** Module Code */
+            module_code: string;
+            /** Release At */
+            release_at?: string | null;
+            /** Release Offset Days */
+            release_offset_days?: number | null;
+            /**
+             * Required
+             * @default true
+             */
+            required: boolean;
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+            /**
+             * Status
+             * @default draft
+             * @enum {string}
+             */
+            status: "draft" | "published";
+            /** Title */
+            title: string;
+        };
+        /** NavigationItemInput */
+        NavigationItemInput: {
+            /** External Url */
+            external_url?: string | null;
+            /** Internal Name */
+            internal_name: string;
+            /**
+             * Is Active
+             * @default true
+             */
+            is_active: boolean;
+            /**
+             * Link Type
+             * @enum {string}
+             */
+            link_type: "route" | "external" | "content";
+            /** Localizations */
+            localizations: components["schemas"]["NavigationLocalizationInput"][];
+            /**
+             * Open In New Tab
+             * @default false
+             */
+            open_in_new_tab: boolean;
+            /**
+             * Required Auth
+             * @default false
+             */
+            required_auth: boolean;
+            /** Route Name */
+            route_name?: string | null;
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+            /** Target Entry Id */
+            target_entry_id?: string | null;
+        };
+        /** NavigationLocalizationInput */
+        NavigationLocalizationInput: {
+            /** Label */
+            label: string;
+            /**
+             * Locale
+             * @enum {string}
+             */
+            locale: "zh-CN" | "zh-TW" | "en";
+        };
+        /** NavigationMenuUpdateRequest */
+        NavigationMenuUpdateRequest: {
+            /**
+             * Is Active
+             * @default true
+             */
+            is_active: boolean;
+            /** Items */
+            items: components["schemas"]["NavigationItemInput"][];
+            /** Name */
+            name: string;
+            /** Reason */
+            reason: string;
+        };
+        /** OrderCancelRequest */
+        OrderCancelRequest: {
+            /** Reason */
+            reason: string;
+        };
+        /** ParticipantProfileRequest */
+        ParticipantProfileRequest: {
+            /** Brief Introduction */
+            brief_introduction?: string | null;
+            /** Consent */
+            consent: boolean;
+            /** Display Name */
+            display_name: string;
+            /**
+             * Visibility Status
+             * @default visible
+             * @enum {string}
+             */
+            visibility_status: "visible" | "hidden";
+        };
+        /** PasswordChangeRequest */
+        PasswordChangeRequest: {
+            /** Current Password */
+            current_password: string;
+            /** New Password */
+            new_password: string;
+        };
+        /** PasswordResetRequest */
+        PasswordResetRequest: {
+            /** New Password */
+            new_password: string;
+            /** Token */
+            token: string;
+        };
+        /** PaymentCreateRequest */
+        PaymentCreateRequest: {
+            /**
+             * Provider
+             * @enum {string}
+             */
+            provider: "stripe" | "paypal";
+        };
+        /** PostEventChoiceRequest */
+        PostEventChoiceRequest: {
+            /**
+             * Choice
+             * @default interested
+             * @enum {string}
+             */
+            choice: "interested" | "pass";
+            /**
+             * Chosen User Id
+             * Format: uuid
+             */
+            chosen_user_id: string;
+        };
+        /** PrerequisiteCreateRequest */
+        PrerequisiteCreateRequest: {
+            /** Minimum Score Basis Points */
+            minimum_score_basis_points?: number | null;
+            /**
+             * Prerequisite Lesson Id
+             * Format: uuid
+             */
+            prerequisite_lesson_id: string;
+            /**
+             * Required Completion
+             * @default true
+             */
+            required_completion: boolean;
+        };
+        /** PreviewTokenRequest */
+        PreviewTokenRequest: {
+            /** Locale */
+            locale?: string | null;
+        };
+        /** PriceBookCreateRequest */
+        PriceBookCreateRequest: {
+            /** Customer Segment */
+            customer_segment?: string | null;
+            /** Name */
+            name: string;
+            /** Price Book Code */
+            price_book_code: string;
+            /**
+             * Priority
+             * @default 0
+             */
+            priority: number;
+            /** Region Code */
+            region_code?: string | null;
+            /** Valid From */
+            valid_from?: string | null;
+            /** Valid Until */
+            valid_until?: string | null;
+        };
+        /** PriceBookUpdateRequest */
+        PriceBookUpdateRequest: {
+            /** Customer Segment */
+            customer_segment?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Priority */
+            priority?: number | null;
+            /** Reason */
+            reason: string;
+            /** Region Code */
+            region_code?: string | null;
+            /** Valid From */
+            valid_from?: string | null;
+            /** Valid Until */
+            valid_until?: string | null;
+        };
+        /** PriceCreateRequest */
+        PriceCreateRequest: {
+            /** Billing Interval */
+            billing_interval?: string | null;
+            /** Billing Interval Count */
+            billing_interval_count?: number | null;
+            billing_type: components["schemas"]["BillingType"];
+            /** Compare At Amount Minor */
+            compare_at_amount_minor?: number | null;
+            /** Currency Code */
+            currency_code: string;
+            /** External Price References */
+            external_price_references?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Price Book Id
+             * Format: uuid
+             */
+            price_book_id: string;
+            /** Supersedes Price Id */
+            supersedes_price_id?: string | null;
+            /**
+             * Tax Behavior
+             * @default unspecified
+             */
+            tax_behavior: string;
+            /** Unit Amount Minor */
+            unit_amount_minor: number;
+            /**
+             * Valid From
+             * Format: date-time
+             */
+            valid_from: string;
+            /** Valid Until */
+            valid_until?: string | null;
+        };
+        /** PriceSupersedeRequest */
+        PriceSupersedeRequest: {
+            /** Billing Interval */
+            billing_interval?: string | null;
+            /** Billing Interval Count */
+            billing_interval_count?: number | null;
+            billing_type: components["schemas"]["BillingType"];
+            /** Compare At Amount Minor */
+            compare_at_amount_minor?: number | null;
+            /** Currency Code */
+            currency_code: string;
+            /** External Price References */
+            external_price_references?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Price Book Id
+             * Format: uuid
+             */
+            price_book_id: string;
+            /** Reason */
+            reason: string;
+            /** Supersedes Price Id */
+            supersedes_price_id?: string | null;
+            /**
+             * Tax Behavior
+             * @default unspecified
+             */
+            tax_behavior: string;
+            /** Unit Amount Minor */
+            unit_amount_minor: number;
+            /**
+             * Valid From
+             * Format: date-time
+             */
+            valid_from: string;
+            /** Valid Until */
+            valid_until?: string | null;
+        };
+        /** PricingContextInput */
+        PricingContextInput: {
+            /**
+             * Channel
+             * @default user_web
+             * @enum {string}
+             */
+            channel: "user_web" | "admin" | "api";
+            /** Customer Segment */
+            customer_segment?: string | null;
+            /** Region Code */
+            region_code?: string | null;
+            /**
+             * Requested At
+             * Format: date-time
+             */
+            requested_at?: string;
+        };
+        /** PricingQuoteRequest */
+        PricingQuoteRequest: {
+            /**
+             * Anonymous Session Id
+             * Format: uuid
+             */
+            anonymous_session_id: string;
+            /** Coupon Code */
+            coupon_code?: string | null;
+            /**
+             * Locale
+             * @default zh-CN
+             */
+            locale: string;
+            pricing_context?: components["schemas"]["PricingContextInput"];
+            /** Quantity */
+            quantity: number;
+            /** Requested Currency */
+            requested_currency: string;
+            /**
+             * Sku Id
+             * Format: uuid
+             */
+            sku_id: string;
+        };
+        /** PricingSimulationRequest */
+        PricingSimulationRequest: {
+            /** Coupon Code */
+            coupon_code?: string | null;
+            /**
+             * Locale
+             * @default zh-CN
+             */
+            locale: string;
+            pricing_context?: components["schemas"]["PricingContextInput"];
+            /** Quantity */
+            quantity: number;
+            /** Requested Currency */
+            requested_currency: string;
+            /**
+             * Sku Id
+             * Format: uuid
+             */
+            sku_id: string;
+            /** User Id */
+            user_id?: string | null;
+        };
+        /** ProductCreateRequest */
+        ProductCreateRequest: {
+            /** Category Id */
+            category_id?: string | null;
+            /**
+             * Default Locale
+             * @default zh-CN
+             */
+            default_locale: string;
+            /**
+             * Featured
+             * @default false
+             */
+            featured: boolean;
+            fulfillment_type: components["schemas"]["FulfillmentType"];
+            /** Internal Name */
+            internal_name: string;
+            /** Localizations */
+            localizations: components["schemas"]["ProductLocalizationInput"][];
+            /** Metadata */
+            metadata?: {
+                [key: string]: unknown;
+            };
+            /** Product Code */
+            product_code: string;
+            product_type: components["schemas"]["ProductType"];
+            /** Purchasable From */
+            purchasable_from?: string | null;
+            /** Purchasable Until */
+            purchasable_until?: string | null;
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+            /**
+             * Visibility
+             * @default public
+             */
+            visibility: string;
+        };
+        /** ProductLocalizationInput */
+        ProductLocalizationInput: {
+            /** Cover Media Id */
+            cover_media_id?: string | null;
+            /** Description Blocks */
+            description_blocks?: (components["schemas"]["HeroBlock"] | components["schemas"]["RichTextBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["QuoteBlock"] | components["schemas"]["CallToActionBlock"] | components["schemas"]["CollectionBlock"])[];
+            /** Locale */
+            locale: string;
+            /** Name */
+            name: string;
+            /** Seo Description */
+            seo_description?: string | null;
+            /** Seo Title */
+            seo_title?: string | null;
+            /** Short Description */
+            short_description?: string | null;
+            /** Slug */
+            slug: string;
+            /**
+             * Translation Status
+             * @default draft
+             */
+            translation_status: string;
+        };
+        /** ProductLocalizationUpdateRequest */
+        ProductLocalizationUpdateRequest: {
+            /** Cover Media Id */
+            cover_media_id?: string | null;
+            /** Description Blocks */
+            description_blocks?: (components["schemas"]["HeroBlock"] | components["schemas"]["RichTextBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["QuoteBlock"] | components["schemas"]["CallToActionBlock"] | components["schemas"]["CollectionBlock"])[];
+            /** Expected Version */
+            expected_version: number;
+            /** Locale */
+            locale: string;
+            /** Name */
+            name: string;
+            /** Reason */
+            reason: string;
+            /** Seo Description */
+            seo_description?: string | null;
+            /** Seo Title */
+            seo_title?: string | null;
+            /** Short Description */
+            short_description?: string | null;
+            /** Slug */
+            slug: string;
+            /**
+             * Translation Status
+             * @default draft
+             */
+            translation_status: string;
+        };
+        /**
+         * ProductType
+         * @enum {string}
+         */
+        ProductType: "activity_ticket" | "course" | "course_bundle" | "counseling_session" | "counseling_package" | "ai_credit_package" | "ai_subscription" | "membership" | "digital_service";
+        /** ProductUpdateRequest */
+        ProductUpdateRequest: {
+            /** Category Id */
+            category_id?: string | null;
+            /** Expected Version */
+            expected_version: number;
+            /** Featured */
+            featured?: boolean | null;
+            /** Internal Name */
+            internal_name?: string | null;
+            /** Metadata */
+            metadata?: {
+                [key: string]: unknown;
+            } | null;
+            /** Purchasable From */
+            purchasable_from?: string | null;
+            /** Purchasable Until */
+            purchasable_until?: string | null;
+            /** Reason */
+            reason: string;
+            /** Sort Order */
+            sort_order?: number | null;
+            /** Visibility */
+            visibility?: string | null;
+        };
+        /** ProgressResetRequest */
+        ProgressResetRequest: {
+            /** Reason */
+            reason: string;
+        };
+        /**
+         * PromotionApplicationMode
+         * @enum {string}
+         */
+        PromotionApplicationMode: "automatic" | "coupon_required";
+        /** PromotionBenefits */
+        PromotionBenefits: {
+            /** Amounts */
+            amounts?: {
+                [key: string]: number;
+            };
+            /** Fixed Prices */
+            fixed_prices?: {
+                [key: string]: number;
+            };
+            /** Maximum Discount Minor */
+            maximum_discount_minor?: number | null;
+            /** Percentage Basis Points */
+            percentage_basis_points?: number | null;
+            /**
+             * Schema Version
+             * @default 1
+             */
+            schema_version: number;
+        };
+        /** PromotionCreateRequest */
+        PromotionCreateRequest: {
+            application_mode: components["schemas"]["PromotionApplicationMode"];
+            benefits: components["schemas"]["PromotionBenefits"];
+            /** Budget Currency */
+            budget_currency?: string | null;
+            /** Budget Limit Minor */
+            budget_limit_minor?: number | null;
+            /** Internal Name */
+            internal_name: string;
+            /** Per User Redemption Limit */
+            per_user_redemption_limit?: number | null;
+            /**
+             * Priority
+             * @default 0
+             */
+            priority: number;
+            /** Promotion Code */
+            promotion_code: string;
+            promotion_type: components["schemas"]["PromotionType"];
+            rules: components["schemas"]["PromotionRules"];
+            /** @default exclusive */
+            stackability: components["schemas"]["Stackability"];
+            /** Total Redemption Limit */
+            total_redemption_limit?: number | null;
+            /**
+             * Valid From
+             * Format: date-time
+             */
+            valid_from: string;
+            /** Valid Until */
+            valid_until?: string | null;
+        };
+        /** PromotionRules */
+        PromotionRules: {
+            /** Allowed Currencies */
+            allowed_currencies?: string[];
+            /** Customer Segments */
+            customer_segments?: string[];
+            /** Eligible Category Ids */
+            eligible_category_ids?: string[];
+            /** Eligible Product Ids */
+            eligible_product_ids?: string[];
+            /** Eligible Sku Ids */
+            eligible_sku_ids?: string[];
+            /** Excluded Product Ids */
+            excluded_product_ids?: string[];
+            /**
+             * First Purchase Only
+             * @default false
+             */
+            first_purchase_only: boolean;
+            /**
+             * Minimum Quantity
+             * @default 1
+             */
+            minimum_quantity: number;
+            /**
+             * Minimum Subtotal Minor
+             * @default 0
+             */
+            minimum_subtotal_minor: number;
+            /**
+             * Schema Version
+             * @default 1
+             */
+            schema_version: number;
+        };
+        /**
+         * PromotionType
+         * @enum {string}
+         */
+        PromotionType: "percentage" | "fixed_amount" | "fixed_price" | "free_item";
+        /** PromotionUpdateRequest */
+        PromotionUpdateRequest: {
+            benefits?: components["schemas"]["PromotionBenefits"] | null;
+            /** Internal Name */
+            internal_name?: string | null;
+            /** Priority */
+            priority?: number | null;
+            /** Reason */
+            reason: string;
+            rules?: components["schemas"]["PromotionRules"] | null;
+            stackability?: components["schemas"]["Stackability"] | null;
+            /** Valid From */
+            valid_from?: string | null;
+            /** Valid Until */
+            valid_until?: string | null;
+        };
+        /** ProposalRequest */
+        ProposalRequest: {
+            /** Expected Proposal Version */
+            expected_proposal_version: number;
+            /**
+             * Mentor Id
+             * Format: uuid
+             */
+            mentor_id: string;
+            /** Reason */
+            reason: string;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+        };
+        /** QuestionCreateRequest */
+        QuestionCreateRequest: {
+            /** Answer Key */
+            answer_key?: unknown;
+            /**
+             * Locale
+             * @default zh-CN
+             */
+            locale: string;
+            /** Options */
+            options?: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Points
+             * @default 1
+             */
+            points: number;
+            /** Prompt Blocks */
+            prompt_blocks: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Question Type
+             * @enum {string}
+             */
+            question_type: "single_choice" | "multiple_choice" | "true_false" | "text" | "file";
+            /**
+             * Required
+             * @default true
+             */
+            required: boolean;
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+        };
+        /** QuoteBlock */
+        QuoteBlock: {
+            data: components["schemas"]["QuoteData"];
+            /** Id */
+            id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "quote";
+            /**
+             * Version
+             * @default 1
+             */
+            version: number;
+        };
+        /** QuoteData */
+        QuoteData: {
+            /** Attribution */
+            attribution?: string | null;
+            /** Quote */
+            quote: string;
+        };
+        /** ReconciliationResolveRequest */
+        ReconciliationResolveRequest: {
+            /** Reason */
+            reason: string;
+        };
+        /** RecordCreateRequest */
+        RecordCreateRequest: {
+            /** Content */
+            content: {
+                [key: string]: unknown;
+            };
+            /**
+             * Publish
+             * @default false
+             */
+            publish: boolean;
+            /**
+             * Record Type
+             * @enum {string}
+             */
+            record_type: "client_summary" | "mentor_note" | "operations_note";
+        };
+        /** RefundActionRequest */
+        RefundActionRequest: {
+            /** Reason */
+            reason: string;
+        };
+        /** RefundRequestCreate */
+        RefundRequestCreate: {
+            /** Amount Minor */
+            amount_minor: number;
+            /**
+             * Order Id
+             * Format: uuid
+             */
+            order_id: string;
+            /** Reason */
+            reason: string;
+            /** Reason Code */
+            reason_code: string;
+        };
+        /** RegisterRequest */
+        RegisterRequest: {
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Password */
+            password: string;
+            /**
+             * Preferred Locale
+             * @default zh-CN
+             */
+            preferred_locale: string;
+            /** Privacy Version */
+            privacy_version: string;
+            /** Terms Version */
+            terms_version: string;
+            /**
+             * Timezone
+             * @default UTC
+             */
+            timezone: string;
+        };
+        /** RegistrationCreateRequest */
+        RegistrationCreateRequest: {
+            /** Accepted Consents */
+            accepted_consents?: string[];
+            /** Billing Email */
+            billing_email?: string | null;
+            /**
+             * Currency Code
+             * @default USD
+             */
+            currency_code: string;
+            /** Form Response */
+            form_response?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Locale
+             * @default zh-CN
+             */
+            locale: string;
+            /**
+             * Ticket Type Id
+             * Format: uuid
+             */
+            ticket_type_id: string;
+        };
+        /** RestrictionRequest */
+        RestrictionRequest: {
+            /** Reason Code */
+            reason_code: string;
+            /**
+             * Target User Id
+             * Format: uuid
+             */
+            target_user_id: string;
+        };
+        /** RichTextBlock */
+        RichTextBlock: {
+            data: components["schemas"]["RichTextData"];
+            /** Id */
+            id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "rich_text";
+            /**
+             * Version
+             * @default 1
+             */
+            version: number;
+        };
+        /** RichTextData */
+        RichTextData: {
+            /** Document */
+            document: {
+                [key: string]: unknown;
+            };
+        };
+        /** RoleChangeRequest */
+        RoleChangeRequest: {
+            /** Expires At */
+            expires_at?: string | null;
+            /** Reason */
+            reason: string;
+            /** Role Code */
+            role_code: string;
+        };
+        /** SafetyReferralRequest */
+        SafetyReferralRequest: {
+            /** Category */
+            category: string;
+            /** Details */
+            details: {
+                [key: string]: unknown;
+            };
+            /**
+             * Risk Level
+             * @enum {string}
+             */
+            risk_level: "low" | "moderate" | "high" | "immediate";
+        };
+        /** ScheduleRequest */
+        ScheduleRequest: {
+            /** Reason */
+            reason: string;
+            /**
+             * Scheduled Publish At
+             * Format: date-time
+             */
+            scheduled_publish_at: string;
+        };
+        /** ServiceCreateRequest */
+        ServiceCreateRequest: {
+            /**
+             * Booking Mode
+             * @default request_and_confirm
+             * @enum {string}
+             */
+            booking_mode: "request_and_confirm" | "direct_booking";
+            /**
+             * Buffer After Minutes
+             * @default 0
+             */
+            buffer_after_minutes: number;
+            /**
+             * Buffer Before Minutes
+             * @default 0
+             */
+            buffer_before_minutes: number;
+            /** Catalog Product Id */
+            catalog_product_id?: string | null;
+            /** Catalog Sku Id */
+            catalog_sku_id?: string | null;
+            /**
+             * Delivery Mode
+             * @enum {string}
+             */
+            delivery_mode: "online" | "in_person" | "hybrid";
+            /** Duration Minutes */
+            duration_minutes: number;
+            /**
+             * Free Access
+             * @default false
+             */
+            free_access: boolean;
+            /** Internal Name */
+            internal_name: string;
+            /**
+             * Max Advance Days
+             * @default 90
+             */
+            max_advance_days: number;
+            /**
+             * Min Notice Minutes
+             * @default 1440
+             */
+            min_notice_minutes: number;
+            /**
+             * Participant Mode
+             * @default individual
+             * @enum {string}
+             */
+            participant_mode: "individual" | "couple";
+            /**
+             * Payment Policy
+             * @enum {string}
+             */
+            payment_policy: "free" | "pay_before_confirm" | "pay_after_approval" | "credit";
+            /** Service Code */
+            service_code: string;
+        };
+        /** ServiceLocalizationRequest */
+        ServiceLocalizationRequest: {
+            /** Description Blocks */
+            description_blocks?: {
+                [key: string]: unknown;
+            }[];
+            /** Name */
+            name: string;
+            /** Scope Notice */
+            scope_notice: string;
+            /** Slug */
+            slug: string;
+            /** Summary */
+            summary?: string | null;
+            /**
+             * Translation Status
+             * @default draft
+             * @enum {string}
+             */
+            translation_status: "draft" | "ready";
+        };
+        /** SessionCreateRequest */
+        SessionCreateRequest: {
+            /** Checkin Closes At */
+            checkin_closes_at?: string | null;
+            /** Checkin Opens At */
+            checkin_opens_at?: string | null;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /** Location Id */
+            location_id?: string | null;
+            /** Session Code */
+            session_code: string;
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /** Title */
+            title: string;
+        };
+        /** SiteSettingRequest */
+        SiteSettingRequest: {
+            /**
+             * Is Public
+             * @default false
+             */
+            is_public: boolean;
+            /** Value */
+            value: {
+                [key: string]: unknown;
+            } | unknown[] | string | boolean | null;
+            /** Value Type */
+            value_type: string;
+        };
+        /** SkuCreateRequest */
+        SkuCreateRequest: {
+            billing_type: components["schemas"]["BillingType"];
+            /** Entitlement Definition */
+            entitlement_definition?: {
+                [key: string]: unknown;
+            };
+            /** Fulfillment Configuration */
+            fulfillment_configuration: {
+                [key: string]: unknown;
+            };
+            /** Internal Name */
+            internal_name: string;
+            inventory_policy: components["schemas"]["InventoryPolicy"];
+            /** Purchasable From */
+            purchasable_from?: string | null;
+            /** Purchasable Until */
+            purchasable_until?: string | null;
+            /** Purchase Limit Per User */
+            purchase_limit_per_user?: number | null;
+            /** Purchase Limit Total */
+            purchase_limit_total?: number | null;
+            /** Service Quantity */
+            service_quantity?: number | null;
+            /** Service Unit */
+            service_unit?: string | null;
+            /** Sku Code */
+            sku_code: string;
+        };
+        /** SkuMappingRequest */
+        SkuMappingRequest: {
+            /** Access Duration Days */
+            access_duration_days?: number | null;
+            /**
+             * Access Start Policy
+             * @default entitlement_activation
+             * @constant
+             */
+            access_start_policy: "entitlement_activation";
+            /**
+             * Catalog Sku Id
+             * Format: uuid
+             */
+            catalog_sku_id: string;
+            /**
+             * Course Version Policy
+             * @default pin_at_enrollment
+             * @constant
+             */
+            course_version_policy: "pin_at_enrollment";
+        };
+        /** SkuUpdateRequest */
+        SkuUpdateRequest: {
+            /** Entitlement Definition */
+            entitlement_definition?: {
+                [key: string]: unknown;
+            } | null;
+            /** Expected Version */
+            expected_version: number;
+            /** Fulfillment Configuration */
+            fulfillment_configuration?: {
+                [key: string]: unknown;
+            } | null;
+            /** Internal Name */
+            internal_name?: string | null;
+            /** Purchase Limit Per User */
+            purchase_limit_per_user?: number | null;
+            /** Purchase Limit Total */
+            purchase_limit_total?: number | null;
+            /** Reason */
+            reason: string;
+            /** Service Quantity */
+            service_quantity?: number | null;
+            /** Service Unit */
+            service_unit?: string | null;
+        };
+        /** SlotHoldRequest */
+        SlotHoldRequest: {
+            /** Idempotency Key */
+            idempotency_key: string;
+            /**
+             * Mentor Id
+             * Format: uuid
+             */
+            mentor_id: string;
+            /**
+             * Service Id
+             * Format: uuid
+             */
+            service_id: string;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+        };
+        /**
+         * Stackability
+         * @enum {string}
+         */
+        Stackability: "exclusive" | "stackable" | "stackable_with_automatic_only";
+        /** SubscriptionCancelRequest */
+        SubscriptionCancelRequest: {
+            /**
+             * Immediate
+             * @default false
+             */
+            immediate: boolean;
+            /** Reason */
+            reason: string;
+        };
+        /** TestimonialCreateRequest */
+        TestimonialCreateRequest: {
+            /** Canonical Slug */
+            canonical_slug: string;
+            /** Change Summary */
+            change_summary: string;
+            /**
+             * Default Locale
+             * @default zh-CN
+             */
+            default_locale: string;
+            /** Internal Name */
+            internal_name: string;
+            localization: components["schemas"]["LocalizationInput"];
+            /** @default {
+             *       "anonymity_level": "fully_anonymous",
+             *       "consent_status": "pending",
+             *       "featured": false
+             *     } */
+            metadata: components["schemas"]["TestimonialMetadataInput"];
+        };
+        /** TestimonialMetadataInput */
+        TestimonialMetadataInput: {
+            /**
+             * Anonymity Level
+             * @default fully_anonymous
+             */
+            anonymity_level: string;
+            /** Consent Record Id */
+            consent_record_id?: string | null;
+            /**
+             * Consent Status
+             * @default pending
+             */
+            consent_status: string;
+            /**
+             * Featured
+             * @default false
+             */
+            featured: boolean;
+            /** Relationship Stage */
+            relationship_stage?: string | null;
+            /** Subject Display Name */
+            subject_display_name?: string | null;
+        };
+        /** TicketLinkRequest */
+        TicketLinkRequest: {
+            /** Approval Policy Override */
+            approval_policy_override?: ("automatic" | "manual" | "rule_assisted") | null;
+            /**
+             * Capacity Display Mode
+             * @default status_only
+             * @enum {string}
+             */
+            capacity_display_mode: "hidden" | "status_only" | "exact";
+            /**
+             * Catalog Product Id
+             * Format: uuid
+             */
+            catalog_product_id: string;
+            /**
+             * Catalog Sku Id
+             * Format: uuid
+             */
+            catalog_sku_id: string;
+            /** Eligibility Rules */
+            eligibility_rules?: {
+                [key: string]: unknown;
+            };
+            /** Internal Name */
+            internal_name: string;
+            /**
+             * Max Quantity Per User
+             * @default 1
+             */
+            max_quantity_per_user: number;
+            /** Payment Timing Override */
+            payment_timing_override?: ("before_approval" | "after_approval" | "not_required") | null;
+            /** Registration Closes At */
+            registration_closes_at?: string | null;
+            /** Registration Opens At */
+            registration_opens_at?: string | null;
+            /**
+             * Sort Order
+             * @default 0
+             */
+            sort_order: number;
+            /**
+             * Status
+             * @default draft
+             * @enum {string}
+             */
+            status: "draft" | "active";
+            /** Ticket Code */
+            ticket_code: string;
+            /**
+             * Waitlist Enabled
+             * @default true
+             */
+            waitlist_enabled: boolean;
+        };
+        /** TokenConfirmRequest */
+        TokenConfirmRequest: {
+            /** Token */
+            token: string;
+        };
+        /** TransitionRequest */
+        TransitionRequest: {
+            /** Reason */
+            reason: string;
+            /** Target Status */
+            target_status: string;
+        };
+        /**
+         * TranslationStatus
+         * @enum {string}
+         */
+        TranslationStatus: "missing" | "draft" | "review_required" | "ready" | "outdated";
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+        };
+        /** VersionRestoreRequest */
+        VersionRestoreRequest: {
+            /** Expected Version */
+            expected_version: number;
+            /** Reason */
+            reason: string;
+        };
+        /** VideoAttachRequest */
+        VideoAttachRequest: {
+            /** Duration Seconds */
+            duration_seconds: number;
+            /** Private Reference */
+            private_reference: string;
+            /**
+             * Processing Status
+             * @default ready
+             * @enum {string}
+             */
+            processing_status: "processing" | "ready" | "failed";
+            /** Provider Video Id */
+            provider_video_id: string;
+            /**
+             * Required Watch Basis Points
+             * @default 9000
+             */
+            required_watch_basis_points: number;
+        };
+        /** WaitlistReorderRequest */
+        WaitlistReorderRequest: {
+            /** Manual Order Override */
+            manual_order_override: number;
+            /** Reason */
+            reason: string;
+            /** Reason Code */
+            reason_code: string;
+        };
+        /** ReasonRequest */
+        vav__modules__activities__schemas__ReasonRequest: {
+            /** Reason */
+            reason: string;
+            /** Reason Code */
+            reason_code: string;
+        };
+        /** ReviewRequest */
+        vav__modules__activities__schemas__ReviewRequest: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "approve" | "reject" | "request_information";
+            /** Private Notes */
+            private_notes?: string | null;
+            /** Reason Code */
+            reason_code: string;
+            /** User Message */
+            user_message?: string | null;
+        };
+        /** ReasonRequest */
+        vav__modules__catalog__schemas__ReasonRequest: {
+            /** Reason */
+            reason: string;
+        };
+        /** ReviewRequest */
+        vav__modules__content__schemas__ReviewRequest: {
+            /** Reason */
+            reason: string;
+        };
+        /** ReasonRequest */
+        vav__modules__counseling__schemas__ReasonRequest: {
+            /** Reason */
+            reason: string;
+        };
+        /** ReasonRequest */
+        vav__modules__identity__schemas__ReasonRequest: {
+            /** Reason */
+            reason: string;
+        };
+    };
     responses: never;
     parameters: never;
     requestBodies: never;
@@ -84,6 +7625,9265 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    my_post_event_choices_api_v1_account_activities__activity_id__choices_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_post_event_choice_api_v1_account_activities__activity_id__choices_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PostEventChoiceRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    withdraw_post_event_choice_api_v1_account_activities__activity_id__choices__participant_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+                participant_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_activity_group_api_v1_account_activities__activity_id__group_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upsert_participant_profile_api_v1_account_activities__activity_id__participant_profile_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ParticipantProfileRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    eligible_participants_api_v1_account_activities__activity_id__participants_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_interaction_restriction_api_v1_account_activity_interaction_restrictions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RestrictionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_activity_mutual_choices_api_v1_account_activity_mutual_choices_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    my_activity_registrations_api_v1_account_activity_registrations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    accept_waitlist_offer_api_v1_account_activity_registrations__activity_id__accept_waitlist_offer_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirmed_activity_access_api_v1_account_activity_registrations__activity_id__access_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_checkin_credential_api_v1_account_activity_registrations__activity_id__checkin_credential_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_activity_registration_api_v1_account_activity_registrations__registration_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                registration_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_my_activity_registration_api_v1_account_activity_registrations__registration_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                registration_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__activities__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_activity_waitlist_api_v1_account_activity_waitlist_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    accept_activity_waitlist_entry_api_v1_account_activity_waitlist__entry_id__accept_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    decline_activity_waitlist_entry_api_v1_account_activity_waitlist__entry_id__decline_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__activities__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_certificates_api_v1_account_certificates_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    own_appointments_api_v1_account_counseling_appointments_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_appointment_api_v1_account_counseling_appointments_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AppointmentRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    own_appointment_detail_api_v1_account_counseling_appointments__appointment_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                appointment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    accept_proposal_api_v1_account_counseling_appointments__appointment_id__accept_proposal_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                appointment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__counseling__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_appointment_api_v1_account_counseling_appointments__appointment_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                appointment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__counseling__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    join_session_api_v1_account_counseling_appointments__appointment_id__join_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                appointment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    session_access_api_v1_account_counseling_session_access__session_id__get: {
+        parameters: {
+            query: {
+                token: string;
+            };
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_hold_api_v1_account_counseling_slot_holds_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SlotHoldRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_certificates_api_v1_account_course_certificates_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    my_courses_api_v1_account_course_enrollments_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_dashboard_api_v1_account_course_enrollments__enrollment_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                enrollment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_courses_api_v1_account_courses_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_dashboard_api_v1_account_courses__enrollment_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                enrollment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    record_learning_event_api_v1_account_courses__enrollment_id__events_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                enrollment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LearningEventRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_attempt_api_v1_account_courses__enrollment_id__exercises__exercise_id__attempts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                enrollment_id: string;
+                exercise_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    learning_lesson_api_v1_account_courses__enrollment_id__lessons__lesson_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                enrollment_id: string;
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_playback_api_v1_account_courses__enrollment_id__lessons__lesson_id__playback_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                enrollment_id: string;
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_attempt_draft_api_v1_account_exercise_attempts__attempt_id__draft_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attempt_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttemptSaveRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_attempt_api_v1_account_exercise_attempts__attempt_id__submit_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attempt_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttemptSubmitRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    playback_heartbeat_api_v1_account_playback__session_id__heartbeat_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HeartbeatRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_public_activities_api_v1_activities_get: {
+        parameters: {
+            query?: {
+                locale?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    register_for_activity_api_v1_activities__activity_id__registrations_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegistrationCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_activity_ticket_types_api_v1_activities__activity_id__ticket_types_get: {
+        parameters: {
+            query?: {
+                locale?: string;
+            };
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_activity_detail_api_v1_activities__slug__get: {
+        parameters: {
+            query?: {
+                locale?: string;
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_list_activities_api_v1_admin_activities_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    admin_create_activity_api_v1_admin_activities_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActivityCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_activity_detail_api_v1_admin_activities__activity_id__get: {
+        parameters: {
+            query?: {
+                locale?: string;
+            };
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_update_activity_api_v1_admin_activities__activity_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActivityUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_activity_attendance_api_v1_admin_activities__activity_id__attendance_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_activity_audit_api_v1_admin_activities__activity_id__audit_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_cancel_activity_api_v1_admin_activities__activity_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActivityCancelRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_grouping_plans_api_v1_admin_activities__activity_id__grouping_plans_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_create_grouping_api_v1_admin_activities__activity_id__grouping_plans_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GroupingRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_upsert_localization_api_v1_admin_activities__activity_id__localizations__locale__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+                locale: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LocalizationUpsertRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_add_location_api_v1_admin_activities__activity_id__locations_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LocationCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_activity_post_event_analytics_api_v1_admin_activities__activity_id__post_event_analytics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_upsert_form_api_v1_admin_activities__activity_id__registration_form_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FormUpsertRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_add_session_api_v1_admin_activities__activity_id__sessions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SessionCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_link_ticket_api_v1_admin_activities__activity_id__tickets_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TicketLinkRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_transition_activity_api_v1_admin_activities__activity_id__transition_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActivityTransitionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_activity_waitlist_api_v1_admin_activities__activity_id__waitlist_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                activity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_checkin_api_v1_admin_activity_checkins_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckinRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_lock_grouping_plan_api_v1_admin_activity_grouping_plans__plan_id__lock_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GroupingStatusRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_unlock_grouping_plan_api_v1_admin_activity_grouping_plans__plan_id__unlock_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GroupingStatusRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_move_group_member_api_v1_admin_activity_groups__group_id__members_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                group_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GroupMemberMoveRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_suspend_activity_match_api_v1_admin_activity_mutual_choices__match_id__suspend_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__activities__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_list_registrations_api_v1_admin_activity_registrations_get: {
+        parameters: {
+            query?: {
+                activity_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_registration_detail_api_v1_admin_activity_registrations__registration_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                registration_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_cancel_registration_api_v1_admin_activity_registrations__registration_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                registration_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__activities__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_review_registration_api_v1_admin_activity_registrations__registration_id__review_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                registration_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__activities__schemas__ReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_registration_sensitive_response_api_v1_admin_activity_registrations__registration_id__sensitive_response_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                registration_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_cancel_waitlist_api_v1_admin_activity_waitlist__entry_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__activities__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_offer_waitlist_api_v1_admin_activity_waitlist__entry_id__offer_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__activities__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_reorder_waitlist_api_v1_admin_activity_waitlist__entry_id__reorder_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WaitlistReorderRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_admins_api_v1_admin_admins_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    list_invitations_api_v1_admin_admins_invitations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    invite_admin_api_v1_admin_admins_invitations_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminInvitationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    accept_invitation_api_v1_admin_admins_invitations_accept_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminInvitationAcceptRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    revoke_invitation_api_v1_admin_admins_invitations__invitation_id__revoke_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invitation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__identity__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    disable_admin_api_v1_admin_admins__user_id__disable_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__identity__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    restore_admin_api_v1_admin_admins__user_id__restore_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__identity__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_security_events_api_v1_admin_audit_security_events_get: {
+        parameters: {
+            query?: {
+                event_type?: string | null;
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_login_api_v1_admin_auth_login_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_logout_api_v1_admin_auth_logout_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    admin_me_api_v1_admin_auth_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    admin_refresh_api_v1_admin_auth_refresh_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    admin_sessions_api_v1_admin_auth_sessions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    revoke_admin_session_api_v1_admin_auth_sessions__session_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_categories_api_v1_admin_catalog_categories_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_category_api_v1_admin_catalog_categories_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CategoryCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_coupons_api_v1_admin_catalog_coupons_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_coupon_api_v1_admin_catalog_coupons_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CouponCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    bulk_create_coupons_api_v1_admin_catalog_coupons_bulk_create_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CouponBulkCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_coupon_api_v1_admin_catalog_coupons__coupon_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                coupon_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CouponUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    disable_coupon_api_v1_admin_catalog_coupons__coupon_id__disable_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                coupon_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__catalog__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_inventory_api_v1_admin_catalog_inventory_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    get_admin_inventory_api_v1_admin_catalog_inventory__sku_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sku_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    configure_inventory_api_v1_admin_catalog_inventory__sku_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sku_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InventoryConfigureRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    adjust_inventory_api_v1_admin_catalog_inventory__sku_id__adjust_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sku_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InventoryAdjustRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    inventory_movements_api_v1_admin_catalog_inventory__sku_id__movements_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sku_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    price_books_api_v1_admin_catalog_price_books_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_price_book_api_v1_admin_catalog_price_books_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PriceBookCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_price_book_api_v1_admin_catalog_price_books__book_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                book_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PriceBookUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    activate_price_book_api_v1_admin_catalog_price_books__book_id__activate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                book_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__catalog__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    deactivate_price_book_api_v1_admin_catalog_price_books__book_id__deactivate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                book_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__catalog__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_prices_api_v1_admin_catalog_prices_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    get_price_api_v1_admin_catalog_prices__price_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                price_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    activate_price_api_v1_admin_catalog_prices__price_id__activate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                price_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__catalog__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    expire_price_api_v1_admin_catalog_prices__price_id__expire_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                price_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__catalog__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    supersede_price_api_v1_admin_catalog_prices__price_id__supersede_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                price_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PriceSupersedeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    simulate_pricing_api_v1_admin_catalog_pricing_simulate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PricingSimulationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_products_api_v1_admin_catalog_products_get: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_product_api_v1_admin_catalog_products_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_admin_product_api_v1_admin_catalog_products__product_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                product_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_product_api_v1_admin_catalog_products__product_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                product_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    archive_product_api_v1_admin_catalog_products__product_id__archive_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                product_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__catalog__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_product_localization_api_v1_admin_catalog_products__product_id__localizations__locale__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                product_id: string;
+                locale: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductLocalizationUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    publish_product_api_v1_admin_catalog_products__product_id__publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                product_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__catalog__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    product_skus_api_v1_admin_catalog_products__product_id__skus_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                product_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_sku_api_v1_admin_catalog_products__product_id__skus_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                product_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SkuCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_product_review_api_v1_admin_catalog_products__product_id__submit_review_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                product_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__catalog__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unpublish_product_api_v1_admin_catalog_products__product_id__unpublish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                product_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__catalog__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_promotions_api_v1_admin_catalog_promotions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_promotion_api_v1_admin_catalog_promotions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PromotionCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_promotion_api_v1_admin_catalog_promotions__promotion_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                promotion_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_promotion_api_v1_admin_catalog_promotions__promotion_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                promotion_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PromotionUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    activate_promotion_api_v1_admin_catalog_promotions__promotion_id__activate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                promotion_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__catalog__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    deactivate_promotion_api_v1_admin_catalog_promotions__promotion_id__deactivate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                promotion_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__catalog__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_sku_api_v1_admin_catalog_skus__sku_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sku_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_sku_api_v1_admin_catalog_skus__sku_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sku_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SkuUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    activate_sku_api_v1_admin_catalog_skus__sku_id__activate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sku_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__catalog__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    deactivate_sku_api_v1_admin_catalog_skus__sku_id__deactivate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sku_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__catalog__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sku_prices_api_v1_admin_catalog_skus__sku_id__prices_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sku_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_price_api_v1_admin_catalog_skus__sku_id__prices_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sku_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PriceCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_entitlements_api_v1_admin_commerce_entitlements_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    revoke_entitlement_api_v1_admin_commerce_entitlements__entitlement_id__revoke_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entitlement_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EntitlementActionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_orders_api_v1_admin_commerce_orders_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    admin_payments_api_v1_admin_commerce_payments_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    admin_reconciliation_api_v1_admin_commerce_reconciliation_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    scan_reconciliation_api_v1_admin_commerce_reconciliation_scan_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    resolve_reconciliation_api_v1_admin_commerce_reconciliation__discrepancy_id__resolve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                discrepancy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReconciliationResolveRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_refunds_api_v1_admin_commerce_refunds_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    request_refund_api_v1_admin_commerce_refunds_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefundRequestCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    approve_refund_api_v1_admin_commerce_refunds__refund_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                refund_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefundActionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_refund_api_v1_admin_commerce_refunds__refund_id__submit_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                refund_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefundActionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_subscriptions_api_v1_admin_commerce_subscriptions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    admin_webhooks_api_v1_admin_commerce_webhooks_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    replay_webhook_api_v1_admin_commerce_webhooks__event_id__replay_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefundActionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_contact_submissions_api_v1_admin_contact_submissions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    export_contact_submissions_api_v1_admin_contact_submissions_export_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    get_contact_submission_api_v1_admin_contact_submissions__submission_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                submission_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assign_contact_submission_api_v1_admin_contact_submissions__submission_id__assign_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                submission_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContactAssignRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    resolve_contact_submission_api_v1_admin_contact_submissions__submission_id__resolve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                submission_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContactResolveRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_contact_status_api_v1_admin_contact_submissions__submission_id__status_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                submission_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContactStatusRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_articles_api_v1_admin_content_articles_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_article_api_v1_admin_content_articles_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ArticleCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_article_api_v1_admin_content_articles__entry_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_article_api_v1_admin_content_articles__entry_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContentUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    content_articles_archive_api_v1_admin_content_articles__entry_id__archive_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__content__schemas__ReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    content_articles_publish_api_v1_admin_content_articles__entry_id__publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__content__schemas__ReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    content_articles_restore_api_v1_admin_content_articles__entry_id__restore_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__content__schemas__ReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    content_articles_submit_review_api_v1_admin_content_articles__entry_id__submit_review_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__content__schemas__ReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_pages_api_v1_admin_content_pages_get: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_page_api_v1_admin_content_pages_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContentCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_page_api_v1_admin_content_pages__entry_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_page_api_v1_admin_content_pages__entry_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_page_api_v1_admin_content_pages__entry_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContentUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    content_page_approve_api_v1_admin_content_pages__entry_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__content__schemas__ReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    content_page_archive_api_v1_admin_content_pages__entry_id__archive_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__content__schemas__ReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_page_localization_api_v1_admin_content_pages__entry_id__localizations__locale__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+                locale: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LocalizationUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    content_page_publish_api_v1_admin_content_pages__entry_id__publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__content__schemas__ReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    content_page_reject_api_v1_admin_content_pages__entry_id__reject_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__content__schemas__ReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    content_page_restore_api_v1_admin_content_pages__entry_id__restore_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__content__schemas__ReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    schedule_page_api_v1_admin_content_pages__entry_id__schedule_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScheduleRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    content_page_submit_review_api_v1_admin_content_pages__entry_id__submit_review_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__content__schemas__ReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    content_versions_api_v1_admin_content_pages__entry_id__versions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    restore_content_version_api_v1_admin_content_pages__entry_id__versions__version_number__restore_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+                version_number: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VersionRestoreRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_testimonials_api_v1_admin_content_testimonials_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_testimonial_api_v1_admin_content_testimonials_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TestimonialCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_testimonial_api_v1_admin_content_testimonials__entry_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_testimonial_api_v1_admin_content_testimonials__entry_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContentUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    content_testimonials_archive_api_v1_admin_content_testimonials__entry_id__archive_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__content__schemas__ReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    content_testimonials_publish_api_v1_admin_content_testimonials__entry_id__publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__content__schemas__ReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    content_testimonials_restore_api_v1_admin_content_testimonials__entry_id__restore_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__content__schemas__ReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    content_testimonials_submit_review_api_v1_admin_content_testimonials__entry_id__submit_review_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__content__schemas__ReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_preview_token_api_v1_admin_content__entry_id__preview_token_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviewTokenRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_appointments_api_v1_admin_counseling_appointments_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    complete_appointment_api_v1_admin_counseling_appointments__appointment_id__complete_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                appointment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__counseling__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_followup_api_v1_admin_counseling_appointments__appointment_id__follow_ups_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                appointment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FollowUpCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    propose_time_api_v1_admin_counseling_appointments__appointment_id__propose_time_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                appointment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProposalRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_safety_referral_api_v1_admin_counseling_appointments__appointment_id__safety_referrals_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                appointment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SafetyReferralRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_transition_api_v1_admin_counseling_appointments__appointment_id__transition_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                appointment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransitionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_rule_api_v1_admin_counseling_availability_rules_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AvailabilityRuleRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_mentors_api_v1_admin_counseling_mentors_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_mentor_api_v1_admin_counseling_mentors_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MentorCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    activate_mentor_api_v1_admin_counseling_mentors__mentor_id__activate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                mentor_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    localize_mentor_api_v1_admin_counseling_mentors__mentor_id__localizations__locale__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                mentor_id: string;
+                locale: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MentorLocalizationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_services_api_v1_admin_counseling_services_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_service_api_v1_admin_counseling_services_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ServiceCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    localize_service_api_v1_admin_counseling_services__service_id__localizations__locale__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                service_id: string;
+                locale: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ServiceLocalizationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    link_mentor_service_api_v1_admin_counseling_services__service_id__mentors__mentor_id__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                service_id: string;
+                mentor_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    publish_service_api_v1_admin_counseling_services__service_id__publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                service_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_record_api_v1_admin_counseling_sessions__session_id__records_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_certificates_api_v1_admin_course_certificates_get: {
+        parameters: {
+            query?: {
+                course_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    revoke_certificate_api_v1_admin_course_certificates__certificate_id__revoke_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                certificate_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnrollmentActionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_enrollments_api_v1_admin_course_enrollments_get: {
+        parameters: {
+            query?: {
+                course_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    enrollment_action_api_v1_admin_course_enrollments__enrollment_id___action__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                enrollment_id: string;
+                action: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnrollmentActionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_exercise_api_v1_admin_course_exercises_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExerciseCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_question_api_v1_admin_course_exercises__exercise_id__questions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                exercise_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuestionCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_course_instructors_api_v1_admin_course_instructors_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_course_instructor_api_v1_admin_course_instructors_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InstructorCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_prerequisite_api_v1_admin_course_lessons__lesson_id__prerequisites_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrerequisiteCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    attach_video_api_v1_admin_course_lessons__lesson_id__video_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VideoAttachRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_lesson_api_v1_admin_course_modules__module_id__lessons_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                module_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LessonCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reset_progress_api_v1_admin_course_progress__progress_id__reset_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                progress_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProgressResetRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_courses_api_v1_admin_courses_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_course_api_v1_admin_courses_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourseCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_course_detail_api_v1_admin_courses__course_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_course_api_v1_admin_courses__course_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourseUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transition_course_action_api_v1_admin_courses__course_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnrollmentActionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transition_course_action_api_v1_admin_courses__course_id__archive_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnrollmentActionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    course_catalog_mappings_api_v1_admin_courses__course_id__catalog_mappings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    map_course_sku_api_v1_admin_courses__course_id__catalog_mappings_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SkuMappingRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_course_catalog_mapping_api_v1_admin_courses__course_id__catalog_mappings__mapping_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                mapping_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transition_course_action_api_v1_admin_courses__course_id__close_enrollment_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnrollmentActionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    grant_enrollment_api_v1_admin_courses__course_id__enrollments_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminEnrollmentGrantRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assign_course_instructor_api_v1_admin_courses__course_id__instructors_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InstructorAssignmentRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remove_course_instructor_api_v1_admin_courses__course_id__instructors__instructor_id___role__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                instructor_id: string;
+                role: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upsert_course_localization_api_v1_admin_courses__course_id__localizations__locale__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                locale: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourseLocalizationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_module_api_v1_admin_courses__course_id__modules_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ModuleCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transition_course_action_api_v1_admin_courses__course_id__publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnrollmentActionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transition_course_action_api_v1_admin_courses__course_id__schedule_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnrollmentActionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    map_course_sku_api_v1_admin_courses__course_id__sku_mapping_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SkuMappingRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transition_course_action_api_v1_admin_courses__course_id__submit_review_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnrollmentActionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transition_course_api_v1_admin_courses__course_id__transition_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourseTransitionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transition_course_action_api_v1_admin_courses__course_id__unpublish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnrollmentActionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    manual_grade_api_v1_admin_exercise_attempts__attempt_id__grade_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attempt_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ManualGradeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_media_api_v1_admin_media_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_media_upload_api_v1_admin_media_uploads_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MediaUploadRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    complete_media_upload_api_v1_admin_media_uploads__asset_id__complete_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MediaCompleteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_media_api_v1_admin_media__asset_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_media_api_v1_admin_media__asset_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_media_api_v1_admin_media__asset_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MediaUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    media_references_api_v1_admin_media__asset_id__references_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    admin_navigation_api_v1_admin_navigation_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    update_navigation_api_v1_admin_navigation__menu_code__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                menu_code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NavigationMenuUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_roles_api_v1_admin_roles_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    admin_site_settings_api_v1_admin_site_settings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    update_site_setting_api_v1_admin_site_settings__setting_key__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                setting_key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SiteSettingRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_users_api_v1_admin_users_get: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    restore_user_api_v1_admin_users__user_id__restore_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__identity__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assign_role_api_v1_admin_users__user_id__roles_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RoleChangeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    revoke_role_api_v1_admin_users__user_id__roles__role_code__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+                role_code: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__identity__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    suspend_user_api_v1_admin_users__user_id__suspend_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__identity__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_verification_api_v1_auth_email_verification_confirm_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TokenConfirmRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    resend_verification_api_v1_auth_email_verification_send_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    user_login_api_v1_auth_login_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    user_logout_api_v1_auth_logout_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    logout_all_api_v1_auth_logout_all_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    user_me_api_v1_auth_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    change_password_api_v1_auth_password_change_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordChangeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    forgot_password_api_v1_auth_password_forgot_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reset_password_api_v1_auth_password_reset_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordResetRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    user_refresh_api_v1_auth_refresh_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    register_api_v1_auth_register_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    user_sessions_api_v1_auth_sessions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    revoke_user_session_api_v1_auth_sessions__session_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_cart_api_v1_cart_get: {
+        parameters: {
+            query?: {
+                anonymous_session_id?: string | null;
+                currency_code?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    clear_cart_api_v1_cart_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CartOwnerRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_cart_item_api_v1_cart_items_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CartItemCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_cart_item_api_v1_cart_items__item_id__delete: {
+        parameters: {
+            query?: {
+                anonymous_session_id?: string | null;
+            };
+            header?: never;
+            path: {
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_cart_item_api_v1_cart_items__item_id__patch: {
+        parameters: {
+            query?: {
+                anonymous_session_id?: string | null;
+            };
+            header?: never;
+            path: {
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CartItemUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    verify_certificate_api_v1_certificates_verify__verification_token__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                verification_token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_order_api_v1_checkout_orders_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckoutOrderRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    checkout_preview_api_v1_checkout_preview_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckoutPreviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_courses_api_v1_courses_get: {
+        parameters: {
+            query?: {
+                locale?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    free_enroll_api_v1_courses__course_id__enroll_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    free_enroll_api_v1_courses__course_id__enroll_free_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    course_detail_api_v1_courses__slug__get: {
+        parameters: {
+            query?: {
+                locale?: string;
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    user_entitlements_api_v1_entitlements_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
     liveness_api_v1_health_live_get: {
         parameters: {
             query?: never;
@@ -122,6 +16922,1493 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+        };
+    };
+    reserve_coupon_redemption_api_v1_internal_catalog_coupon_redemptions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CouponRedemptionReservationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_coupon_redemption_api_v1_internal_catalog_coupon_redemptions__reservation_id__confirm_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reservation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    release_coupon_redemption_api_v1_internal_catalog_coupon_redemptions__reservation_id__release_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reservation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    consume_entitlement_api_v1_internal_entitlements__entitlement_id__consume_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entitlement_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EntitlementConsumeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_inventory_reservation_api_v1_internal_inventory_reservations_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InventoryReservationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_inventory_reservation_api_v1_internal_inventory_reservations__reservation_id__confirm_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reservation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    release_inventory_reservation_api_v1_internal_inventory_reservations__reservation_id__release_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reservation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__catalog__schemas__ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    playback_manifest_api_v1_learning_playback__session_id__manifest_get: {
+        parameters: {
+            query: {
+                token: string;
+            };
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    user_orders_api_v1_orders_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    user_order_api_v1_orders__order_number__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                order_number: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_order_api_v1_orders__order_number__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                order_number: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrderCancelRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_payment_api_v1_orders__order_number__payments_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path: {
+                order_number: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PaymentCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_articles_api_v1_public_articles_get: {
+        parameters: {
+            query?: {
+                locale?: string;
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_article_api_v1_public_articles__slug__get: {
+        parameters: {
+            query?: {
+                locale?: string;
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_categories_api_v1_public_catalog_categories_get: {
+        parameters: {
+            query?: {
+                locale?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_category_api_v1_public_catalog_categories__slug__get: {
+        parameters: {
+            query?: {
+                locale?: string;
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    validate_coupon_api_v1_public_catalog_coupons_validate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CouponValidationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_currencies_api_v1_public_catalog_currencies_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_pricing_quote_api_v1_public_catalog_pricing_quote_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PricingQuoteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_pricing_quote_api_v1_public_catalog_pricing_quotes__quote_id__get: {
+        parameters: {
+            query: {
+                anonymous_session_id: string;
+            };
+            header?: never;
+            path: {
+                quote_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_products_api_v1_public_catalog_products_get: {
+        parameters: {
+            query?: {
+                locale?: string;
+                category?: string | null;
+                product_type?: string | null;
+                currency?: string | null;
+                featured?: boolean | null;
+                available_only?: boolean;
+                purchasable_at?: string | null;
+                page?: number;
+                page_size?: number;
+                sort?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_product_availability_api_v1_public_catalog_products__product_id__availability_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                product_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_product_api_v1_public_catalog_products__slug__get: {
+        parameters: {
+            query?: {
+                locale?: string;
+                currency?: string | null;
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_contact_api_v1_public_contact_submissions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContactSubmissionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_page_api_v1_public_content_pages__slug__get: {
+        parameters: {
+            query?: {
+                locale?: string;
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_page_locale_api_v1_public_content_pages__slug__locales__locale__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+                locale: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_availability_api_v1_public_counseling_availability_get: {
+        parameters: {
+            query: {
+                mentor_id: string;
+                service_id: string;
+                start_date: string;
+                end_date: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_mentors_api_v1_public_counseling_mentors_get: {
+        parameters: {
+            query?: {
+                locale?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_mentor_api_v1_public_counseling_mentors__slug__get: {
+        parameters: {
+            query?: {
+                locale?: string;
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_services_api_v1_public_counseling_services_get: {
+        parameters: {
+            query?: {
+                locale?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_service_api_v1_public_counseling_services__slug__get: {
+        parameters: {
+            query?: {
+                locale?: string;
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_courses_api_v1_public_courses_get: {
+        parameters: {
+            query?: {
+                locale?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_access_summary_api_v1_public_courses__course_id__access_summary_get: {
+        parameters: {
+            query?: {
+                locale?: string;
+            };
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_curriculum_api_v1_public_courses__course_id__curriculum_get: {
+        parameters: {
+            query?: {
+                locale?: string;
+            };
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_preview_lesson_api_v1_public_courses__course_id__lessons__lesson_id__get: {
+        parameters: {
+            query?: {
+                locale?: string;
+            };
+            header?: never;
+            path: {
+                course_id: string;
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    course_detail_api_v1_public_courses__slug__get: {
+        parameters: {
+            query?: {
+                locale?: string;
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_media_api_v1_public_media__asset_id__get: {
+        parameters: {
+            query?: {
+                variant?: string | null;
+            };
+            header?: never;
+            path: {
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_navigation_api_v1_public_navigation__menu_code__get: {
+        parameters: {
+            query?: {
+                locale?: string;
+            };
+            header?: never;
+            path: {
+                menu_code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    preview_content_api_v1_public_preview__raw_token__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                raw_token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_site_settings_api_v1_public_site_settings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    public_testimonials_api_v1_public_testimonials_get: {
+        parameters: {
+            query?: {
+                locale?: string;
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    public_testimonial_api_v1_public_testimonials__slug__get: {
+        parameters: {
+            query?: {
+                locale?: string;
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    user_subscriptions_api_v1_subscriptions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    cancel_subscription_api_v1_subscriptions__subscription_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subscription_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubscriptionCancelRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -166,6 +18453,39 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+        };
+    };
+    payment_webhook_api_v1_webhooks__provider_name__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

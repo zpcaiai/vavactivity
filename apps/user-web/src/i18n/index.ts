@@ -1,10 +1,15 @@
 import { createI18n } from "vue-i18n";
 
+import enExtensions from "./locales/en.json";
+import zhCNExtensions from "./locales/zh-CN.json";
+import zhTWExtensions from "./locales/zh-TW.json";
+
 export const supportedLocales = ["zh-CN", "zh-TW", "en"] as const;
 export type SupportedLocale = (typeof supportedLocales)[number];
 
 const messages = {
   "zh-CN": {
+    ...zhCNExtensions,
     brand: { promise: "认真认识，安心同行" },
     nav: {
       home: "首页",
@@ -89,6 +94,7 @@ const messages = {
     common: { coming: "正在建立可靠的服务闭环", language: "语言", close: "关闭" }
   },
   "zh-TW": {
+    ...zhTWExtensions,
     brand: { promise: "認真認識，安心同行" },
     nav: {
       home: "首頁",
@@ -133,6 +139,7 @@ const messages = {
     common: { coming: "正在建立可靠的服務閉環", language: "語言", close: "關閉" }
   },
   en: {
+    ...enExtensions,
     brand: { promise: "Meet thoughtfully. Walk forward safely." },
     nav: {
       home: "Home",
@@ -184,4 +191,3 @@ export const i18n = createI18n({
   fallbackLocale: "en",
   messages
 });
-

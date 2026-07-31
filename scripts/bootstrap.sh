@@ -16,10 +16,10 @@ if [[ ! -f .env ]]; then
   echo "Created .env from development-only template"
 fi
 
+./scripts/generate-dev-auth-keys.sh
 corepack pnpm install
 uv sync --all-packages --all-groups
 ./scripts/generate-openapi-client.sh
 python3 scripts/validate_manifest.py
 
 echo "Bootstrap complete. Run: make dev"
-

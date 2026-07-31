@@ -46,3 +46,4 @@ make verify
 
 更多资料见 `docs/product`、`docs/architecture`、`docs/security`、`docs/runbooks` 和 `docs/acceptance`。
 
+# vavactivity

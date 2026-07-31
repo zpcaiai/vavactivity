@@ -5,15 +5,23 @@ description = "VAV modular-monolith API"
 requires-python = ">=3.12,<3.13"
 dependencies = [
   "alembic==1.16.4",
+  "argon2-cffi==25.1.0",
   "asyncpg==0.30.0",
+  "boto3==1.39.14",
+  "cryptography==45.0.5",
+  "email-validator==2.2.0",
   "fastapi==0.116.1",
   "greenlet==3.2.3",
+  "httpx==0.28.1",
   "opentelemetry-api==1.36.0",
   "opentelemetry-exporter-otlp-proto-http==1.36.0",
   "opentelemetry-instrumentation-fastapi==0.57b0",
   "opentelemetry-sdk==1.36.0",
+  "pillow==11.3.0",
   "pydantic==2.11.7",
   "pydantic-settings==2.10.1",
+  "pyjwt==2.10.1",
+  "python-multipart==0.0.20",
   "redis==5.2.1",
   "sqlalchemy==2.0.42",
   "structlog==25.4.0",
@@ -22,7 +30,6 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-  "httpx==0.28.1",
   "mypy==1.17.0",
   "pytest==8.4.1",
   "pytest-asyncio==1.1.0",
@@ -54,5 +61,5 @@ plugins = ["pydantic.mypy"]
 packages = ["vav"]
 
 [[tool.mypy.overrides]]
-module = ["alembic.*", "celery.*"]
+module = ["alembic.*", "boto3.*", "botocore.*", "celery.*"]
 ignore_missing_imports = true

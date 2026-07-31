@@ -9,6 +9,7 @@ celery_app = Celery(
     "vav",
     broker=os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/1"),
     backend=os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/2"),
+    include=["vav_worker.tasks"],
 )
 celery_app.conf.update(
     task_serializer="json",
@@ -18,6 +19,34 @@ celery_app.conf.update(
     enable_utc=True,
     task_track_started=True,
     broker_connection_retry_on_startup=True,
+    beat_schedule={
+        "publish-scheduled-content-every-minute": {
+            "task": "vav.content.publish_scheduled",
+            "schedule": 60.0,
+        },
+        "expire-inventory-reservations-every-minute": {
+            "task": "vav.inventory.expire_reservations",
+            "schedule": 60.0,
+        },
+        "reconcile-commerce-every-thirty-minutes": {
+            "task": "vav.commerce.reconcile",
+            "schedule": 1800.0,
+        },
+        "advance-activity-lifecycle-and-waitlist": {
+            "task": "vav.activities.advance",
+            "schedule": 60.0,
+        },
+        "advance-course-publication-and-completion": {
+            "task": "vav.courses.advance",
+            "schedule": float(
+                os.getenv("COURSE_COMPLETION_JOB_INTERVAL_SECONDS", "60")
+            ),
+        },
+        "expire-counseling-slot-holds": {
+            "task": "vav.counseling.advance",
+            "schedule": 60.0,
+        },
+    },
 )
 
 

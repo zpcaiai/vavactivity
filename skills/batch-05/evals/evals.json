@@ -1,0 +1,23 @@
+{
+  "skill_name": "vav-batch-05-commerce-payments-entitlements",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Add a Stripe payment-success callback that marks a VAV order paid when the browser returns with success=true.",
+      "expected_output": "Reject the callback-based transition and implement verified Webhook confirmation with amount, currency, ownership and idempotency checks.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Implement a partial refund for a fulfilled counseling package, including permissions and entitlement handling.",
+      "expected_output": "Use request/approve/submit separation, Provider confirmation, refund limits, audit reasons and manual review for consumed entitlement.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Investigate a Stripe payment that succeeded while the VAV order is pending and no entitlement exists.",
+      "expected_output": "Create a non-destructive reconciliation discrepancy and an audited repair path without silently overwriting Provider or internal state.",
+      "files": []
+    }
+  ]
+}

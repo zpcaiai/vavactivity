@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 5174",
     "build": "vue-tsc -b && vite build",
+    "i18n:check": "node ../../scripts/check-i18n.mjs src/i18n/locales",
     "lint": "eslint .",
     "test": "vitest run",
     "typecheck": "vue-tsc -b"

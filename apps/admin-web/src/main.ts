@@ -5,17 +5,26 @@ import "./assets/main.css";
 import {
   ElAlert,
   ElButton,
+  ElDatePicker,
+  ElDescriptions,
+  ElDescriptionsItem,
   ElDialog,
+  ElEmpty,
+  ElForm,
+  ElFormItem,
   ElIcon,
   ElInput,
+  ElInputNumber,
   ElLoading,
   ElMenu,
   ElMenuItem,
   ElOption,
   ElPagination,
   ElSelect,
+  ElTabPane,
   ElTable,
   ElTableColumn,
+  ElTabs,
   ElTag
 } from "element-plus";
 import { createPinia } from "pinia";
@@ -31,16 +40,25 @@ app.use(router);
 [
   ElAlert,
   ElButton,
+  ElDatePicker,
+  ElDescriptions,
+  ElDescriptionsItem,
   ElDialog,
+  ElEmpty,
+  ElForm,
+  ElFormItem,
   ElIcon,
   ElInput,
+  ElInputNumber,
   ElMenu,
   ElMenuItem,
   ElOption,
   ElPagination,
   ElSelect,
+  ElTabPane,
   ElTable,
   ElTableColumn,
+  ElTabs,
   ElTag
 ].forEach((component) => app.component(component.name ?? "", component));
 app.directive("loading", ElLoading.directive);

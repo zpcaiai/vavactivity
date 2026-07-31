@@ -7,6 +7,7 @@
     "dev": "vite --host 0.0.0.0 --port 5173",
     "build": "vue-tsc -b && vite build",
     "lint": "eslint .",
+    "i18n:check": "node ../../scripts/check-i18n.mjs src/i18n/locales",
     "test": "vitest run",
     "typecheck": "vue-tsc -b"
   },

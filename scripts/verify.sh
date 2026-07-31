@@ -9,6 +9,7 @@ if [[ ! -f .env ]]; then
   echo "Created .env from development-only template"
 fi
 
+./scripts/generate-dev-auth-keys.sh
 python3 scripts/validate_manifest.py
 docker compose config --quiet
 docker compose up -d --build
@@ -23,11 +24,18 @@ docker compose exec -T api alembic upgrade head
 docker compose exec -T api pytest
 corepack pnpm --recursive --if-present test
 corepack pnpm --recursive --if-present build
+
+contract_hash_before="$(
+  shasum -a 256 packages/contracts/openapi.json packages/api-client/src/schema.ts
+)"
 ./scripts/generate-openapi-client.sh
 
-if ! git diff --exit-code -- packages/contracts/openapi.json packages/api-client/src/schema.ts; then
-  echo "Generated API contract has uncommitted changes" >&2
+contract_hash_after="$(
+  shasum -a 256 packages/contracts/openapi.json packages/api-client/src/schema.ts
+)"
+if [[ "$contract_hash_before" != "$contract_hash_after" ]]; then
+  echo "Generated API contract was stale; review and rerun verification" >&2
   exit 1
 fi
 
-echo "Batch 1 acceptance passed"
+echo "Platform acceptance passed"

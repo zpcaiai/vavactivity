@@ -15,7 +15,9 @@ COPY packages/contracts/package.json ./packages/contracts/package.json
 COPY packages/design-tokens/package.json ./packages/design-tokens/package.json
 COPY packages/eslint-config/package.json ./packages/eslint-config/package.json
 
-RUN corepack pnpm install --frozen-lockfile
+RUN corepack pnpm install --frozen-lockfile \
+    --filter @vav/user-web... \
+    --filter @vav/admin-web...
 
 COPY apps ./apps
 COPY packages ./packages

@@ -1,0 +1,23 @@
+{
+  "skill_name": "vav-batch-07-courses-learning-progress-certificates",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Implement a paid video course so access starts only after COURSE_ACCESS activation and seeking to the end cannot complete the lesson.",
+      "expected_output": "Entitlement-backed enrollment, scoped short-lived playback and monotonic watch evidence without payment-return trust.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Add a course bundle and ensure an existing buyer keeps the snapshotted included courses after administrators edit the bundle.",
+      "expected_output": "Catalog bundle mapping plus immutable order fulfillment snapshot expansion into version-pinned enrollments.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Build quiz completion and a public certificate verification page without leaking answers or a learner's full name.",
+      "expected_output": "Deterministic grading, backend completion, idempotent certificate issuance and minimized verification DTO.",
+      "files": []
+    }
+  ]
+}

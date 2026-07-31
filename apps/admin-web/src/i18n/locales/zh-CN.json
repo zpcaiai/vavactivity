@@ -1,0 +1,25 @@
+{
+  "shell": {
+    "workspace": "运营工作台",
+    "operations": "VAV 运营",
+    "authorizedSession": "后端授权会话",
+    "expand": "展开",
+    "collapse": "收起导航",
+    "language": "界面语言"
+  },
+  "menu": {
+    "dashboard": "工作台",
+    "users": "用户",
+    "pages": "页面",
+    "media": "媒体库",
+    "navigation": "导航",
+    "catalog": "服务目录",
+    "commerce": "交易中心",
+    "activities": "活动中心",
+    "courses": "课程中心",
+    "counseling": "辅导中心",
+    "settings": "网站设置",
+    "admins": "管理员",
+    "audit": "审计日志"
+  }
+}

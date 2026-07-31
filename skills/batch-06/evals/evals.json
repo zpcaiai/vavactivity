@@ -1,0 +1,23 @@
+{
+  "skill_name": "vav-batch-06-activities-registration-operations",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Add a paid in-person VAV activity with manual approval before payment, Catalog-linked capacity, and a public detail page.",
+      "expected_output": "Uses Catalog and Commerce boundaries, explicit approval states, privacy-safe venue output, migrations and tests.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Implement activity QR check-in, deterministic groups, and a staff workbench without leaking participant or payment data.",
+      "expected_output": "Produces signed expiring credentials, append-only attendance, seeded grouping, scoped RBAC and security tests.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Build post-event participant choices where reciprocal interest creates one match but one-sided choices and contact details remain private.",
+      "expected_output": "Enforces eligibility, confidentiality, moderation boundary, canonical pair uniqueness, concurrency and privacy tests.",
+      "files": []
+    }
+  ]
+}

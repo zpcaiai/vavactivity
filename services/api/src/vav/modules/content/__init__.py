@@ -1,0 +1,1 @@
+"""Structured multilingual content management."""

@@ -4,12 +4,39 @@ import { i18n, supportedLocales } from "@/i18n";
 import type { SupportedLocale } from "@/i18n";
 
 import AccountPage from "@/pages/AccountPage.vue";
+import ActivitiesPage from "@/features/activities/pages/ActivitiesPage.vue";
+import ActivityDetailPage from "@/features/activities/pages/ActivityDetailPage.vue";
+import ActivityRegistrationsPage from "@/features/activities/pages/ActivityRegistrationsPage.vue";
+import ActivityExperiencePage from "@/features/activities/pages/ActivityExperiencePage.vue";
+import ActivityMatchesPage from "@/features/activities/pages/ActivityMatchesPage.vue";
+import CourseDetailPage from "@/features/courses/pages/CourseDetailPage.vue";
+import CourseCertificatesPage from "@/features/courses/pages/CourseCertificatesPage.vue";
+import CoursesPage from "@/features/courses/pages/CoursesPage.vue";
+import CertificateVerificationPage from "@/features/courses/pages/CertificateVerificationPage.vue";
+import LearningPage from "@/features/courses/pages/LearningPage.vue";
+import MyCoursesPage from "@/features/courses/pages/MyCoursesPage.vue";
+import CounselingAppointmentsPage from "@/features/counseling/pages/CounselingAppointmentsPage.vue";
+import CounselingBookingPage from "@/features/counseling/pages/CounselingBookingPage.vue";
+import CounselingServicePage from "@/features/counseling/pages/CounselingServicePage.vue";
+import CounselingServicesPage from "@/features/counseling/pages/CounselingServicesPage.vue";
 import AuthPage from "@/pages/AuthPage.vue";
-import ContentPage from "@/pages/ContentPage.vue";
+import AuthTokenPage from "@/pages/AuthTokenPage.vue";
+import CatalogPage from "@/features/catalog/pages/CatalogPage.vue";
+import CmsPage from "@/features/public-site/pages/CmsPage.vue";
+import ContentCollectionPage from "@/features/public-site/pages/ContentCollectionPage.vue";
+import ContactPage from "@/features/public-site/pages/ContactPage.vue";
+import ProductDetailPage from "@/features/catalog/pages/ProductDetailPage.vue";
+import CartPage from "@/features/commerce/pages/CartPage.vue";
+import CheckoutPage from "@/features/commerce/pages/CheckoutPage.vue";
+import CommerceListPage from "@/features/commerce/pages/CommerceListPage.vue";
+import OrderDetailPage from "@/features/commerce/pages/OrderDetailPage.vue";
+import PaymentProcessingPage from "@/features/commerce/pages/PaymentProcessingPage.vue";
 import HomePage from "@/pages/HomePage.vue";
 import LanguageGateway from "@/pages/LanguageGateway.vue";
 import NotFoundPage from "@/pages/NotFoundPage.vue";
 import PublicLayout from "@/layouts/PublicLayout.vue";
+import SessionPage from "@/pages/SessionPage.vue";
+import { useAuthStore } from "@/stores/auth";
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -21,27 +48,89 @@ export const router = createRouter({
       component: PublicLayout,
       children: [
         { path: "", name: "home", component: HomePage },
-        { path: "about", name: "about", component: ContentPage, meta: { copyKey: "about" } },
-        { path: "stories", name: "stories", component: ContentPage, meta: { copyKey: "stories" } },
-        { path: "articles", name: "articles", component: ContentPage, meta: { copyKey: "articles" } },
-        { path: "activities", name: "activities", component: ContentPage, meta: { copyKey: "activities" } },
-        { path: "courses", name: "courses", component: ContentPage, meta: { copyKey: "courses" } },
-        { path: "counseling", name: "counseling", component: ContentPage, meta: { copyKey: "counseling" } },
-        { path: "ai-assistant", name: "ai-assistant", component: ContentPage, meta: { copyKey: "ai" } },
-        { path: "login", name: "login", component: AuthPage, props: { mode: "login" } },
-        { path: "register", name: "register", component: AuthPage, props: { mode: "register" } },
-        { path: "account", name: "account", component: AccountPage }
+        { path: "about", name: "about", component: CmsPage, meta: { copyKey: "about", cmsSlug: "about" } },
+        { path: "stories", name: "stories", component: ContentCollectionPage, meta: { collectionType: "testimonials" } },
+        { path: "stories/:slug", name: "story-detail", component: CmsPage, meta: { copyKey: "stories" } },
+        { path: "articles", name: "articles", component: ContentCollectionPage, meta: { collectionType: "articles" } },
+        { path: "articles/:slug", name: "article-detail", component: CmsPage, meta: { copyKey: "articles" } },
+        { path: "services", name: "services", component: CatalogPage, meta: { catalogTitle: "全部服务" } },
+        { path: "services/:category", name: "service-category", component: CatalogPage, meta: { catalogTitle: "分类服务" } },
+        { path: "products/:slug", name: "product-detail", component: ProductDetailPage },
+        { path: "cart", name: "cart", component: CartPage },
+        { path: "checkout", name: "checkout", component: CheckoutPage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
+        { path: "checkout/processing", name: "checkout-processing", component: PaymentProcessingPage, meta: { requiresAuth: true } },
+        { path: "account/orders", name: "account-orders", component: CommerceListPage, meta: { requiresAuth: true, commerceKind: "orders" } },
+        { path: "account/orders/:orderNumber", name: "account-order-detail", component: OrderDetailPage, meta: { requiresAuth: true } },
+        { path: "account/subscriptions", name: "account-subscriptions", component: CommerceListPage, meta: { requiresAuth: true, commerceKind: "subscriptions" } },
+        { path: "account/entitlements", name: "account-entitlements", component: CommerceListPage, meta: { requiresAuth: true, commerceKind: "entitlements" } },
+        { path: "contact", name: "contact", component: ContactPage },
+        { path: "privacy", name: "privacy", component: CmsPage, meta: { copyKey: "about", cmsSlug: "privacy" } },
+        { path: "terms", name: "terms", component: CmsPage, meta: { copyKey: "about", cmsSlug: "terms" } },
+        { path: "refund-policy", name: "refund-policy", component: CmsPage, meta: { copyKey: "about", cmsSlug: "refund-policy" } },
+        { path: "ai-disclaimer", name: "ai-disclaimer", component: CmsPage, meta: { copyKey: "ai", cmsSlug: "ai-disclaimer" } },
+        { path: "activities", name: "activities", component: ActivitiesPage },
+        { path: "activities/:slug", name: "activity-detail", component: ActivityDetailPage },
+        { path: "activities/:slug/register", name: "activity-register", component: ActivityDetailPage, meta: { requiresAuth: true } },
+        { path: "activities/:slug/waitlist", name: "activity-waitlist", component: ActivityDetailPage, meta: { requiresAuth: true } },
+        { path: "account/activity-registrations", name: "activity-registrations", component: ActivityRegistrationsPage, meta: { requiresAuth: true } },
+        { path: "account/activities", name: "account-activities", component: ActivityRegistrationsPage, meta: { requiresAuth: true } },
+        { path: "account/activities/:activityId", name: "activity-experience", component: ActivityExperiencePage, meta: { requiresAuth: true } },
+        { path: "account/activity-matches", name: "activity-matches", component: ActivityMatchesPage, meta: { requiresAuth: true } },
+        { path: "courses", name: "courses", component: CoursesPage },
+        { path: "courses/:slug", name: "course-detail", component: CourseDetailPage },
+        { path: "certificates/verify/:verificationToken", name: "course-certificate-verify", component: CertificateVerificationPage },
+        { path: "certificates/:verificationToken", name: "course-certificate", component: CertificateVerificationPage },
+        { path: "account/courses", name: "account-courses", component: MyCoursesPage, meta: { requiresAuth: true } },
+        { path: "account/course-certificates", name: "account-course-certificates", component: CourseCertificatesPage, meta: { requiresAuth: true } },
+        { path: "learn/:enrollmentId", name: "course-learning", component: LearningPage, meta: { requiresAuth: true } },
+        { path: "learn/:enrollmentId/lessons/:lessonId", name: "course-learning-lesson", component: LearningPage, meta: { requiresAuth: true } },
+        { path: "learn/:enrollmentId/exercises/:exerciseId", name: "course-learning-exercise", component: LearningPage, meta: { requiresAuth: true } },
+        { path: "counseling", name: "counseling", component: CounselingServicesPage },
+        { path: "counseling/:slug", name: "counseling-detail", component: CounselingServicePage },
+        { path: "counseling/:slug/book", name: "counseling-book", component: CounselingBookingPage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
+        { path: "account/counseling", name: "account-counseling", component: CounselingAppointmentsPage, meta: { requiresAuth: true } },
+        { path: "account/counseling/:appointmentId", name: "account-counseling-detail", component: CounselingAppointmentsPage, meta: { requiresAuth: true } },
+        { path: "ai-assistant", name: "ai-assistant", component: CmsPage, meta: { copyKey: "ai", cmsSlug: "ai-assistant" } },
+        { path: "ai-assistant/plans", name: "ai-plans", component: CatalogPage, meta: { catalogTitle: "AI 辅导方案", catalogCategory: "ai-coaching" } },
+        { path: "membership", name: "membership", component: CatalogPage, meta: { catalogTitle: "婚恋会员", catalogCategory: "memberships" } },
+        { path: "login", redirect: (to) => `/${String(to.params.locale)}/auth/login` },
+        { path: "register", redirect: (to) => `/${String(to.params.locale)}/auth/register` },
+        { path: "auth/login", name: "login", component: AuthPage, props: { mode: "login" } },
+        { path: "auth/register", name: "register", component: AuthPage, props: { mode: "register" } },
+        { path: "auth/verify-email", name: "verify-email", component: AuthTokenPage, props: { mode: "verify" } },
+        { path: "auth/verification-pending", name: "verification-pending", component: AuthTokenPage, props: { mode: "pending" } },
+        { path: "auth/forgot-password", name: "forgot-password", component: AuthTokenPage, props: { mode: "forgot" } },
+        { path: "auth/reset-password", name: "reset-password", component: AuthTokenPage, props: { mode: "reset" } },
+        { path: "account", name: "account", component: AccountPage, meta: { requiresAuth: true } },
+        { path: "account/security", name: "account-security", component: AccountPage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
+        { path: "account/sessions", name: "account-sessions", component: SessionPage, meta: { requiresAuth: true, requiresVerifiedEmail: true } }
       ]
     },
     { path: "/:pathMatch(.*)*", name: "not-found", component: NotFoundPage }
   ]
 });
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const locale = to.params.locale;
   if (typeof locale === "string" && supportedLocales.includes(locale as SupportedLocale)) {
     i18n.global.locale.value = locale as SupportedLocale;
     document.documentElement.lang = locale;
   }
+  if (to.meta.requiresAuth) {
+    const auth = useAuthStore();
+    await auth.bootstrap();
+    if (!auth.isAuthenticated) {
+      return {
+        name: "login",
+        params: { locale: typeof locale === "string" ? locale : "zh-CN" },
+        query: { returnTo: to.fullPath }
+      };
+    }
+    if (to.meta.requiresVerifiedEmail && !auth.user?.email_verified) {
+      return {
+        name: "verification-pending",
+        params: { locale: typeof locale === "string" ? locale : "zh-CN" }
+      };
+    }
+  }
 });
-

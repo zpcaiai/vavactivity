@@ -7,6 +7,11 @@ ENV PYTHONUNBUFFERED=1 \
 WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
+COPY services/api/pyproject.toml ./services/api/pyproject.toml
+COPY services/worker/pyproject.toml ./services/worker/pyproject.toml
+
+RUN uv sync --frozen --all-packages --all-groups --no-install-workspace
+
 COPY services ./services
 
 RUN uv sync --frozen --all-packages --all-groups
