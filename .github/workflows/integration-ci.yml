@@ -1,0 +1,22 @@
+name: Integration CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  compose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: cp .env.example .env
+      - run: docker compose config --quiet
+      - run: docker compose up -d --build
+      - run: ./scripts/wait-for-services.sh
+      - run: docker compose exec -T api alembic upgrade head
+      - run: curl --fail http://localhost:5173
+      - run: curl --fail http://localhost:5174/admin/login
+      - if: always()
+        run: docker compose logs --no-color
+
