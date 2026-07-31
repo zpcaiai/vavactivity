@@ -1,0 +1,124 @@
+schema_version: "1.0"
+
+project:
+  name: vav-platform
+  display_name: VAV 婚恋智能服务平台
+  architecture: modular-monolith
+  frontend_backend_separated: true
+  default_timezone: UTC
+  status: foundation_in_progress
+
+applications:
+  user_web:
+    framework: vue
+    owner: frontend
+    status: foundation_in_progress
+    port: 5173
+  admin_web:
+    framework: vue
+    owner: frontend
+    status: foundation_in_progress
+    port: 5174
+  api:
+    framework: fastapi
+    owner: backend
+    status: foundation_in_progress
+    port: 8000
+  worker:
+    framework: celery
+    owner: platform
+    status: foundation_in_progress
+
+module_registry:
+  public_site: {owner: product, status: planned, phase: phase_1}
+  identity: {owner: backend, status: planned, phase: phase_1}
+  activities: {owner: product, status: planned, phase: phase_1}
+  courses: {owner: product, status: planned, phase: phase_1}
+  counseling: {owner: product, status: planned, phase: phase_1}
+  ai_assistant: {owner: ai, status: planned, phase: phase_1}
+  catalog: {owner: backend, status: planned, phase: phase_1}
+  orders: {owner: backend, status: planned, phase: phase_1}
+  payments: {owner: backend, status: planned, phase: phase_1}
+  admin: {owner: frontend, status: foundation_in_progress, phase: phase_1}
+  dating_profile: {owner: product, status: planned, phase: phase_2}
+  partner_preferences: {owner: product, status: planned, phase: phase_2}
+  recommendations: {owner: matchmaking, status: planned, phase: phase_2}
+  likes: {owner: matchmaking, status: planned, phase: phase_2}
+  matches: {owner: matchmaking, status: planned, phase: phase_2}
+  introductions: {owner: matchmaking, status: planned, phase: phase_2}
+  relationship_state: {owner: matchmaking, status: planned, phase: phase_2}
+  memberships: {owner: backend, status: planned, phase: phase_2}
+  moderation: {owner: trust_and_safety, status: planned, phase: phase_2}
+
+phases:
+  phase_1:
+    objective: 完成官网、账户、服务购买和运营交付闭环
+    modules:
+      - public_site
+      - identity
+      - activities
+      - courses
+      - counseling
+      - ai_assistant
+      - catalog
+      - orders
+      - payments
+      - admin
+  phase_2:
+    objective: 完成建档、推荐、互选、认识期和安全治理闭环
+    modules:
+      - dating_profile
+      - partner_preferences
+      - recommendations
+      - likes
+      - matches
+      - introductions
+      - relationship_state
+      - memberships
+      - moderation
+
+pending_decisions:
+  payment_legal_entity:
+    owner: business
+    status: undecided
+    value: null
+  launch_regions:
+    owner: business
+    status: undecided
+    value: null
+  launch_languages:
+    owner: product
+    status: undecided
+    value: null
+  membership_plans:
+    owner: product
+    status: undecided
+    value: null
+  contact_exchange_policy:
+    owner: trust_and_safety
+    status: undecided
+    value: null
+  video_hosting:
+    owner: platform
+    status: undecided
+    value: null
+  counseling_scheduling_mode:
+    owner: operations
+    status: undecided
+    value: null
+  ai_knowledge_authorization:
+    owner: legal
+    status: undecided
+    value: null
+  pilot_user_group:
+    owner: product
+    status: undecided
+    value: null
+
+quality:
+  credentials_committed: false
+  database_changes_via_migrations: true
+  backend_authoritative_for_permissions: true
+  backend_authoritative_for_payments: true
+  ai_failure_must_not_block_core_services: true
+
