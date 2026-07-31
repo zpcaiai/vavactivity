@@ -18,6 +18,7 @@ build/
 *.egg-info/
 *.tsbuildinfo
 vite.config.d.ts
+vite.config.js
 
 node_modules/
 .pnpm-store/
