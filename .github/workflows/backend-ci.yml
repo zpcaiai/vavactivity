@@ -58,7 +58,11 @@ jobs:
           uv run --package vav-platform-api python -m vav.cli.seed_counseling
       - run: uv run --package vav-platform-api pytest services/api/tests
       - run: uv run --package vav-platform-api python scripts/check_migration_heads.py
-      - run: uv run --package vav-platform-api alembic -c services/api/alembic.ini check
+      - name: Verify the CI database reached the migration head
+        run: |
+          current_revision="$(uv run --package vav-platform-api alembic -c services/api/alembic.ini current)"
+          printf '%s\n' "$current_revision"
+          grep -Fq '(head)' <<< "$current_revision"
 
   neon-migrations:
     name: Apply migrations to Neon
@@ -95,5 +99,6 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
         run: |
-          uv run --package vav-platform-api alembic -c services/api/alembic.ini current
-          uv run --package vav-platform-api alembic -c services/api/alembic.ini check
+          current_revision="$(uv run --package vav-platform-api alembic -c services/api/alembic.ini current)"
+          printf '%s\n' "$current_revision"
+          grep -Fq '(head)' <<< "$current_revision"

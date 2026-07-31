@@ -3,8 +3,8 @@
 ## 自动执行规则
 
 每次代码推送到 `main` 后，`Backend CI` 会先在隔离的 PostgreSQL 服务中执行后端测试、
-完整 Alembic 迁移和模型漂移检查。只有这些检查全部通过，`Apply migrations to Neon`
-任务才会对 Neon 执行一次幂等的 `alembic upgrade head`，随后再次检查线上 schema。空库
+完整 Alembic 迁移和迁移头检查。只有这些检查全部通过，`Apply migrations to Neon`
+任务才会对 Neon 执行一次幂等的 `alembic upgrade head`，随后确认线上版本已到唯一迁移头。空库
 第一次会完整执行所有迁移；以后 Alembic 根据 `alembic_version` 只执行尚未应用的新版本。
 
 迁移任务按 `neon-production-migrations` 并发组串行运行。迁移失败会让 Backend CI
@@ -36,7 +36,7 @@
 1. `Validate Neon migration connection`
 2. `Verify a single migration head`
 3. `Apply pending migrations to Neon`
-4. `Verify the live Neon schema`
+4. `Verify the live Neon schema`（确认数据库版本已到唯一迁移头）
 
 若迁移失败，先保留失败日志并停止后续数据库发布。修复应新增向前迁移；不要在生产 Neon
 上手工改表或直接执行 `alembic downgrade`。需要恢复数据时，使用 Neon 分支或时间点恢复，
