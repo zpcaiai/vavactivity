@@ -11,9 +11,16 @@ from vav.modules.identity.permissions import ALL_PERMISSIONS, ROLE_PERMISSIONS
 
 async def seed_permissions() -> None:
     async with session_factory() as session:
-        permissions_by_code: dict[str, Permission] = {}
+        permissions_by_code = {
+            permission.code: permission
+            for permission in (
+                await session.scalars(
+                    select(Permission).where(Permission.code.in_(ALL_PERMISSIONS))
+                )
+            ).all()
+        }
         for code in sorted(ALL_PERMISSIONS):
-            permission = await session.scalar(select(Permission).where(Permission.code == code))
+            permission = permissions_by_code.get(code)
             if permission is None:
                 resource, _, action = code.partition(".")
                 permission = Permission(
@@ -38,11 +45,17 @@ async def seed_permissions() -> None:
                     ),
                 )
                 session.add(permission)
-                await session.flush()
-            permissions_by_code[code] = permission
+                permissions_by_code[code] = permission
+        await session.flush()
 
-        for role_code, permission_codes in ROLE_PERMISSIONS.items():
-            role = await session.scalar(select(Role).where(Role.code == role_code))
+        roles_by_code = {
+            role.code: role
+            for role in (
+                await session.scalars(select(Role).where(Role.code.in_(ROLE_PERMISSIONS)))
+            ).all()
+        }
+        for role_code in ROLE_PERMISSIONS:
+            role = roles_by_code.get(role_code)
             if role is None:
                 role = Role(
                     code=role_code,
@@ -52,11 +65,26 @@ async def seed_permissions() -> None:
                     is_active=True,
                 )
                 session.add(role)
-                await session.flush()
+                roles_by_code[role_code] = role
+        await session.flush()
+
+        role_ids = [role.id for role in roles_by_code.values()]
+        existing_assignments = set(
+            (
+                await session.execute(
+                    select(RolePermission.role_id, RolePermission.permission_id).where(
+                        RolePermission.role_id.in_(role_ids)
+                    )
+                )
+            )
+            .tuples()
+            .all()
+        )
+        for role_code, permission_codes in ROLE_PERMISSIONS.items():
+            role = roles_by_code[role_code]
             for permission_code in sorted(permission_codes):
                 permission = permissions_by_code[permission_code]
-                existing = await session.get(RolePermission, (role.id, permission.id))
-                if existing is None:
+                if (role.id, permission.id) not in existing_assignments:
                     session.add(RolePermission(role_id=role.id, permission_id=permission.id))
         await session.commit()
     print(
