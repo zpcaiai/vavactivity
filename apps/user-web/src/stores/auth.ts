@@ -13,7 +13,7 @@ export interface CurrentUser {
 
 export function normalizeLoginIdentifier(identifier: string) {
   const normalized = identifier.trim();
-  return normalized.toLocaleLowerCase() === "test" ? "test@vav.local" : normalized;
+  return normalized.toLocaleLowerCase() === "test" ? "test@example.com" : normalized;
 }
 
 interface AuthResponse {

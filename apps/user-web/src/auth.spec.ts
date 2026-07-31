@@ -21,8 +21,8 @@ describe("user authentication routes", () => {
   });
 
   it("maps the visible test login to its seeded email identity", () => {
-    expect(normalizeLoginIdentifier("test")).toBe("test@vav.local");
-    expect(normalizeLoginIdentifier(" Test ")).toBe("test@vav.local");
+    expect(normalizeLoginIdentifier("test")).toBe("test@example.com");
+    expect(normalizeLoginIdentifier(" Test ")).toBe("test@example.com");
     expect(normalizeLoginIdentifier("member@example.com")).toBe("member@example.com");
   });
 });

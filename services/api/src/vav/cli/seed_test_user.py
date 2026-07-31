@@ -11,7 +11,8 @@ from vav.models.identity import Role, User, UserRole
 from vav.modules.identity.domain import UserStatus
 from vav.modules.identity.security import PasswordHasher
 
-TEST_USER_EMAIL = "test@vav.local"
+TEST_USER_EMAIL = "test@example.com"
+LEGACY_TEST_USER_EMAIL = "test@vav.local"
 TEST_USER_PASSWORD = "test"
 
 
@@ -22,6 +23,15 @@ async def seed_test_user() -> bool:
             select(User).where(User.email == TEST_USER_EMAIL).with_for_update()
         )
         if existing is not None:
+            return False
+
+        legacy = await session.scalar(
+            select(User).where(User.email == LEGACY_TEST_USER_EMAIL).with_for_update()
+        )
+        if legacy is not None:
+            legacy.email = TEST_USER_EMAIL
+            legacy.display_email = "test"
+            await session.commit()
             return False
 
         now = datetime.now(UTC)
@@ -69,7 +79,7 @@ def main() -> None:
         raise SystemExit("Refusing to create test/test without explicit confirmation.")
 
     created = asyncio.run(seed_test_user())
-    state = "created" if created else "already present; left unchanged"
+    state = "created" if created else "ready; existing credentials preserved"
     print(f"Frontend test account {state}: {TEST_USER_EMAIL}")
 
 

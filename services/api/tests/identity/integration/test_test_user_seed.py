@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import pytest
+from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 from vav.cli.seed_permissions import seed_permissions
 from vav.cli.seed_test_user import TEST_USER_EMAIL, TEST_USER_PASSWORD, seed_test_user
 from vav.core.database import session_factory
+from vav.main import app
 from vav.models.identity import Role, User, UserRole
 from vav.modules.identity.domain import UserStatus
 from vav.modules.identity.security import PasswordHasher
@@ -38,3 +40,14 @@ async def test_test_user_seed_is_login_ready_and_does_not_rotate_credentials() -
             .where(UserRole.user_id == user.id, Role.code == "member")
         )
         assert member_role is not None
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/v1/auth/login",
+            json={
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD,
+                "device_name": "test-account-integration",
+            },
+        )
+    assert response.status_code == 200, response.text
