@@ -2,7 +2,22 @@ import "@vav/design-tokens/tokens.css";
 import "element-plus/dist/index.css";
 import "./assets/main.css";
 
-import ElementPlus from "element-plus";
+import {
+  ElAlert,
+  ElButton,
+  ElDialog,
+  ElIcon,
+  ElInput,
+  ElLoading,
+  ElMenu,
+  ElMenuItem,
+  ElOption,
+  ElPagination,
+  ElSelect,
+  ElTable,
+  ElTableColumn,
+  ElTag
+} from "element-plus";
 import { createPinia } from "pinia";
 import { createApp } from "vue";
 
@@ -12,8 +27,22 @@ import { router } from "./router";
 
 const app = createApp(App);
 app.use(createPinia());
-app.use(ElementPlus);
 app.use(router);
+[
+  ElAlert,
+  ElButton,
+  ElDialog,
+  ElIcon,
+  ElInput,
+  ElMenu,
+  ElMenuItem,
+  ElOption,
+  ElPagination,
+  ElSelect,
+  ElTable,
+  ElTableColumn,
+  ElTag
+].forEach((component) => app.component(component.name ?? "", component));
+app.directive("loading", ElLoading.directive);
 app.directive("permission", permission);
 app.mount("#app");
-
