@@ -341,6 +341,9 @@ async def seed_courses() -> None:
                 ],
             )
         )
+        await session.flush()
+        from vav.modules.courses.service import curriculum_payload
+
         session.add(
             CourseVersion(
                 course_id=course.id,
@@ -348,12 +351,13 @@ async def seed_courses() -> None:
                 curriculum_snapshot={
                     "schema_version": 1,
                     "course_id": str(course.id),
-                    "modules": [
-                        {
-                            "id": str(module.id),
-                            "lessons": [str(rich_lesson.id), str(video_lesson.id)],
-                        }
-                    ],
+                    "completion_policy_id": str(course.completion_policy_id),
+                    "modules": await curriculum_payload(
+                        session,
+                        course.id,
+                        locale=course.default_locale,
+                        public_only=True,
+                    ),
                 },
                 change_summary="Development acceptance fixture",
                 created_by=SYSTEM_USER_ID,

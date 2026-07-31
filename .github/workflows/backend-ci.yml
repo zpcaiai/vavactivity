@@ -49,6 +49,13 @@ jobs:
       - run: uv run ruff format --check services
       - run: uv run mypy services/api/src services/worker/src
       - run: uv run --package vav-platform-api alembic -c services/api/alembic.ini upgrade head
+      - name: Seed deterministic integration fixtures
+        run: |
+          uv run --package vav-platform-api python -m vav.cli.seed_permissions
+          uv run --package vav-platform-api python -m vav.cli.seed_cms
+          uv run --package vav-platform-api python -m vav.cli.seed_catalog
+          uv run --package vav-platform-api python -m vav.cli.seed_courses
+          uv run --package vav-platform-api python -m vav.cli.seed_counseling
       - run: uv run --package vav-platform-api pytest services/api/tests
       - run: uv run --package vav-platform-api python scripts/check_migration_heads.py
       - run: uv run --package vav-platform-api alembic -c services/api/alembic.ini check
