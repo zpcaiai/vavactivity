@@ -48,8 +48,8 @@ jobs:
       - run: uv run ruff check services
       - run: uv run ruff format --check services
       - run: uv run mypy services/api/src services/worker/src
-      - run: uv run --package vav-platform-api pytest services/api/tests
       - run: uv run --package vav-platform-api alembic -c services/api/alembic.ini upgrade head
+      - run: uv run --package vav-platform-api pytest services/api/tests
       - run: uv run --package vav-platform-api python scripts/check_migration_heads.py
       - run: uv run --package vav-platform-api alembic -c services/api/alembic.ini check
 
