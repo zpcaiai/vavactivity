@@ -32,7 +32,7 @@ Batch 11 delivers a persisted notification domain rather than a UI-only inbox:
 | SMTP development path | PASS | A notification delivery changed Mailpit `SMTPAccepted` from 5 to 6 and the database delivery reached `sent`. |
 | Template governance API | PASS | A new release completed draft → review → approved → active; the prior release was then restored through the rollback endpoint. |
 | OpenAPI/client | PASS | OpenAPI was exported and the TypeScript API schema regenerated. |
-| Docker images | PENDING | `docker compose build api worker` is still downloading pinned dependencies at report creation time. |
+| Docker images | PASS | `docker compose build api worker` completed and exported both pinned backend images. |
 
 ## Local database evidence
 
