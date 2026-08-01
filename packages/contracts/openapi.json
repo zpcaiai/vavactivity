@@ -7995,6 +7995,62 @@
         "title": "TemplateDefinitionRequest",
         "type": "object"
       },
+      "TemplateDefinitionUpdateRequest": {
+        "properties": {
+          "internal_name": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 3,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Internal Name"
+          },
+          "purpose": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "minLength": 3,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purpose"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 8,
+            "title": "Reason",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "active",
+                  "disabled"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "TemplateDefinitionUpdateRequest",
+        "type": "object"
+      },
       "TemplatePreviewRequest": {
         "properties": {
           "variables": {
@@ -8107,6 +8163,32 @@
           "body_text_template"
         ],
         "title": "TemplateReleaseRequest",
+        "type": "object"
+      },
+      "TemplateTestSendRequest": {
+        "properties": {
+          "recipient": {
+            "anyOf": [
+              {
+                "maxLength": 320,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recipient"
+          },
+          "variables": {
+            "additionalProperties": true,
+            "title": "Variables",
+            "type": "object"
+          }
+        },
+        "required": [
+          "variables"
+        ],
+        "title": "TemplateTestSendRequest",
         "type": "object"
       },
       "TestimonialCreateRequest": {
@@ -25559,6 +25641,66 @@
         ]
       }
     },
+    "/api/v1/admin/notifications/template-releases/{release_id}/rollback": {
+      "post": {
+        "operationId": "rollback_template_release_api_v1_admin_notifications_template_releases__release_id__rollback_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "release_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Release Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Rollback Template Release Api V1 Admin Notifications Template Releases  Release Id  Rollback Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rollback Template Release",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
     "/api/v1/admin/notifications/template-releases/{release_id}/submit-review": {
       "post": {
         "operationId": "submit_template_review_api_v1_admin_notifications_template_releases__release_id__submit_review_post",
@@ -25604,6 +25746,66 @@
           }
         ],
         "summary": "Submit Template Review",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/template-releases/{release_id}/test-send": {
+      "post": {
+        "operationId": "test_send_template_release_api_v1_admin_notifications_template_releases__release_id__test_send_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "release_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Release Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateTestSendRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Test Send Template Release Api V1 Admin Notifications Template Releases  Release Id  Test Send Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Test Send Template Release",
         "tags": [
           "notifications-admin"
         ]
@@ -25728,6 +25930,64 @@
           }
         ],
         "summary": "Template Detail",
+        "tags": [
+          "notifications-admin"
+        ]
+      },
+      "patch": {
+        "operationId": "update_template_definition_api_v1_admin_notifications_templates__template_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "template_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Template Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateDefinitionUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Template Definition Api V1 Admin Notifications Templates  Template Id  Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Template Definition",
         "tags": [
           "notifications-admin"
         ]

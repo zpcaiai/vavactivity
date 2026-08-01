@@ -896,6 +896,7 @@ async def _send_delivery(session: AsyncSession, delivery_id: UUID) -> dict[str, 
             attempt_number=attempt_number,
             error_code=exc.code,
             retryable=retryable,
+            provider_name=provider.name,
         )
         return {
             "delivery_id": str(delivery_id),
@@ -914,6 +915,16 @@ async def _send_delivery(session: AsyncSession, delivery_id: UUID) -> dict[str, 
             "metadata": _json({"status": result.status}),
             "id": attempt_id,
         },
+    )
+    await session.execute(
+        text(
+            "INSERT INTO notification_provider_health "
+            "(provider,circuit_state,consecutive_failures,last_success_at) "
+            "VALUES (:provider,'closed',0,now()) "
+            "ON CONFLICT (provider) DO UPDATE SET circuit_state='closed',consecutive_failures=0,"
+            "last_success_at=now(),updated_at=now()"
+        ),
+        {"provider": provider.name},
     )
     await session.execute(
         text(
@@ -941,6 +952,7 @@ async def _record_send_failure(
     attempt_number: int,
     error_code: str,
     retryable: bool,
+    provider_name: str,
 ) -> None:
     final = not retryable or attempt_number >= get_settings().notification_max_delivery_attempts
     status = "failed_final" if final else "failed_retryable"
@@ -956,6 +968,19 @@ async def _record_send_failure(
             "error_code": error_code,
             "id": attempt_id,
         },
+    )
+    await session.execute(
+        text(
+            "INSERT INTO notification_provider_health "
+            "(provider,circuit_state,consecutive_failures,last_failure_at) "
+            "VALUES (:provider,'closed',1,now()) "
+            "ON CONFLICT (provider) DO UPDATE SET "
+            "consecutive_failures=notification_provider_health.consecutive_failures+1,"
+            "circuit_state=CASE WHEN notification_provider_health.consecutive_failures+1>=5 "
+            "THEN 'open' ELSE notification_provider_health.circuit_state END,"
+            "last_failure_at=now(),updated_at=now()"
+        ),
+        {"provider": provider_name},
     )
     await session.execute(
         text(
@@ -1126,7 +1151,8 @@ async def dispatch_due_reminders(
     results: list[dict[str, Any]] = []
     for row in rows:
         user = await _active_user(session, UUID(str(row["recipient_user_id"])))
-        if user is None:
+        subject_is_current = await _reminder_subject_is_current(session, row)
+        if user is None or not subject_is_current:
             await session.execute(
                 text(
                     "UPDATE notification_reminders SET status='cancelled',updated_at=now() WHERE id=:id"
@@ -1190,6 +1216,43 @@ async def dispatch_due_reminders(
         results.append({"reminder_id": str(row["id"]), "status": "dispatched"})
     await session.commit()
     return results
+
+
+async def _reminder_subject_is_current(session: AsyncSession, row: Any) -> bool:
+    """Revalidate mutable business state immediately before reminder dispatch."""
+    if not get_settings().notification_stale_reminder_recheck:
+        return True
+    subject_type = str(row["subject_type"])
+    query_by_subject = {
+        "activity_registration": (
+            "SELECT EXISTS(SELECT 1 FROM activity_registrations WHERE id=:id "
+            "AND user_id=:user_id AND version=:version "
+            "AND status NOT IN ('cancelled','rejected','refunded'))"
+        ),
+        "course_enrollment": (
+            "SELECT EXISTS(SELECT 1 FROM course_enrollments WHERE id=:id "
+            "AND user_id=:user_id AND version=:version "
+            "AND status NOT IN ('suspended','revoked','expired'))"
+        ),
+        "counseling_appointment": (
+            "SELECT EXISTS(SELECT 1 FROM counseling_appointments WHERE id=:id "
+            "AND user_id=:user_id AND version=:version "
+            "AND status IN ('confirmed','reschedule_requested'))"
+        ),
+    }
+    query = query_by_subject.get(subject_type)
+    if query is None:
+        # Explicit operations reminders do not have a mutable domain aggregate.
+        return subject_type in {"operations", "system", "campaign"}
+    value = await session.scalar(
+        text(query),
+        {
+            "id": row["subject_id"],
+            "user_id": row["recipient_user_id"],
+            "version": row["trigger_reference_version"],
+        },
+    )
+    return bool(value)
 
 
 async def replan_reminder(
@@ -1374,6 +1437,25 @@ async def receive_provider_webhook(
                 ),
                 {"hash": delivery["destination_hash"], "reason": reason},
             )
+        elif event_type == "soft_bounce":
+            soft_bounce_count = await session.scalar(
+                text(
+                    "SELECT count(*) FROM notification_provider_events "
+                    "WHERE provider=:provider AND provider_message_id=:message_id "
+                    "AND event_type='soft_bounce' AND signature_verified=true"
+                ),
+                {"provider": provider_name, "message_id": message_id},
+            )
+            if int(soft_bounce_count or 0) >= get_settings().notification_soft_bounce_threshold:
+                await session.execute(
+                    text(
+                        "INSERT INTO notification_suppressions "
+                        "(destination_type,destination_hash,channel,suppression_reason,source,status) "
+                        "VALUES ('email',:hash,'email','repeated_soft_bounce','provider_webhook','active') "
+                        "ON CONFLICT DO NOTHING"
+                    ),
+                    {"hash": delivery["destination_hash"]},
+                )
     await session.execute(
         text(
             "UPDATE notification_provider_events SET processing_status='processed',processed_at=now() WHERE id=:id"

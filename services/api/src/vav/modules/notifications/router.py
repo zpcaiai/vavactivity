@@ -15,6 +15,7 @@ from vav.common.schemas import success
 from vav.core.config import get_settings
 from vav.core.request_context import request_id_from_request
 from vav.modules.identity.dependencies import AuthenticatedPrincipal, require_authenticated_user
+from vav.modules.notifications.crypto import stable_hash
 from vav.modules.notifications.schemas import (
     ConsentRequest,
     UpdateNotificationPreferencesRequest,
@@ -464,9 +465,9 @@ async def unsubscribe_preview(
             await session.execute(
                 text(
                     "SELECT category,channel,expires_at,consumed_at FROM notification_unsubscribe_tokens "
-                    "WHERE token_hash=encode(digest(lower(trim(:token)),'sha256'),'hex')"
+                    "WHERE token_hash=:token_hash"
                 ),
-                {"token": token},
+                {"token_hash": stable_hash(token)},
             )
         )
         .mappings()

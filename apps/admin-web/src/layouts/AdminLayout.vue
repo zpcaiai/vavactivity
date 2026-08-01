@@ -38,8 +38,19 @@ const menu = [
   { path: "/admin/access/admins", labelKey: "menu.admins", icon: Lock },
   { path: "/admin/audit/auth", labelKey: "menu.audit", icon: DataAnalysis }
 ];
-const visibleMenu = computed(() =>
-  menu.filter((item) => {
+const visibleMenu = computed(() => {
+  const notificationLanding = [
+    ["notifications.analytics.read", "dashboard"],
+    ["notifications.templates.read", "templates"],
+    ["notifications.deliveries.read", "deliveries"],
+    ["notifications.campaigns.read", "campaigns"],
+    ["notifications.reminders.read", "reminders"],
+    ["notifications.providers.read", "providers"],
+    ["notifications.audit.read", "audit"]
+  ].find(([permission]) => auth.hasPermission(permission))?.[1];
+  return menu.map((item) => item.path === "/admin/notifications/dashboard" && notificationLanding
+    ? { ...item, path: `/admin/notifications/${notificationLanding}` }
+    : item).filter((item) => {
     const permissionByPath: Record<string, string> = {
       "/admin/users": "users.read",
       "/admin/content/pages": "content.pages.read",
@@ -57,10 +68,13 @@ const visibleMenu = computed(() =>
       "/admin/access/admins": "admins.read",
       "/admin/audit/auth": "audit.read"
     };
+    if (item.labelKey === "menu.notifications") {
+      return Boolean(notificationLanding);
+    }
     const required = permissionByPath[item.path];
     return !required || auth.hasPermission(required);
-  })
-);
+  });
+});
 
 function changeLocale(value: string) {
   if (adminLocales.includes(value as AdminLocale)) {

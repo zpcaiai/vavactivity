@@ -18,9 +18,11 @@ async function refresh() {
 
 onMounted(() => {
   void refresh();
+  window.addEventListener("vav:notifications-updated", refresh);
   timer = window.setInterval(() => void refresh(), 30_000);
 });
 onBeforeUnmount(() => {
+  window.removeEventListener("vav:notifications-updated", refresh);
   if (timer) window.clearInterval(timer);
 });
 </script>

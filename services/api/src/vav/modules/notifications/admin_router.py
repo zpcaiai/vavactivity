@@ -4,7 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 from typing import Any, Literal
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
@@ -19,6 +19,7 @@ from vav.core.request_context import request_id_from_request
 from vav.modules.identity.dependencies import AuthenticatedPrincipal
 from vav.modules.identity.permissions import require_permission
 from vav.modules.notifications.crypto import decrypt_notification_data, stable_hash
+from vav.modules.notifications.providers import EmailSendRequest, configured_email_provider
 from vav.modules.notifications.rendering import (
     render_template,
     validate_template_source,
@@ -59,6 +60,13 @@ class RegistryStatusRequest(BaseModel):
 class TemplateTestSendRequest(BaseModel):
     variables: dict[str, Any]
     recipient: str | None = Field(default=None, max_length=320)
+
+
+class TemplateDefinitionUpdateRequest(BaseModel):
+    internal_name: str | None = Field(default=None, min_length=3, max_length=200)
+    purpose: str | None = Field(default=None, min_length=3, max_length=2000)
+    status: Literal["active", "disabled"] | None = None
+    reason: str = Field(min_length=8, max_length=1000)
 
 
 @router.post("/internal/notifications/events", status_code=202)
@@ -232,6 +240,52 @@ async def template_detail(
         {"definition": dict(definition), "releases": [dict(row) for row in releases]},
         request_id_from_request(request),
     )
+
+
+@router.patch("/admin/notifications/templates/{template_id}")
+async def update_template_definition(
+    template_id: UUID,
+    payload: TemplateDefinitionUpdateRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(
+        require_permission("notifications.templates.update")
+    ),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    if payload.internal_name is None and payload.purpose is None and payload.status is None:
+        raise VavError(
+            "NOTIFICATION_TEMPLATE_UPDATE_EMPTY",
+            "At least one template definition field is required.",
+            status_code=422,
+        )
+    value = await session.scalar(
+        text(
+            "UPDATE notification_template_definitions SET "
+            "internal_name=COALESCE(:internal_name,internal_name),"
+            "purpose=COALESCE(:purpose,purpose),status=COALESCE(:status,status),updated_at=now() "
+            "WHERE id=:id RETURNING id"
+        ),
+        {
+            "internal_name": payload.internal_name,
+            "purpose": payload.purpose,
+            "status": payload.status,
+            "id": template_id,
+        },
+    )
+    if value is None:
+        raise VavError(
+            "NOTIFICATION_TEMPLATE_NOT_FOUND", "Template was not found.", status_code=404
+        )
+    await _audit(
+        session,
+        "notification.template.updated",
+        "notification_template",
+        template_id,
+        actor_id=principal.user.id,
+        reason=payload.reason,
+    )
+    await session.commit()
+    return success({"id": str(template_id)}, request_id_from_request(request))
 
 
 @router.post("/admin/notifications/templates/{template_id}/releases", status_code=201)
@@ -472,6 +526,72 @@ async def revoke_template_release(
     )
 
 
+@router.post("/admin/notifications/template-releases/{release_id}/rollback")
+async def rollback_template_release(
+    release_id: UUID,
+    payload: StatusReasonRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(
+        require_permission("notifications.templates.rollback")
+    ),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    target = (
+        (
+            await session.execute(
+                text("SELECT * FROM notification_template_releases WHERE id=:id FOR UPDATE"),
+                {"id": release_id},
+            )
+        )
+        .mappings()
+        .first()
+    )
+    if target is None:
+        raise VavError(
+            "NOTIFICATION_TEMPLATE_RELEASE_NOT_FOUND",
+            "Template release was not found.",
+            status_code=404,
+        )
+    if target["status"] not in {"approved", "superseded"}:
+        raise VavError(
+            "NOTIFICATION_TEMPLATE_ROLLBACK_STATE_INVALID",
+            "Only an approved or superseded release can be restored.",
+            status_code=409,
+        )
+    current_id = await session.scalar(
+        text(
+            "UPDATE notification_template_releases SET status='superseded' "
+            "WHERE template_definition_id=:definition_id AND locale=:locale AND channel=:channel "
+            "AND status='active' RETURNING id"
+        ),
+        {
+            "definition_id": target["template_definition_id"],
+            "locale": target["locale"],
+            "channel": target["channel"],
+        },
+    )
+    await session.execute(
+        text(
+            "UPDATE notification_template_releases SET status='active',activated_at=now() WHERE id=:id"
+        ),
+        {"id": release_id},
+    )
+    await _audit(
+        session,
+        "notification.template.rolled_back",
+        "notification_template_release",
+        release_id,
+        actor_id=principal.user.id,
+        reason=payload.reason,
+        context={"replaced_release_id": str(current_id) if current_id else None},
+    )
+    await session.commit()
+    return success(
+        {"id": str(release_id), "status": "active", "replaced_release_id": current_id},
+        request_id_from_request(request),
+    )
+
+
 @router.post("/admin/notifications/template-releases/{release_id}/preview")
 async def preview_template_release(
     release_id: UUID,
@@ -510,6 +630,95 @@ async def preview_template_release(
         action_url_template=row["action_url_template"],
     )
     return success(rendered.__dict__, request_id_from_request(request))
+
+
+@router.post("/admin/notifications/template-releases/{release_id}/test-send")
+async def test_send_template_release(
+    release_id: UUID,
+    payload: TemplateTestSendRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(
+        require_permission("notifications.templates.test_send")
+    ),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    row = (
+        (
+            await session.execute(
+                text(
+                    "SELECT r.*,d.variable_schema,d.template_code FROM notification_template_releases r "
+                    "JOIN notification_template_definitions d ON d.id=r.template_definition_id WHERE r.id=:id"
+                ),
+                {"id": release_id},
+            )
+        )
+        .mappings()
+        .first()
+    )
+    if row is None:
+        raise VavError(
+            "NOTIFICATION_TEMPLATE_RELEASE_NOT_FOUND",
+            "Template release was not found.",
+            status_code=404,
+        )
+    rendered = render_template(
+        schema=row["variable_schema"],
+        variables=payload.variables,
+        subject_template=row["subject_template"],
+        title_template=row["title_template"],
+        body_html_template=row["body_html_template"],
+        body_text_template=row["body_text_template"],
+        action_label_template=row["action_label_template"],
+        action_url_template=row["action_url_template"],
+    )
+    recipient = (payload.recipient or principal.user.email).strip().lower()
+    allowlist = {
+        item.strip().lower()
+        for item in get_settings().notification_campaign_test_recipient_allowlist.split(",")
+        if item.strip()
+    }
+    if recipient != principal.user.email.lower() and recipient not in allowlist:
+        raise VavError(
+            "NOTIFICATION_TEST_RECIPIENT_FORBIDDEN",
+            "Test sends are limited to the current administrator or the configured allowlist.",
+            status_code=403,
+        )
+    provider_message_id = None
+    if row["channel"] == "email":
+        provider = configured_email_provider()
+        result = await provider.send(
+            EmailSendRequest(
+                from_address=get_settings().notification_email_from_address,
+                from_name=get_settings().notification_email_from_name,
+                to_address=recipient,
+                reply_to=get_settings().notification_email_reply_to or None,
+                subject=f"[TEST] {rendered.subject or row['template_code']}",
+                html_body=rendered.body_html or rendered.body_text,
+                text_body=f"[TEST]\n{rendered.body_text}",
+                headers={"X-VAV-Test-Send": "true"},
+                tags={"release_id": str(release_id), "test_send": "true"},
+                idempotency_key=f"test-{release_id}-{uuid4()}",
+            )
+        )
+        provider_message_id = result.provider_message_id
+    await _audit(
+        session,
+        "notification.template.test_sent",
+        "notification_template_release",
+        release_id,
+        actor_id=principal.user.id,
+        context={"channel": row["channel"], "recipient_hash": stable_hash(recipient)},
+    )
+    await session.commit()
+    return success(
+        {
+            "id": str(release_id),
+            "channel": row["channel"],
+            "provider_message_id": provider_message_id,
+            "test_marker": True,
+        },
+        request_id_from_request(request),
+    )
 
 
 @router.get("/admin/notifications/event-subscriptions")

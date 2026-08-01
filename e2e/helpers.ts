@@ -101,6 +101,21 @@ export function seedAiFixture() {
   }
 }
 
+export function seedNotificationFixture() {
+  if (process.env.VAV_E2E_SKIP_NOTIFICATION_SEED === "1") return;
+  for (const moduleName of [
+    "vav.cli.seed_permissions",
+    "vav.cli.seed_notification_templates",
+    "vav.cli.seed_notifications"
+  ]) {
+    execFileSync(
+      "docker",
+      ["compose", "exec", "-T", "api", "python", "-m", moduleName],
+      { stdio: "pipe" }
+    );
+  }
+}
+
 export function verifyUserFixture(email: string) {
   const escaped = email.replaceAll("'", "''");
   execFileSync(
@@ -117,6 +132,38 @@ export function verifyUserFixture(email: string) {
       "vav",
       "-c",
       `UPDATE users SET status='active', email_verified_at=now() WHERE email='${escaped}'`
+    ],
+    { stdio: "pipe" }
+  );
+}
+
+export function seedUserNotificationFixture(email: string) {
+  const escaped = email.replaceAll("'", "''");
+  const deduplicationKey = `notification-e2e-${Date.now()}`;
+  execFileSync(
+    "docker",
+    [
+      "compose",
+      "exec",
+      "-T",
+      "postgres",
+      "psql",
+      "-U",
+      "vav",
+      "-d",
+      "vav",
+      "-v",
+      "ON_ERROR_STOP=1",
+      "-c",
+      [
+        "WITH target AS (SELECT id FROM users WHERE email='" + escaped + "'),",
+        "created_intent AS (",
+        "  INSERT INTO notification_intents (notification_type,category,priority,recipient_type,recipient_reference_id,template_code,channel_policy,preference_policy,template_variables_encrypted,deduplication_key,status)",
+        "  SELECT 'notification-e2e','platform','normal','user',id,'platform-announcement','{\"required\":[\"in_app\"]}'::jsonb,'service_optional','encrypted','" + deduplicationKey + "','created' FROM target RETURNING id,recipient_reference_id",
+        ")",
+        "INSERT INTO user_notifications (user_id,notification_intent_id,category,priority,title,body,action_type,action_reference,action_url,status,rendering_snapshot)",
+        "SELECT recipient_reference_id,id,'platform','normal','Batch 11 浏览器验收通知','这是一条来自持久化通知中心的可审计消息。','route','{\"route_name\":\"account-notifications\",\"params\":{}}'::jsonb,'/account/notifications','active','{\"locale\":\"zh-CN\",\"channel\":\"in_app\"}'::jsonb FROM created_intent"
+      ].join(" ")
     ],
     { stdio: "pipe" }
   );

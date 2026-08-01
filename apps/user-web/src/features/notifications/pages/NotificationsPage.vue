@@ -73,14 +73,17 @@ async function load() {
 
 async function markRead(item: UserNotification) {
   if (!item.read_at) await notificationApi.read(item.id);
+  window.dispatchEvent(new Event("vav:notifications-updated"));
   await loadNotifications();
 }
 async function archive(item: UserNotification) {
   await notificationApi.archive(item.id);
+  window.dispatchEvent(new Event("vav:notifications-updated"));
   await loadNotifications();
 }
 async function markAll() {
   await notificationApi.markAllRead();
+  window.dispatchEvent(new Event("vav:notifications-updated"));
   await loadNotifications();
 }
 async function savePreferences() {

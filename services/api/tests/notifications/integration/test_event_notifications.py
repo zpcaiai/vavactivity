@@ -13,7 +13,7 @@ from vav.cli.seed_test_user import TEST_USER_EMAIL, seed_test_user
 from vav.core.database import session_factory
 from vav.modules.notifications.crypto import stable_hash
 from vav.modules.notifications.schemas import IngestNotificationEventRequest
-from vav.modules.notifications.service import ingest_event
+from vav.modules.notifications.service import dispatch_due_reminders, ingest_event, replan_reminder
 
 
 async def seeded() -> None:
@@ -125,3 +125,32 @@ async def test_active_template_release_is_immutable() -> None:
             )
             await session.flush()
         await session.rollback()
+
+
+@pytest.mark.asyncio
+async def test_stale_business_reminder_is_cancelled_before_dispatch() -> None:
+    await seeded()
+    user_id = await active_user_id()
+    missing_registration_id = uuid4()
+    async with session_factory() as session:
+        reminder_id = await replan_reminder(
+            session,
+            reminder_type="activity-starting",
+            subject_type="activity_registration",
+            subject_id=missing_registration_id,
+            recipient_user_id=user_id,
+            template_code="activity-reminder",
+            category="service",
+            trigger_at=datetime.now(UTC),
+            timezone_name="Asia/Shanghai",
+            reference_version=1,
+            deduplication_key=f"activity-reminder:{missing_registration_id}:1",
+        )
+        results = await dispatch_due_reminders(session)
+        result = next(item for item in results if item["reminder_id"] == str(reminder_id))
+        assert result["status"] == "cancelled"
+        status = await session.scalar(
+            text("SELECT status FROM notification_reminders WHERE id=:id"),
+            {"id": reminder_id},
+        )
+        assert status == "cancelled"

@@ -38,6 +38,22 @@ const modules = [
   ["audit", "审计日志", "追加式操作记录", "audit:view"]
 ] as const;
 
+const notificationSectionPermissions: Record<string, string> = {
+  dashboard: "notifications.analytics.read",
+  templates: "notifications.templates.read",
+  "template-releases": "notifications.templates.read",
+  "event-subscriptions": "notifications.subscriptions.read",
+  deliveries: "notifications.deliveries.read",
+  "dead-letters": "notifications.dead_letters.read",
+  reminders: "notifications.reminders.read",
+  campaigns: "notifications.campaigns.read",
+  providers: "notifications.providers.read",
+  "provider-events": "notifications.providers.read",
+  suppressions: "notifications.suppressions.read",
+  unsubscribes: "notifications.preferences.read",
+  audit: "notifications.audit.read"
+};
+
 export const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -268,8 +284,32 @@ export const router = createRouter({
           path: `notifications/${section}`,
           name: `admin-notifications-${section}`,
           component: NotificationManagementPage,
-          meta: { title: "通知运营中心", permission: "notifications.analytics.read", notificationSection: section }
+          meta: { title: "通知运营中心", permission: notificationSectionPermissions[section], notificationSection: section }
         })),
+        {
+          path: "notifications/templates/:templateId",
+          name: "admin-notifications-template-detail",
+          component: NotificationManagementPage,
+          meta: { title: "通知模板详情", permission: "notifications.templates.read", notificationSection: "templates" }
+        },
+        {
+          path: "notifications/deliveries/:deliveryId",
+          name: "admin-notifications-delivery-detail",
+          component: NotificationManagementPage,
+          meta: { title: "通知发送详情", permission: "notifications.deliveries.read", notificationSection: "deliveries" }
+        },
+        {
+          path: "notifications/campaigns/new",
+          name: "admin-notifications-campaign-new",
+          component: NotificationManagementPage,
+          meta: { title: "新建通知活动", permission: "notifications.campaigns.create", notificationSection: "campaigns" }
+        },
+        {
+          path: "notifications/campaigns/:campaignId",
+          name: "admin-notifications-campaign-detail",
+          component: NotificationManagementPage,
+          meta: { title: "通知活动详情", permission: "notifications.campaigns.read", notificationSection: "campaigns" }
+        },
         {
           path: "access/admins",
           name: "admin-access-admins",

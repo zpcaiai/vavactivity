@@ -5023,6 +5023,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/notifications/template-releases/{release_id}/rollback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rollback Template Release */
+        post: operations["rollback_template_release_api_v1_admin_notifications_template_releases__release_id__rollback_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/notifications/template-releases/{release_id}/submit-review": {
         parameters: {
             query?: never;
@@ -5034,6 +5051,23 @@ export interface paths {
         put?: never;
         /** Submit Template Review */
         post: operations["submit_template_review_api_v1_admin_notifications_template_releases__release_id__submit_review_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/notifications/template-releases/{release_id}/test-send": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Test Send Template Release */
+        post: operations["test_send_template_release_api_v1_admin_notifications_template_releases__release_id__test_send_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5072,7 +5106,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** Update Template Definition */
+        patch: operations["update_template_definition_api_v1_admin_notifications_templates__template_id__patch"];
         trace?: never;
     };
     "/api/v1/admin/notifications/templates/{template_id}/releases": {
@@ -9607,6 +9642,17 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        /** TemplateDefinitionUpdateRequest */
+        TemplateDefinitionUpdateRequest: {
+            /** Internal Name */
+            internal_name?: string | null;
+            /** Purpose */
+            purpose?: string | null;
+            /** Reason */
+            reason: string;
+            /** Status */
+            status?: ("active" | "disabled") | null;
+        };
         /** TemplatePreviewRequest */
         TemplatePreviewRequest: {
             /** Variables */
@@ -9640,6 +9686,15 @@ export interface components {
             subject_template?: string | null;
             /** Title Template */
             title_template?: string | null;
+        };
+        /** TemplateTestSendRequest */
+        TemplateTestSendRequest: {
+            /** Recipient */
+            recipient?: string | null;
+            /** Variables */
+            variables: {
+                [key: string]: unknown;
+            };
         };
         /** TestimonialCreateRequest */
         TestimonialCreateRequest: {
@@ -20796,6 +20851,43 @@ export interface operations {
             };
         };
     };
+    rollback_template_release_api_v1_admin_notifications_template_releases__release_id__rollback_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                release_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StatusReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     submit_template_review_api_v1_admin_notifications_template_releases__release_id__submit_review_post: {
         parameters: {
             query?: never;
@@ -20806,6 +20898,43 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    test_send_template_release_api_v1_admin_notifications_template_releases__release_id__test_send_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                release_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TemplateTestSendRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -20896,6 +21025,43 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_template_definition_api_v1_admin_notifications_templates__template_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                template_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TemplateDefinitionUpdateRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {

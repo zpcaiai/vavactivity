@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
 
 import { catalogApi } from "@/features/catalog/api";
+import { useAdminAuthStore } from "@/stores/admin-auth";
 
 type Dashboard = {
   deliveries: Record<string, number>;
@@ -22,6 +24,8 @@ type ProviderEvent = { id: string; provider: string; provider_event_id: string; 
 type AuditEvent = { id: string; event_type: string; subject_type: string; reason?: string | null; created_at: string };
 
 const dashboard = ref<Dashboard>();
+const route = useRoute();
+const auth = useAdminAuthStore();
 const templates = ref<Template[]>([]);
 const subscriptions = ref<Subscription[]>([]);
 const deliveries = ref<Delivery[]>([]);
@@ -50,17 +54,18 @@ async function load() {
   busy.value = true;
   error.value = "";
   try {
+    await auth.bootstrap();
     const [dashboardValue, templateValue, subscriptionValue, deliveryValue, deadValue, reminderValue, campaignValue, suppressionValue, providerValue, auditValue] = await Promise.all([
-      catalogApi<Dashboard>("/admin/notifications/dashboard"),
-      catalogApi<{ items: Template[] }>("/admin/notifications/templates"),
-      catalogApi<{ items: Subscription[] }>("/admin/notifications/event-subscriptions"),
-      catalogApi<{ items: Delivery[] }>("/admin/notifications/deliveries"),
-      catalogApi<{ items: DeadLetter[] }>("/admin/notifications/dead-letters"),
-      catalogApi<{ items: Reminder[] }>("/admin/notifications/reminders"),
-      catalogApi<{ items: Campaign[] }>("/admin/notifications/campaigns"),
-      catalogApi<{ items: Suppression[] }>("/admin/notifications/suppressions"),
-      catalogApi<{ items: ProviderEvent[] }>("/admin/notifications/provider-events"),
-      catalogApi<{ items: AuditEvent[] }>("/admin/notifications/audit")
+      auth.hasPermission("notifications.analytics.read") ? catalogApi<Dashboard>("/admin/notifications/dashboard") : Promise.resolve(undefined),
+      auth.hasPermission("notifications.templates.read") ? catalogApi<{ items: Template[] }>("/admin/notifications/templates") : Promise.resolve({ items: [] }),
+      auth.hasPermission("notifications.subscriptions.read") ? catalogApi<{ items: Subscription[] }>("/admin/notifications/event-subscriptions") : Promise.resolve({ items: [] }),
+      auth.hasPermission("notifications.deliveries.read") ? catalogApi<{ items: Delivery[] }>("/admin/notifications/deliveries") : Promise.resolve({ items: [] }),
+      auth.hasPermission("notifications.dead_letters.read") ? catalogApi<{ items: DeadLetter[] }>("/admin/notifications/dead-letters") : Promise.resolve({ items: [] }),
+      auth.hasPermission("notifications.reminders.read") ? catalogApi<{ items: Reminder[] }>("/admin/notifications/reminders") : Promise.resolve({ items: [] }),
+      auth.hasPermission("notifications.campaigns.read") ? catalogApi<{ items: Campaign[] }>("/admin/notifications/campaigns") : Promise.resolve({ items: [] }),
+      auth.hasPermission("notifications.suppressions.read") ? catalogApi<{ items: Suppression[] }>("/admin/notifications/suppressions") : Promise.resolve({ items: [] }),
+      auth.hasPermission("notifications.providers.read") ? catalogApi<{ items: ProviderEvent[] }>("/admin/notifications/provider-events") : Promise.resolve({ items: [] }),
+      auth.hasPermission("notifications.audit.read") ? catalogApi<{ items: AuditEvent[] }>("/admin/notifications/audit") : Promise.resolve({ items: [] })
     ]);
     dashboard.value = dashboardValue;
     templates.value = templateValue.items;
@@ -114,7 +119,7 @@ async function createCampaign() {
   notice.value = "Campaign 草稿已创建；发送前仍需测试发送、独立审批和不可变受众快照。";
   await load();
 }
-async function campaignAction(item: Campaign, action: "test-send" | "submit-review" | "audience" | "start" | "pause" | "cancel") {
+async function campaignAction(item: Campaign, action: "test-send" | "submit-review" | "approve" | "audience" | "start" | "pause" | "cancel") {
   const body = action === "audience" ? undefined : JSON.stringify({ reason: reason.value, confirmation_code: ["start", "cancel"].includes(action) ? item.campaign_code : undefined });
   await catalogApi(`/admin/notifications/campaigns/${item.id}/${action}`, { method: "POST", body });
   await load();
@@ -132,7 +137,12 @@ async function liftSuppression(item: Suppression) {
   await load();
 }
 
-onMounted(() => void load());
+onMounted(() => {
+  if (typeof route.meta.notificationSection === "string") {
+    activeTab.value = route.meta.notificationSection;
+  }
+  void load();
+});
 </script>
 
 <template>
@@ -178,6 +188,7 @@ onMounted(() => void load());
 
     <el-tabs v-model="activeTab">
       <el-tab-pane
+        v-if="auth.hasPermission('notifications.analytics.read')"
         label="Dashboard"
         name="dashboard"
       >
@@ -195,6 +206,7 @@ onMounted(() => void load());
         <p>Provider：{{ dashboard?.provider_status }}。本地统计是执行证据，不代表送达 SLA 或服务结果。</p>
       </el-tab-pane>
       <el-tab-pane
+        v-if="auth.hasPermission('notifications.templates.read')"
         label="模板中心"
         name="templates"
       >
@@ -219,6 +231,7 @@ onMounted(() => void load());
         <p>Release 激活后不可原地修改；支持 zh-CN、zh-TW、en、HTML 与 Plain Text 双正文。</p>
       </el-tab-pane>
       <el-tab-pane
+        v-if="auth.hasPermission('notifications.subscriptions.read')"
         label="事件订阅"
         name="subscriptions"
       >
@@ -252,6 +265,7 @@ onMounted(() => void load());
         </el-table>
       </el-tab-pane>
       <el-tab-pane
+        v-if="auth.hasPermission('notifications.deliveries.read')"
         label="Delivery"
         name="deliveries"
       >
@@ -288,6 +302,7 @@ onMounted(() => void load());
         </el-table>
       </el-tab-pane>
       <el-tab-pane
+        v-if="auth.hasPermission('notifications.dead_letters.read')"
         label="Dead Letter"
         name="deadletters"
       >
@@ -318,6 +333,7 @@ onMounted(() => void load());
         </el-table>
       </el-tab-pane>
       <el-tab-pane
+        v-if="auth.hasPermission('notifications.reminders.read')"
         label="提醒与摘要"
         name="reminders"
       >
@@ -348,6 +364,7 @@ onMounted(() => void load());
         </el-table>
       </el-tab-pane>
       <el-tab-pane
+        v-if="auth.hasPermission('notifications.campaigns.read')"
         label="Campaign"
         name="campaigns"
       >
@@ -413,6 +430,12 @@ onMounted(() => void load());
               >
                 提交审批
               </el-button><el-button
+                v-if="scope.row.status === 'in_review'"
+                size="small"
+                @click="campaignAction(scope.row,'approve')"
+              >
+                独立审批
+              </el-button><el-button
                 v-if="scope.row.status === 'approved'"
                 size="small"
                 @click="campaignAction(scope.row,'audience')"
@@ -444,6 +467,7 @@ onMounted(() => void load());
         <p>创建者不能自行批准正式群发；暂停/取消只停止新发送，不能撤回已进入邮箱的邮件。</p>
       </el-tab-pane>
       <el-tab-pane
+        v-if="auth.hasPermission('notifications.providers.read') || auth.hasPermission('notifications.suppressions.read')"
         label="Provider 与抑制"
         name="providers"
       >
@@ -512,6 +536,7 @@ onMounted(() => void load());
         </el-table>
       </el-tab-pane>
       <el-tab-pane
+        v-if="auth.hasPermission('notifications.audit.read')"
         label="审计"
         name="audit"
       >

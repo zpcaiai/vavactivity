@@ -123,3 +123,76 @@ async def test_invalid_webhook_signature_is_rejected(
                 raw_body=b'{"event_id":"x-123","event_type":"delivered"}',
             )
         assert error.value.code == "NOTIFICATION_WEBHOOK_SIGNATURE_INVALID"
+
+
+@pytest.mark.asyncio
+async def test_repeated_soft_bounces_reach_suppression_threshold(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    await seed_notification_templates()
+    await seed_notifications()
+    await seed_test_user()
+    fake = FakeEmailProvider()
+    monkeypatch.setattr(service_module, "configured_email_provider", lambda: fake)
+    async with session_factory() as session:
+        user_id = await session.scalar(
+            text("SELECT id FROM users WHERE email=:email"), {"email": TEST_USER_EMAIL}
+        )
+        assert user_id is not None
+        destination_hash = stable_hash(TEST_USER_EMAIL)
+        await session.execute(
+            text(
+                "UPDATE notification_suppressions SET status='lifted',lifted_at=now() "
+                "WHERE destination_hash=:hash AND status='active'"
+            ),
+            {"hash": destination_hash},
+        )
+        await session.execute(
+            text(
+                "UPDATE notification_deliveries SET status='cancelled' "
+                "WHERE status IN ('pending','scheduled','failed_retryable')"
+            )
+        )
+        await session.commit()
+        await ingest_event(
+            session,
+            IngestNotificationEventRequest(
+                source_event_id=uuid4(),
+                source_module="auth",
+                event_type="auth.password.changed",
+                event_version=1,
+                subject_type="user",
+                subject_id=user_id,
+                payload={"user_id": str(user_id)},
+                occurred_at=datetime.now(UTC),
+            ),
+        )
+        delivery_result = (await process_due_deliveries(session, limit=1))[0]
+        message_id = await session.scalar(
+            text("SELECT provider_message_id FROM notification_deliveries WHERE id=:id"),
+            {"id": UUID(delivery_result["delivery_id"])},
+        )
+        secret = get_settings().notification_email_provider_webhook_secret.get_secret_value()
+        for index in range(get_settings().notification_soft_bounce_threshold):
+            raw = json.dumps(
+                {
+                    "event_id": f"soft-{index}-{uuid4()}",
+                    "event_type": "soft_bounce",
+                    "provider_message_id": message_id,
+                }
+            ).encode()
+            result = await receive_provider_webhook(
+                session,
+                provider_name="fake",
+                headers={"x-vav-notification-secret": secret},
+                raw_body=raw,
+            )
+            assert result["status"] == "processed"
+        count = await session.scalar(
+            text(
+                "SELECT count(*) FROM notification_suppressions WHERE destination_hash=:hash "
+                "AND suppression_reason='repeated_soft_bounce' AND status='active'"
+            ),
+            {"hash": destination_hash},
+        )
+        assert count == 1
