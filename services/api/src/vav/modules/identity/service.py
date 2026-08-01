@@ -61,6 +61,23 @@ async def permissions_for_user(session: AsyncSession, user_id: UUID) -> list[str
     return list((await session.scalars(statement)).all())
 
 
+async def roles_for_user(session: AsyncSession, user_id: UUID) -> list[str]:
+    now = datetime.now(UTC)
+    statement = (
+        select(Role.code)
+        .join(UserRole, UserRole.role_id == Role.id)
+        .where(
+            UserRole.user_id == user_id,
+            UserRole.revoked_at.is_(None),
+            or_(UserRole.expires_at.is_(None), UserRole.expires_at > now),
+            Role.is_active.is_(True),
+        )
+        .distinct()
+        .order_by(Role.code)
+    )
+    return list((await session.scalars(statement)).all())
+
+
 class IdentityService:
     def __init__(self, settings: Settings | None = None) -> None:
         self.settings = settings or get_settings()

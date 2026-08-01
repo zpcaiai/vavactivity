@@ -36,6 +36,7 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-vav_minio_local}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-vav_minio_local_development_only}
+      MINIO_API_CORS_ALLOW_ORIGIN: ${MINIO_API_CORS_ALLOW_ORIGIN:-http://localhost:5174}
     ports:
       - "9000:9000"
       - "9001:9001"

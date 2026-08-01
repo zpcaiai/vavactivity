@@ -751,6 +751,126 @@
         "title": "AttemptSubmitRequest",
         "type": "object"
       },
+      "AuthorizationDecisionRequest": {
+        "properties": {
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 2,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "AuthorizationDecisionRequest",
+        "type": "object"
+      },
+      "AuthorizationRequest": {
+        "properties": {
+          "allow_external_training": {
+            "default": false,
+            "title": "Allow External Training",
+            "type": "boolean"
+          },
+          "allow_public_quote": {
+            "default": false,
+            "title": "Allow Public Quote",
+            "type": "boolean"
+          },
+          "allow_rag": {
+            "title": "Allow Rag",
+            "type": "boolean"
+          },
+          "allowed_regions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Allowed Regions",
+            "type": "array"
+          },
+          "allowed_uses": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Allowed Uses",
+            "type": "array"
+          },
+          "authorization_basis": {
+            "default": "owned_by_vav",
+            "enum": [
+              "owned_by_vav",
+              "written_license",
+              "public_domain",
+              "contractual_permission",
+              "user_supplied_authorized"
+            ],
+            "title": "Authorization Basis",
+            "type": "string"
+          },
+          "citation_permission": {
+            "default": "none",
+            "enum": [
+              "none",
+              "internal_reference_only",
+              "short_public_excerpt",
+              "public_title_only"
+            ],
+            "title": "Citation Permission",
+            "type": "string"
+          },
+          "evidence": {
+            "additionalProperties": true,
+            "title": "Evidence",
+            "type": "object"
+          },
+          "prohibited_regions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Prohibited Regions",
+            "type": "array"
+          },
+          "prohibited_uses": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Prohibited Uses",
+            "type": "array"
+          },
+          "rights_holder_name": {
+            "default": "VAV",
+            "maxLength": 300,
+            "minLength": 2,
+            "title": "Rights Holder Name",
+            "type": "string"
+          },
+          "valid_from": {
+            "format": "date-time",
+            "title": "Valid From",
+            "type": "string"
+          },
+          "valid_until": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid Until"
+          }
+        },
+        "required": [
+          "allow_rag",
+          "evidence",
+          "valid_from"
+        ],
+        "title": "AuthorizationRequest",
+        "type": "object"
+      },
       "AvailabilityRuleRequest": {
         "properties": {
           "daily_limit": {
@@ -851,6 +971,35 @@
         ],
         "title": "BillingType",
         "type": "string"
+      },
+      "Body_upload_document_api_v1_admin_knowledge_sources__source_id__upload_post": {
+        "properties": {
+          "document_code": {
+            "title": "Document Code",
+            "type": "string"
+          },
+          "file": {
+            "format": "binary",
+            "title": "File",
+            "type": "string"
+          },
+          "locale": {
+            "default": "zh-CN",
+            "title": "Locale",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file",
+          "document_code",
+          "title"
+        ],
+        "title": "Body_upload_document_api_v1_admin_knowledge_sources__source_id__upload_post",
+        "type": "object"
       },
       "CallToActionBlock": {
         "properties": {
@@ -2233,6 +2382,61 @@
         "title": "CourseUpdateRequest",
         "type": "object"
       },
+      "DocumentRequest": {
+        "properties": {
+          "allowed_roles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Allowed Roles",
+            "type": "array"
+          },
+          "document_code": {
+            "pattern": "^[a-z0-9][a-z0-9_-]{2,127}$",
+            "title": "Document Code",
+            "type": "string"
+          },
+          "locale": {
+            "default": "zh-CN",
+            "title": "Locale",
+            "type": "string"
+          },
+          "mime_type": {
+            "default": "text/markdown",
+            "enum": [
+              "text/plain",
+              "text/markdown",
+              "application/json"
+            ],
+            "title": "Mime Type",
+            "type": "string"
+          },
+          "source_locator": {
+            "additionalProperties": true,
+            "title": "Source Locator",
+            "type": "object"
+          },
+          "text": {
+            "maxLength": 1000000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 500,
+            "minLength": 2,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "document_code",
+          "title",
+          "text"
+        ],
+        "title": "DocumentRequest",
+        "type": "object"
+      },
       "EmailRequest": {
         "properties": {
           "email": {
@@ -2393,6 +2597,31 @@
           "exercise_code"
         ],
         "title": "ExerciseCreateRequest",
+        "type": "object"
+      },
+      "FindingReviewRequest": {
+        "properties": {
+          "decision": {
+            "enum": [
+              "resolved",
+              "accepted_risk",
+              "rejected"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "resolution": {
+            "maxLength": 2000,
+            "minLength": 2,
+            "title": "Resolution",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "resolution"
+        ],
+        "title": "FindingReviewRequest",
         "type": "object"
       },
       "FollowUpCreateRequest": {
@@ -2733,6 +2962,21 @@
           "media_id"
         ],
         "title": "ImageData",
+        "type": "object"
+      },
+      "IndexActionRequest": {
+        "properties": {
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 2,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "IndexActionRequest",
         "type": "object"
       },
       "InstructorAssignmentRequest": {
@@ -5824,6 +6068,26 @@
         "title": "ProposalRequest",
         "type": "object"
       },
+      "PublishRequest": {
+        "properties": {
+          "allowed_roles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Allowed Roles",
+            "type": "array"
+          },
+          "reason": {
+            "default": "approved for knowledge retrieval",
+            "maxLength": 1000,
+            "minLength": 2,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "title": "PublishRequest",
+        "type": "object"
+      },
       "QuestionCreateRequest": {
         "properties": {
           "answer_key": {
@@ -6145,6 +6409,73 @@
           "reason_code"
         ],
         "title": "RestrictionRequest",
+        "type": "object"
+      },
+      "RetrievalRequest": {
+        "properties": {
+          "index_version_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Index Version Id"
+          },
+          "locale": {
+            "default": "zh-CN",
+            "title": "Locale",
+            "type": "string"
+          },
+          "public": {
+            "default": false,
+            "title": "Public",
+            "type": "boolean"
+          },
+          "query": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Query",
+            "type": "string"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region"
+          },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Roles",
+            "type": "array"
+          },
+          "space_code": {
+            "title": "Space Code",
+            "type": "string"
+          },
+          "top_k": {
+            "default": 8,
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Top K",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "space_code",
+          "query"
+        ],
+        "title": "RetrievalRequest",
         "type": "object"
       },
       "RichTextBlock": {
@@ -6860,6 +7191,90 @@
         "title": "SlotHoldRequest",
         "type": "object"
       },
+      "SourceRequest": {
+        "properties": {
+          "sensitivity": {
+            "default": "internal",
+            "enum": [
+              "public",
+              "internal",
+              "restricted"
+            ],
+            "title": "Sensitivity",
+            "type": "string"
+          },
+          "source_code": {
+            "pattern": "^[a-z0-9][a-z0-9_-]{2,127}$",
+            "title": "Source Code",
+            "type": "string"
+          },
+          "source_type": {
+            "enum": [
+              "upload",
+              "cms",
+              "course",
+              "activity",
+              "counseling",
+              "faq"
+            ],
+            "title": "Source Type",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 300,
+            "minLength": 2,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_code",
+          "source_type",
+          "title"
+        ],
+        "title": "SourceRequest",
+        "type": "object"
+      },
+      "SpaceRequest": {
+        "properties": {
+          "allowed_roles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Allowed Roles",
+            "type": "array"
+          },
+          "default_locale": {
+            "default": "zh-CN",
+            "title": "Default Locale",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 2,
+            "title": "Name",
+            "type": "string"
+          },
+          "purpose": {
+            "maxLength": 1000,
+            "minLength": 10,
+            "title": "Purpose",
+            "type": "string"
+          },
+          "space_code": {
+            "pattern": "^[a-z0-9][a-z0-9_-]{2,127}$",
+            "title": "Space Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "space_code",
+          "name",
+          "purpose"
+        ],
+        "title": "SpaceRequest",
+        "type": "object"
+      },
       "Stackability": {
         "enum": [
           "exclusive",
@@ -7165,6 +7580,83 @@
         "title": "TranslationStatus",
         "type": "string"
       },
+      "UploadCompleteRequest": {
+        "properties": {
+          "checksum_sha256": {
+            "pattern": "^[a-fA-F0-9]{64}$",
+            "title": "Checksum Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "checksum_sha256"
+        ],
+        "title": "UploadCompleteRequest",
+        "type": "object"
+      },
+      "UploadCreateRequest": {
+        "properties": {
+          "byte_size": {
+            "exclusiveMinimum": 0.0,
+            "title": "Byte Size",
+            "type": "integer"
+          },
+          "checksum_sha256": {
+            "pattern": "^[a-fA-F0-9]{64}$",
+            "title": "Checksum Sha256",
+            "type": "string"
+          },
+          "document_code": {
+            "pattern": "^[a-z0-9][a-z0-9_-]{2,127}$",
+            "title": "Document Code",
+            "type": "string"
+          },
+          "filename": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Filename",
+            "type": "string"
+          },
+          "locale": {
+            "default": "zh-CN",
+            "title": "Locale",
+            "type": "string"
+          },
+          "mime_type": {
+            "enum": [
+              "application/pdf",
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+              "text/markdown",
+              "text/plain",
+              "text/html"
+            ],
+            "title": "Mime Type",
+            "type": "string"
+          },
+          "source_id": {
+            "format": "uuid",
+            "title": "Source Id",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 500,
+            "minLength": 2,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_id",
+          "document_code",
+          "title",
+          "filename",
+          "mime_type",
+          "byte_size",
+          "checksum_sha256"
+        ],
+        "title": "UploadCreateRequest",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "loc": {
@@ -7422,6 +7914,30 @@
           "reason"
         ],
         "title": "ReasonRequest",
+        "type": "object"
+      },
+      "vav__modules__knowledge__schemas__ReviewRequest": {
+        "properties": {
+          "decision": {
+            "enum": [
+              "approve",
+              "reject"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 2,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "reason"
+        ],
+        "title": "ReviewRequest",
         "type": "object"
       }
     },
@@ -19646,6 +20162,1622 @@
         "summary": "Manual Grade",
         "tags": [
           "courses"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/audit": {
+      "get": {
+        "operationId": "knowledge_audit_api_v1_admin_knowledge_audit_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Knowledge Audit Api V1 Admin Knowledge Audit Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Knowledge Audit",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/authorizations": {
+      "get": {
+        "operationId": "list_authorizations_api_v1_admin_knowledge_authorizations_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Authorizations Api V1 Admin Knowledge Authorizations Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Authorizations",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/authorizations/{authorization_id}/approve": {
+      "post": {
+        "operationId": "approve_authorization_api_v1_admin_knowledge_authorizations__authorization_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "authorization_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Authorization Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorizationDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Authorization Api V1 Admin Knowledge Authorizations  Authorization Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Authorization",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/authorizations/{authorization_id}/impact": {
+      "get": {
+        "operationId": "authorization_impact_api_v1_admin_knowledge_authorizations__authorization_id__impact_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "authorization_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Authorization Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Authorization Impact Api V1 Admin Knowledge Authorizations  Authorization Id  Impact Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Authorization Impact",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/authorizations/{authorization_id}/reject": {
+      "post": {
+        "operationId": "reject_authorization_api_v1_admin_knowledge_authorizations__authorization_id__reject_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "authorization_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Authorization Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorizationDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reject Authorization Api V1 Admin Knowledge Authorizations  Authorization Id  Reject Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reject Authorization",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/authorizations/{authorization_id}/revoke": {
+      "post": {
+        "operationId": "revoke_authorization_api_v1_admin_knowledge_authorizations__authorization_id__revoke_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "authorization_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Authorization Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IndexActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Revoke Authorization Api V1 Admin Knowledge Authorizations  Authorization Id  Revoke Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Revoke Authorization",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/citations/{citation_id}/verify": {
+      "get": {
+        "operationId": "verify_citation_api_v1_admin_knowledge_citations__citation_id__verify_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "citation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Citation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Verify Citation Api V1 Admin Knowledge Citations  Citation Id  Verify Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Verify Citation",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/document-versions/{left_id}/diff/{right_id}": {
+      "get": {
+        "operationId": "version_diff_api_v1_admin_knowledge_document_versions__left_id__diff__right_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "left_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Left Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "right_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Right Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Version Diff Api V1 Admin Knowledge Document Versions  Left Id  Diff  Right Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Version Diff",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/document-versions/{version_id}/chunks": {
+      "get": {
+        "operationId": "chunk_inspector_api_v1_admin_knowledge_document_versions__version_id__chunks_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Chunk Inspector Api V1 Admin Knowledge Document Versions  Version Id  Chunks Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Chunk Inspector",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/document-versions/{version_id}/findings": {
+      "get": {
+        "operationId": "list_findings_api_v1_admin_knowledge_document_versions__version_id__findings_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Findings Api V1 Admin Knowledge Document Versions  Version Id  Findings Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Findings",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/document-versions/{version_id}/parsing": {
+      "get": {
+        "operationId": "parsing_preview_api_v1_admin_knowledge_document_versions__version_id__parsing_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Parsing Preview Api V1 Admin Knowledge Document Versions  Version Id  Parsing Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Parsing Preview",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/document-versions/{version_id}/publish": {
+      "post": {
+        "operationId": "publish_document_api_v1_admin_knowledge_document_versions__version_id__publish_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Publish Document Api V1 Admin Knowledge Document Versions  Version Id  Publish Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Publish Document",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/document-versions/{version_id}/review": {
+      "post": {
+        "operationId": "review_document_version_api_v1_admin_knowledge_document_versions__version_id__review_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/vav__modules__knowledge__schemas__ReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Review Document Version Api V1 Admin Knowledge Document Versions  Version Id  Review Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Review Document Version",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/documents": {
+      "get": {
+        "operationId": "list_documents_api_v1_admin_knowledge_documents_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Documents Api V1 Admin Knowledge Documents Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Documents",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/documents/{document_id}": {
+      "get": {
+        "operationId": "document_detail_api_v1_admin_knowledge_documents__document_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Document Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Document Detail Api V1 Admin Knowledge Documents  Document Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Document Detail",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/documents/{document_id}/authorizations": {
+      "post": {
+        "operationId": "create_document_authorization_api_v1_admin_knowledge_documents__document_id__authorizations_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Document Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorizationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Document Authorization Api V1 Admin Knowledge Documents  Document Id  Authorizations Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Document Authorization",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/evaluation-runs": {
+      "get": {
+        "operationId": "evaluation_runs_api_v1_admin_knowledge_evaluation_runs_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Evaluation Runs Api V1 Admin Knowledge Evaluation Runs Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Evaluation Runs",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/evaluations": {
+      "get": {
+        "operationId": "evaluations_api_v1_admin_knowledge_evaluations_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Evaluations Api V1 Admin Knowledge Evaluations Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Evaluations",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/findings/{finding_id}/review": {
+      "post": {
+        "operationId": "review_finding_api_v1_admin_knowledge_findings__finding_id__review_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "finding_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Finding Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FindingReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Review Finding Api V1 Admin Knowledge Findings  Finding Id  Review Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Review Finding",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/indexes": {
+      "get": {
+        "operationId": "list_indexes_api_v1_admin_knowledge_indexes_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Indexes Api V1 Admin Knowledge Indexes Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Indexes",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/indexes/{index_id}/activate": {
+      "post": {
+        "operationId": "activate_index_api_v1_admin_knowledge_indexes__index_id__activate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "index_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Index Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IndexActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Activate Index Api V1 Admin Knowledge Indexes  Index Id  Activate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Activate Index",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/indexes/{index_id}/rollback": {
+      "post": {
+        "operationId": "rollback_index_api_v1_admin_knowledge_indexes__index_id__rollback_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "index_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Index Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IndexActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Rollback Index Api V1 Admin Knowledge Indexes  Index Id  Rollback Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rollback Index",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/retrieval/debug": {
+      "post": {
+        "operationId": "debug_retrieval_api_v1_admin_knowledge_retrieval_debug_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetrievalRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Debug Retrieval Api V1 Admin Knowledge Retrieval Debug Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Debug Retrieval",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/sources": {
+      "get": {
+        "operationId": "list_sources_api_v1_admin_knowledge_sources_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Sources Api V1 Admin Knowledge Sources Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Sources",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/sources/{source_id}/authorizations": {
+      "post": {
+        "operationId": "authorize_source_api_v1_admin_knowledge_sources__source_id__authorizations_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Source Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorizationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Authorize Source Api V1 Admin Knowledge Sources  Source Id  Authorizations Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Authorize Source",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/sources/{source_id}/documents": {
+      "post": {
+        "operationId": "ingest_document_api_v1_admin_knowledge_sources__source_id__documents_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Source Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Ingest Document Api V1 Admin Knowledge Sources  Source Id  Documents Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Ingest Document",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/sources/{source_id}/sync": {
+      "post": {
+        "operationId": "synchronize_source_api_v1_admin_knowledge_sources__source_id__sync_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Source Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Synchronize Source Api V1 Admin Knowledge Sources  Source Id  Sync Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Synchronize Source",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/sources/{source_id}/upload": {
+      "post": {
+        "operationId": "upload_document_api_v1_admin_knowledge_sources__source_id__upload_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Source Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_document_api_v1_admin_knowledge_sources__source_id__upload_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Upload Document Api V1 Admin Knowledge Sources  Source Id  Upload Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Upload Document",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/spaces": {
+      "get": {
+        "operationId": "list_spaces_api_v1_admin_knowledge_spaces_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Spaces Api V1 Admin Knowledge Spaces Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Spaces",
+        "tags": [
+          "knowledge"
+        ]
+      },
+      "post": {
+        "operationId": "create_space_api_v1_admin_knowledge_spaces_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SpaceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Space Api V1 Admin Knowledge Spaces Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Space",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/spaces/{space_id}/sources": {
+      "post": {
+        "operationId": "create_source_api_v1_admin_knowledge_spaces__space_id__sources_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "space_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Space Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SourceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Source Api V1 Admin Knowledge Spaces  Space Id  Sources Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Source",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/uploads": {
+      "post": {
+        "operationId": "create_private_upload_api_v1_admin_knowledge_uploads_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Private Upload Api V1 Admin Knowledge Uploads Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Private Upload",
+        "tags": [
+          "knowledge"
+        ]
+      }
+    },
+    "/api/v1/admin/knowledge/uploads/{upload_id}/complete": {
+      "post": {
+        "operationId": "complete_private_upload_api_v1_admin_knowledge_uploads__upload_id__complete_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "upload_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Upload Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadCompleteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Complete Private Upload Api V1 Admin Knowledge Uploads  Upload Id  Complete Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Complete Private Upload",
+        "tags": [
+          "knowledge"
         ]
       }
     },

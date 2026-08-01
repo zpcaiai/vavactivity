@@ -490,6 +490,94 @@ class Settings(BaseSettings):
         default=True,
         validation_alias="COUNSELING_IMMEDIATE_RISK_AUTO_PAUSE_GENERAL_ADVICE",
     )
+    knowledge_default_locale: str = Field(
+        default="zh-CN", validation_alias="KNOWLEDGE_DEFAULT_LOCALE"
+    )
+    knowledge_supported_locales: str = Field(
+        default="zh-CN,zh-TW,en", validation_alias="KNOWLEDGE_SUPPORTED_LOCALES"
+    )
+    knowledge_require_authorization: bool = Field(
+        default=True, validation_alias="KNOWLEDGE_REQUIRE_AUTHORIZATION"
+    )
+    knowledge_require_review_before_publish: bool = Field(
+        default=True, validation_alias="KNOWLEDGE_REQUIRE_REVIEW_BEFORE_PUBLISH"
+    )
+    knowledge_max_upload_size_mb: int = Field(
+        default=100, validation_alias="KNOWLEDGE_MAX_UPLOAD_SIZE_MB"
+    )
+    knowledge_parser_timeout_seconds: int = Field(
+        default=120, validation_alias="KNOWLEDGE_PARSER_TIMEOUT_SECONDS"
+    )
+    knowledge_min_parse_quality_bps: int = Field(
+        default=8000, validation_alias="KNOWLEDGE_MIN_PARSE_QUALITY_BPS"
+    )
+    knowledge_block_low_quality_autopublish: bool = Field(
+        default=True, validation_alias="KNOWLEDGE_BLOCK_LOW_QUALITY_AUTOPUBLISH"
+    )
+    knowledge_chunk_strategy: str = Field(
+        default="heading_aware_v1", validation_alias="KNOWLEDGE_CHUNK_STRATEGY"
+    )
+    knowledge_chunk_target_tokens: int = Field(
+        default=500, validation_alias="KNOWLEDGE_CHUNK_TARGET_TOKENS"
+    )
+    knowledge_chunk_max_tokens: int = Field(
+        default=800, validation_alias="KNOWLEDGE_CHUNK_MAX_TOKENS"
+    )
+    knowledge_chunk_min_tokens: int = Field(
+        default=100, validation_alias="KNOWLEDGE_CHUNK_MIN_TOKENS"
+    )
+    knowledge_chunk_overlap_tokens: int = Field(
+        default=80, validation_alias="KNOWLEDGE_CHUNK_OVERLAP_TOKENS"
+    )
+    knowledge_parent_chunk_max_tokens: int = Field(
+        default=1600, validation_alias="KNOWLEDGE_PARENT_CHUNK_MAX_TOKENS"
+    )
+    knowledge_embedding_provider: str = Field(
+        default="fake", validation_alias="KNOWLEDGE_EMBEDDING_PROVIDER"
+    )
+    knowledge_embedding_profile: str = Field(
+        default="default-multilingual", validation_alias="KNOWLEDGE_EMBEDDING_PROFILE"
+    )
+    knowledge_embedding_batch_token_limit: int = Field(
+        default=20000, validation_alias="KNOWLEDGE_EMBEDDING_BATCH_TOKEN_LIMIT"
+    )
+    knowledge_embedding_max_retries: int = Field(
+        default=5, validation_alias="KNOWLEDGE_EMBEDDING_MAX_RETRIES"
+    )
+    knowledge_retrieval_top_k: int = Field(default=8, validation_alias="KNOWLEDGE_RETRIEVAL_TOP_K")
+    knowledge_retrieval_candidate_count: int = Field(
+        default=40, validation_alias="KNOWLEDGE_RETRIEVAL_CANDIDATE_COUNT"
+    )
+    knowledge_retrieval_fusion: str = Field(
+        default="reciprocal_rank_fusion", validation_alias="KNOWLEDGE_RETRIEVAL_FUSION"
+    )
+    knowledge_retrieval_rerank_enabled: bool = Field(
+        default=True, validation_alias="KNOWLEDGE_RETRIEVAL_RERANK_ENABLED"
+    )
+    knowledge_retrieval_query_max_length: int = Field(
+        default=2000, validation_alias="KNOWLEDGE_RETRIEVAL_QUERY_MAX_LENGTH"
+    )
+    knowledge_retrieval_cache_ttl_seconds: int = Field(
+        default=300, validation_alias="KNOWLEDGE_RETRIEVAL_CACHE_TTL_SECONDS"
+    )
+    knowledge_evaluation_min_cases: int = Field(
+        default=30, validation_alias="KNOWLEDGE_EVALUATION_MIN_CASES"
+    )
+    knowledge_evaluation_require_zero_acl_leakage: bool = Field(
+        default=True, validation_alias="KNOWLEDGE_EVALUATION_REQUIRE_ZERO_ACL_LEAKAGE"
+    )
+    knowledge_evaluation_require_zero_authorization_violations: bool = Field(
+        default=True, validation_alias="KNOWLEDGE_EVALUATION_REQUIRE_ZERO_AUTHORIZATION_VIOLATIONS"
+    )
+    knowledge_query_log_retention_days: int = Field(
+        default=30, validation_alias="KNOWLEDGE_QUERY_LOG_RETENTION_DAYS"
+    )
+    knowledge_store_raw_query_text: bool = Field(
+        default=True, validation_alias="KNOWLEDGE_STORE_RAW_QUERY_TEXT"
+    )
+    knowledge_sensitive_query_encryption: bool = Field(
+        default=True, validation_alias="KNOWLEDGE_SENSITIVE_QUERY_ENCRYPTION"
+    )
 
     @model_validator(mode="after")
     def reject_development_credentials_in_production(self) -> Settings:
@@ -510,6 +598,8 @@ class Settings(BaseSettings):
             raise ValueError("production must configure a real private course video provider")
         if self.environment == "production" and self.counseling_meeting_provider == "fake":
             raise ValueError("production must configure a real counseling meeting provider")
+        if self.environment == "production" and self.knowledge_embedding_provider == "fake":
+            raise ValueError("production must configure a real knowledge embedding provider")
         return self
 
     def public_summary(self) -> dict[str, object]:

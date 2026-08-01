@@ -13,6 +13,10 @@ COPY services/worker/pyproject.toml ./services/worker/pyproject.toml
 RUN uv sync --frozen --all-packages --all-groups --no-install-workspace
 
 COPY services ./services
+# Repository-level validation modules are imported by the API acceptance tests.
+# Keep them in the runtime image so `docker compose exec api pytest` exercises
+# the same release checks as the host suite.
+COPY scripts ./scripts
 
 RUN uv sync --frozen --all-packages --all-groups
 

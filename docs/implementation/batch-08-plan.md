@@ -23,3 +23,16 @@ Scheduling mode, cancellation/refund, no-show credit consumption, recording,
 transcription, retention and professional-scope approval remain undecided.
 Development defaults to manual confirmation, no automatic refund, no automatic
 no-show consumption, recording/transcription off and least-disclosing access.
+
+## Evidence recorded 2026-07-31
+
+- Alembic `20260731_0027` applied against PostgreSQL: 14 counseling tables and
+  the `counseling_appointments_no_overlap` exclusion constraint are present.
+- Seed is repeatable: 173 permissions, 18 roles, Catalog product/SKU/price,
+  mentor, localized service and timezone availability.
+- `make counseling-verify` passed every Batch 8 gate and all recursive Batch
+  1-7 tests/E2E. Its final redundant image metadata lookup was blocked twice by
+  registry `EOF`; the images had already built successfully immediately before.
+- `VAV_VERIFY_REUSE_BUILT_IMAGES=true make verify` then passed 109 backend
+  tests, 12 frontend tests, both production builds and OpenAPI freshness using
+  those exact locally built images.

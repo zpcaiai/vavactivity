@@ -174,6 +174,18 @@ pending_decisions:
     owner: legal_and_service_owner
     status: undecided
     value: null
+  knowledge_embedding_provider:
+    owner: platform_and_ai
+    status: undecided
+    value: null
+  knowledge_query_retention:
+    owner: privacy_and_legal
+    status: undecided
+    value: null
+  knowledge_public_citation_policy:
+    owner: legal_and_content
+    status: undecided
+    value: null
 
 quality:
   credentials_committed: false

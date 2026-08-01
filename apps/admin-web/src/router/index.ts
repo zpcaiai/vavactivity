@@ -15,6 +15,7 @@ import CmsManagementPage from "@/pages/CmsManagementPage.vue";
 import ErrorPage from "@/pages/ErrorPage.vue";
 import LoginPage from "@/pages/LoginPage.vue";
 import MediaLibraryPage from "@/pages/MediaLibraryPage.vue";
+import KnowledgeManagementPage from "@/pages/KnowledgeManagementPage.vue";
 import ModuleListPage from "@/pages/ModuleListPage.vue";
 import NavigationManagementPage from "@/pages/NavigationManagementPage.vue";
 import PricingSimulationPage from "@/pages/PricingSimulationPage.vue";
@@ -234,6 +235,12 @@ export const router = createRouter({
           name: "admin-counseling",
           component: CounselingManagementPage,
           meta: { title: "辅导中心", permission: "counseling.appointments.read" }
+        },
+        {
+          path: "knowledge",
+          name: "admin-knowledge",
+          component: KnowledgeManagementPage,
+          meta: { title: "知识库中心", permission: "knowledge.spaces.read" }
         },
         {
           path: "access/admins",

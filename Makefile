@@ -11,7 +11,10 @@
 	course-migrate course-seed course-test course-concurrency-test course-security-test \
 	course-user-e2e course-admin-e2e course-verify \
 	counseling-migrate counseling-seed counseling-test counseling-concurrency-test \
-	counseling-security-test counseling-user-e2e counseling-admin-e2e counseling-verify
+	counseling-security-test counseling-user-e2e counseling-admin-e2e counseling-verify \
+	knowledge-migrate knowledge-seed knowledge-ingest-fixtures knowledge-build-index \
+	knowledge-test knowledge-retrieval-test knowledge-security-test knowledge-eval \
+	knowledge-admin-e2e knowledge-verify
 
 bootstrap:
 	./scripts/bootstrap.sh
@@ -220,3 +223,34 @@ counseling-admin-e2e:
 
 counseling-verify: counseling-migrate counseling-seed counseling-test counseling-concurrency-test counseling-security-test counseling-user-e2e counseling-admin-e2e
 	$(MAKE) course-verify
+
+knowledge-migrate:
+	docker compose exec -T api alembic upgrade head
+
+knowledge-seed:
+	docker compose exec -T api python -m vav.cli.seed_permissions
+	docker compose exec -T api python -m vav.cli.seed_knowledge
+
+knowledge-ingest-fixtures:
+	docker compose exec -T api python -m vav.cli.ingest_knowledge_fixtures
+
+knowledge-build-index:
+	docker compose exec -T api python -m vav.cli.build_knowledge_index
+
+knowledge-test:
+	docker compose exec -T api pytest tests/knowledge/unit tests/knowledge/integration -q
+
+knowledge-retrieval-test:
+	docker compose exec -T api pytest tests/knowledge/retrieval -q
+
+knowledge-security-test:
+	docker compose exec -T api pytest tests/knowledge/security -q
+
+knowledge-eval:
+	docker compose exec -T api python -m vav.cli.run_knowledge_evaluation
+
+knowledge-admin-e2e:
+	corepack pnpm exec playwright test e2e/knowledge.admin.spec.ts
+
+knowledge-verify: knowledge-migrate knowledge-seed knowledge-ingest-fixtures knowledge-build-index knowledge-test knowledge-retrieval-test knowledge-security-test knowledge-eval knowledge-admin-e2e
+	$(MAKE) counseling-verify

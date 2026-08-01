@@ -31,6 +31,7 @@ const menu = [
   { path: "/admin/activities", labelKey: "menu.activities", icon: Goods },
   { path: "/admin/courses", labelKey: "menu.courses", icon: Document },
   { path: "/admin/counseling", labelKey: "menu.counseling", icon: User },
+  { path: "/admin/knowledge", labelKey: "menu.knowledge", icon: Document },
   { path: "/admin/content/settings", labelKey: "menu.settings", icon: Setting },
   { path: "/admin/access/admins", labelKey: "menu.admins", icon: Lock },
   { path: "/admin/audit/auth", labelKey: "menu.audit", icon: DataAnalysis }
@@ -47,6 +48,7 @@ const visibleMenu = computed(() =>
       "/admin/activities": "activities.read",
       "/admin/courses": "courses.read",
       "/admin/counseling": "counseling.appointments.read",
+      "/admin/knowledge": "knowledge.spaces.read",
       "/admin/content/settings": "content.settings.read",
       "/admin/access/admins": "admins.read",
       "/admin/audit/auth": "audit.read"

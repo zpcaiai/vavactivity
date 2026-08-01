@@ -12,7 +12,12 @@ fi
 ./scripts/generate-dev-auth-keys.sh
 python3 scripts/validate_manifest.py
 docker compose config --quiet
-docker compose up -d --build
+if [[ "${VAV_VERIFY_REUSE_BUILT_IMAGES:-false}" == "true" ]]; then
+  echo "Reusing locally built images for verification"
+  docker compose up -d
+else
+  docker compose up -d --build
+fi
 ./scripts/wait-for-services.sh
 
 curl --noproxy "*" --fail --silent http://localhost:8000/api/v1/health/live >/dev/null

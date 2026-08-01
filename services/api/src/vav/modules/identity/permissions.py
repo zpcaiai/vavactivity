@@ -203,6 +203,27 @@ COUNSELING_PERMISSIONS = {
     "counseling.safety.manage",
 }
 
+KNOWLEDGE_PERMISSIONS = {
+    "knowledge.spaces.read",
+    "knowledge.spaces.manage",
+    "knowledge.sources.read",
+    "knowledge.sources.manage",
+    "knowledge.authorizations.read",
+    "knowledge.authorizations.manage",
+    "knowledge.authorizations.approve",
+    "knowledge.documents.read",
+    "knowledge.documents.ingest",
+    "knowledge.documents.review",
+    "knowledge.documents.publish",
+    "knowledge.findings.sensitive.read",
+    "knowledge.indexes.read",
+    "knowledge.indexes.manage",
+    "knowledge.retrieval.debug",
+    "knowledge.evaluations.read",
+    "knowledge.evaluations.run",
+    "knowledge.audit.read",
+}
+
 ALL_PERMISSIONS = (
     IDENTITY_PERMISSIONS
     | CMS_PERMISSIONS
@@ -211,6 +232,7 @@ ALL_PERMISSIONS = (
     | ACTIVITY_PERMISSIONS
     | COURSE_PERMISSIONS
     | COUNSELING_PERMISSIONS
+    | KNOWLEDGE_PERMISSIONS
 )
 
 ROLE_PERMISSIONS: dict[str, set[str]] = {
@@ -320,6 +342,24 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "counseling.schedules.manage",
         "counseling.appointments.read",
         "counseling.appointments.manage",
+    },
+    "ai_knowledge_manager": KNOWLEDGE_PERMISSIONS
+    - {"knowledge.authorizations.approve", "knowledge.findings.sensitive.read"},
+    "knowledge_rights_approver": {
+        "knowledge.sources.read",
+        "knowledge.authorizations.read",
+        "knowledge.authorizations.approve",
+        "knowledge.audit.read",
+    },
+    "knowledge_reviewer": {
+        "knowledge.spaces.read",
+        "knowledge.sources.read",
+        "knowledge.documents.read",
+        "knowledge.documents.review",
+        "knowledge.findings.sensitive.read",
+        "knowledge.indexes.read",
+        "knowledge.retrieval.debug",
+        "knowledge.evaluations.read",
     },
     "analyst": {"audit.read", "catalog.audit.read"},
     "support_agent": {"users.read", "catalog.products.read"},

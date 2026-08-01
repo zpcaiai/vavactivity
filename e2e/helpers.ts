@@ -76,6 +76,16 @@ export function seedCounselingFixture() {
   }
 }
 
+export function seedKnowledgeFixture() {
+  for (const moduleName of ["vav.cli.seed_permissions", "vav.cli.seed_knowledge"]) {
+    execFileSync(
+      "docker",
+      ["compose", "exec", "-T", "api", "python", "-m", moduleName],
+      { stdio: "pipe" }
+    );
+  }
+}
+
 export function providerPaymentId(orderNumber: string): string {
   return execFileSync(
     "docker",

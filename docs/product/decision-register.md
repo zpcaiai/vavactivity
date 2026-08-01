@@ -34,6 +34,9 @@
 | `counseling_recording_policy` | legal_and_privacy | undecided | 录音、录像与转录默认关闭，未经独立同意不得启用 |
 | `counseling_record_retention` | privacy_and_legal | undecided | 记录保持分层加密，不预设生产保留期限 |
 | `counseling_professional_scope` | legal_and_service_owner | undecided | 不宣称心理治疗、医疗诊断、危机干预或法律意见 |
+| `knowledge_embedding_provider` | platform_and_ai | undecided | 开发/测试只用确定性 Fake，生产必须显式配置真实 Provider |
+| `knowledge_query_retention` | privacy_and_legal | undecided | 查询文本保持加密且不声明生产保留期限已批准 |
+| `knowledge_public_citation_policy` | legal_and_content | undecided | 未获独立引用许可时只返回内部引用，不公开原文摘录 |
 
 ## 决策记录格式
 
