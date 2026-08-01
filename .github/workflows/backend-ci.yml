@@ -56,6 +56,7 @@ jobs:
           uv run --package vav-platform-api python -m vav.cli.seed_catalog
           uv run --package vav-platform-api python -m vav.cli.seed_courses
           uv run --package vav-platform-api python -m vav.cli.seed_counseling
+          uv run --package vav-platform-api python -m vav.cli.seed_knowledge
       - run: uv run --package vav-platform-api pytest services/api/tests
       - run: uv run --package vav-platform-api python scripts/check_migration_heads.py
       - name: Verify the CI database reached the migration head
