@@ -6,6 +6,15 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from vav.models.identity import SecurityAuditEvent
+from vav.models.system import OutboxEvent
+
+NOTIFICATION_SECURITY_EVENTS = {
+    "auth.registration.created",
+    "auth.email_verification.completed",
+    "auth.password.changed",
+    "auth.password.reset.completed",
+    "auth.refresh_token.reuse_detected",
+}
 
 
 def record_security_event(
@@ -41,4 +50,14 @@ def record_security_event(
         user_agent_hash=user_agent_hash,
     )
     session.add(event)
+    user_id = target_id if target_type == "user" and target_id is not None else actor_user_id
+    if event_type in NOTIFICATION_SECURITY_EVENTS and user_id is not None:
+        session.add(
+            OutboxEvent(
+                topic=event_type,
+                aggregate_type="user",
+                aggregate_id=str(user_id),
+                payload={"user_id": str(user_id)},
+            )
+        )
     return event

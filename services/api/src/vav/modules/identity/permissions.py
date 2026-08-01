@@ -224,6 +224,75 @@ KNOWLEDGE_PERMISSIONS = {
     "knowledge.audit.read",
 }
 
+AI_PERMISSIONS = {
+    "ai.conversations.read",
+    "ai.conversations.sensitive.read",
+    "ai.conversations.export",
+    "ai.conversations.delete",
+    "ai.referrals.read",
+    "ai.referrals.assign",
+    "ai.referrals.resolve",
+    "ai.referrals.safety.read",
+    "ai.prompts.read",
+    "ai.prompts.create",
+    "ai.prompts.update",
+    "ai.prompts.approve",
+    "ai.prompts.activate",
+    "ai.prompts.rollback",
+    "ai.models.read",
+    "ai.models.manage",
+    "ai.model_routes.manage",
+    "ai.tools.read",
+    "ai.tools.manage",
+    "ai.tool_executions.read",
+    "ai.tool_executions.replay",
+    "ai.evaluations.read",
+    "ai.evaluations.manage",
+    "ai.evaluations.run",
+    "ai.evaluations.approve",
+    "ai.feedback.read",
+    "ai.feedback.resolve",
+    "ai.incidents.read",
+    "ai.incidents.manage",
+    "ai.audit.read",
+}
+
+NOTIFICATION_PERMISSIONS = {
+    "notifications.templates.read",
+    "notifications.templates.create",
+    "notifications.templates.update",
+    "notifications.templates.approve",
+    "notifications.templates.activate",
+    "notifications.templates.rollback",
+    "notifications.templates.test_send",
+    "notifications.subscriptions.read",
+    "notifications.subscriptions.manage",
+    "notifications.deliveries.read",
+    "notifications.deliveries.content.read",
+    "notifications.deliveries.retry",
+    "notifications.deliveries.cancel",
+    "notifications.reminders.read",
+    "notifications.reminders.manage",
+    "notifications.reminders.cancel",
+    "notifications.campaigns.read",
+    "notifications.campaigns.create",
+    "notifications.campaigns.update",
+    "notifications.campaigns.approve",
+    "notifications.campaigns.schedule",
+    "notifications.campaigns.start",
+    "notifications.campaigns.pause",
+    "notifications.campaigns.cancel",
+    "notifications.providers.read",
+    "notifications.providers.manage",
+    "notifications.suppressions.read",
+    "notifications.suppressions.create",
+    "notifications.suppressions.lift",
+    "notifications.dead_letters.read",
+    "notifications.dead_letters.resolve",
+    "notifications.analytics.read",
+    "notifications.audit.read",
+}
+
 ALL_PERMISSIONS = (
     IDENTITY_PERMISSIONS
     | CMS_PERMISSIONS
@@ -233,6 +302,8 @@ ALL_PERMISSIONS = (
     | COURSE_PERMISSIONS
     | COUNSELING_PERMISSIONS
     | KNOWLEDGE_PERMISSIONS
+    | AI_PERMISSIONS
+    | NOTIFICATION_PERMISSIONS
 )
 
 ROLE_PERMISSIONS: dict[str, set[str]] = {
@@ -344,7 +415,82 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "counseling.appointments.manage",
     },
     "ai_knowledge_manager": KNOWLEDGE_PERMISSIONS
-    - {"knowledge.authorizations.approve", "knowledge.findings.sensitive.read"},
+    - {"knowledge.authorizations.approve", "knowledge.findings.sensitive.read"}
+    | {"ai.evaluations.read"},
+    "ai_operations_manager": {
+        "ai.conversations.read",
+        "ai.referrals.read",
+        "ai.referrals.assign",
+        "ai.prompts.read",
+        "ai.models.read",
+        "ai.tools.read",
+        "ai.tool_executions.read",
+        "ai.evaluations.read",
+        "ai.feedback.read",
+        "ai.feedback.resolve",
+        "ai.audit.read",
+    },
+    "ai_safety_reviewer": {
+        "ai.conversations.read",
+        "ai.conversations.sensitive.read",
+        "ai.referrals.read",
+        "ai.referrals.assign",
+        "ai.referrals.resolve",
+        "ai.referrals.safety.read",
+        "ai.incidents.read",
+        "ai.incidents.manage",
+        "ai.evaluations.read",
+    },
+    "ai_release_manager": {
+        permission
+        for permission in AI_PERMISSIONS
+        if permission.startswith("ai.prompts.") or permission.startswith("ai.evaluations.")
+    }
+    | {
+        "ai.models.read",
+        "ai.model_routes.manage",
+        "ai.tools.read",
+        "ai.audit.read",
+    },
+    "notification_manager": (
+        {
+            permission
+            for permission in NOTIFICATION_PERMISSIONS
+            if permission.startswith("notifications.templates.")
+            or permission.startswith("notifications.subscriptions.")
+            or permission.startswith("notifications.reminders.")
+            or permission.startswith("notifications.dead_letters.")
+        }
+        - {"notifications.templates.approve"}
+    )
+    | {
+        "notifications.deliveries.read",
+        "notifications.deliveries.retry",
+        "notifications.campaigns.read",
+        "notifications.campaigns.create",
+        "notifications.campaigns.update",
+        "notifications.campaigns.schedule",
+        "notifications.campaigns.start",
+        "notifications.campaigns.pause",
+        "notifications.campaigns.cancel",
+        "notifications.providers.read",
+        "notifications.suppressions.read",
+        "notifications.analytics.read",
+        "notifications.audit.read",
+    },
+    "campaign_editor": {
+        "notifications.templates.read",
+        "notifications.campaigns.read",
+        "notifications.campaigns.create",
+        "notifications.campaigns.update",
+        "notifications.analytics.read",
+    },
+    "notification_support": {
+        "notifications.deliveries.read",
+        "notifications.dead_letters.read",
+        "notifications.dead_letters.resolve",
+        "notifications.suppressions.read",
+    },
     "knowledge_rights_approver": {
         "knowledge.sources.read",
         "knowledge.authorizations.read",

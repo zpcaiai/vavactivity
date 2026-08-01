@@ -1060,6 +1060,116 @@
         "title": "CallToActionData",
         "type": "object"
       },
+      "CampaignActionRequest": {
+        "properties": {
+          "confirmation_code": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmation Code"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 8,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "CampaignActionRequest",
+        "type": "object"
+      },
+      "CampaignRequest": {
+        "properties": {
+          "audience_definition": {
+            "additionalProperties": true,
+            "title": "Audience Definition",
+            "type": "object"
+          },
+          "batch_size": {
+            "default": 100,
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Batch Size",
+            "type": "integer"
+          },
+          "campaign_code": {
+            "pattern": "^[A-Z0-9][A-Z0-9_-]{4,127}$",
+            "title": "Campaign Code",
+            "type": "string"
+          },
+          "campaign_type": {
+            "enum": [
+              "service_announcement",
+              "product_update",
+              "activity_promotion",
+              "course_promotion",
+              "educational_newsletter",
+              "operational_notice"
+            ],
+            "title": "Campaign Type",
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/NotificationCategory"
+          },
+          "channel_policy": {
+            "additionalProperties": true,
+            "title": "Channel Policy",
+            "type": "object"
+          },
+          "internal_name": {
+            "maxLength": 300,
+            "minLength": 3,
+            "title": "Internal Name",
+            "type": "string"
+          },
+          "rate_limit_per_minute": {
+            "default": 500,
+            "maximum": 10000.0,
+            "minimum": 1.0,
+            "title": "Rate Limit Per Minute",
+            "type": "integer"
+          },
+          "scheduled_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduled At"
+          },
+          "template_code": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Template Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "campaign_code",
+          "internal_name",
+          "campaign_type",
+          "category",
+          "template_code",
+          "audience_definition",
+          "channel_policy"
+        ],
+        "title": "CampaignRequest",
+        "type": "object"
+      },
       "CartItemCreateRequest": {
         "properties": {
           "anonymous_session_id": {
@@ -1526,6 +1636,26 @@
           }
         },
         "title": "CollectionData",
+        "type": "object"
+      },
+      "ConsentRequest": {
+        "properties": {
+          "consent_version": {
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Consent Version",
+            "type": "string"
+          },
+          "evidence": {
+            "additionalProperties": true,
+            "title": "Evidence",
+            "type": "object"
+          }
+        },
+        "required": [
+          "consent_version"
+        ],
+        "title": "ConsentRequest",
         "type": "object"
       },
       "ContactAssignRequest": {
@@ -2382,6 +2512,39 @@
         "title": "CourseUpdateRequest",
         "type": "object"
       },
+      "CreateConversationRequest": {
+        "properties": {
+          "accept_ai_disclosure": {
+            "title": "Accept Ai Disclosure",
+            "type": "boolean"
+          },
+          "consent_version": {
+            "title": "Consent Version",
+            "type": "string"
+          },
+          "locale": {
+            "default": "zh-CN",
+            "title": "Locale",
+            "type": "string"
+          },
+          "memory_opt_in": {
+            "default": false,
+            "title": "Memory Opt In",
+            "type": "boolean"
+          },
+          "user_timezone": {
+            "default": "Asia/Shanghai",
+            "title": "User Timezone",
+            "type": "string"
+          }
+        },
+        "required": [
+          "consent_version",
+          "accept_ai_disclosure"
+        ],
+        "title": "CreateConversationRequest",
+        "type": "object"
+      },
       "DocumentRequest": {
         "properties": {
           "allowed_roles": {
@@ -2508,6 +2671,34 @@
         "title": "EntitlementConsumeRequest",
         "type": "object"
       },
+      "ExecuteConfirmedToolRequest": {
+        "properties": {
+          "arguments": {
+            "additionalProperties": true,
+            "title": "Arguments",
+            "type": "object"
+          },
+          "confirmation_token": {
+            "maxLength": 512,
+            "minLength": 16,
+            "title": "Confirmation Token",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "confirmation_token",
+          "arguments",
+          "idempotency_key"
+        ],
+        "title": "ExecuteConfirmedToolRequest",
+        "type": "object"
+      },
       "ExerciseCreateRequest": {
         "properties": {
           "cooldown_minutes": {
@@ -2597,6 +2788,44 @@
           "exercise_code"
         ],
         "title": "ExerciseCreateRequest",
+        "type": "object"
+      },
+      "FeedbackRequest": {
+        "properties": {
+          "rating": {
+            "anyOf": [
+              {
+                "enum": [
+                  "up",
+                  "down"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "reported": {
+            "default": false,
+            "title": "Reported",
+            "type": "boolean"
+          }
+        },
+        "title": "FeedbackRequest",
         "type": "object"
       },
       "FindingReviewRequest": {
@@ -2977,6 +3206,77 @@
           "reason"
         ],
         "title": "IndexActionRequest",
+        "type": "object"
+      },
+      "IngestNotificationEventRequest": {
+        "properties": {
+          "event_type": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Event Type",
+            "type": "string"
+          },
+          "event_version": {
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Event Version",
+            "type": "integer"
+          },
+          "occurred_at": {
+            "format": "date-time",
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "title": "Payload",
+            "type": "object"
+          },
+          "source_event_id": {
+            "format": "uuid",
+            "title": "Source Event Id",
+            "type": "string"
+          },
+          "source_module": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Source Module",
+            "type": "string"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Id"
+          },
+          "subject_type": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          }
+        },
+        "required": [
+          "source_event_id",
+          "source_module",
+          "event_type",
+          "event_version",
+          "payload",
+          "occurred_at"
+        ],
+        "title": "IngestNotificationEventRequest",
         "type": "object"
       },
       "InstructorAssignmentRequest": {
@@ -4129,6 +4429,19 @@
         "title": "MediaUploadRequest",
         "type": "object"
       },
+      "MemoryConsentRequest": {
+        "properties": {
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "title": "MemoryConsentRequest",
+        "type": "object"
+      },
       "MentorCreateRequest": {
         "properties": {
           "display_name": {
@@ -4465,6 +4778,107 @@
           "reason"
         ],
         "title": "NavigationMenuUpdateRequest",
+        "type": "object"
+      },
+      "NotificationCategory": {
+        "enum": [
+          "security",
+          "account",
+          "order",
+          "payment",
+          "subscription",
+          "activity",
+          "course",
+          "counseling",
+          "ai_assistant",
+          "matchmaking",
+          "moderation",
+          "platform",
+          "marketing"
+        ],
+        "title": "NotificationCategory",
+        "type": "string"
+      },
+      "NotificationFrequency": {
+        "enum": [
+          "immediate",
+          "daily_digest",
+          "weekly_digest",
+          "disabled"
+        ],
+        "title": "NotificationFrequency",
+        "type": "string"
+      },
+      "NotificationPreferenceItem": {
+        "additionalProperties": false,
+        "properties": {
+          "category": {
+            "$ref": "#/components/schemas/NotificationCategory"
+          },
+          "channel": {
+            "enum": [
+              "in_app",
+              "email"
+            ],
+            "title": "Channel",
+            "type": "string"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "frequency": {
+            "$ref": "#/components/schemas/NotificationFrequency",
+            "default": "immediate"
+          },
+          "quiet_hours_enabled": {
+            "default": false,
+            "title": "Quiet Hours Enabled",
+            "type": "boolean"
+          },
+          "quiet_hours_end": {
+            "anyOf": [
+              {
+                "format": "time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quiet Hours End"
+          },
+          "quiet_hours_start": {
+            "anyOf": [
+              {
+                "format": "time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quiet Hours Start"
+          },
+          "quiet_hours_timezone": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quiet Hours Timezone"
+          }
+        },
+        "required": [
+          "category",
+          "channel",
+          "enabled"
+        ],
+        "title": "NotificationPreferenceItem",
         "type": "object"
       },
       "OrderCancelRequest": {
@@ -6249,6 +6663,48 @@
         "title": "RecordCreateRequest",
         "type": "object"
       },
+      "ReferralActionRequest": {
+        "properties": {
+          "action": {
+            "enum": [
+              "assign",
+              "acknowledge",
+              "resolve"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "assigned_to": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned To"
+          },
+          "resolution": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolution"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "title": "ReferralActionRequest",
+        "type": "object"
+      },
       "RefundActionRequest": {
         "properties": {
           "reason": {
@@ -6388,6 +6844,77 @@
           "ticket_type_id"
         ],
         "title": "RegistrationCreateRequest",
+        "type": "object"
+      },
+      "ReminderRequest": {
+        "properties": {
+          "category": {
+            "$ref": "#/components/schemas/NotificationCategory"
+          },
+          "deduplication_key": {
+            "maxLength": 255,
+            "minLength": 8,
+            "title": "Deduplication Key",
+            "type": "string"
+          },
+          "recipient_user_id": {
+            "format": "uuid",
+            "title": "Recipient User Id",
+            "type": "string"
+          },
+          "reminder_type": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Reminder Type",
+            "type": "string"
+          },
+          "subject_id": {
+            "format": "uuid",
+            "title": "Subject Id",
+            "type": "string"
+          },
+          "subject_type": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Subject Type",
+            "type": "string"
+          },
+          "template_code": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Template Code",
+            "type": "string"
+          },
+          "timezone": {
+            "maxLength": 64,
+            "minLength": 3,
+            "title": "Timezone",
+            "type": "string"
+          },
+          "trigger_at": {
+            "format": "date-time",
+            "title": "Trigger At",
+            "type": "string"
+          },
+          "trigger_reference_version": {
+            "minimum": 1.0,
+            "title": "Trigger Reference Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "reminder_type",
+          "subject_type",
+          "subject_id",
+          "recipient_user_id",
+          "template_code",
+          "category",
+          "trigger_at",
+          "timezone",
+          "trigger_reference_version",
+          "deduplication_key"
+        ],
+        "title": "ReminderRequest",
         "type": "object"
       },
       "RestrictionRequest": {
@@ -6605,6 +7132,48 @@
           "scheduled_publish_at"
         ],
         "title": "ScheduleRequest",
+        "type": "object"
+      },
+      "SendMessageRequest": {
+        "properties": {
+          "client_message_id": {
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Client Message Id",
+            "type": "string"
+          },
+          "content": {
+            "maxLength": 10000,
+            "minLength": 1,
+            "title": "Content",
+            "type": "string"
+          },
+          "locale": {
+            "default": "zh-CN",
+            "title": "Locale",
+            "type": "string"
+          }
+        },
+        "required": [
+          "client_message_id",
+          "content"
+        ],
+        "title": "SendMessageRequest",
+        "type": "object"
+      },
+      "SensitiveConversationRequest": {
+        "properties": {
+          "access_reason": {
+            "maxLength": 500,
+            "minLength": 8,
+            "title": "Access Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "access_reason"
+        ],
+        "title": "SensitiveConversationRequest",
         "type": "object"
       },
       "ServiceCreateRequest": {
@@ -7284,6 +7853,21 @@
         "title": "Stackability",
         "type": "string"
       },
+      "StatusReasonRequest": {
+        "properties": {
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 8,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "StatusReasonRequest",
+        "type": "object"
+      },
       "SubscriptionCancelRequest": {
         "properties": {
           "immediate": {
@@ -7302,6 +7886,227 @@
           "reason"
         ],
         "title": "SubscriptionCancelRequest",
+        "type": "object"
+      },
+      "SuppressionRequest": {
+        "properties": {
+          "channel": {
+            "const": "email",
+            "default": "email",
+            "title": "Channel",
+            "type": "string"
+          },
+          "destination": {
+            "maxLength": 320,
+            "minLength": 3,
+            "title": "Destination",
+            "type": "string"
+          },
+          "explanation": {
+            "maxLength": 1000,
+            "minLength": 8,
+            "title": "Explanation",
+            "type": "string"
+          },
+          "reason": {
+            "enum": [
+              "hard_bounce",
+              "repeated_soft_bounce",
+              "spam_complaint",
+              "user_unsubscribed",
+              "admin_blocked",
+              "invalid_address",
+              "security_hold"
+            ],
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "destination",
+          "reason",
+          "explanation"
+        ],
+        "title": "SuppressionRequest",
+        "type": "object"
+      },
+      "TemplateDefinitionRequest": {
+        "properties": {
+          "category": {
+            "$ref": "#/components/schemas/NotificationCategory"
+          },
+          "internal_name": {
+            "maxLength": 200,
+            "minLength": 3,
+            "title": "Internal Name",
+            "type": "string"
+          },
+          "purpose": {
+            "enum": [
+              "security",
+              "transactional",
+              "service",
+              "marketing"
+            ],
+            "title": "Purpose",
+            "type": "string"
+          },
+          "required_channels": {
+            "items": {
+              "enum": [
+                "in_app",
+                "email"
+              ],
+              "type": "string"
+            },
+            "title": "Required Channels",
+            "type": "array"
+          },
+          "supported_channels": {
+            "items": {
+              "enum": [
+                "in_app",
+                "email"
+              ],
+              "type": "string"
+            },
+            "title": "Supported Channels",
+            "type": "array"
+          },
+          "template_code": {
+            "pattern": "^[a-z0-9][a-z0-9-]{2,127}$",
+            "title": "Template Code",
+            "type": "string"
+          },
+          "variable_schema": {
+            "additionalProperties": true,
+            "title": "Variable Schema",
+            "type": "object"
+          }
+        },
+        "required": [
+          "template_code",
+          "internal_name",
+          "category",
+          "purpose",
+          "variable_schema",
+          "supported_channels"
+        ],
+        "title": "TemplateDefinitionRequest",
+        "type": "object"
+      },
+      "TemplatePreviewRequest": {
+        "properties": {
+          "variables": {
+            "additionalProperties": true,
+            "title": "Variables",
+            "type": "object"
+          }
+        },
+        "required": [
+          "variables"
+        ],
+        "title": "TemplatePreviewRequest",
+        "type": "object"
+      },
+      "TemplateReleaseRequest": {
+        "properties": {
+          "action_label_template": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action Label Template"
+          },
+          "action_url_template": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action Url Template"
+          },
+          "body_html_template": {
+            "anyOf": [
+              {
+                "maxLength": 50000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Body Html Template"
+          },
+          "body_text_template": {
+            "maxLength": 50000,
+            "minLength": 1,
+            "title": "Body Text Template",
+            "type": "string"
+          },
+          "channel": {
+            "enum": [
+              "in_app",
+              "email"
+            ],
+            "title": "Channel",
+            "type": "string"
+          },
+          "locale": {
+            "enum": [
+              "zh-CN",
+              "zh-TW",
+              "en"
+            ],
+            "title": "Locale",
+            "type": "string"
+          },
+          "semantic_version": {
+            "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+            "title": "Semantic Version",
+            "type": "string"
+          },
+          "subject_template": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Template"
+          },
+          "title_template": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title Template"
+          }
+        },
+        "required": [
+          "semantic_version",
+          "locale",
+          "channel",
+          "body_text_template"
+        ],
+        "title": "TemplateReleaseRequest",
         "type": "object"
       },
       "TestimonialCreateRequest": {
@@ -7549,6 +8354,27 @@
         "title": "TokenConfirmRequest",
         "type": "object"
       },
+      "ToolConfirmationRequest": {
+        "properties": {
+          "arguments": {
+            "additionalProperties": true,
+            "title": "Arguments",
+            "type": "object"
+          },
+          "tool_code": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Tool Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool_code",
+          "arguments"
+        ],
+        "title": "ToolConfirmationRequest",
+        "type": "object"
+      },
       "TransitionRequest": {
         "properties": {
           "reason": {
@@ -7579,6 +8405,24 @@
         ],
         "title": "TranslationStatus",
         "type": "string"
+      },
+      "UpdateNotificationPreferencesRequest": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationPreferenceItem"
+            },
+            "maxItems": 40,
+            "minItems": 1,
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "UpdateNotificationPreferencesRequest",
+        "type": "object"
       },
       "UploadCompleteRequest": {
         "properties": {
@@ -7856,6 +8700,23 @@
         "title": "ReviewRequest",
         "type": "object"
       },
+      "vav__modules__ai_assistant__admin_router__RegistryStatusRequest": {
+        "properties": {
+          "status": {
+            "enum": [
+              "active",
+              "disabled"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "RegistryStatusRequest",
+        "type": "object"
+      },
       "vav__modules__catalog__schemas__ReasonRequest": {
         "properties": {
           "reason": {
@@ -7938,6 +8799,30 @@
           "reason"
         ],
         "title": "ReviewRequest",
+        "type": "object"
+      },
+      "vav__modules__notifications__admin_router__RegistryStatusRequest": {
+        "properties": {
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 8,
+            "title": "Reason",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "disabled"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "reason"
+        ],
+        "title": "RegistryStatusRequest",
         "type": "object"
       }
     },
@@ -9755,6 +10640,540 @@
         "summary": "Submit Attempt",
         "tags": [
           "courses"
+        ]
+      }
+    },
+    "/api/v1/account/notification-consents": {
+      "get": {
+        "operationId": "notification_consents_api_v1_account_notification_consents_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Notification Consents Api V1 Account Notification Consents Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Notification Consents",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/account/notification-consents/{consent_type}/grant": {
+      "post": {
+        "operationId": "grant_notification_consent_api_v1_account_notification_consents__consent_type__grant_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consent_type",
+            "required": true,
+            "schema": {
+              "title": "Consent Type",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Grant Notification Consent Api V1 Account Notification Consents  Consent Type  Grant Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Grant Notification Consent",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/account/notification-consents/{consent_type}/withdraw": {
+      "post": {
+        "operationId": "withdraw_notification_consent_api_v1_account_notification_consents__consent_type__withdraw_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consent_type",
+            "required": true,
+            "schema": {
+              "title": "Consent Type",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Withdraw Notification Consent Api V1 Account Notification Consents  Consent Type  Withdraw Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Withdraw Notification Consent",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/account/notification-preferences": {
+      "get": {
+        "operationId": "notification_preferences_api_v1_account_notification_preferences_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Notification Preferences Api V1 Account Notification Preferences Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Notification Preferences",
+        "tags": [
+          "notifications"
+        ]
+      },
+      "put": {
+        "operationId": "update_notification_preferences_api_v1_account_notification_preferences_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNotificationPreferencesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Notification Preferences Api V1 Account Notification Preferences Put",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Notification Preferences",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/account/notifications": {
+      "get": {
+        "operationId": "list_notifications_api_v1_account_notifications_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "category",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "priority",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Priority"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Notifications Api V1 Account Notifications Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Notifications",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/account/notifications/mark-all-read": {
+      "post": {
+        "operationId": "mark_all_notifications_read_api_v1_account_notifications_mark_all_read_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Mark All Notifications Read Api V1 Account Notifications Mark All Read Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Mark All Notifications Read",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/account/notifications/unread-count": {
+      "get": {
+        "operationId": "unread_count_api_v1_account_notifications_unread_count_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Unread Count Api V1 Account Notifications Unread Count Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Unread Count",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/account/notifications/{notification_id}": {
+      "get": {
+        "operationId": "notification_detail_api_v1_account_notifications__notification_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "notification_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Notification Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Notification Detail Api V1 Account Notifications  Notification Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Notification Detail",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/account/notifications/{notification_id}/archive": {
+      "post": {
+        "operationId": "archive_notification_api_v1_account_notifications__notification_id__archive_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "notification_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Notification Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Archive Notification Api V1 Account Notifications  Notification Id  Archive Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Archive Notification",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/account/notifications/{notification_id}/read": {
+      "post": {
+        "operationId": "mark_notification_read_api_v1_account_notifications__notification_id__read_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "notification_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Notification Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Mark Notification Read Api V1 Account Notifications  Notification Id  Read Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Mark Notification Read",
+        "tags": [
+          "notifications"
         ]
       }
     },
@@ -12032,6 +13451,460 @@
         "summary": "Restore Admin",
         "tags": [
           "identity"
+        ]
+      }
+    },
+    "/api/v1/admin/ai/audit": {
+      "get": {
+        "operationId": "list_ai_audit_api_v1_admin_ai_audit_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Ai Audit Api V1 Admin Ai Audit Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Ai Audit",
+        "tags": [
+          "ai-assistant-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/ai/conversations": {
+      "get": {
+        "operationId": "list_conversations_api_v1_admin_ai_conversations_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Conversations Api V1 Admin Ai Conversations Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Conversations",
+        "tags": [
+          "ai-assistant-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/ai/conversations/{conversation_id}/sensitive-view": {
+      "post": {
+        "operationId": "sensitive_conversation_api_v1_admin_ai_conversations__conversation_id__sensitive_view_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SensitiveConversationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Sensitive Conversation Api V1 Admin Ai Conversations  Conversation Id  Sensitive View Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Sensitive Conversation",
+        "tags": [
+          "ai-assistant-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/ai/evaluation-runs": {
+      "get": {
+        "operationId": "list_evaluation_runs_api_v1_admin_ai_evaluation_runs_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Evaluation Runs Api V1 Admin Ai Evaluation Runs Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Evaluation Runs",
+        "tags": [
+          "ai-assistant-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/ai/feedback": {
+      "get": {
+        "operationId": "list_feedback_api_v1_admin_ai_feedback_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Feedback Api V1 Admin Ai Feedback Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Feedback",
+        "tags": [
+          "ai-assistant-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/ai/models": {
+      "get": {
+        "operationId": "list_models_api_v1_admin_ai_models_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Models Api V1 Admin Ai Models Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Models",
+        "tags": [
+          "ai-assistant-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/ai/prompts": {
+      "get": {
+        "operationId": "list_prompts_api_v1_admin_ai_prompts_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Prompts Api V1 Admin Ai Prompts Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Prompts",
+        "tags": [
+          "ai-assistant-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/ai/prompts/{release_id}/activate": {
+      "post": {
+        "operationId": "activate_prompt_api_v1_admin_ai_prompts__release_id__activate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "release_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Release Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Activate Prompt Api V1 Admin Ai Prompts  Release Id  Activate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Activate Prompt",
+        "tags": [
+          "ai-assistant-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/ai/referrals": {
+      "get": {
+        "operationId": "list_referrals_api_v1_admin_ai_referrals_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Referrals Api V1 Admin Ai Referrals Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Referrals",
+        "tags": [
+          "ai-assistant-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/ai/referrals/{referral_id}/actions": {
+      "post": {
+        "operationId": "referral_action_api_v1_admin_ai_referrals__referral_id__actions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "referral_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Referral Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReferralActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Referral Action Api V1 Admin Ai Referrals  Referral Id  Actions Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Referral Action",
+        "tags": [
+          "ai-assistant-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/ai/tools": {
+      "get": {
+        "operationId": "list_tools_api_v1_admin_ai_tools_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Tools Api V1 Admin Ai Tools Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Tools",
+        "tags": [
+          "ai-assistant-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/ai/tools/{tool_id}": {
+      "patch": {
+        "operationId": "set_tool_status_api_v1_admin_ai_tools__tool_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tool_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Tool Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/vav__modules__ai_assistant__admin_router__RegistryStatusRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Set Tool Status Api V1 Admin Ai Tools  Tool Id  Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Set Tool Status",
+        "tags": [
+          "ai-assistant-admin"
         ]
       }
     },
@@ -22210,6 +24083,1908 @@
         ]
       }
     },
+    "/api/v1/admin/notifications/audit": {
+      "get": {
+        "operationId": "notification_audit_api_v1_admin_notifications_audit_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Notification Audit Api V1 Admin Notifications Audit Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Notification Audit",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/campaigns": {
+      "get": {
+        "operationId": "campaigns_api_v1_admin_notifications_campaigns_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Campaigns Api V1 Admin Notifications Campaigns Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Campaigns",
+        "tags": [
+          "notifications-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_campaign_api_v1_admin_notifications_campaigns_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampaignRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Campaign Api V1 Admin Notifications Campaigns Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Campaign",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/campaigns/{campaign_id}/approve": {
+      "post": {
+        "operationId": "approve_campaign_api_v1_admin_notifications_campaigns__campaign_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampaignActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Campaign Api V1 Admin Notifications Campaigns  Campaign Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Campaign",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/campaigns/{campaign_id}/audience": {
+      "post": {
+        "operationId": "create_campaign_audience_api_v1_admin_notifications_campaigns__campaign_id__audience_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Campaign Audience Api V1 Admin Notifications Campaigns  Campaign Id  Audience Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Campaign Audience",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/campaigns/{campaign_id}/cancel": {
+      "post": {
+        "operationId": "cancel_campaign_api_v1_admin_notifications_campaigns__campaign_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampaignActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Cancel Campaign Api V1 Admin Notifications Campaigns  Campaign Id  Cancel Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Cancel Campaign",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/campaigns/{campaign_id}/pause": {
+      "post": {
+        "operationId": "pause_campaign_api_v1_admin_notifications_campaigns__campaign_id__pause_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampaignActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Pause Campaign Api V1 Admin Notifications Campaigns  Campaign Id  Pause Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Pause Campaign",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/campaigns/{campaign_id}/start": {
+      "post": {
+        "operationId": "start_campaign_api_v1_admin_notifications_campaigns__campaign_id__start_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampaignActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Start Campaign Api V1 Admin Notifications Campaigns  Campaign Id  Start Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Start Campaign",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/campaigns/{campaign_id}/submit-review": {
+      "post": {
+        "operationId": "submit_campaign_review_api_v1_admin_notifications_campaigns__campaign_id__submit_review_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampaignActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Submit Campaign Review Api V1 Admin Notifications Campaigns  Campaign Id  Submit Review Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Submit Campaign Review",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/campaigns/{campaign_id}/test-send": {
+      "post": {
+        "operationId": "campaign_test_send_api_v1_admin_notifications_campaigns__campaign_id__test_send_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampaignActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Campaign Test Send Api V1 Admin Notifications Campaigns  Campaign Id  Test Send Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Campaign Test Send",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/dashboard": {
+      "get": {
+        "operationId": "notification_dashboard_api_v1_admin_notifications_dashboard_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Notification Dashboard Api V1 Admin Notifications Dashboard Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Notification Dashboard",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/dead-letters": {
+      "get": {
+        "operationId": "dead_letters_api_v1_admin_notifications_dead_letters_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Dead Letters Api V1 Admin Notifications Dead Letters Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dead Letters",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/dead-letters/{dead_letter_id}/resolve": {
+      "post": {
+        "operationId": "resolve_dead_letter_api_v1_admin_notifications_dead_letters__dead_letter_id__resolve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dead_letter_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Dead Letter Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Resolve Dead Letter Api V1 Admin Notifications Dead Letters  Dead Letter Id  Resolve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Resolve Dead Letter",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/deliveries": {
+      "get": {
+        "operationId": "list_deliveries_api_v1_admin_notifications_deliveries_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Deliveries Api V1 Admin Notifications Deliveries Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Deliveries",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/deliveries/{delivery_id}": {
+      "get": {
+        "operationId": "delivery_detail_api_v1_admin_notifications_deliveries__delivery_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "delivery_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Delivery Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Delivery Detail Api V1 Admin Notifications Deliveries  Delivery Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delivery Detail",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/deliveries/{delivery_id}/retry": {
+      "post": {
+        "operationId": "retry_delivery_api_v1_admin_notifications_deliveries__delivery_id__retry_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "delivery_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Delivery Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Retry Delivery Api V1 Admin Notifications Deliveries  Delivery Id  Retry Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Retry Delivery",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/deliveries/{delivery_id}/sensitive-view": {
+      "post": {
+        "operationId": "delivery_content_api_v1_admin_notifications_deliveries__delivery_id__sensitive_view_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "delivery_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Delivery Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Delivery Content Api V1 Admin Notifications Deliveries  Delivery Id  Sensitive View Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delivery Content",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/event-subscriptions": {
+      "get": {
+        "operationId": "event_subscriptions_api_v1_admin_notifications_event_subscriptions_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Event Subscriptions Api V1 Admin Notifications Event Subscriptions Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Event Subscriptions",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/event-subscriptions/{subscription_id}": {
+      "patch": {
+        "operationId": "update_event_subscription_api_v1_admin_notifications_event_subscriptions__subscription_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "subscription_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Subscription Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/vav__modules__notifications__admin_router__RegistryStatusRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Event Subscription Api V1 Admin Notifications Event Subscriptions  Subscription Id  Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Event Subscription",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/provider-events": {
+      "get": {
+        "operationId": "provider_events_api_v1_admin_notifications_provider_events_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Provider Events Api V1 Admin Notifications Provider Events Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Provider Events",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/providers": {
+      "get": {
+        "operationId": "providers_api_v1_admin_notifications_providers_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Providers Api V1 Admin Notifications Providers Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Providers",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/reminders": {
+      "get": {
+        "operationId": "reminders_api_v1_admin_notifications_reminders_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reminders Api V1 Admin Notifications Reminders Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reminders",
+        "tags": [
+          "notifications-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_reminder_api_v1_admin_notifications_reminders_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReminderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Reminder Api V1 Admin Notifications Reminders Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Reminder",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/reminders/{reminder_id}/cancel": {
+      "post": {
+        "operationId": "cancel_reminder_api_v1_admin_notifications_reminders__reminder_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reminder_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Reminder Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Cancel Reminder Api V1 Admin Notifications Reminders  Reminder Id  Cancel Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Cancel Reminder",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/suppressions": {
+      "get": {
+        "operationId": "suppressions_api_v1_admin_notifications_suppressions_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Suppressions Api V1 Admin Notifications Suppressions Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Suppressions",
+        "tags": [
+          "notifications-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_suppression_api_v1_admin_notifications_suppressions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuppressionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Suppression Api V1 Admin Notifications Suppressions Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Suppression",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/suppressions/{suppression_id}/lift": {
+      "post": {
+        "operationId": "lift_suppression_api_v1_admin_notifications_suppressions__suppression_id__lift_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "suppression_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Suppression Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Lift Suppression Api V1 Admin Notifications Suppressions  Suppression Id  Lift Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lift Suppression",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/template-releases/{release_id}/activate": {
+      "post": {
+        "operationId": "activate_template_release_api_v1_admin_notifications_template_releases__release_id__activate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "release_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Release Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Activate Template Release Api V1 Admin Notifications Template Releases  Release Id  Activate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Activate Template Release",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/template-releases/{release_id}/approve": {
+      "post": {
+        "operationId": "approve_template_release_api_v1_admin_notifications_template_releases__release_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "release_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Release Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Template Release Api V1 Admin Notifications Template Releases  Release Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Template Release",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/template-releases/{release_id}/preview": {
+      "post": {
+        "operationId": "preview_template_release_api_v1_admin_notifications_template_releases__release_id__preview_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "release_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Release Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplatePreviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Preview Template Release Api V1 Admin Notifications Template Releases  Release Id  Preview Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Preview Template Release",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/template-releases/{release_id}/revoke": {
+      "post": {
+        "operationId": "revoke_template_release_api_v1_admin_notifications_template_releases__release_id__revoke_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "release_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Release Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Revoke Template Release Api V1 Admin Notifications Template Releases  Release Id  Revoke Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Revoke Template Release",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/template-releases/{release_id}/submit-review": {
+      "post": {
+        "operationId": "submit_template_review_api_v1_admin_notifications_template_releases__release_id__submit_review_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "release_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Release Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Submit Template Review Api V1 Admin Notifications Template Releases  Release Id  Submit Review Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Submit Template Review",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/templates": {
+      "get": {
+        "operationId": "list_templates_api_v1_admin_notifications_templates_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Templates Api V1 Admin Notifications Templates Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Templates",
+        "tags": [
+          "notifications-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_template_api_v1_admin_notifications_templates_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateDefinitionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Template Api V1 Admin Notifications Templates Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Template",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/templates/{template_id}": {
+      "get": {
+        "operationId": "template_detail_api_v1_admin_notifications_templates__template_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "template_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Template Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Template Detail Api V1 Admin Notifications Templates  Template Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Template Detail",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/templates/{template_id}/releases": {
+      "post": {
+        "operationId": "create_template_release_api_v1_admin_notifications_templates__template_id__releases_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "template_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Template Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateReleaseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Template Release Api V1 Admin Notifications Templates  Template Id  Releases Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Template Release",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/workers/campaigns/{campaign_id}/run": {
+      "post": {
+        "operationId": "run_campaign_worker_api_v1_admin_notifications_workers_campaigns__campaign_id__run_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Run Campaign Worker Api V1 Admin Notifications Workers Campaigns  Campaign Id  Run Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Run Campaign Worker",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/workers/deliveries/run": {
+      "post": {
+        "operationId": "run_delivery_worker_api_v1_admin_notifications_workers_deliveries_run_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Run Delivery Worker Api V1 Admin Notifications Workers Deliveries Run Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Run Delivery Worker",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/workers/digests/{frequency}/{window_key}/run": {
+      "post": {
+        "operationId": "run_digest_worker_api_v1_admin_notifications_workers_digests__frequency___window_key__run_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "frequency",
+            "required": true,
+            "schema": {
+              "title": "Frequency",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "window_key",
+            "required": true,
+            "schema": {
+              "title": "Window Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Run Digest Worker Api V1 Admin Notifications Workers Digests  Frequency   Window Key  Run Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Run Digest Worker",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/workers/outbox/run": {
+      "post": {
+        "operationId": "run_outbox_consumer_api_v1_admin_notifications_workers_outbox_run_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Run Outbox Consumer Api V1 Admin Notifications Workers Outbox Run Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Run Outbox Consumer",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/notifications/workers/reminders/run": {
+      "post": {
+        "operationId": "run_reminder_worker_api_v1_admin_notifications_workers_reminders_run_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Run Reminder Worker Api V1 Admin Notifications Workers Reminders Run Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Run Reminder Worker",
+        "tags": [
+          "notifications-admin"
+        ]
+      }
+    },
     "/api/v1/admin/roles": {
       "get": {
         "operationId": "list_roles_api_v1_admin_roles_get",
@@ -22634,6 +26409,513 @@
         "summary": "Suspend User",
         "tags": [
           "identity"
+        ]
+      }
+    },
+    "/api/v1/ai/conversations": {
+      "get": {
+        "operationId": "conversations_api_v1_ai_conversations_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Conversations Api V1 Ai Conversations Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Conversations",
+        "tags": [
+          "ai-assistant"
+        ]
+      },
+      "post": {
+        "operationId": "start_conversation_api_v1_ai_conversations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConversationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Start Conversation Api V1 Ai Conversations Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Start Conversation",
+        "tags": [
+          "ai-assistant"
+        ]
+      }
+    },
+    "/api/v1/ai/conversations/{conversation_id}": {
+      "delete": {
+        "operationId": "remove_conversation_api_v1_ai_conversations__conversation_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Remove Conversation Api V1 Ai Conversations  Conversation Id  Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Remove Conversation",
+        "tags": [
+          "ai-assistant"
+        ]
+      },
+      "get": {
+        "operationId": "conversation_detail_api_v1_ai_conversations__conversation_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Conversation Detail Api V1 Ai Conversations  Conversation Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Conversation Detail",
+        "tags": [
+          "ai-assistant"
+        ]
+      }
+    },
+    "/api/v1/ai/conversations/{conversation_id}/memory-consent": {
+      "patch": {
+        "operationId": "memory_consent_api_v1_ai_conversations__conversation_id__memory_consent_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemoryConsentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Memory Consent Api V1 Ai Conversations  Conversation Id  Memory Consent Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Memory Consent",
+        "tags": [
+          "ai-assistant"
+        ]
+      }
+    },
+    "/api/v1/ai/conversations/{conversation_id}/messages": {
+      "post": {
+        "operationId": "post_message_api_v1_ai_conversations__conversation_id__messages_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Post Message Api V1 Ai Conversations  Conversation Id  Messages Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Post Message",
+        "tags": [
+          "ai-assistant"
+        ]
+      }
+    },
+    "/api/v1/ai/conversations/{conversation_id}/tool-confirmations": {
+      "post": {
+        "operationId": "create_tool_confirmation_api_v1_ai_conversations__conversation_id__tool_confirmations_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToolConfirmationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Tool Confirmation Api V1 Ai Conversations  Conversation Id  Tool Confirmations Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Tool Confirmation",
+        "tags": [
+          "ai-assistant"
+        ]
+      }
+    },
+    "/api/v1/ai/conversations/{conversation_id}/tools/{tool_code}/execute": {
+      "post": {
+        "operationId": "execute_confirmed_tool_api_v1_ai_conversations__conversation_id__tools__tool_code__execute_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "tool_code",
+            "required": true,
+            "schema": {
+              "title": "Tool Code",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteConfirmedToolRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Execute Confirmed Tool Api V1 Ai Conversations  Conversation Id  Tools  Tool Code  Execute Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Execute Confirmed Tool",
+        "tags": [
+          "ai-assistant"
+        ]
+      }
+    },
+    "/api/v1/ai/messages/{message_id}/feedback": {
+      "post": {
+        "operationId": "message_feedback_api_v1_ai_messages__message_id__feedback_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "message_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Message Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Message Feedback Api V1 Ai Messages  Message Id  Feedback Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Message Feedback",
+        "tags": [
+          "ai-assistant"
+        ]
+      }
+    },
+    "/api/v1/ai/referrals": {
+      "get": {
+        "operationId": "user_referrals_api_v1_ai_referrals_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response User Referrals Api V1 Ai Referrals Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "User Referrals",
+        "tags": [
+          "ai-assistant"
         ]
       }
     },
@@ -24218,6 +28500,54 @@
         "summary": "Release Inventory Reservation",
         "tags": [
           "catalog"
+        ]
+      }
+    },
+    "/api/v1/internal/notifications/events": {
+      "post": {
+        "operationId": "receive_domain_event_api_v1_internal_notifications_events_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestNotificationEventRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Receive Domain Event Api V1 Internal Notifications Events Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Receive Domain Event",
+        "tags": [
+          "notifications-admin"
         ]
       }
     },
@@ -25963,6 +30293,92 @@
         ]
       }
     },
+    "/api/v1/public/notifications/unsubscribe/{token}": {
+      "get": {
+        "operationId": "unsubscribe_preview_api_v1_public_notifications_unsubscribe__token__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Unsubscribe Preview Api V1 Public Notifications Unsubscribe  Token  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Unsubscribe Preview",
+        "tags": [
+          "notifications"
+        ]
+      },
+      "post": {
+        "operationId": "unsubscribe_api_v1_public_notifications_unsubscribe__token__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Unsubscribe Api V1 Public Notifications Unsubscribe  Token  Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Unsubscribe",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
     "/api/v1/public/preview/{raw_token}": {
       "get": {
         "operationId": "preview_content_api_v1_public_preview__raw_token__get",
@@ -26283,6 +30699,50 @@
         "summary": "Application version",
         "tags": [
           "system"
+        ]
+      }
+    },
+    "/api/v1/webhooks/email/{provider}": {
+      "post": {
+        "operationId": "email_provider_webhook_api_v1_webhooks_email__provider__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "provider",
+            "required": true,
+            "schema": {
+              "title": "Provider",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Email Provider Webhook Api V1 Webhooks Email  Provider  Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Email Provider Webhook",
+        "tags": [
+          "notifications"
         ]
       }
     },

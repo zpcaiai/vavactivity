@@ -8,6 +8,7 @@ import {
   type PublicNavigationItem
 } from "@/features/public-site/api/content";
 import { useAuthStore } from "@/stores/auth";
+import NotificationBell from "@/features/notifications/components/NotificationBell.vue";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -127,6 +128,7 @@ watch(locale, () => void loadNavigation());
         >
           {{ t("commerce.cart") }}
         </RouterLink>
+        <NotificationBell v-if="auth.user" />
         <RouterLink
           class="start-link"
           :to="auth.user ? `/${locale}/account` : `/${locale}/auth/register`"

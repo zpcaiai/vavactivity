@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC, datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, text
 
 from vav.core.database import get_engine, session_factory
 from vav.models.content import ContentEntry
@@ -19,6 +19,13 @@ from vav.modules.content.service import content_service
 from vav.modules.commerce.service import reconciliation_service
 from vav.modules.courses.service import completion_service, publication_service
 from vav.modules.counseling.service import availability_service
+from vav.modules.notifications.service import (
+    consume_outbox_events,
+    dispatch_campaign_batch,
+    dispatch_digest_window,
+    dispatch_due_reminders,
+    process_due_deliveries,
+)
 from vav_worker.celery_app import celery_app
 
 
@@ -153,3 +160,88 @@ async def _advance_counseling() -> int:
 @celery_app.task(name="vav.counseling.advance")  # type: ignore[misc]
 def advance_counseling() -> dict[str, int]:
     return {"expired_holds": asyncio.run(_advance_counseling())}
+
+
+async def _consume_notification_outbox() -> int:
+    async with session_factory() as session:
+        values = await consume_outbox_events(session)
+    await get_engine().dispose()
+    return len(values)
+
+
+@celery_app.task(name="vav.notifications.consume_outbox")  # type: ignore[misc]
+def consume_notification_outbox() -> dict[str, int]:
+    return {"processed": asyncio.run(_consume_notification_outbox())}
+
+
+async def _deliver_notifications() -> int:
+    async with session_factory() as session:
+        values = await process_due_deliveries(session)
+    await get_engine().dispose()
+    return len(values)
+
+
+@celery_app.task(name="vav.notifications.deliver")  # type: ignore[misc]
+def deliver_notifications() -> dict[str, int]:
+    return {"processed": asyncio.run(_deliver_notifications())}
+
+
+async def _dispatch_notification_reminders() -> int:
+    async with session_factory() as session:
+        values = await dispatch_due_reminders(session)
+    await get_engine().dispose()
+    return len(values)
+
+
+@celery_app.task(name="vav.notifications.reminders")  # type: ignore[misc]
+def dispatch_notification_reminders() -> dict[str, int]:
+    return {"processed": asyncio.run(_dispatch_notification_reminders())}
+
+
+async def _dispatch_notification_campaigns() -> int:
+    async with session_factory() as session:
+        campaign_ids = list(
+            (
+                await session.scalars(
+                    text(
+                        "SELECT id FROM notification_campaigns WHERE status='sending' "
+                        "ORDER BY started_at NULLS LAST LIMIT 20"
+                    )
+                )
+            ).all()
+        )
+    processed = 0
+    for campaign_id in campaign_ids:
+        async with session_factory() as session:
+            result = await dispatch_campaign_batch(session, campaign_id)
+            processed += int(result["queued"])
+    await get_engine().dispose()
+    return processed
+
+
+@celery_app.task(name="vav.notifications.campaigns")  # type: ignore[misc]
+def dispatch_notification_campaigns() -> dict[str, int]:
+    return {"queued": asyncio.run(_dispatch_notification_campaigns())}
+
+
+async def _dispatch_notification_digests() -> int:
+    now = datetime.now(UTC)
+    total = 0
+    async with session_factory() as session:
+        daily = await dispatch_digest_window(
+            session, frequency="daily_digest", window_key=now.strftime("%Y-%m-%d")
+        )
+        total += int(daily["dispatched"])
+    if now.weekday() == 0:
+        async with session_factory() as session:
+            weekly = await dispatch_digest_window(
+                session, frequency="weekly_digest", window_key=now.strftime("%G-W%V")
+            )
+            total += int(weekly["dispatched"])
+    await get_engine().dispose()
+    return total
+
+
+@celery_app.task(name="vav.notifications.digests")  # type: ignore[misc]
+def dispatch_notification_digests() -> dict[str, int]:
+    return {"dispatched": asyncio.run(_dispatch_notification_digests())}

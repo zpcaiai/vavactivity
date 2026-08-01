@@ -19,6 +19,8 @@
     "courses": "Courses",
     "counseling": "Counseling",
     "knowledge": "Knowledge",
+    "ai": "AI operations",
+    "notifications": "Notification operations",
     "settings": "Site settings",
     "admins": "Administrators",
     "audit": "Audit log"

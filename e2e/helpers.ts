@@ -7,6 +7,7 @@ export const adminEmail = "e2e-admin@example.com";
 export const adminPassword = "VavE2e!2026_Secure#";
 
 export function seedSuperAdmin() {
+  if (process.env.VAV_E2E_SKIP_ADMIN_SEED === "1") return;
   execFileSync(
     "docker",
     [
@@ -84,6 +85,41 @@ export function seedKnowledgeFixture() {
       { stdio: "pipe" }
     );
   }
+}
+
+export function seedAiFixture() {
+  if (process.env.VAV_E2E_SKIP_AI_SEED === "1") return;
+  for (const moduleName of [
+    "vav.cli.seed_permissions",
+    "vav.cli.seed_ai_assistant"
+  ]) {
+    execFileSync(
+      "docker",
+      ["compose", "exec", "-T", "api", "python", "-m", moduleName],
+      { stdio: "pipe" }
+    );
+  }
+}
+
+export function verifyUserFixture(email: string) {
+  const escaped = email.replaceAll("'", "''");
+  execFileSync(
+    "docker",
+    [
+      "compose",
+      "exec",
+      "-T",
+      "postgres",
+      "psql",
+      "-U",
+      "vav",
+      "-d",
+      "vav",
+      "-c",
+      `UPDATE users SET status='active', email_verified_at=now() WHERE email='${escaped}'`
+    ],
+    { stdio: "pipe" }
+  );
 }
 
 export function providerPaymentId(orderNumber: string): string {

@@ -46,6 +46,28 @@ celery_app.conf.update(
             "task": "vav.counseling.advance",
             "schedule": 60.0,
         },
+        "consume-notification-outbox": {
+            "task": "vav.notifications.consume_outbox",
+            "schedule": 10.0,
+        },
+        "deliver-notifications": {
+            "task": "vav.notifications.deliver",
+            "schedule": 10.0,
+        },
+        "dispatch-notification-reminders": {
+            "task": "vav.notifications.reminders",
+            "schedule": float(
+                os.getenv("NOTIFICATION_REMINDER_JOB_INTERVAL_SECONDS", "60")
+            ),
+        },
+        "dispatch-notification-campaigns": {
+            "task": "vav.notifications.campaigns",
+            "schedule": 10.0,
+        },
+        "dispatch-notification-digests": {
+            "task": "vav.notifications.digests",
+            "schedule": 3600.0,
+        },
     },
 )
 

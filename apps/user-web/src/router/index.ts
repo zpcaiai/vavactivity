@@ -19,6 +19,9 @@ import CounselingAppointmentsPage from "@/features/counseling/pages/CounselingAp
 import CounselingBookingPage from "@/features/counseling/pages/CounselingBookingPage.vue";
 import CounselingServicePage from "@/features/counseling/pages/CounselingServicePage.vue";
 import CounselingServicesPage from "@/features/counseling/pages/CounselingServicesPage.vue";
+import AiAssistantPage from "@/features/ai-assistant/pages/AiAssistantPage.vue";
+import NotificationsPage from "@/features/notifications/pages/NotificationsPage.vue";
+import UnsubscribePage from "@/features/notifications/pages/UnsubscribePage.vue";
 import AuthPage from "@/pages/AuthPage.vue";
 import AuthTokenPage from "@/pages/AuthTokenPage.vue";
 import CatalogPage from "@/features/catalog/pages/CatalogPage.vue";
@@ -90,8 +93,13 @@ export const router = createRouter({
         { path: "counseling/:slug/book", name: "counseling-book", component: CounselingBookingPage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
         { path: "account/counseling", name: "account-counseling", component: CounselingAppointmentsPage, meta: { requiresAuth: true } },
         { path: "account/counseling/:appointmentId", name: "account-counseling-detail", component: CounselingAppointmentsPage, meta: { requiresAuth: true } },
-        { path: "ai-assistant", name: "ai-assistant", component: CmsPage, meta: { copyKey: "ai", cmsSlug: "ai-assistant" } },
+        { path: "ai-assistant", name: "ai-assistant", component: AiAssistantPage, meta: { requiresAuth: true } },
+        { path: "ai-assistant/:conversationId", name: "ai-assistant-conversation", component: AiAssistantPage, meta: { requiresAuth: true } },
         { path: "ai-assistant/plans", name: "ai-plans", component: CatalogPage, meta: { catalogTitle: "AI 辅导方案", catalogCategory: "ai-coaching" } },
+        { path: "account/notifications", name: "account-notifications", component: NotificationsPage, meta: { requiresAuth: true } },
+        { path: "account/notification-preferences", name: "account-notification-preferences", component: NotificationsPage, meta: { requiresAuth: true } },
+        { path: "account/email-preferences", redirect: (to) => `/${String(to.params.locale)}/account/notification-preferences` },
+        { path: "notifications/unsubscribe/:token", name: "notification-unsubscribe", component: UnsubscribePage },
         { path: "membership", name: "membership", component: CatalogPage, meta: { catalogTitle: "婚恋会员", catalogCategory: "memberships" } },
         { path: "login", redirect: (to) => `/${String(to.params.locale)}/auth/login` },
         { path: "register", redirect: (to) => `/${String(to.params.locale)}/auth/register` },

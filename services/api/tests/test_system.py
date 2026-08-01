@@ -2,6 +2,8 @@ import json
 
 from fastapi.testclient import TestClient
 
+from vav.core.config import get_settings
+
 
 def test_version_is_enveloped(client: TestClient) -> None:
     response = client.get("/api/v1/system/version")
@@ -17,7 +19,7 @@ def test_public_config_excludes_secrets(client: TestClient) -> None:
     assert "database_url" not in serialized
     assert "password" not in serialized
     assert "secret" not in serialized
-    assert response.json()["data"]["features"]["ai_assistant"] is False
+    assert response.json()["data"]["features"]["ai_assistant"] is get_settings().ai_enabled
 
 
 def test_not_found_uses_standard_error(client: TestClient) -> None:

@@ -14,7 +14,12 @@
 	counseling-security-test counseling-user-e2e counseling-admin-e2e counseling-verify \
 	knowledge-migrate knowledge-seed knowledge-ingest-fixtures knowledge-build-index \
 	knowledge-test knowledge-retrieval-test knowledge-security-test knowledge-eval \
-	knowledge-admin-e2e knowledge-verify
+	knowledge-admin-e2e knowledge-verify \
+	ai-migrate ai-seed ai-test ai-safety-test ai-concurrency-test ai-eval \
+	ai-user-e2e ai-admin-e2e ai-verify \
+	notification-migrate notification-seed notification-seed-templates notification-test \
+	notification-concurrency-test notification-security-test notification-provider-test \
+	notification-user-e2e notification-admin-e2e notification-verify
 
 bootstrap:
 	./scripts/bootstrap.sh
@@ -254,3 +259,62 @@ knowledge-admin-e2e:
 
 knowledge-verify: knowledge-migrate knowledge-seed knowledge-ingest-fixtures knowledge-build-index knowledge-test knowledge-retrieval-test knowledge-security-test knowledge-eval knowledge-admin-e2e
 	$(MAKE) counseling-verify
+
+ai-migrate:
+	docker compose exec -T api alembic upgrade head
+
+ai-seed:
+	docker compose exec -T api python -m vav.cli.seed_permissions
+	docker compose exec -T api python -m vav.cli.seed_ai_assistant
+
+ai-test:
+	docker compose exec -T api pytest tests/ai_assistant/unit tests/ai_assistant/integration -q
+
+ai-safety-test:
+	docker compose exec -T api pytest tests/ai_assistant/safety tests/ai_assistant/security -q
+
+ai-concurrency-test:
+	docker compose exec -T api pytest tests/ai_assistant/concurrency -q
+
+ai-eval:
+	docker compose exec -T api python -m vav.cli.run_ai_evaluation
+
+ai-user-e2e:
+	corepack pnpm exec playwright test e2e/ai.user.spec.ts
+
+ai-admin-e2e:
+	corepack pnpm exec playwright test e2e/ai.admin.spec.ts
+
+ai-verify: ai-migrate ai-seed ai-test ai-safety-test ai-concurrency-test ai-eval ai-user-e2e ai-admin-e2e
+	$(MAKE) knowledge-verify
+
+notification-migrate:
+	docker compose exec -T api alembic upgrade head
+
+notification-seed:
+	docker compose exec -T api python -m vav.cli.seed_permissions
+	docker compose exec -T api python -m vav.cli.seed_notifications
+
+notification-seed-templates:
+	docker compose exec -T api python -m vav.cli.seed_notification_templates
+
+notification-test:
+	docker compose exec -T api pytest tests/notifications/unit tests/notifications/integration -q
+
+notification-concurrency-test:
+	docker compose exec -T api pytest tests/notifications/concurrency -q
+
+notification-security-test:
+	docker compose exec -T api pytest tests/notifications/security -q
+
+notification-provider-test:
+	docker compose exec -T api pytest tests/notifications/providers -q
+
+notification-user-e2e:
+	corepack pnpm exec playwright test e2e/notifications.user.spec.ts
+
+notification-admin-e2e:
+	corepack pnpm exec playwright test e2e/notifications.admin.spec.ts
+
+notification-verify: notification-migrate notification-seed-templates notification-seed notification-test notification-concurrency-test notification-security-test notification-provider-test notification-user-e2e notification-admin-e2e
+	$(MAKE) ai-verify

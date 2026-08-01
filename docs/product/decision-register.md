@@ -37,6 +37,16 @@
 | `knowledge_embedding_provider` | platform_and_ai | undecided | 开发/测试只用确定性 Fake，生产必须显式配置真实 Provider |
 | `knowledge_query_retention` | privacy_and_legal | undecided | 查询文本保持加密且不声明生产保留期限已批准 |
 | `knowledge_public_citation_policy` | legal_and_content | undecided | 未获独立引用许可时只返回内部引用，不公开原文摘录 |
+| `ai_memory_policy` | privacy_and_product | undecided | 长期记忆默认关闭，只有单独明确同意后才可跨 Turn 使用；不默认跨会话共享 |
+| `ai_conversation_retention` | privacy_and_legal | undecided | 本地使用可配置 365 天占位值，生产不得宣称保留期限已获批准或自动永久保存 |
+| `ai_safety_escalation_policy` | trust_and_safety_and_legal | undecided | 高风险停止普通建议并建内部复核；地区紧急指导和外发流程未批准时不得虚构 |
+| `ai_model_provider` | platform_and_ai | undecided | 开发/评测使用确定性 Provider；生产必须配置兼容、获批且满足数据地区要求的 Provider |
+| `ai_human_referral_policy` | operations_and_legal | undecided | 普通转介需用户确认；高风险仅建受限内部任务，不自动向外部机构发送资料 |
+| `notification_email_provider` | platform_and_operations | undecided | 开发只使用 Mailpit/Fake，生产必须显式选择并验证真实 Provider |
+| `notification_marketing_consent` | legal_and_product | undecided | 营销默认关闭，不从注册或购买推断同意，正式文案和版本待批准 |
+| `notification_retention` | privacy_and_legal | undecided | 本地使用可配置占位期限，生产清理和审计保留期限未获批准 |
+| `notification_tracking_policy` | privacy_and_product | undecided | 敏感事务邮件不嵌入营销追踪，点击/打开追踪默认关闭 |
+| `notification_campaign_approval` | operations_and_legal | undecided | 所有营销群发保持审批分离；正式人数阈值与升级流程待批准 |
 
 ## 决策记录格式
 

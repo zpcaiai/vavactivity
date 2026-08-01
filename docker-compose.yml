@@ -98,6 +98,11 @@ services:
       MEDIA_S3_SECRET_KEY: ${MEDIA_S3_SECRET_KEY:-vav_minio_local_development_only}
       MEDIA_S3_BUCKET_PUBLIC: ${MEDIA_S3_BUCKET_PUBLIC:-vav-public}
       MEDIA_S3_BUCKET_PRIVATE: ${MEDIA_S3_BUCKET_PRIVATE:-vav-private}
+      AI_ENABLED: ${AI_ENABLED:-true}
+      NOTIFICATION_ENABLED: ${NOTIFICATION_ENABLED:-true}
+      NOTIFICATION_EMAIL_PROVIDER: ${NOTIFICATION_EMAIL_PROVIDER:-mailpit}
+      MAILPIT_SMTP_HOST: mailpit
+      MAILPIT_SMTP_PORT: 1025
     command:
       - /bin/sh
       - -ec

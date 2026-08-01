@@ -579,6 +579,224 @@ class Settings(BaseSettings):
         default=True, validation_alias="KNOWLEDGE_SENSITIVE_QUERY_ENCRYPTION"
     )
 
+    ai_agent_profile: str = Field(default="hanna_v1", validation_alias="AI_AGENT_PROFILE")
+    ai_agent_graph_version: str = Field(default="1.0.0", validation_alias="AI_AGENT_GRAPH_VERSION")
+    ai_agent_default_locale: str = Field(
+        default="zh-CN", validation_alias="AI_AGENT_DEFAULT_LOCALE"
+    )
+    ai_agent_max_recent_turns: int = Field(default=12, validation_alias="AI_AGENT_MAX_RECENT_TURNS")
+    ai_agent_summary_trigger_turns: int = Field(
+        default=10, validation_alias="AI_AGENT_SUMMARY_TRIGGER_TURNS"
+    )
+    ai_agent_max_clarifying_questions_per_turn: int = Field(
+        default=2, validation_alias="AI_AGENT_MAX_CLARIFYING_QUESTIONS_PER_TURN"
+    )
+    ai_turn_timeout_seconds: int = Field(default=45, validation_alias="AI_TURN_TIMEOUT_SECONDS")
+    ai_turn_max_model_calls: int = Field(default=8, validation_alias="AI_TURN_MAX_MODEL_CALLS")
+    ai_turn_max_tool_calls: int = Field(default=6, validation_alias="AI_TURN_MAX_TOOL_CALLS")
+    ai_turn_max_input_tokens: int = Field(
+        default=30000, validation_alias="AI_TURN_MAX_INPUT_TOKENS"
+    )
+    ai_turn_max_output_tokens: int = Field(
+        default=2000, validation_alias="AI_TURN_MAX_OUTPUT_TOKENS"
+    )
+    ai_turn_max_cost_minor: int = Field(default=100, validation_alias="AI_TURN_MAX_COST_MINOR")
+    ai_safety_prescreen_enabled: bool = Field(
+        default=True, validation_alias="AI_SAFETY_PRESCREEN_ENABLED"
+    )
+    ai_safety_postcheck_enabled: bool = Field(
+        default=True, validation_alias="AI_SAFETY_POSTCHECK_ENABLED"
+    )
+    ai_safety_high_risk_auto_referral: bool = Field(
+        default=True, validation_alias="AI_SAFETY_HIGH_RISK_AUTO_REFERRAL"
+    )
+    ai_safety_immediate_risk_pause_conversation: bool = Field(
+        default=True, validation_alias="AI_SAFETY_IMMEDIATE_RISK_PAUSE_CONVERSATION"
+    )
+    ai_safety_policy_version: str = Field(
+        default="1.0.0", validation_alias="AI_SAFETY_POLICY_VERSION"
+    )
+    ai_rag_enabled: bool = Field(default=True, validation_alias="AI_RAG_ENABLED")
+    ai_rag_top_k: int = Field(default=8, validation_alias="AI_RAG_TOP_K")
+    ai_rag_require_citations: bool = Field(
+        default=True, validation_alias="AI_RAG_REQUIRE_CITATIONS"
+    )
+    ai_rag_allow_unsourced_general_guidance: bool = Field(
+        default=True, validation_alias="AI_RAG_ALLOW_UNSOURCED_GENERAL_GUIDANCE"
+    )
+    ai_rag_block_unsupported_core_claims: bool = Field(
+        default=True, validation_alias="AI_RAG_BLOCK_UNSUPPORTED_CORE_CLAIMS"
+    )
+    ai_tool_calling_enabled: bool = Field(default=True, validation_alias="AI_TOOL_CALLING_ENABLED")
+    ai_tool_default_timeout_seconds: int = Field(
+        default=10, validation_alias="AI_TOOL_DEFAULT_TIMEOUT_SECONDS"
+    )
+    ai_tool_write_confirmation_required: bool = Field(
+        default=True, validation_alias="AI_TOOL_WRITE_CONFIRMATION_REQUIRED"
+    )
+    ai_tool_max_parallel_calls: int = Field(
+        default=3, validation_alias="AI_TOOL_MAX_PARALLEL_CALLS"
+    )
+    ai_max_service_recommendations: int = Field(
+        default=3, validation_alias="AI_MAX_SERVICE_RECOMMENDATIONS"
+    )
+    ai_max_recommendations_per_type: int = Field(
+        default=2, validation_alias="AI_MAX_RECOMMENDATIONS_PER_TYPE"
+    )
+    ai_recommend_only_currently_available: bool = Field(
+        default=True, validation_alias="AI_RECOMMEND_ONLY_CURRENTLY_AVAILABLE"
+    )
+    ai_long_term_memory_enabled: bool = Field(
+        default=True, validation_alias="AI_LONG_TERM_MEMORY_ENABLED"
+    )
+    ai_long_term_memory_opt_in_required: bool = Field(
+        default=True, validation_alias="AI_LONG_TERM_MEMORY_OPT_IN_REQUIRED"
+    )
+    ai_long_term_memory_default: bool = Field(
+        default=False, validation_alias="AI_LONG_TERM_MEMORY_DEFAULT"
+    )
+    ai_conversation_retention_days: int = Field(
+        default=365, validation_alias="AI_CONVERSATION_RETENTION_DAYS"
+    )
+    ai_conversation_store_raw_content: bool = Field(
+        default=True, validation_alias="AI_CONVERSATION_STORE_RAW_CONTENT"
+    )
+    ai_conversation_encryption_enabled: bool = Field(
+        default=True, validation_alias="AI_CONVERSATION_ENCRYPTION_ENABLED"
+    )
+    ai_external_training_opt_in_required: bool = Field(
+        default=True, validation_alias="AI_EXTERNAL_TRAINING_OPT_IN_REQUIRED"
+    )
+    ai_external_training_default: bool = Field(
+        default=False, validation_alias="AI_EXTERNAL_TRAINING_DEFAULT"
+    )
+    ai_model_provider: str = Field(
+        default="deterministic_local", validation_alias="AI_MODEL_PROVIDER"
+    )
+    ai_evaluation_min_cases: int = Field(default=30, validation_alias="AI_EVALUATION_MIN_CASES")
+    ai_evaluation_require_zero_privacy_leakage: bool = Field(
+        default=True, validation_alias="AI_EVALUATION_REQUIRE_ZERO_PRIVACY_LEAKAGE"
+    )
+    ai_evaluation_require_zero_unauthorized_tool_calls: bool = Field(
+        default=True, validation_alias="AI_EVALUATION_REQUIRE_ZERO_UNAUTHORIZED_TOOL_CALLS"
+    )
+    ai_evaluation_require_zero_cross_user_access: bool = Field(
+        default=True, validation_alias="AI_EVALUATION_REQUIRE_ZERO_CROSS_USER_ACCESS"
+    )
+
+    notification_enabled: bool = Field(default=True, validation_alias="NOTIFICATION_ENABLED")
+    notification_default_locale: str = Field(
+        default="zh-CN", validation_alias="NOTIFICATION_DEFAULT_LOCALE"
+    )
+    notification_supported_locales: str = Field(
+        default="zh-CN,zh-TW,en", validation_alias="NOTIFICATION_SUPPORTED_LOCALES"
+    )
+    notification_default_timezone: str = Field(
+        default="Asia/Shanghai", validation_alias="NOTIFICATION_DEFAULT_TIMEZONE"
+    )
+    notification_worker_batch_size: int = Field(
+        default=100, validation_alias="NOTIFICATION_WORKER_BATCH_SIZE"
+    )
+    notification_max_delivery_attempts: int = Field(
+        default=6, validation_alias="NOTIFICATION_MAX_DELIVERY_ATTEMPTS"
+    )
+    notification_delivery_timeout_seconds: int = Field(
+        default=15, validation_alias="NOTIFICATION_DELIVERY_TIMEOUT_SECONDS"
+    )
+    notification_retry_base_seconds: int = Field(
+        default=60, validation_alias="NOTIFICATION_RETRY_BASE_SECONDS"
+    )
+    notification_retry_max_seconds: int = Field(
+        default=43200, validation_alias="NOTIFICATION_RETRY_MAX_SECONDS"
+    )
+    notification_dedup_ttl_days: int = Field(
+        default=30, validation_alias="NOTIFICATION_DEDUP_TTL_DAYS"
+    )
+    notification_in_app_enabled: bool = Field(
+        default=True, validation_alias="NOTIFICATION_IN_APP_ENABLED"
+    )
+    notification_in_app_retention_days: int = Field(
+        default=365, validation_alias="NOTIFICATION_IN_APP_RETENTION_DAYS"
+    )
+    notification_unread_cache_ttl_seconds: int = Field(
+        default=60, validation_alias="NOTIFICATION_UNREAD_CACHE_TTL_SECONDS"
+    )
+    notification_email_enabled: bool = Field(
+        default=True, validation_alias="NOTIFICATION_EMAIL_ENABLED"
+    )
+    notification_email_provider: str = Field(
+        default="mailpit", validation_alias="NOTIFICATION_EMAIL_PROVIDER"
+    )
+    notification_email_from_address: str = Field(
+        default="no-reply@example.local", validation_alias="NOTIFICATION_EMAIL_FROM_ADDRESS"
+    )
+    notification_email_from_name: str = Field(
+        default="VAV", validation_alias="NOTIFICATION_EMAIL_FROM_NAME"
+    )
+    notification_email_reply_to: str = Field(
+        default="", validation_alias="NOTIFICATION_EMAIL_REPLY_TO"
+    )
+    notification_email_provider_webhook_secret: SecretStr = Field(
+        default=SecretStr("change-me-notification-webhook"),
+        validation_alias="NOTIFICATION_EMAIL_PROVIDER_WEBHOOK_SECRET",
+    )
+    notification_email_max_recipients_per_request: int = Field(
+        default=1, validation_alias="NOTIFICATION_EMAIL_MAX_RECIPIENTS_PER_REQUEST"
+    )
+    mailpit_smtp_host: str = Field(default="localhost", validation_alias="MAILPIT_SMTP_HOST")
+    mailpit_smtp_port: int = Field(default=1025, validation_alias="MAILPIT_SMTP_PORT")
+    notification_quiet_hours_enabled: bool = Field(
+        default=True, validation_alias="NOTIFICATION_QUIET_HOURS_ENABLED"
+    )
+    notification_marketing_opt_in_required: bool = Field(
+        default=True, validation_alias="NOTIFICATION_MARKETING_OPT_IN_REQUIRED"
+    )
+    notification_default_marketing_enabled: bool = Field(
+        default=False, validation_alias="NOTIFICATION_DEFAULT_MARKETING_ENABLED"
+    )
+    notification_digest_enabled: bool = Field(
+        default=True, validation_alias="NOTIFICATION_DIGEST_ENABLED"
+    )
+    notification_reminder_job_interval_seconds: int = Field(
+        default=60, validation_alias="NOTIFICATION_REMINDER_JOB_INTERVAL_SECONDS"
+    )
+    notification_reminder_lookahead_minutes: int = Field(
+        default=10, validation_alias="NOTIFICATION_REMINDER_LOOKAHEAD_MINUTES"
+    )
+    notification_stale_reminder_recheck: bool = Field(
+        default=True, validation_alias="NOTIFICATION_STALE_REMINDER_RECHECK"
+    )
+    notification_campaigns_enabled: bool = Field(
+        default=True, validation_alias="NOTIFICATION_CAMPAIGNS_ENABLED"
+    )
+    notification_campaign_default_batch_size: int = Field(
+        default=100, validation_alias="NOTIFICATION_CAMPAIGN_DEFAULT_BATCH_SIZE"
+    )
+    notification_campaign_default_rate_per_minute: int = Field(
+        default=500, validation_alias="NOTIFICATION_CAMPAIGN_DEFAULT_RATE_PER_MINUTE"
+    )
+    notification_campaign_approval_required: bool = Field(
+        default=True, validation_alias="NOTIFICATION_CAMPAIGN_APPROVAL_REQUIRED"
+    )
+    notification_campaign_test_recipient_allowlist: str = Field(
+        default="", validation_alias="NOTIFICATION_CAMPAIGN_TEST_RECIPIENT_ALLOWLIST"
+    )
+    notification_soft_bounce_threshold: int = Field(
+        default=3, validation_alias="NOTIFICATION_SOFT_BOUNCE_THRESHOLD"
+    )
+    notification_suppression_enabled: bool = Field(
+        default=True, validation_alias="NOTIFICATION_SUPPRESSION_ENABLED"
+    )
+    notification_event_retention_days: int = Field(
+        default=90, validation_alias="NOTIFICATION_EVENT_RETENTION_DAYS"
+    )
+    notification_delivery_retention_days: int = Field(
+        default=365, validation_alias="NOTIFICATION_DELIVERY_RETENTION_DAYS"
+    )
+    notification_attempt_retention_days: int = Field(
+        default=180, validation_alias="NOTIFICATION_ATTEMPT_RETENTION_DAYS"
+    )
+
     @model_validator(mode="after")
     def reject_development_credentials_in_production(self) -> Settings:
         if self.environment == "production" and (
@@ -600,6 +818,26 @@ class Settings(BaseSettings):
             raise ValueError("production must configure a real counseling meeting provider")
         if self.environment == "production" and self.knowledge_embedding_provider == "fake":
             raise ValueError("production must configure a real knowledge embedding provider")
+        if self.environment == "production" and self.ai_model_provider == "deterministic_local":
+            raise ValueError("production must configure an approved AI model provider")
+        if self.environment == "production" and not self.ai_conversation_encryption_enabled:
+            raise ValueError("production must encrypt AI conversation content")
+        if self.ai_external_training_default:
+            raise ValueError("external AI training cannot be enabled by default")
+        if self.notification_default_marketing_enabled:
+            raise ValueError("marketing notifications cannot be enabled by default")
+        if self.notification_email_max_recipients_per_request != 1:
+            raise ValueError("notification email delivery must use one recipient per request")
+        if self.environment == "production" and self.notification_email_provider in {
+            "mailpit",
+            "fake",
+        }:
+            raise ValueError("production must configure an approved notification email provider")
+        if self.environment == "production" and (
+            "change-me" in self.notification_email_provider_webhook_secret.get_secret_value()
+            or not self.notification_email_provider_webhook_secret.get_secret_value()
+        ):
+            raise ValueError("production requires a notification webhook secret")
         return self
 
     def public_summary(self) -> dict[str, object]:
@@ -607,7 +845,10 @@ class Settings(BaseSettings):
             "environment": self.environment,
             "version": self.version,
             "display_timezone": self.display_timezone,
-            "features": {"ai_assistant": self.ai_enabled},
+            "features": {
+                "ai_assistant": self.ai_enabled,
+                "notifications": self.notification_enabled,
+            },
         }
 
 

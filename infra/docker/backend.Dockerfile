@@ -2,6 +2,7 @@ FROM ghcr.io/astral-sh/uv:0.8.3-python3.12-bookworm-slim
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
+    UV_HTTP_TIMEOUT=120 \
     PATH="/app/.venv/bin:$PATH"
 
 WORKDIR /app

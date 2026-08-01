@@ -35,7 +35,8 @@ module_registry:
   activities: {owner: product, status: foundation_in_progress, phase: phase_1}
   courses: {owner: product, status: foundation_in_progress, phase: phase_1}
   counseling: {owner: product, status: planned, phase: phase_1}
-  ai_assistant: {owner: ai, status: planned, phase: phase_1}
+  ai_assistant: {owner: ai, status: foundation_in_progress, phase: phase_1}
+  notifications: {owner: platform, status: foundation_in_progress, phase: phase_1}
   catalog: {owner: backend, status: foundation_in_progress, phase: phase_1}
   orders: {owner: backend, status: foundation_in_progress, phase: phase_1}
   payments: {owner: backend, status: foundation_in_progress, phase: phase_1}
@@ -60,6 +61,7 @@ phases:
       - courses
       - counseling
       - ai_assistant
+      - notifications
       - catalog
       - orders
       - payments
@@ -184,6 +186,46 @@ pending_decisions:
     value: null
   knowledge_public_citation_policy:
     owner: legal_and_content
+    status: undecided
+    value: null
+  ai_memory_policy:
+    owner: privacy_and_product
+    status: undecided
+    value: null
+  ai_conversation_retention:
+    owner: privacy_and_legal
+    status: undecided
+    value: null
+  ai_safety_escalation_policy:
+    owner: trust_and_safety_and_legal
+    status: undecided
+    value: null
+  ai_model_provider:
+    owner: platform_and_ai
+    status: undecided
+    value: null
+  ai_human_referral_policy:
+    owner: operations_and_legal
+    status: undecided
+    value: null
+  notification_email_provider:
+    owner: platform_and_operations
+    status: undecided
+    value: null
+  notification_marketing_consent:
+    owner: legal_and_product
+    status: undecided
+    value: null
+  notification_retention:
+    owner: privacy_and_legal
+    status: undecided
+    value: null
+  notification_tracking_policy:
+    owner: privacy_and_product
+    status: undecided
+    value: null
+  notification_campaign_approval:
+    owner: operations_and_legal
     status: undecided
     value: null
 

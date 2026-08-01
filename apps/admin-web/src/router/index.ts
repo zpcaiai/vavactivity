@@ -16,6 +16,8 @@ import ErrorPage from "@/pages/ErrorPage.vue";
 import LoginPage from "@/pages/LoginPage.vue";
 import MediaLibraryPage from "@/pages/MediaLibraryPage.vue";
 import KnowledgeManagementPage from "@/pages/KnowledgeManagementPage.vue";
+import AiManagementPage from "@/pages/AiManagementPage.vue";
+import NotificationManagementPage from "@/pages/NotificationManagementPage.vue";
 import ModuleListPage from "@/pages/ModuleListPage.vue";
 import NavigationManagementPage from "@/pages/NavigationManagementPage.vue";
 import PricingSimulationPage from "@/pages/PricingSimulationPage.vue";
@@ -243,6 +245,32 @@ export const router = createRouter({
           meta: { title: "知识库中心", permission: "knowledge.spaces.read" }
         },
         {
+          path: "ai",
+          name: "admin-ai",
+          component: AiManagementPage,
+          meta: { title: "AI 运营中心", permission: "ai.conversations.read" }
+        },
+        ...[
+          "dashboard",
+          "templates",
+          "template-releases",
+          "event-subscriptions",
+          "deliveries",
+          "dead-letters",
+          "reminders",
+          "campaigns",
+          "providers",
+          "provider-events",
+          "suppressions",
+          "unsubscribes",
+          "audit"
+        ].map((section) => ({
+          path: `notifications/${section}`,
+          name: `admin-notifications-${section}`,
+          component: NotificationManagementPage,
+          meta: { title: "通知运营中心", permission: "notifications.analytics.read", notificationSection: section }
+        })),
+        {
           path: "access/admins",
           name: "admin-access-admins",
           component: AccessManagementPage,
@@ -278,7 +306,7 @@ export const router = createRouter({
           component: AccessManagementPage,
           meta: { title: "权限审计", permission: "audit.read", endpoint: "/admin/audit/security-events" }
         },
-        ...modules.filter(([path]) => !["users", "catalog", "activities", "courses", "counseling"].includes(path)).map(([path, title, description, routePermission]) => ({
+        ...modules.filter(([path]) => !["users", "catalog", "activities", "courses", "counseling", "ai"].includes(path)).map(([path, title, description, routePermission]) => ({
           path,
           name: `admin-${path}`,
           component: ModuleListPage,
