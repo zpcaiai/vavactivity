@@ -26,6 +26,7 @@ from vav.modules.notifications.service import (
     dispatch_due_reminders,
     process_due_deliveries,
 )
+from vav.modules.privacy.service import execute_erasure_plan, process_export_request
 from vav_worker.celery_app import celery_app
 
 
@@ -245,3 +246,245 @@ async def _dispatch_notification_digests() -> int:
 @celery_app.task(name="vav.notifications.digests")  # type: ignore[misc]
 def dispatch_notification_digests() -> dict[str, int]:
     return {"dispatched": asyncio.run(_dispatch_notification_digests())}
+
+
+async def _process_privacy_exports() -> int:
+    async with session_factory() as session:
+        request_ids = list(
+            (
+                await session.scalars(
+                    text(
+                        "SELECT id FROM data_subject_requests WHERE request_type='export' "
+                        "AND status IN ('verified','approved') ORDER BY submitted_at "
+                        "FOR UPDATE SKIP LOCKED LIMIT 20"
+                    )
+                )
+            ).all()
+        )
+    processed = 0
+    for request_id in request_ids:
+        async with session_factory() as session:
+            await process_export_request(session, request_id)
+            processed += 1
+    await get_engine().dispose()
+    return processed
+
+
+@celery_app.task(name="vav.privacy.exports")  # type: ignore[misc]
+def process_privacy_exports() -> dict[str, int]:
+    return {"processed": asyncio.run(_process_privacy_exports())}
+
+
+async def _process_privacy_erasures() -> int:
+    async with session_factory() as session:
+        rows = list(
+            (
+                await session.execute(
+                    text(
+                        "SELECT id,approved_by FROM privacy_erasure_plans WHERE status='ready' "
+                        "AND approved_by IS NOT NULL ORDER BY approved_at FOR UPDATE SKIP LOCKED LIMIT 10"
+                    )
+                )
+            )
+            .mappings()
+            .all()
+        )
+    processed = 0
+    for row in rows:
+        async with session_factory() as session:
+            await execute_erasure_plan(session, row["id"], actor_id=row["approved_by"])
+            processed += 1
+    await get_engine().dispose()
+    return processed
+
+
+@celery_app.task(name="vav.privacy.erasures")  # type: ignore[misc]
+def process_privacy_erasures() -> dict[str, int]:
+    return {"processed": asyncio.run(_process_privacy_erasures())}
+
+
+async def _evaluate_privacy_retention() -> dict[str, int]:
+    async with session_factory() as session:
+        sources = (
+            (
+                "privacy.identity.profile",
+                "user_profile",
+                "SELECT id AS subject_id,user_id,created_at AS trigger_at FROM user_profiles",
+            ),
+            (
+                "privacy.identity.contacts",
+                "contact_point",
+                "SELECT id AS subject_id,user_id,created_at AS trigger_at FROM user_contact_points",
+            ),
+            (
+                "privacy.commerce.orders",
+                "order",
+                "SELECT id AS subject_id,user_id,created_at AS trigger_at FROM orders",
+            ),
+            (
+                "privacy.commerce.payments",
+                "payment_attempt",
+                "SELECT p.id AS subject_id,o.user_id,p.created_at AS trigger_at FROM payment_attempts p JOIN orders o ON o.id=p.order_id",
+            ),
+            (
+                "privacy.activities.registrations",
+                "activity_registration",
+                "SELECT id AS subject_id,user_id,created_at AS trigger_at FROM activity_registrations",
+            ),
+            (
+                "privacy.courses.enrollments",
+                "course_enrollment",
+                "SELECT id AS subject_id,user_id,created_at AS trigger_at FROM course_enrollments",
+            ),
+            (
+                "privacy.courses.certificates",
+                "course_certificate",
+                "SELECT id AS subject_id,user_id,created_at AS trigger_at FROM course_certificates",
+            ),
+            (
+                "privacy.counseling.appointments",
+                "counseling_appointment",
+                "SELECT id AS subject_id,user_id,created_at AS trigger_at FROM counseling_appointments",
+            ),
+            (
+                "privacy.knowledge.queries",
+                "knowledge_query",
+                "SELECT id AS subject_id,actor_id AS user_id,created_at AS trigger_at FROM knowledge_retrieval_queries WHERE actor_id IS NOT NULL",
+            ),
+            (
+                "privacy.ai.conversations",
+                "ai_conversation",
+                "SELECT id AS subject_id,user_id,created_at AS trigger_at FROM ai_conversations",
+            ),
+            (
+                "privacy.ai.memories",
+                "ai_memory_item",
+                "SELECT id AS subject_id,user_id,created_at AS trigger_at FROM ai_memory_items",
+            ),
+            (
+                "privacy.notifications.in_app",
+                "user_notification",
+                "SELECT id AS subject_id,user_id,created_at AS trigger_at FROM user_notifications",
+            ),
+            (
+                "privacy.notifications.deliveries",
+                "notification_delivery",
+                "SELECT id AS subject_id,user_id,created_at AS trigger_at FROM notification_deliveries",
+            ),
+            (
+                "privacy.notifications.preferences",
+                "notification_preference",
+                "SELECT id AS subject_id,user_id,created_at AS trigger_at FROM notification_preferences",
+            ),
+        )
+        materialized = 0
+        for policy_code, subject_type, source_query in sources:
+            values = list(
+                (
+                    await session.scalars(
+                        text(
+                            "INSERT INTO privacy_retention_instances "
+                            "(policy_id,subject_type,subject_id,user_id,trigger_at,expires_at,status) "
+                            f"SELECT p.id,:subject_type,s.subject_id,s.user_id,s.trigger_at,"
+                            f"s.trigger_at+make_interval(days=>p.retention_days),'active' FROM ({source_query}) s "
+                            "JOIN privacy_retention_policies p ON p.policy_code=:policy AND p.status='active' "
+                            "WHERE p.retention_days IS NOT NULL ON CONFLICT (policy_id,subject_type,subject_id) "
+                            "DO NOTHING RETURNING id"
+                        ),
+                        {"policy": policy_code, "subject_type": subject_type},
+                    )
+                ).all()
+            )
+            materialized += len(values)
+        held = len(
+            list(
+                (
+                    await session.scalars(
+                        text(
+                            "UPDATE privacy_retention_instances SET status='blocked_by_hold',evaluated_at=now(),"
+                            "updated_at=now() WHERE status='active' AND expires_at<=now() AND active_hold_count>0 "
+                            "RETURNING id"
+                        )
+                    )
+                ).all()
+            )
+        )
+        due = list(
+            (
+                await session.execute(
+                    text(
+                        "SELECT i.id,p.expiration_action FROM privacy_retention_instances i "
+                        "JOIN privacy_retention_policies p ON p.id=i.policy_id "
+                        "WHERE i.status='active' AND i.expires_at<=now() AND i.active_hold_count=0 "
+                        "ORDER BY i.expires_at FOR UPDATE OF i SKIP LOCKED LIMIT 500"
+                    )
+                )
+            )
+            .mappings()
+            .all()
+        )
+        for row in due:
+            await session.execute(
+                text(
+                    "UPDATE privacy_retention_instances SET status=:status,evaluated_at=now(),"
+                    "updated_at=now() WHERE id=:id"
+                ),
+                {
+                    "id": row["id"],
+                    "status": (
+                        "manual_review"
+                        if row["expiration_action"]
+                        in {"manual_review", "retain_restricted"}
+                        else "action_queued"
+                    ),
+                },
+            )
+        await session.commit()
+    await get_engine().dispose()
+    return {
+        "materialized": materialized,
+        "evaluated": len(due),
+        "blocked_by_hold": held,
+    }
+
+
+@celery_app.task(name="vav.privacy.retention")  # type: ignore[misc]
+def evaluate_privacy_retention() -> dict[str, int]:
+    return asyncio.run(_evaluate_privacy_retention())
+
+
+async def _expire_privacy_data() -> dict[str, int]:
+    async with session_factory() as session:
+        archives = len(
+            list(
+                (
+                    await session.scalars(
+                        text(
+                            "UPDATE privacy_export_jobs SET archive_encrypted=NULL,download_token_hash=NULL,"
+                            "status='expired',updated_at=now() WHERE archive_expires_at<=now() "
+                            "AND archive_encrypted IS NOT NULL RETURNING id"
+                        )
+                    )
+                ).all()
+            )
+        )
+        memories = len(
+            list(
+                (
+                    await session.scalars(
+                        text(
+                            "UPDATE ai_memory_items SET content_encrypted='deleted',status='deleted',"
+                            "deleted_at=now(),updated_at=now() WHERE status<>'deleted' AND expires_at<=now() RETURNING id"
+                        )
+                    )
+                ).all()
+            )
+        )
+        await session.commit()
+    await get_engine().dispose()
+    return {"expired_archives": archives, "expired_memories": memories}
+
+
+@celery_app.task(name="vav.privacy.expiry")  # type: ignore[misc]
+def expire_privacy_data() -> dict[str, int]:
+    return asyncio.run(_expire_privacy_data())

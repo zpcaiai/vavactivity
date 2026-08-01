@@ -166,6 +166,12 @@ watch(locale, () => void loadNavigation());
       <RouterLink :to="`/${locale}/privacy`">
         隐私说明
       </RouterLink>
+      <RouterLink
+        v-if="auth.user"
+        :to="`/${locale}/account/privacy`"
+      >
+        隐私中心
+      </RouterLink>
       <RouterLink :to="`/${locale}/account/orders`">
         {{ t("commerce.orders") }}
       </RouterLink>

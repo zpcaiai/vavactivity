@@ -293,6 +293,50 @@ NOTIFICATION_PERMISSIONS = {
     "notifications.audit.read",
 }
 
+PRIVACY_PERMISSIONS = {
+    "privacy.profile.read",
+    "privacy.profile.update",
+    "privacy.consents.read",
+    "privacy.consents.manage",
+    "privacy.consent_releases.create",
+    "privacy.consent_releases.approve",
+    "privacy.consent_releases.activate",
+    "privacy.requests.read",
+    "privacy.requests.assign",
+    "privacy.requests.verify_identity",
+    "privacy.requests.approve",
+    "privacy.requests.reject",
+    "privacy.exports.read",
+    "privacy.exports.generate",
+    "privacy.exports.download",
+    "privacy.corrections.read",
+    "privacy.corrections.review",
+    "privacy.corrections.execute",
+    "privacy.erasures.read",
+    "privacy.erasures.plan",
+    "privacy.erasures.approve",
+    "privacy.erasures.execute",
+    "privacy.erasures.verify",
+    "privacy.inventory.read",
+    "privacy.inventory.manage",
+    "privacy.classifications.read",
+    "privacy.classifications.manage",
+    "privacy.retention.read",
+    "privacy.retention.manage",
+    "privacy.retention.execute",
+    "privacy.holds.read",
+    "privacy.holds.create",
+    "privacy.holds.release",
+    "privacy.break_glass.read",
+    "privacy.break_glass.request",
+    "privacy.break_glass.approve",
+    "privacy.break_glass.use",
+    "privacy.sensitive_access.read",
+    "privacy.incidents.read",
+    "privacy.incidents.manage",
+    "privacy.audit.read",
+}
+
 ALL_PERMISSIONS = (
     IDENTITY_PERMISSIONS
     | CMS_PERMISSIONS
@@ -304,6 +348,7 @@ ALL_PERMISSIONS = (
     | KNOWLEDGE_PERMISSIONS
     | AI_PERMISSIONS
     | NOTIFICATION_PERMISSIONS
+    | PRIVACY_PERMISSIONS
 )
 
 ROLE_PERMISSIONS: dict[str, set[str]] = {
@@ -491,6 +536,51 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "notifications.dead_letters.resolve",
         "notifications.suppressions.read",
     },
+    "privacy_manager": {
+        permission
+        for permission in PRIVACY_PERMISSIONS
+        if permission.startswith(("privacy.requests.", "privacy.exports.", "privacy.corrections."))
+    }
+    | {
+        "privacy.erasures.read",
+        "privacy.erasures.plan",
+        "privacy.inventory.read",
+        "privacy.retention.read",
+        "privacy.consents.read",
+        "privacy.audit.read",
+    },
+    "privacy_rights_reviewer": {
+        "privacy.requests.read",
+        "privacy.requests.assign",
+        "privacy.requests.verify_identity",
+        "privacy.requests.approve",
+        "privacy.requests.reject",
+        "privacy.exports.read",
+        "privacy.corrections.read",
+        "privacy.corrections.review",
+        "privacy.corrections.execute",
+        "privacy.audit.read",
+    },
+    "privacy_security_officer": {
+        permission
+        for permission in PRIVACY_PERMISSIONS
+        if permission.startswith(
+            (
+                "privacy.holds.",
+                "privacy.break_glass.",
+                "privacy.incidents.",
+            )
+        )
+    }
+    | {"privacy.sensitive_access.read", "privacy.audit.read"},
+    "privacy_data_steward": {
+        permission
+        for permission in PRIVACY_PERMISSIONS
+        if permission.startswith(
+            ("privacy.inventory.", "privacy.classifications.", "privacy.retention.")
+        )
+    }
+    | {"privacy.audit.read"},
     "knowledge_rights_approver": {
         "knowledge.sources.read",
         "knowledge.authorizations.read",

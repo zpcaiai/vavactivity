@@ -19,7 +19,9 @@
 	ai-user-e2e ai-admin-e2e ai-verify \
 	notification-migrate notification-seed notification-seed-templates notification-test \
 	notification-concurrency-test notification-security-test notification-provider-test \
-	notification-user-e2e notification-admin-e2e notification-verify
+	notification-user-e2e notification-admin-e2e notification-verify \
+	privacy-migrate privacy-seed privacy-seed-inventory privacy-test privacy-security-test \
+	privacy-concurrency-test privacy-retention-test privacy-user-e2e privacy-admin-e2e privacy-verify
 
 bootstrap:
 	./scripts/bootstrap.sh
@@ -318,3 +320,34 @@ notification-admin-e2e:
 
 notification-verify: notification-migrate notification-seed-templates notification-seed notification-test notification-concurrency-test notification-security-test notification-provider-test notification-user-e2e notification-admin-e2e
 	$(MAKE) ai-verify
+
+privacy-migrate:
+	docker compose exec -T api alembic upgrade head
+
+privacy-seed:
+	docker compose exec -T api python -m vav.cli.seed_permissions
+	docker compose exec -T api python -m vav.cli.seed_privacy
+
+privacy-seed-inventory:
+	docker compose exec -T api python -m vav.cli.seed_privacy_inventory
+
+privacy-test:
+	docker compose exec -T api pytest tests/privacy/unit tests/privacy/integration -q
+
+privacy-security-test:
+	docker compose exec -T api pytest tests/privacy/security -q
+
+privacy-concurrency-test:
+	docker compose exec -T api pytest tests/privacy/concurrency -q
+
+privacy-retention-test:
+	docker compose exec -T api pytest tests/privacy/retention -q
+
+privacy-user-e2e:
+	pnpm exec playwright test e2e/user-privacy
+
+privacy-admin-e2e:
+	pnpm exec playwright test e2e/admin-privacy
+
+privacy-verify: privacy-migrate privacy-seed privacy-seed-inventory privacy-test privacy-security-test privacy-concurrency-test privacy-retention-test privacy-user-e2e privacy-admin-e2e
+	$(MAKE) notification-verify

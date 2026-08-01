@@ -711,7 +711,8 @@ async def _materialize_intent(
                     "body_text_rendered_encrypted,rendering_checksum,status,provider,scheduled_at,next_attempt_at,"
                     "expires_at,deduplication_key) VALUES (:intent_id,:user_id,'email',:priority,:destination,"
                     ":destination_hash,:release_id,:locale,:subject,:html,:text,:checksum,:status,:provider,"
-                    ":scheduled_at,:next_attempt_at,:expires_at,:dedup_key) ON CONFLICT DO NOTHING"
+                    ":scheduled_at,COALESCE(:next_attempt_at,now()),:expires_at,:dedup_key) "
+                    "ON CONFLICT DO NOTHING"
                 ),
                 {
                     "intent_id": intent_id,
@@ -732,7 +733,7 @@ async def _materialize_intent(
                     "status": "scheduled" if scheduled_at else "pending",
                     "provider": get_settings().notification_email_provider,
                     "scheduled_at": scheduled_at,
-                    "next_attempt_at": scheduled_at or now,
+                    "next_attempt_at": scheduled_at,
                     "expires_at": expires_at,
                     "dedup_key": dedup_key,
                 },

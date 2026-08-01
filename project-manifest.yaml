@@ -37,6 +37,7 @@ module_registry:
   counseling: {owner: product, status: planned, phase: phase_1}
   ai_assistant: {owner: ai, status: foundation_in_progress, phase: phase_1}
   notifications: {owner: platform, status: foundation_in_progress, phase: phase_1}
+  privacy: {owner: privacy_and_platform, status: foundation_in_progress, phase: phase_1}
   catalog: {owner: backend, status: foundation_in_progress, phase: phase_1}
   orders: {owner: backend, status: foundation_in_progress, phase: phase_1}
   payments: {owner: backend, status: foundation_in_progress, phase: phase_1}
@@ -62,6 +63,7 @@ phases:
       - counseling
       - ai_assistant
       - notifications
+      - privacy
       - catalog
       - orders
       - payments
@@ -226,6 +228,30 @@ pending_decisions:
     value: null
   notification_campaign_approval:
     owner: operations_and_legal
+    status: undecided
+    value: null
+  privacy_retention_policy:
+    owner: privacy_and_legal
+    status: undecided
+    value: null
+  privacy_erasure_policy:
+    owner: privacy_and_legal
+    status: undecided
+    value: null
+  privacy_legal_hold_policy:
+    owner: legal_and_security
+    status: undecided
+    value: null
+  privacy_break_glass_policy:
+    owner: security_and_privacy
+    status: undecided
+    value: null
+  privacy_export_format_policy:
+    owner: privacy_and_product
+    status: undecided
+    value: null
+  ai_external_training_policy:
+    owner: privacy_legal_and_ai
     status: undecided
     value: null
 

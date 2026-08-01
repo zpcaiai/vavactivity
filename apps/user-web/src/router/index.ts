@@ -21,6 +21,7 @@ import CounselingServicePage from "@/features/counseling/pages/CounselingService
 import CounselingServicesPage from "@/features/counseling/pages/CounselingServicesPage.vue";
 import AiAssistantPage from "@/features/ai-assistant/pages/AiAssistantPage.vue";
 import NotificationsPage from "@/features/notifications/pages/NotificationsPage.vue";
+import PrivacyCenterPage from "@/features/privacy/pages/PrivacyCenterPage.vue";
 import UnsubscribePage from "@/features/notifications/pages/UnsubscribePage.vue";
 import AuthPage from "@/pages/AuthPage.vue";
 import AuthTokenPage from "@/pages/AuthTokenPage.vue";
@@ -98,6 +99,17 @@ export const router = createRouter({
         { path: "ai-assistant/plans", name: "ai-plans", component: CatalogPage, meta: { catalogTitle: "AI 辅导方案", catalogCategory: "ai-coaching" } },
         { path: "account/notifications", name: "account-notifications", component: NotificationsPage, meta: { requiresAuth: true } },
         { path: "account/notification-preferences", name: "account-notification-preferences", component: NotificationsPage, meta: { requiresAuth: true } },
+        { path: "account/profile", name: "account-profile", component: PrivacyCenterPage, meta: { requiresAuth: true } },
+        { path: "account/contact-points", name: "account-contact-points", component: PrivacyCenterPage, meta: { requiresAuth: true } },
+        { path: "account/privacy", name: "account-privacy", component: PrivacyCenterPage, meta: { requiresAuth: true } },
+        { path: "account/consents", name: "account-consents", component: PrivacyCenterPage, meta: { requiresAuth: true } },
+        { path: "account/consents/:consentCode", name: "account-consent-detail", component: PrivacyCenterPage, meta: { requiresAuth: true } },
+        { path: "account/privacy/requests", name: "account-privacy-requests", component: PrivacyCenterPage, meta: { requiresAuth: true } },
+        { path: "account/privacy/requests/:requestId", name: "account-privacy-request-detail", component: PrivacyCenterPage, meta: { requiresAuth: true } },
+        { path: "account/privacy/export", name: "account-privacy-export", component: PrivacyCenterPage, meta: { requiresAuth: true } },
+        { path: "account/privacy/corrections", name: "account-privacy-corrections", component: PrivacyCenterPage, meta: { requiresAuth: true } },
+        { path: "account/privacy/erasure", name: "account-privacy-erasure", component: PrivacyCenterPage, meta: { requiresAuth: true } },
+        { path: "account/ai-memory", name: "account-ai-memory", component: PrivacyCenterPage, meta: { requiresAuth: true } },
         { path: "account/email-preferences", redirect: (to) => `/${String(to.params.locale)}/account/notification-preferences` },
         { path: "notifications/unsubscribe/:token", name: "notification-unsubscribe", component: UnsubscribePage },
         { path: "membership", name: "membership", component: CatalogPage, meta: { catalogTitle: "婚恋会员", catalogCategory: "memberships" } },

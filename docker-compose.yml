@@ -101,6 +101,8 @@ services:
       AI_ENABLED: ${AI_ENABLED:-true}
       NOTIFICATION_ENABLED: ${NOTIFICATION_ENABLED:-true}
       NOTIFICATION_EMAIL_PROVIDER: ${NOTIFICATION_EMAIL_PROVIDER:-mailpit}
+      PRIVACY_ENABLED: ${PRIVACY_ENABLED:-true}
+      PRIVACY_SEARCH_HMAC_PEPPER: ${PRIVACY_SEARCH_HMAC_PEPPER:-local-privacy-search-hmac-only}
       MAILPIT_SMTP_HOST: mailpit
       MAILPIT_SMTP_PORT: 1025
     command:
@@ -152,6 +154,8 @@ services:
       MEDIA_S3_SECRET_KEY: ${MEDIA_S3_SECRET_KEY:-vav_minio_local_development_only}
       MEDIA_S3_BUCKET_PUBLIC: ${MEDIA_S3_BUCKET_PUBLIC:-vav-public}
       MEDIA_S3_BUCKET_PRIVATE: ${MEDIA_S3_BUCKET_PRIVATE:-vav-private}
+      PRIVACY_ENABLED: ${PRIVACY_ENABLED:-true}
+      PRIVACY_SEARCH_HMAC_PEPPER: ${PRIVACY_SEARCH_HMAC_PEPPER:-local-privacy-search-hmac-only}
     working_dir: /app
     command:
       [
@@ -197,6 +201,8 @@ services:
       MEDIA_S3_SECRET_KEY: ${MEDIA_S3_SECRET_KEY:-vav_minio_local_development_only}
       MEDIA_S3_BUCKET_PUBLIC: ${MEDIA_S3_BUCKET_PUBLIC:-vav-public}
       MEDIA_S3_BUCKET_PRIVATE: ${MEDIA_S3_BUCKET_PRIVATE:-vav-private}
+      PRIVACY_ENABLED: ${PRIVACY_ENABLED:-true}
+      PRIVACY_SEARCH_HMAC_PEPPER: ${PRIVACY_SEARCH_HMAC_PEPPER:-local-privacy-search-hmac-only}
     working_dir: /app
     command:
       [

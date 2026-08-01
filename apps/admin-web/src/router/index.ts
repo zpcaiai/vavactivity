@@ -18,6 +18,7 @@ import MediaLibraryPage from "@/pages/MediaLibraryPage.vue";
 import KnowledgeManagementPage from "@/pages/KnowledgeManagementPage.vue";
 import AiManagementPage from "@/pages/AiManagementPage.vue";
 import NotificationManagementPage from "@/pages/NotificationManagementPage.vue";
+import PrivacyManagementPage from "@/pages/PrivacyManagementPage.vue";
 import ModuleListPage from "@/pages/ModuleListPage.vue";
 import NavigationManagementPage from "@/pages/NavigationManagementPage.vue";
 import PricingSimulationPage from "@/pages/PricingSimulationPage.vue";
@@ -52,6 +53,26 @@ const notificationSectionPermissions: Record<string, string> = {
   suppressions: "notifications.suppressions.read",
   unsubscribes: "notifications.preferences.read",
   audit: "notifications.audit.read"
+};
+
+const privacySectionPermissions: Record<string, string> = {
+  dashboard: "privacy.requests.read",
+  requests: "privacy.requests.read",
+  exports: "privacy.exports.read",
+  corrections: "privacy.corrections.read",
+  erasures: "privacy.erasures.read",
+  consents: "privacy.consents.read",
+  "consent-releases": "privacy.consents.read",
+  inventory: "privacy.inventory.read",
+  processing: "privacy.inventory.read",
+  classifications: "privacy.classifications.read",
+  retention: "privacy.retention.read",
+  "retention-instances": "privacy.retention.read",
+  holds: "privacy.holds.read",
+  "break-glass": "privacy.break_glass.read",
+  "access-events": "privacy.sensitive_access.read",
+  incidents: "privacy.incidents.read",
+  audit: "privacy.audit.read"
 };
 
 export const router = createRouter({
@@ -309,6 +330,18 @@ export const router = createRouter({
           name: "admin-notifications-campaign-detail",
           component: NotificationManagementPage,
           meta: { title: "通知活动详情", permission: "notifications.campaigns.read", notificationSection: "campaigns" }
+        },
+        ...Object.keys(privacySectionPermissions).map((section) => ({
+          path: `privacy/${section}`,
+          name: `admin-privacy-${section}`,
+          component: PrivacyManagementPage,
+          meta: { title: "隐私运营中心", permission: privacySectionPermissions[section], privacySection: section }
+        })),
+        {
+          path: "privacy/requests/:requestId",
+          name: "admin-privacy-request-detail",
+          component: PrivacyManagementPage,
+          meta: { title: "隐私请求详情", permission: "privacy.requests.read", privacySection: "requests" }
         },
         {
           path: "access/admins",

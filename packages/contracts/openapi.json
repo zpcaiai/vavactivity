@@ -455,6 +455,28 @@
         "title": "ActivityUpdateRequest",
         "type": "object"
       },
+      "AdminDecisionRequest": {
+        "properties": {
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 8,
+            "title": "Reason",
+            "type": "string"
+          },
+          "user_visible_message": {
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "User Visible Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason",
+          "user_visible_message"
+        ],
+        "title": "AdminDecisionRequest",
+        "type": "object"
+      },
       "AdminEnrollmentGrantRequest": {
         "properties": {
           "access_duration_days": {
@@ -557,6 +579,144 @@
           "role_codes"
         ],
         "title": "AdminInvitationRequest",
+        "type": "object"
+      },
+      "AiMemoryCandidateRequest": {
+        "properties": {
+          "allowed_agent_profiles": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "minItems": 1,
+            "title": "Allowed Agent Profiles",
+            "type": "array"
+          },
+          "allowed_purposes": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "minItems": 1,
+            "title": "Allowed Purposes",
+            "type": "array"
+          },
+          "certainty": {
+            "enum": [
+              "user_confirmed",
+              "user_stated",
+              "inferred_low",
+              "inferred_medium"
+            ],
+            "title": "Certainty",
+            "type": "string"
+          },
+          "content": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Content",
+            "type": "string"
+          },
+          "memory_type": {
+            "enum": [
+              "user_preference",
+              "stated_goal",
+              "relationship_context",
+              "service_preference",
+              "communication_preference",
+              "user_confirmed_fact",
+              "model_inference"
+            ],
+            "title": "Memory Type",
+            "type": "string"
+          },
+          "source_reference_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference Id"
+          },
+          "source_type": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Source Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "memory_type",
+          "content",
+          "source_type",
+          "certainty",
+          "allowed_purposes",
+          "allowed_agent_profiles"
+        ],
+        "title": "AiMemoryCandidateRequest",
+        "type": "object"
+      },
+      "AiMemoryPreferencesRequest": {
+        "properties": {
+          "allow_cross_conversation_use": {
+            "default": false,
+            "title": "Allow Cross Conversation Use",
+            "type": "boolean"
+          },
+          "allow_profile_facts": {
+            "default": false,
+            "title": "Allow Profile Facts",
+            "type": "boolean"
+          },
+          "allow_relationship_context": {
+            "default": false,
+            "title": "Allow Relationship Context",
+            "type": "boolean"
+          },
+          "allow_service_history": {
+            "default": false,
+            "title": "Allow Service History",
+            "type": "boolean"
+          },
+          "delete_existing_when_disabled": {
+            "default": false,
+            "title": "Delete Existing When Disabled",
+            "type": "boolean"
+          },
+          "long_term_memory_enabled": {
+            "title": "Long Term Memory Enabled",
+            "type": "boolean"
+          },
+          "settings_version": {
+            "minimum": 1.0,
+            "title": "Settings Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "long_term_memory_enabled",
+          "settings_version"
+        ],
+        "title": "AiMemoryPreferencesRequest",
+        "type": "object"
+      },
+      "AiMemoryUpdateRequest": {
+        "properties": {
+          "content": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Content",
+            "type": "string"
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "title": "AiMemoryUpdateRequest",
         "type": "object"
       },
       "AppointmentRequest": {
@@ -999,6 +1159,48 @@
           "title"
         ],
         "title": "Body_upload_document_api_v1_admin_knowledge_sources__source_id__upload_post",
+        "type": "object"
+      },
+      "BreakGlassRequest": {
+        "properties": {
+          "data_scope": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Data Scope",
+            "type": "array"
+          },
+          "purpose": {
+            "enum": [
+              "security_incident",
+              "approved_safety_referral",
+              "account_takeover_investigation",
+              "payment_fraud_investigation"
+            ],
+            "title": "Purpose",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 12,
+            "title": "Reason",
+            "type": "string"
+          },
+          "subject_user_id": {
+            "format": "uuid",
+            "title": "Subject User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject_user_id",
+          "data_scope",
+          "purpose",
+          "reason"
+        ],
+        "title": "BreakGlassRequest",
         "type": "object"
       },
       "CallToActionBlock": {
@@ -1638,6 +1840,107 @@
         "title": "CollectionData",
         "type": "object"
       },
+      "ConsentActionRequest": {
+        "properties": {
+          "evidence": {
+            "additionalProperties": true,
+            "title": "Evidence",
+            "type": "object"
+          },
+          "release_id": {
+            "format": "uuid",
+            "title": "Release Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "release_id"
+        ],
+        "title": "ConsentActionRequest",
+        "type": "object"
+      },
+      "ConsentDefinitionRequest": {
+        "properties": {
+          "category": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Category",
+            "type": "string"
+          },
+          "consent_code": {
+            "pattern": "^[a-z][a-z0-9_]{2,127}$",
+            "title": "Consent Code",
+            "type": "string"
+          },
+          "evidence_requirements": {
+            "additionalProperties": true,
+            "title": "Evidence Requirements",
+            "type": "object"
+          },
+          "required_for_service": {
+            "title": "Required For Service",
+            "type": "boolean"
+          },
+          "scope_definition": {
+            "additionalProperties": true,
+            "title": "Scope Definition",
+            "type": "object"
+          },
+          "withdrawable": {
+            "title": "Withdrawable",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "consent_code",
+          "category",
+          "required_for_service",
+          "withdrawable",
+          "scope_definition",
+          "evidence_requirements"
+        ],
+        "title": "ConsentDefinitionRequest",
+        "type": "object"
+      },
+      "ConsentReleaseRequest": {
+        "properties": {
+          "locale": {
+            "pattern": "^(zh-CN|zh-TW|en)$",
+            "title": "Locale",
+            "type": "string"
+          },
+          "semantic_version": {
+            "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+            "title": "Semantic Version",
+            "type": "string"
+          },
+          "summary": {
+            "maxLength": 20000,
+            "minLength": 3,
+            "title": "Summary",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 300,
+            "minLength": 3,
+            "title": "Title",
+            "type": "string"
+          },
+          "valid_from": {
+            "title": "Valid From",
+            "type": "string"
+          }
+        },
+        "required": [
+          "semantic_version",
+          "locale",
+          "title",
+          "summary",
+          "valid_from"
+        ],
+        "title": "ConsentReleaseRequest",
+        "type": "object"
+      },
       "ConsentRequest": {
         "properties": {
           "consent_version": {
@@ -1677,6 +1980,70 @@
           "reason"
         ],
         "title": "ContactAssignRequest",
+        "type": "object"
+      },
+      "ContactPointCreateRequest": {
+        "properties": {
+          "contact_type": {
+            "enum": [
+              "email",
+              "phone",
+              "wechat",
+              "whatsapp",
+              "telegram",
+              "other"
+            ],
+            "title": "Contact Type",
+            "type": "string"
+          },
+          "value": {
+            "maxLength": 320,
+            "minLength": 3,
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "contact_type",
+          "value"
+        ],
+        "title": "ContactPointCreateRequest",
+        "type": "object"
+      },
+      "ContactPointUpdateRequest": {
+        "properties": {
+          "is_primary": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Primary"
+          },
+          "version_reason": {
+            "maxLength": 500,
+            "minLength": 8,
+            "title": "Version Reason",
+            "type": "string"
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FieldVisibility"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "version_reason"
+        ],
+        "title": "ContactPointUpdateRequest",
         "type": "object"
       },
       "ContactResolveRequest": {
@@ -1894,6 +2261,76 @@
           "change_summary"
         ],
         "title": "ContentUpdateRequest",
+        "type": "object"
+      },
+      "CorrectionItemRequest": {
+        "properties": {
+          "entity_reference_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Reference Id"
+          },
+          "entity_reference_type": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Entity Reference Type",
+            "type": "string"
+          },
+          "field_path": {
+            "maxLength": 500,
+            "minLength": 2,
+            "title": "Field Path",
+            "type": "string"
+          },
+          "module_code": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Module Code",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 8,
+            "title": "Reason",
+            "type": "string"
+          },
+          "requested_value": {
+            "title": "Requested Value"
+          }
+        },
+        "required": [
+          "module_code",
+          "entity_reference_type",
+          "field_path",
+          "requested_value",
+          "reason"
+        ],
+        "title": "CorrectionItemRequest",
+        "type": "object"
+      },
+      "CorrectionRequest": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CorrectionItemRequest"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "CorrectionRequest",
         "type": "object"
       },
       "CouponBulkCreateRequest": {
@@ -2671,6 +3108,56 @@
         "title": "EntitlementConsumeRequest",
         "type": "object"
       },
+      "ErasureConfirmationRequest": {
+        "properties": {
+          "confirmation": {
+            "const": "CONFIRM_ACCOUNT_ERASURE",
+            "title": "Confirmation",
+            "type": "string"
+          },
+          "password": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "password",
+          "confirmation"
+        ],
+        "title": "ErasureConfirmationRequest",
+        "type": "object"
+      },
+      "ErasureRequest": {
+        "properties": {
+          "confirmation": {
+            "const": "REQUEST_ACCOUNT_ERASURE",
+            "title": "Confirmation",
+            "type": "string"
+          },
+          "password": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Password",
+            "type": "string"
+          },
+          "requested_scope": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Requested Scope",
+            "type": "array"
+          }
+        },
+        "required": [
+          "password",
+          "confirmation"
+        ],
+        "title": "ErasureRequest",
+        "type": "object"
+      },
       "ExecuteConfirmedToolRequest": {
         "properties": {
           "arguments": {
@@ -2790,6 +3277,39 @@
         "title": "ExerciseCreateRequest",
         "type": "object"
       },
+      "ExportRequest": {
+        "properties": {
+          "modules": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Modules",
+            "type": "array"
+          },
+          "password": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Password",
+            "type": "string"
+          },
+          "requested_format": {
+            "default": "json",
+            "enum": [
+              "json",
+              "csv",
+              "html"
+            ],
+            "title": "Requested Format",
+            "type": "string"
+          }
+        },
+        "required": [
+          "password"
+        ],
+        "title": "ExportRequest",
+        "type": "object"
+      },
       "FeedbackRequest": {
         "properties": {
           "rating": {
@@ -2826,6 +3346,73 @@
           }
         },
         "title": "FeedbackRequest",
+        "type": "object"
+      },
+      "FieldVisibility": {
+        "enum": [
+          "private",
+          "platform_operations",
+          "assigned_mentor",
+          "activity_participants",
+          "mutual_matches",
+          "verified_members",
+          "public"
+        ],
+        "title": "FieldVisibility",
+        "type": "string"
+      },
+      "FieldVisibilityRuleRequest": {
+        "properties": {
+          "allowed_purposes": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Allowed Purposes",
+            "type": "array"
+          },
+          "allowed_recipient_types": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Allowed Recipient Types",
+            "type": "array"
+          },
+          "data_domain": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Data Domain",
+            "type": "string"
+          },
+          "field_code": {
+            "maxLength": 128,
+            "minLength": 2,
+            "title": "Field Code",
+            "type": "string"
+          },
+          "valid_until": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid Until"
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/FieldVisibility"
+          }
+        },
+        "required": [
+          "data_domain",
+          "field_code",
+          "visibility"
+        ],
+        "title": "FieldVisibilityRuleRequest",
         "type": "object"
       },
       "FindingReviewRequest": {
@@ -3532,6 +4119,61 @@
           "occurred_at"
         ],
         "title": "LearningEventRequest",
+        "type": "object"
+      },
+      "LegalHoldRequest": {
+        "properties": {
+          "authorized_by": {
+            "format": "uuid",
+            "title": "Authorized By",
+            "type": "string"
+          },
+          "ends_at": {
+            "format": "date-time",
+            "title": "Ends At",
+            "type": "string"
+          },
+          "hold_type": {
+            "enum": [
+              "legal",
+              "security_investigation",
+              "fraud_investigation",
+              "safety_case",
+              "payment_dispute"
+            ],
+            "title": "Hold Type",
+            "type": "string"
+          },
+          "module_codes": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Module Codes",
+            "type": "array"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 12,
+            "title": "Reason",
+            "type": "string"
+          },
+          "subject_user_id": {
+            "format": "uuid",
+            "title": "Subject User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "hold_type",
+          "subject_user_id",
+          "module_codes",
+          "reason",
+          "authorized_by",
+          "ends_at"
+        ],
+        "title": "LegalHoldRequest",
         "type": "object"
       },
       "LessonCreateRequest": {
@@ -5599,6 +6241,71 @@
         "title": "PricingSimulationRequest",
         "type": "object"
       },
+      "PrivacyMode": {
+        "enum": [
+          "strict",
+          "balanced",
+          "custom"
+        ],
+        "title": "PrivacyMode",
+        "type": "string"
+      },
+      "PrivacySettingsUpdateRequest": {
+        "properties": {
+          "allow_contact_exchange_after_mutual_confirmation": {
+            "title": "Allow Contact Exchange After Mutual Confirmation",
+            "type": "boolean"
+          },
+          "allow_profile_use_by_ai": {
+            "title": "Allow Profile Use By Ai",
+            "type": "boolean"
+          },
+          "allow_service_history_use_by_ai": {
+            "title": "Allow Service History Use By Ai",
+            "type": "boolean"
+          },
+          "field_rules": {
+            "items": {
+              "$ref": "#/components/schemas/FieldVisibilityRuleRequest"
+            },
+            "maxItems": 100,
+            "title": "Field Rules",
+            "type": "array"
+          },
+          "privacy_mode": {
+            "$ref": "#/components/schemas/PrivacyMode"
+          },
+          "searchable_by_platform_users": {
+            "title": "Searchable By Platform Users",
+            "type": "boolean"
+          },
+          "settings_version": {
+            "minimum": 1.0,
+            "title": "Settings Version",
+            "type": "integer"
+          },
+          "visible_in_activity_directory": {
+            "title": "Visible In Activity Directory",
+            "type": "boolean"
+          },
+          "visible_in_matchmaking": {
+            "title": "Visible In Matchmaking",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "privacy_mode",
+          "searchable_by_platform_users",
+          "visible_in_activity_directory",
+          "visible_in_matchmaking",
+          "allow_contact_exchange_after_mutual_confirmation",
+          "allow_profile_use_by_ai",
+          "allow_service_history_use_by_ai",
+          "settings_version"
+        ],
+        "title": "PrivacySettingsUpdateRequest",
+        "type": "object"
+      },
       "ProductCreateRequest": {
         "properties": {
           "category_id": {
@@ -6085,6 +6792,145 @@
           "reason"
         ],
         "title": "ProductUpdateRequest",
+        "type": "object"
+      },
+      "ProfileUpdateRequest": {
+        "properties": {
+          "city": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "country_code": {
+            "anyOf": [
+              {
+                "maxLength": 2,
+                "minLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country Code"
+          },
+          "date_of_birth": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date Of Birth"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "gender_code": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender Code"
+          },
+          "legal_name": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Legal Name"
+          },
+          "preferred_locale": {
+            "anyOf": [
+              {
+                "enum": [
+                  "zh-CN",
+                  "zh-TW",
+                  "en"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Locale"
+          },
+          "public_bio": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Public Bio"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region"
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone"
+          },
+          "version": {
+            "minimum": 1.0,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version"
+        ],
+        "title": "ProfileUpdateRequest",
         "type": "object"
       },
       "ProgressResetRequest": {
@@ -6936,6 +7782,67 @@
           "reason_code"
         ],
         "title": "RestrictionRequest",
+        "type": "object"
+      },
+      "RetentionPolicyRequest": {
+        "properties": {
+          "data_category": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Data Category",
+            "type": "string"
+          },
+          "expiration_action": {
+            "pattern": "^(delete|anonymize|pseudonymize|archive_restricted|manual_review)$",
+            "title": "Expiration Action",
+            "type": "string"
+          },
+          "module_code": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Module Code",
+            "type": "string"
+          },
+          "policy_basis": {
+            "maxLength": 4000,
+            "minLength": 8,
+            "title": "Policy Basis",
+            "type": "string"
+          },
+          "policy_code": {
+            "pattern": "^[a-z][a-z0-9_.-]{2,127}$",
+            "title": "Policy Code",
+            "type": "string"
+          },
+          "retention_days": {
+            "maximum": 36500.0,
+            "minimum": 1.0,
+            "title": "Retention Days",
+            "type": "integer"
+          },
+          "semantic_version": {
+            "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+            "title": "Semantic Version",
+            "type": "string"
+          },
+          "trigger_event": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Trigger Event",
+            "type": "string"
+          }
+        },
+        "required": [
+          "policy_code",
+          "semantic_version",
+          "data_category",
+          "module_code",
+          "trigger_event",
+          "retention_days",
+          "expiration_action",
+          "policy_basis"
+        ],
+        "title": "RetentionPolicyRequest",
         "type": "object"
       },
       "RetrievalRequest": {
@@ -7852,21 +8759,6 @@
         ],
         "title": "Stackability",
         "type": "string"
-      },
-      "StatusReasonRequest": {
-        "properties": {
-          "reason": {
-            "maxLength": 1000,
-            "minLength": 8,
-            "title": "Reason",
-            "type": "string"
-          }
-        },
-        "required": [
-          "reason"
-        ],
-        "title": "StatusReasonRequest",
-        "type": "object"
       },
       "SubscriptionCancelRequest": {
         "properties": {
@@ -8906,6 +9798,36 @@
         ],
         "title": "RegistryStatusRequest",
         "type": "object"
+      },
+      "vav__modules__notifications__schemas__StatusReasonRequest": {
+        "properties": {
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 8,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "StatusReasonRequest",
+        "type": "object"
+      },
+      "vav__modules__privacy__schemas__StatusReasonRequest": {
+        "properties": {
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 8,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "StatusReasonRequest",
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -9752,6 +10674,390 @@
         ]
       }
     },
+    "/api/v1/account/ai-memory/clear-all": {
+      "post": {
+        "operationId": "clear_all_memory_api_v1_account_ai_memory_clear_all_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Clear All Memory Api V1 Account Ai Memory Clear All Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Clear All Memory",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/ai-memory/items": {
+      "get": {
+        "operationId": "memory_items_api_v1_account_ai_memory_items_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Memory Items Api V1 Account Ai Memory Items Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Memory Items",
+        "tags": [
+          "privacy"
+        ]
+      },
+      "post": {
+        "operationId": "add_memory_candidate_api_v1_account_ai_memory_items_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiMemoryCandidateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Add Memory Candidate Api V1 Account Ai Memory Items Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Add Memory Candidate",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/ai-memory/items/{item_id}": {
+      "delete": {
+        "operationId": "delete_memory_item_api_v1_account_ai_memory_items__item_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Delete Memory Item Api V1 Account Ai Memory Items  Item Id  Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Memory Item",
+        "tags": [
+          "privacy"
+        ]
+      },
+      "patch": {
+        "operationId": "update_memory_item_api_v1_account_ai_memory_items__item_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiMemoryUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Memory Item Api V1 Account Ai Memory Items  Item Id  Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Memory Item",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/ai-memory/items/{item_id}/approve": {
+      "post": {
+        "operationId": "approve_memory_item_api_v1_account_ai_memory_items__item_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Memory Item Api V1 Account Ai Memory Items  Item Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Memory Item",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/ai-memory/items/{item_id}/reject": {
+      "post": {
+        "operationId": "reject_memory_item_api_v1_account_ai_memory_items__item_id__reject_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reject Memory Item Api V1 Account Ai Memory Items  Item Id  Reject Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reject Memory Item",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/ai-memory/preferences": {
+      "get": {
+        "operationId": "memory_preferences_api_v1_account_ai_memory_preferences_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Memory Preferences Api V1 Account Ai Memory Preferences Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Memory Preferences",
+        "tags": [
+          "privacy"
+        ]
+      },
+      "put": {
+        "operationId": "update_memory_preferences_api_v1_account_ai_memory_preferences_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiMemoryPreferencesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Memory Preferences Api V1 Account Ai Memory Preferences Put",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Memory Preferences",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
     "/api/v1/account/certificates": {
       "get": {
         "operationId": "my_certificates_api_v1_account_certificates_get",
@@ -9777,6 +11083,373 @@
         "summary": "My Certificates",
         "tags": [
           "courses"
+        ]
+      }
+    },
+    "/api/v1/account/consents": {
+      "get": {
+        "operationId": "consents_api_v1_account_consents_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Consents Api V1 Account Consents Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Consents",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/consents/{consent_code}": {
+      "get": {
+        "operationId": "consent_detail_api_v1_account_consents__consent_code__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consent_code",
+            "required": true,
+            "schema": {
+              "title": "Consent Code",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Consent Detail Api V1 Account Consents  Consent Code  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Consent Detail",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/consents/{consent_code}/grant": {
+      "post": {
+        "operationId": "grant_user_consent_api_v1_account_consents__consent_code__grant_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consent_code",
+            "required": true,
+            "schema": {
+              "title": "Consent Code",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Grant User Consent Api V1 Account Consents  Consent Code  Grant Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Grant User Consent",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/consents/{consent_code}/withdraw": {
+      "post": {
+        "operationId": "withdraw_user_consent_api_v1_account_consents__consent_code__withdraw_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consent_code",
+            "required": true,
+            "schema": {
+              "title": "Consent Code",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Withdraw User Consent Api V1 Account Consents  Consent Code  Withdraw Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Withdraw User Consent",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/contact-points": {
+      "get": {
+        "operationId": "contact_points_api_v1_account_contact_points_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Contact Points Api V1 Account Contact Points Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Contact Points",
+        "tags": [
+          "privacy"
+        ]
+      },
+      "post": {
+        "operationId": "create_contact_point_api_v1_account_contact_points_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContactPointCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Contact Point Api V1 Account Contact Points Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Contact Point",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/contact-points/{contact_id}": {
+      "delete": {
+        "operationId": "delete_contact_point_api_v1_account_contact_points__contact_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contact_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Contact Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Delete Contact Point Api V1 Account Contact Points  Contact Id  Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Contact Point",
+        "tags": [
+          "privacy"
+        ]
+      },
+      "patch": {
+        "operationId": "update_contact_point_api_v1_account_contact_points__contact_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contact_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Contact Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContactPointUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Contact Point Api V1 Account Contact Points  Contact Id  Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Contact Point",
+        "tags": [
+          "privacy"
         ]
       }
     },
@@ -11316,6 +12989,587 @@
         "summary": "Playback Heartbeat",
         "tags": [
           "courses"
+        ]
+      }
+    },
+    "/api/v1/account/privacy/access-events": {
+      "get": {
+        "operationId": "user_sensitive_access_events_api_v1_account_privacy_access_events_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response User Sensitive Access Events Api V1 Account Privacy Access Events Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "User Sensitive Access Events",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/privacy/corrections": {
+      "post": {
+        "operationId": "request_correction_api_v1_account_privacy_corrections_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CorrectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Request Correction Api V1 Account Privacy Corrections Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Request Correction",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/privacy/data-inventory": {
+      "post": {
+        "operationId": "request_inventory_api_v1_account_privacy_data_inventory_post",
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Request Inventory Api V1 Account Privacy Data Inventory Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Request Inventory",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/privacy/erasures": {
+      "post": {
+        "operationId": "request_erasure_api_v1_account_privacy_erasures_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErasureRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Request Erasure Api V1 Account Privacy Erasures Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Request Erasure",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/privacy/erasures/{plan_id}/confirm": {
+      "post": {
+        "operationId": "confirm_erasure_api_v1_account_privacy_erasures__plan_id__confirm_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "plan_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Plan Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErasureConfirmationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Confirm Erasure Api V1 Account Privacy Erasures  Plan Id  Confirm Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Confirm Erasure",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/privacy/exports": {
+      "post": {
+        "operationId": "request_export_api_v1_account_privacy_exports_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Request Export Api V1 Account Privacy Exports Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Request Export",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/privacy/exports/download/{token}": {
+      "get": {
+        "operationId": "download_export_api_v1_account_privacy_exports_download__token__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Download Export",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/privacy/exports/{privacy_request_id}/download-token": {
+      "post": {
+        "operationId": "export_download_token_api_v1_account_privacy_exports__privacy_request_id__download_token_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "privacy_request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Privacy Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Export Download Token Api V1 Account Privacy Exports  Privacy Request Id  Download Token Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Export Download Token",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/privacy/requests": {
+      "get": {
+        "operationId": "list_privacy_requests_api_v1_account_privacy_requests_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Privacy Requests Api V1 Account Privacy Requests Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Privacy Requests",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/privacy/requests/{privacy_request_id}": {
+      "get": {
+        "operationId": "privacy_request_detail_api_v1_account_privacy_requests__privacy_request_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "privacy_request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Privacy Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Privacy Request Detail Api V1 Account Privacy Requests  Privacy Request Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Privacy Request Detail",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/privacy/settings": {
+      "get": {
+        "operationId": "get_privacy_settings_api_v1_account_privacy_settings_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Privacy Settings Api V1 Account Privacy Settings Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Privacy Settings",
+        "tags": [
+          "privacy"
+        ]
+      },
+      "put": {
+        "operationId": "put_privacy_settings_api_v1_account_privacy_settings_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrivacySettingsUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Put Privacy Settings Api V1 Account Privacy Settings Put",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Put Privacy Settings",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/profile": {
+      "get": {
+        "operationId": "get_profile_api_v1_account_profile_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Profile Api V1 Account Profile Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Profile",
+        "tags": [
+          "privacy"
+        ]
+      },
+      "patch": {
+        "operationId": "patch_profile_api_v1_account_profile_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Patch Profile Api V1 Account Profile Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Patch Profile",
+        "tags": [
+          "privacy"
         ]
       }
     },
@@ -24752,7 +27006,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/StatusReasonRequest"
+                "$ref": "#/components/schemas/vav__modules__notifications__schemas__StatusReasonRequest"
               }
             }
           },
@@ -24918,7 +27172,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/StatusReasonRequest"
+                "$ref": "#/components/schemas/vav__modules__notifications__schemas__StatusReasonRequest"
               }
             }
           },
@@ -24978,7 +27232,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/StatusReasonRequest"
+                "$ref": "#/components/schemas/vav__modules__notifications__schemas__StatusReasonRequest"
               }
             }
           },
@@ -25256,7 +27510,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/StatusReasonRequest"
+                "$ref": "#/components/schemas/vav__modules__notifications__schemas__StatusReasonRequest"
               }
             }
           },
@@ -25390,7 +27644,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/StatusReasonRequest"
+                "$ref": "#/components/schemas/vav__modules__notifications__schemas__StatusReasonRequest"
               }
             }
           },
@@ -25660,7 +27914,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/StatusReasonRequest"
+                "$ref": "#/components/schemas/vav__modules__notifications__schemas__StatusReasonRequest"
               }
             }
           },
@@ -26242,6 +28496,1544 @@
         "summary": "Run Reminder Worker",
         "tags": [
           "notifications-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/access-events": {
+      "get": {
+        "operationId": "access_events_api_v1_admin_privacy_access_events_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Access Events Api V1 Admin Privacy Access Events Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Access Events",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/audit": {
+      "get": {
+        "operationId": "privacy_audit_api_v1_admin_privacy_audit_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Privacy Audit Api V1 Admin Privacy Audit Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Privacy Audit",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/break-glass": {
+      "get": {
+        "operationId": "break_glass_requests_api_v1_admin_privacy_break_glass_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Break Glass Requests Api V1 Admin Privacy Break Glass Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Break Glass Requests",
+        "tags": [
+          "privacy-admin"
+        ]
+      },
+      "post": {
+        "operationId": "request_break_glass_api_v1_admin_privacy_break_glass_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BreakGlassRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Request Break Glass Api V1 Admin Privacy Break Glass Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Request Break Glass",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/break-glass/{access_id}/approve": {
+      "post": {
+        "operationId": "approve_break_glass_api_v1_admin_privacy_break_glass__access_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "access_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Access Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/vav__modules__privacy__schemas__StatusReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Break Glass Api V1 Admin Privacy Break Glass  Access Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Break Glass",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/break-glass/{access_id}/use": {
+      "post": {
+        "operationId": "use_break_glass_api_v1_admin_privacy_break_glass__access_id__use_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "access_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Access Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Use Break Glass Api V1 Admin Privacy Break Glass  Access Id  Use Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Use Break Glass",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/classifications": {
+      "get": {
+        "operationId": "classifications_api_v1_admin_privacy_classifications_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Classifications Api V1 Admin Privacy Classifications Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Classifications",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/consent-releases": {
+      "get": {
+        "operationId": "consent_releases_api_v1_admin_privacy_consent_releases_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Consent Releases Api V1 Admin Privacy Consent Releases Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Consent Releases",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/consent-releases/{release_id}/activate": {
+      "post": {
+        "operationId": "activate_consent_release_api_v1_admin_privacy_consent_releases__release_id__activate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "release_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Release Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/vav__modules__privacy__schemas__StatusReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Activate Consent Release Api V1 Admin Privacy Consent Releases  Release Id  Activate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Activate Consent Release",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/consents": {
+      "get": {
+        "operationId": "consent_registry_api_v1_admin_privacy_consents_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Consent Registry Api V1 Admin Privacy Consents Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Consent Registry",
+        "tags": [
+          "privacy-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_consent_definition_api_v1_admin_privacy_consents_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentDefinitionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Consent Definition Api V1 Admin Privacy Consents Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Consent Definition",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/consents/{definition_id}/releases": {
+      "post": {
+        "operationId": "create_consent_release_api_v1_admin_privacy_consents__definition_id__releases_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "definition_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Definition Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentReleaseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Consent Release Api V1 Admin Privacy Consents  Definition Id  Releases Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Consent Release",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/corrections": {
+      "get": {
+        "operationId": "corrections_api_v1_admin_privacy_corrections_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Corrections Api V1 Admin Privacy Corrections Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Corrections",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/corrections/{item_id}/approve": {
+      "post": {
+        "operationId": "approve_correction_api_v1_admin_privacy_corrections__item_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Correction Api V1 Admin Privacy Corrections  Item Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Correction",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/corrections/{item_id}/reject": {
+      "post": {
+        "operationId": "reject_correction_api_v1_admin_privacy_corrections__item_id__reject_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reject Correction Api V1 Admin Privacy Corrections  Item Id  Reject Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reject Correction",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/dashboard": {
+      "get": {
+        "operationId": "dashboard_api_v1_admin_privacy_dashboard_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Dashboard Api V1 Admin Privacy Dashboard Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dashboard",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/data-inventory": {
+      "get": {
+        "operationId": "data_inventory_api_v1_admin_privacy_data_inventory_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Data Inventory Api V1 Admin Privacy Data Inventory Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Data Inventory",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/erasures": {
+      "get": {
+        "operationId": "erasures_api_v1_admin_privacy_erasures_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Erasures Api V1 Admin Privacy Erasures Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Erasures",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/erasures/{plan_id}/approve": {
+      "post": {
+        "operationId": "approve_erasure_api_v1_admin_privacy_erasures__plan_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "plan_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Plan Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/vav__modules__privacy__schemas__StatusReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Erasure Api V1 Admin Privacy Erasures  Plan Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Erasure",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/erasures/{plan_id}/execute": {
+      "post": {
+        "operationId": "execute_erasure_api_v1_admin_privacy_erasures__plan_id__execute_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "plan_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Plan Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Execute Erasure Api V1 Admin Privacy Erasures  Plan Id  Execute Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Execute Erasure",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/erasures/{plan_id}/replan": {
+      "post": {
+        "operationId": "replan_erasure_api_v1_admin_privacy_erasures__plan_id__replan_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "plan_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Plan Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Replan Erasure Api V1 Admin Privacy Erasures  Plan Id  Replan Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Replan Erasure",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/exports": {
+      "get": {
+        "operationId": "exports_api_v1_admin_privacy_exports_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Exports Api V1 Admin Privacy Exports Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Exports",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/exports/{privacy_request_id}/process": {
+      "post": {
+        "operationId": "process_export_api_v1_admin_privacy_exports__privacy_request_id__process_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "privacy_request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Privacy Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Process Export Api V1 Admin Privacy Exports  Privacy Request Id  Process Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Process Export",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/incidents": {
+      "get": {
+        "operationId": "privacy_incidents_api_v1_admin_privacy_incidents_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Privacy Incidents Api V1 Admin Privacy Incidents Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Privacy Incidents",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/legal-holds": {
+      "get": {
+        "operationId": "legal_holds_api_v1_admin_privacy_legal_holds_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Legal Holds Api V1 Admin Privacy Legal Holds Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Legal Holds",
+        "tags": [
+          "privacy-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_legal_hold_api_v1_admin_privacy_legal_holds_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegalHoldRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Legal Hold Api V1 Admin Privacy Legal Holds Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Legal Hold",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/legal-holds/{hold_id}/release": {
+      "post": {
+        "operationId": "release_hold_api_v1_admin_privacy_legal_holds__hold_id__release_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "hold_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Hold Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/vav__modules__privacy__schemas__StatusReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Release Hold Api V1 Admin Privacy Legal Holds  Hold Id  Release Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Release Hold",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/processing-activities": {
+      "get": {
+        "operationId": "processing_activities_api_v1_admin_privacy_processing_activities_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Processing Activities Api V1 Admin Privacy Processing Activities Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Processing Activities",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/requests": {
+      "get": {
+        "operationId": "list_requests_api_v1_admin_privacy_requests_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Requests Api V1 Admin Privacy Requests Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Requests",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/requests/{privacy_request_id}": {
+      "get": {
+        "operationId": "request_detail_api_v1_admin_privacy_requests__privacy_request_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "privacy_request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Privacy Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Request Detail Api V1 Admin Privacy Requests  Privacy Request Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Request Detail",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/requests/{privacy_request_id}/approve": {
+      "post": {
+        "operationId": "approve_request_api_v1_admin_privacy_requests__privacy_request_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "privacy_request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Privacy Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Request Api V1 Admin Privacy Requests  Privacy Request Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Request",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/requests/{privacy_request_id}/reject": {
+      "post": {
+        "operationId": "reject_request_api_v1_admin_privacy_requests__privacy_request_id__reject_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "privacy_request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Privacy Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reject Request Api V1 Admin Privacy Requests  Privacy Request Id  Reject Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reject Request",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/requests/{privacy_request_id}/verify-identity": {
+      "post": {
+        "operationId": "verify_request_identity_api_v1_admin_privacy_requests__privacy_request_id__verify_identity_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "privacy_request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Privacy Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Verify Request Identity Api V1 Admin Privacy Requests  Privacy Request Id  Verify Identity Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Verify Request Identity",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/retention-instances": {
+      "get": {
+        "operationId": "retention_instances_api_v1_admin_privacy_retention_instances_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Retention Instances Api V1 Admin Privacy Retention Instances Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Retention Instances",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/retention-policies": {
+      "get": {
+        "operationId": "retention_policies_api_v1_admin_privacy_retention_policies_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Retention Policies Api V1 Admin Privacy Retention Policies Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Retention Policies",
+        "tags": [
+          "privacy-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_retention_policy_api_v1_admin_privacy_retention_policies_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetentionPolicyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Retention Policy Api V1 Admin Privacy Retention Policies Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Retention Policy",
+        "tags": [
+          "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/privacy/workers/retention/run": {
+      "post": {
+        "operationId": "run_retention_api_v1_admin_privacy_workers_retention_run_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Run Retention Api V1 Admin Privacy Workers Retention Run Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Run Retention",
+        "tags": [
+          "privacy-admin"
         ]
       }
     },

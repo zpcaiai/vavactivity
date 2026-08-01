@@ -13,6 +13,8 @@ from vav.modules.identity.router import router as identity_router
 from vav.modules.knowledge.router import router as knowledge_router
 from vav.modules.notifications.admin_router import router as notifications_admin_router
 from vav.modules.notifications.router import router as notifications_router
+from vav.modules.privacy.admin_router import router as privacy_admin_router
+from vav.modules.privacy.router import router as privacy_router
 from vav.modules.system.router import router as system_router
 
 api_router = APIRouter()
@@ -30,3 +32,5 @@ api_router.include_router(counseling_router, tags=["counseling"])
 api_router.include_router(knowledge_router, tags=["knowledge"])
 api_router.include_router(notifications_router, tags=["notifications"])
 api_router.include_router(notifications_admin_router, tags=["notifications-admin"])
+api_router.include_router(privacy_router, tags=["privacy"])
+api_router.include_router(privacy_admin_router, tags=["privacy-admin"])

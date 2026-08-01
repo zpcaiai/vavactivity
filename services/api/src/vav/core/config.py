@@ -797,6 +797,90 @@ class Settings(BaseSettings):
         default=180, validation_alias="NOTIFICATION_ATTEMPT_RETENTION_DAYS"
     )
 
+    privacy_enabled: bool = Field(default=True, validation_alias="PRIVACY_ENABLED")
+    privacy_default_mode: Literal["strict", "balanced", "custom"] = Field(
+        default="strict", validation_alias="PRIVACY_DEFAULT_MODE"
+    )
+    privacy_require_reauth_for_export: bool = Field(
+        default=True, validation_alias="PRIVACY_REQUIRE_REAUTH_FOR_EXPORT"
+    )
+    privacy_require_reauth_for_erasure: bool = Field(
+        default=True, validation_alias="PRIVACY_REQUIRE_REAUTH_FOR_ERASURE"
+    )
+    privacy_request_default_due_days: int = Field(
+        default=30, validation_alias="PRIVACY_REQUEST_DEFAULT_DUE_DAYS"
+    )
+    privacy_request_identity_verification_ttl_minutes: int = Field(
+        default=30, validation_alias="PRIVACY_REQUEST_IDENTITY_VERIFICATION_TTL_MINUTES"
+    )
+    privacy_request_max_active_per_user: int = Field(
+        default=3, validation_alias="PRIVACY_REQUEST_MAX_ACTIVE_PER_USER"
+    )
+    privacy_export_formats: str = Field(
+        default="json,csv,html", validation_alias="PRIVACY_EXPORT_FORMATS"
+    )
+    privacy_export_download_ttl_hours: int = Field(
+        default=24, validation_alias="PRIVACY_EXPORT_DOWNLOAD_TTL_HOURS"
+    )
+    privacy_export_archive_retention_days: int = Field(
+        default=7, validation_alias="PRIVACY_EXPORT_ARCHIVE_RETENTION_DAYS"
+    )
+    privacy_export_max_size_mb: int = Field(
+        default=1024, validation_alias="PRIVACY_EXPORT_MAX_SIZE_MB"
+    )
+    privacy_export_encryption_enabled: bool = Field(
+        default=True, validation_alias="PRIVACY_EXPORT_ENCRYPTION_ENABLED"
+    )
+    privacy_erasure_confirmation_required: bool = Field(
+        default=True, validation_alias="PRIVACY_ERASURE_CONFIRMATION_REQUIRED"
+    )
+    privacy_erasure_cooling_off_days: int = Field(
+        default=7, validation_alias="PRIVACY_ERASURE_COOLING_OFF_DAYS"
+    )
+    privacy_erasure_max_attempts: int = Field(
+        default=10, validation_alias="PRIVACY_ERASURE_MAX_ATTEMPTS"
+    )
+    privacy_erasure_retry_seconds: int = Field(
+        default=300, validation_alias="PRIVACY_ERASURE_RETRY_SECONDS"
+    )
+    privacy_erasure_fail_closed: bool = Field(
+        default=True, validation_alias="PRIVACY_ERASURE_FAIL_CLOSED"
+    )
+    privacy_retention_job_interval_hours: int = Field(
+        default=24, validation_alias="PRIVACY_RETENTION_JOB_INTERVAL_HOURS"
+    )
+    privacy_retention_policy_required: bool = Field(
+        default=True, validation_alias="PRIVACY_RETENTION_POLICY_REQUIRED"
+    )
+    privacy_allow_unbounded_retention: bool = Field(
+        default=False, validation_alias="PRIVACY_ALLOW_UNBOUNDED_RETENTION"
+    )
+    privacy_field_encryption_enabled: bool = Field(
+        default=True, validation_alias="PRIVACY_FIELD_ENCRYPTION_ENABLED"
+    )
+    privacy_search_hmac_pepper: SecretStr = Field(
+        default=SecretStr("change-me-privacy-search-hmac"),
+        validation_alias="PRIVACY_SEARCH_HMAC_PEPPER",
+    )
+    privacy_break_glass_default_ttl_minutes: int = Field(
+        default=30, validation_alias="PRIVACY_BREAK_GLASS_DEFAULT_TTL_MINUTES"
+    )
+    privacy_break_glass_approval_required: bool = Field(
+        default=True, validation_alias="PRIVACY_BREAK_GLASS_APPROVAL_REQUIRED"
+    )
+    ai_memory_default_ttl_days: int = Field(
+        default=365, validation_alias="AI_MEMORY_DEFAULT_TTL_DAYS"
+    )
+    ai_memory_inferred_item_user_approval_required: bool = Field(
+        default=True, validation_alias="AI_MEMORY_INFERRED_ITEM_USER_APPROVAL_REQUIRED"
+    )
+    privacy_sensitive_access_audit_enabled: bool = Field(
+        default=True, validation_alias="PRIVACY_SENSITIVE_ACCESS_AUDIT_ENABLED"
+    )
+    privacy_audit_retention_days: int = Field(
+        default=730, validation_alias="PRIVACY_AUDIT_RETENTION_DAYS"
+    )
+
     @model_validator(mode="after")
     def reject_development_credentials_in_production(self) -> Settings:
         if self.environment == "production" and (
@@ -838,6 +922,18 @@ class Settings(BaseSettings):
             or not self.notification_email_provider_webhook_secret.get_secret_value()
         ):
             raise ValueError("production requires a notification webhook secret")
+        if self.ai_long_term_memory_default:
+            raise ValueError("AI long-term memory cannot be enabled by default")
+        if not self.ai_long_term_memory_opt_in_required:
+            raise ValueError("AI long-term memory requires explicit opt-in")
+        if self.privacy_allow_unbounded_retention:
+            raise ValueError("unbounded privacy retention cannot be enabled")
+        if self.environment == "production" and (
+            not self.privacy_field_encryption_enabled
+            or not self.privacy_export_encryption_enabled
+            or "change-me" in self.privacy_search_hmac_pepper.get_secret_value()
+        ):
+            raise ValueError("production requires privacy encryption and a strong HMAC pepper")
         return self
 
     def public_summary(self) -> dict[str, object]:
@@ -848,6 +944,7 @@ class Settings(BaseSettings):
             "features": {
                 "ai_assistant": self.ai_enabled,
                 "notifications": self.notification_enabled,
+                "privacy": self.privacy_enabled,
             },
         }
 

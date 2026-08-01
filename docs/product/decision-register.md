@@ -47,6 +47,12 @@
 | `notification_retention` | privacy_and_legal | undecided | 本地使用可配置占位期限，生产清理和审计保留期限未获批准 |
 | `notification_tracking_policy` | privacy_and_product | undecided | 敏感事务邮件不嵌入营销追踪，点击/打开追踪默认关闭 |
 | `notification_campaign_approval` | operations_and_legal | undecided | 所有营销群发保持审批分离；正式人数阈值与升级流程待批准 |
+| `privacy_retention_policy` | privacy_and_legal | undecided | 本地仅使用有限期占位策略；生产期限和法域依据未获批准时不得自动永久保留或删除 |
+| `privacy_erasure_policy` | privacy_and_legal | undecided | 删除请求生成模块计划并 fail closed；财务、安全和辅导数据的最终处置需法务确认 |
+| `privacy_legal_hold_policy` | legal_and_security | undecided | Hold 必须最小范围、授权、到期或复核；不得以无期限 Hold 规避数据权利 |
+| `privacy_break_glass_policy` | security_and_privacy | undecided | 紧急访问保持双人审批、短时、最小范围和逐次审计；生产响应流程待批准 |
+| `privacy_export_format_policy` | privacy_and_product | undecided | 本地提供加密 JSON/HTML 能力；正式 PDF、附件披露和法域格式待批准 |
+| `ai_external_training_policy` | privacy_legal_and_ai | undecided | 外部模型训练默认关闭，不从 AI 使用或长期记忆同意推断授权 |
 
 ## 决策记录格式
 

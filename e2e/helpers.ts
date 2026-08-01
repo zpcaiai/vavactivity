@@ -116,6 +116,21 @@ export function seedNotificationFixture() {
   }
 }
 
+export function seedPrivacyFixture() {
+  if (process.env.VAV_E2E_SKIP_PRIVACY_SEED === "1") return;
+  for (const moduleName of [
+    "vav.cli.seed_permissions",
+    "vav.cli.seed_privacy",
+    "vav.cli.seed_privacy_inventory"
+  ]) {
+    execFileSync(
+      "docker",
+      ["compose", "exec", "-T", "api", "python", "-m", moduleName],
+      { stdio: "pipe" }
+    );
+  }
+}
+
 export function verifyUserFixture(email: string) {
   const escaped = email.replaceAll("'", "''");
   execFileSync(

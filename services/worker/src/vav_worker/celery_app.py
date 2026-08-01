@@ -68,6 +68,23 @@ celery_app.conf.update(
             "task": "vav.notifications.digests",
             "schedule": 3600.0,
         },
+        "process-privacy-exports": {
+            "task": "vav.privacy.exports",
+            "schedule": 30.0,
+        },
+        "process-approved-privacy-erasures": {
+            "task": "vav.privacy.erasures",
+            "schedule": 60.0,
+        },
+        "evaluate-privacy-retention": {
+            "task": "vav.privacy.retention",
+            "schedule": float(os.getenv("PRIVACY_RETENTION_JOB_INTERVAL_HOURS", "24"))
+            * 3600.0,
+        },
+        "expire-privacy-archives-and-ai-memory": {
+            "task": "vav.privacy.expiry",
+            "schedule": 3600.0,
+        },
     },
 )
 
