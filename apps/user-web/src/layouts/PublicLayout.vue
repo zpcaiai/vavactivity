@@ -17,8 +17,7 @@ const locale = computed(() => String(route.params.locale));
 const configuredLinks = ref<PublicNavigationItem[]>([]);
 
 const fallbackLinks = [
-  { key: "about", path: "about" },
-  { key: "articles", path: "articles" },
+  { key: "home", path: "" },
   { key: "activities", path: "activities" },
   { key: "courses", path: "courses" },
   { key: "counseling", path: "counseling" },
@@ -62,21 +61,15 @@ watch(locale, () => void loadNavigation());
 </script>
 
 <template>
-  <div class="site-shell">
+  <div :class="['site-shell', { 'home-route': route.name === 'home' }]">
     <header class="site-header">
       <RouterLink
         class="brand"
         :to="`/${locale}/`"
         aria-label="VAV home"
       >
-        <span
-          class="brand-mark"
-          aria-hidden="true"
-        >V</span>
-        <span>
-          <strong>VAV</strong>
-          <small>{{ t("brand.promise") }}</small>
-        </span>
+        <strong class="brand-wordmark">VAV</strong>
+        <small>{{ t("brand.promise") }}</small>
       </RouterLink>
 
       <button
@@ -128,18 +121,19 @@ watch(locale, () => void loadNavigation());
           </RouterLink>
         </template>
         <RouterLink
-          class="account-link"
+          class="cart-link"
           :to="`/${locale}/cart`"
           @click="menuOpen = false"
         >
           {{ t("commerce.cart") }}
         </RouterLink>
         <RouterLink
-          class="account-link"
-          :to="`/${locale}/account`"
+          class="start-link"
+          :to="auth.user ? `/${locale}/account` : `/${locale}/auth/register`"
           @click="menuOpen = false"
         >
-          {{ t("nav.account") }}
+          {{ auth.user ? t("nav.account") : t("nav.start") }}
+          <span aria-hidden="true">↗</span>
         </RouterLink>
         <RouterLink
           class="language-link"

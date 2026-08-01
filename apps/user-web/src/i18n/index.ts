@@ -20,6 +20,7 @@ const messages = {
       courses: "课程",
       counseling: "真人辅导",
       ai: "AI 辅导",
+      start: "开始认识",
       account: "我的账户",
       menu: "打开导航"
     },
@@ -29,7 +30,19 @@ const messages = {
       intro:
         "VAV 把可信活动、成长课程与专业辅导放进同一条清晰路径。你可以按自己的节奏了解、参与和决定。",
       explore: "探索服务",
+      start: "开始认识",
       learn: "了解我们的原则",
+      members: "全球会员 · 来自 40+ 国家和地区",
+      needsTitle: "选择你的需要",
+      aiTitle: "今天，我该如何开始？",
+      aiBody: "向 VAV AI 提问，获得为你量身定制的建议。",
+      aiPlaceholder: "例如：如何提升长期关系的信任感？",
+      services: {
+        match: "智能匹配",
+        activities: "主题活动",
+        courses: "关系课程",
+        guidance: "哈拿老师 AI 辅导"
+      },
       trustTitle: "每一步都应当清楚、可撤回、被尊重",
       trustBody:
         "平台不会以 AI 替你做关系决定。身份、支付、权限与安全处置由明确的服务规则保护。",
@@ -105,6 +118,7 @@ const messages = {
       courses: "課程",
       counseling: "真人輔導",
       ai: "AI 輔導",
+      start: "開始認識",
       account: "我的帳戶",
       menu: "開啟導覽"
     },
@@ -113,7 +127,19 @@ const messages = {
       title: "讓重要的關係，開始得更從容。",
       intro: "VAV 把可信活動、成長課程與專業輔導放在同一條清楚路徑。你可以按自己的節奏了解、參與和決定。",
       explore: "探索服務",
+      start: "開始認識",
       learn: "了解我們的原則",
+      members: "全球會員 · 來自 40+ 國家和地區",
+      needsTitle: "選擇你的需要",
+      aiTitle: "今天，我該如何開始？",
+      aiBody: "向 VAV AI 提問，獲得為你量身定制的建議。",
+      aiPlaceholder: "例如：如何提升長期關係的信任感？",
+      services: {
+        match: "智能配對",
+        activities: "主題活動",
+        courses: "關係課程",
+        guidance: "哈拿老師 AI 輔導"
+      },
       trustTitle: "每一步都應當清楚、可撤回、被尊重",
       trustBody: "平台不會以 AI 替你做關係決定。身份、付款、權限與安全處置由明確的服務規則保護。",
       steps: {
@@ -150,6 +176,7 @@ const messages = {
       courses: "Courses",
       counseling: "Counseling",
       ai: "AI guidance",
+      start: "Begin your journey",
       account: "My account",
       menu: "Open navigation"
     },
@@ -158,7 +185,19 @@ const messages = {
       title: "Let important relationships begin with room to breathe.",
       intro: "VAV brings trusted activities, growth courses and professional guidance into one clear path. Learn, participate and decide at your own pace.",
       explore: "Explore services",
+      start: "Begin your journey",
       learn: "Read our principles",
+      members: "members worldwide · across 40+ regions",
+      needsTitle: "Choose what you need",
+      aiTitle: "Where should I begin today?",
+      aiBody: "Ask VAV AI for guidance shaped around your situation.",
+      aiPlaceholder: "For example: How can we rebuild long-term trust?",
+      services: {
+        match: "Thoughtful matching",
+        activities: "Curated activities",
+        courses: "Relationship courses",
+        guidance: "Hannah AI guidance"
+      },
       trustTitle: "Every step should be clear, reversible and respected",
       trustBody: "AI will not make relationship decisions for you. Identity, payments, permissions and safety actions remain governed by explicit service rules.",
       steps: {

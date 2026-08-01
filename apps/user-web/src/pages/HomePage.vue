@@ -17,6 +17,12 @@ const seo = computed(() => ({
 }));
 useSeo(seo);
 
+const services = [
+  { key: "match", path: "membership", icon: "heart" },
+  { key: "activities", path: "activities", icon: "spark" },
+  { key: "courses", path: "courses", icon: "orbit" },
+  { key: "guidance", path: "ai-assistant", icon: "voice" }
+] as const;
 const steps = ["discover", "grow", "connect"] as const;
 const cmsHome = ref<PublicContent | null>(null);
 
@@ -30,85 +36,121 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>
+  <div class="home-experience">
     <section
-      v-if="cmsHome"
-      class="editorial-page cms-page"
+      class="home-hero"
+      aria-labelledby="home-hero-title"
     >
-      <h1>{{ cmsHome.title }}</h1>
-      <ContentRenderer :blocks="cmsHome.content_blocks" />
-    </section>
-    <template v-else>
-      <section class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow">
-            {{ t("home.eyebrow") }}
-          </p>
-          <h1>{{ t("home.title") }}</h1>
-          <p class="hero-intro">
-            {{ t("home.intro") }}
-          </p>
-          <div class="hero-actions">
-            <RouterLink
-              class="primary-button"
-              :to="`/${locale}/activities`"
-            >
-              {{ t("home.explore") }}
-            </RouterLink>
-            <RouterLink
-              class="text-link"
-              :to="`/${locale}/about`"
-            >
-              {{ t("home.learn") }} <span aria-hidden="true">→</span>
-            </RouterLink>
-          </div>
+      <div
+        class="home-hero-image"
+        aria-hidden="true"
+      />
+      <div class="home-hero-copy">
+        <p class="eyebrow">
+          {{ t("home.eyebrow") }}
+        </p>
+        <h1 id="home-hero-title">
+          {{ t("home.title") }}
+        </h1>
+        <p class="hero-intro">
+          {{ t("home.intro") }}
+        </p>
+        <div class="hero-actions">
+          <RouterLink
+            class="primary-button hero-primary"
+            :to="`/${locale}/auth/register`"
+          >
+            {{ t("home.start") }}
+          </RouterLink>
+          <RouterLink
+            class="round-arrow"
+            :to="`/${locale}/activities`"
+            :aria-label="t('home.explore')"
+          >
+            <span aria-hidden="true">→</span>
+          </RouterLink>
         </div>
+      </div>
+
+      <div class="member-proof">
         <div
-          class="hero-art"
+          class="member-faces"
           aria-hidden="true"
         >
-          <div class="orbit orbit-one" />
-          <div class="orbit orbit-two" />
-          <div class="figures">
-            <span />
-            <span />
-          </div>
-          <p>V · A · V</p>
+          <span>安</span><span>诚</span><span>真</span><span>爱</span>
         </div>
-      </section>
+        <p><strong>25K+</strong> {{ t("home.members") }}</p>
+      </div>
 
-      <section
-        class="journey-section"
-        aria-labelledby="journey-title"
-      >
-        <div class="section-heading">
-          <p class="eyebrow">
-            VAV PATH
-          </p>
-          <h2 id="journey-title">
-            {{ t("home.trustTitle") }}
-          </h2>
-          <p>{{ t("home.trustBody") }}</p>
-        </div>
-        <div class="journey-grid">
-          <article
-            v-for="(step, index) in steps"
-            :key="step"
+      <aside class="needs-panel">
+        <p>{{ t("home.needsTitle") }}</p>
+        <div class="needs-grid">
+          <RouterLink
+            v-for="service in services"
+            :key="service.key"
+            :to="`/${locale}/${service.path}`"
           >
-            <span class="step-number">0{{ index + 1 }}</span>
-            <h3>{{ t(`home.steps.${step}`) }}</h3>
-            <p>{{ t(`home.steps.${step}Body`) }}</p>
-          </article>
+            <span
+              :class="['need-icon', `need-icon-${service.icon}`]"
+              aria-hidden="true"
+            />
+            <strong>{{ t(`home.services.${service.key}`) }}</strong>
+          </RouterLink>
         </div>
-      </section>
+      </aside>
 
-      <section class="foundation-note">
-        <span class="status-dot" />
-        <div>
-          <strong>{{ t("common.coming") }}</strong>
-          <p>Foundation release · Batch 1</p>
-        </div>
-      </section>
-    </template>
+      <RouterLink
+        class="ai-prompt-card"
+        :to="`/${locale}/ai-assistant`"
+      >
+        <span
+          class="ai-orb"
+          aria-hidden="true"
+        >
+          VAV
+        </span>
+        <span class="ai-prompt-copy">
+          <strong>{{ t("home.aiTitle") }}</strong>
+          <small>{{ t("home.aiBody") }}</small>
+          <span class="ai-prompt-field">
+            {{ t("home.aiPlaceholder") }}
+            <b aria-hidden="true">↑</b>
+          </span>
+        </span>
+      </RouterLink>
+    </section>
+
+    <section
+      class="journey-section"
+      aria-labelledby="journey-title"
+    >
+      <div class="section-heading">
+        <p class="eyebrow">
+          VAV PATH
+        </p>
+        <h2 id="journey-title">
+          {{ t("home.trustTitle") }}
+        </h2>
+        <p>{{ t("home.trustBody") }}</p>
+      </div>
+      <div class="journey-grid">
+        <article
+          v-for="(step, index) in steps"
+          :key="step"
+        >
+          <span class="step-number">0{{ index + 1 }}</span>
+          <h3>{{ t(`home.steps.${step}`) }}</h3>
+          <p>{{ t(`home.steps.${step}Body`) }}</p>
+        </article>
+      </div>
+    </section>
+
+    <section
+      v-if="cmsHome"
+      class="home-cms-content cms-page"
+      :aria-label="cmsHome.title"
+    >
+      <ContentRenderer :blocks="cmsHome.content_blocks" />
+    </section>
   </div>
 </template>
