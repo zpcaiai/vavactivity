@@ -33,6 +33,7 @@ jobs:
           --health-retries 10
     env:
       APP_ENV: test
+      AI_ENABLED: "true"
       DATABASE_URL: postgresql+asyncpg://vav:vav_ci_only@localhost:5432/vav
       REDIS_URL: redis://localhost:6379/0
     steps:
@@ -57,6 +58,9 @@ jobs:
           uv run --package vav-platform-api python -m vav.cli.seed_courses
           uv run --package vav-platform-api python -m vav.cli.seed_counseling
           uv run --package vav-platform-api python -m vav.cli.seed_knowledge
+          uv run --package vav-platform-api python -m vav.cli.seed_ai_assistant
+          uv run --package vav-platform-api python -m vav.cli.seed_notification_templates
+          uv run --package vav-platform-api python -m vav.cli.seed_notifications
       - run: uv run --package vav-platform-api pytest services/api/tests
       - run: uv run --package vav-platform-api python scripts/check_migration_heads.py
       - name: Verify the CI database reached the migration head
@@ -94,6 +98,9 @@ jobs:
         run: |
           uv run --package vav-platform-api alembic -c services/api/alembic.ini upgrade head
           uv run --package vav-platform-api python -m vav.cli.seed_permissions
+          uv run --package vav-platform-api python -m vav.cli.seed_ai_assistant
+          uv run --package vav-platform-api python -m vav.cli.seed_notification_templates
+          uv run --package vav-platform-api python -m vav.cli.seed_notifications
           uv run --package vav-platform-api python -m vav.cli.seed_test_user \
             --confirm-insecure-test-account
       - name: Verify the live Neon schema

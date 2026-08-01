@@ -430,10 +430,10 @@ async def _template_transition(
         )
     await session.execute(
         text(
-            "UPDATE notification_template_releases SET status=:target,"
-            "approved_by=CASE WHEN :target='approved' THEN :actor ELSE approved_by END,"
-            "approved_at=CASE WHEN :target='approved' THEN now() ELSE approved_at END,"
-            "activated_at=CASE WHEN :target='active' THEN now() ELSE activated_at END WHERE id=:id"
+            "UPDATE notification_template_releases SET status=CAST(:target AS varchar),"
+            "approved_by=CASE WHEN CAST(:target AS varchar)='approved' THEN :actor ELSE approved_by END,"
+            "approved_at=CASE WHEN CAST(:target AS varchar)='approved' THEN now() ELSE approved_at END,"
+            "activated_at=CASE WHEN CAST(:target AS varchar)='active' THEN now() ELSE activated_at END WHERE id=:id"
         ),
         {"target": target, "actor": principal.user.id, "id": release_id},
     )
