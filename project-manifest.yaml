@@ -42,8 +42,8 @@ module_registry:
   orders: {owner: backend, status: foundation_in_progress, phase: phase_1}
   payments: {owner: backend, status: foundation_in_progress, phase: phase_1}
   admin: {owner: frontend, status: foundation_in_progress, phase: phase_1}
-  dating_profile: {owner: product, status: planned, phase: phase_2}
-  partner_preferences: {owner: product, status: planned, phase: phase_2}
+  dating_profile: {owner: product, status: foundation_in_progress, phase: phase_2}
+  partner_preferences: {owner: product, status: foundation_in_progress, phase: phase_2}
   recommendations: {owner: matchmaking, status: planned, phase: phase_2}
   likes: {owner: matchmaking, status: planned, phase: phase_2}
   matches: {owner: matchmaking, status: planned, phase: phase_2}
@@ -248,6 +248,30 @@ pending_decisions:
     value: null
   privacy_export_format_policy:
     owner: privacy_and_product
+    status: undecided
+    value: null
+  dating_gender_policy:
+    owner: product_and_legal
+    status: undecided
+    value: null
+  dating_relationship_intent_eligibility:
+    owner: product
+    status: undecided
+    value: null
+  dating_faith_taxonomy_scope:
+    owner: product_and_ministry
+    status: undecided
+    value: null
+  dating_profile_default_visibility:
+    owner: trust_and_safety
+    status: undecided
+    value: null
+  dating_photo_moderation_provider:
+    owner: platform_and_trust
+    status: undecided
+    value: null
+  dating_profile_review_staffing:
+    owner: operations
     status: undecided
     value: null
   ai_external_training_policy:

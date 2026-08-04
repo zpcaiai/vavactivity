@@ -21,6 +21,7 @@ import CounselingServicePage from "@/features/counseling/pages/CounselingService
 import CounselingServicesPage from "@/features/counseling/pages/CounselingServicesPage.vue";
 import AiAssistantPage from "@/features/ai-assistant/pages/AiAssistantPage.vue";
 import NotificationsPage from "@/features/notifications/pages/NotificationsPage.vue";
+import DatingProfilePage from "@/features/dating-profile/pages/DatingProfilePage.vue";
 import PrivacyCenterPage from "@/features/privacy/pages/PrivacyCenterPage.vue";
 import UnsubscribePage from "@/features/notifications/pages/UnsubscribePage.vue";
 import AuthPage from "@/pages/AuthPage.vue";
@@ -99,6 +100,13 @@ export const router = createRouter({
         { path: "ai-assistant/plans", name: "ai-plans", component: CatalogPage, meta: { catalogTitle: "AI 辅导方案", catalogCategory: "ai-coaching" } },
         { path: "account/notifications", name: "account-notifications", component: NotificationsPage, meta: { requiresAuth: true } },
         { path: "account/notification-preferences", name: "account-notification-preferences", component: NotificationsPage, meta: { requiresAuth: true } },
+        { path: "account/dating-profile", name: "account-dating-profile", component: DatingProfilePage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
+        { path: "account/dating-profile/edit", name: "account-dating-profile-edit", component: DatingProfilePage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
+        { path: "account/dating-profile/photos", name: "account-dating-profile-photos", component: DatingProfilePage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
+        { path: "account/dating-profile/preferences", name: "account-dating-profile-preferences", component: DatingProfilePage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
+        { path: "account/dating-profile/privacy", name: "account-dating-profile-privacy", component: DatingProfilePage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
+        { path: "account/dating-profile/preview", name: "account-dating-profile-preview", component: DatingProfilePage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
+        { path: "account/dating-profile/review", name: "account-dating-profile-review", component: DatingProfilePage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
         { path: "account/profile", name: "account-profile", component: PrivacyCenterPage, meta: { requiresAuth: true } },
         { path: "account/contact-points", name: "account-contact-points", component: PrivacyCenterPage, meta: { requiresAuth: true } },
         { path: "account/privacy", name: "account-privacy", component: PrivacyCenterPage, meta: { requiresAuth: true } },

@@ -131,6 +131,51 @@ export function seedPrivacyFixture() {
   }
 }
 
+export function seedDatingProfileFixture() {
+  if (process.env.VAV_E2E_SKIP_DATING_SEED === "1") return;
+  for (const moduleName of [
+    "vav.cli.seed_permissions",
+    "vav.cli.seed_privacy",
+    "vav.cli.seed_dating_taxonomies",
+    "vav.cli.seed_dating_profiles"
+  ]) {
+    execFileSync(
+      "docker",
+      ["compose", "exec", "-T", "api", "python", "-m", moduleName],
+      { stdio: "pipe" }
+    );
+  }
+}
+
+/** Give an e2e member the protected date of birth the adult check reads. */
+export function seedProtectedDateOfBirth(email: string, isoDate = "1992-05-04") {
+  const escaped = email.replaceAll("'", "''");
+  execFileSync(
+    "docker",
+    [
+      "compose",
+      "exec",
+      "-T",
+      "api",
+      "python",
+      "-c",
+      [
+        "import asyncio",
+        "from sqlalchemy import text",
+        "from vav.core.database import session_factory",
+        "from vav.modules.privacy.crypto import encrypt_private",
+        "async def main():",
+        "    async with session_factory() as session:",
+        "        await session.execute(text(\"INSERT INTO user_profiles (user_id,display_name,date_of_birth_encrypted,preferred_locale,timezone,profile_status) SELECT id,'E2E Member',:dob,'zh-CN','UTC','complete' FROM users WHERE email=:email ON CONFLICT (user_id) DO UPDATE SET date_of_birth_encrypted=EXCLUDED.date_of_birth_encrypted\"), {'dob': encrypt_private('" + isoDate + "'), 'email': '" + escaped + "'})",
+        "        await session.execute(text(\"INSERT INTO user_privacy_settings (user_id,visible_in_matchmaking,privacy_mode) SELECT id,true,'strict' FROM users WHERE email=:email ON CONFLICT (user_id) DO UPDATE SET visible_in_matchmaking=true\"), {'email': '" + escaped + "'})",
+        "        await session.commit()",
+        "asyncio.run(main())"
+      ].join("\n")
+    ],
+    { stdio: "pipe" }
+  );
+}
+
 export function verifyUserFixture(email: string) {
   const escaped = email.replaceAll("'", "''");
   execFileSync(

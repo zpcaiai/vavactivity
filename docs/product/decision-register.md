@@ -53,6 +53,12 @@
 | `privacy_break_glass_policy` | security_and_privacy | undecided | 紧急访问保持双人审批、短时、最小范围和逐次审计；生产响应流程待批准 |
 | `privacy_export_format_policy` | privacy_and_product | undecided | 本地提供加密 JSON/HTML 能力；正式 PDF、附件披露和法域格式待批准 |
 | `ai_external_training_policy` | privacy_legal_and_ai | undecided | 外部模型训练默认关闭，不从 AI 使用或长期记忆同意推断授权 |
+| `dating_gender_policy` | product_and_legal | undecided | 性别与可认识对象取值来自版本化字典，不在代码中固化任何永久社会政策 |
+| `dating_relationship_intent_eligibility` | product | undecided | 是否只允许婚姻导向用户进入推荐池未定，代码保持关系目标为可配置字段 |
+| `dating_faith_taxonomy_scope` | product_and_ministry | undecided | 信仰状态与宗派字典可停用但不删除；信仰重要性不得被解释为属灵评分 |
+| `dating_profile_default_visibility` | trust_and_safety | undecided | 新档案一律 Strict，字段默认可见性只能收紧不能放宽 |
+| `dating_photo_moderation_provider` | platform_and_trust | undecided | 自动检测仅作审核辅助；人脸识别与跨站搜索默认禁用且不得自动判定冒用 |
+| `dating_profile_review_staffing` | operations | undecided | 审核员默认无敏感字段、原图与暂停权限；双人复核门槛待运营确认 |
 
 ## 决策记录格式
 

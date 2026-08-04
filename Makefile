@@ -20,6 +20,9 @@
 	notification-migrate notification-seed notification-seed-templates notification-test \
 	notification-concurrency-test notification-security-test notification-provider-test \
 	notification-user-e2e notification-admin-e2e notification-verify \
+	dating-profile-migrate dating-profile-seed dating-profile-seed-taxonomies dating-profile-test \
+	dating-profile-concurrency-test dating-profile-security-test dating-profile-user-e2e \
+	dating-profile-admin-e2e dating-profile-verify \
 	privacy-migrate privacy-seed privacy-seed-inventory privacy-test privacy-security-test \
 	privacy-concurrency-test privacy-retention-test privacy-user-e2e privacy-admin-e2e privacy-verify
 
@@ -351,3 +354,38 @@ privacy-admin-e2e:
 
 privacy-verify: privacy-migrate privacy-seed privacy-seed-inventory privacy-test privacy-security-test privacy-concurrency-test privacy-retention-test privacy-user-e2e privacy-admin-e2e
 	$(MAKE) notification-verify
+
+dating-profile-migrate:
+	docker compose exec -T api alembic upgrade head
+
+dating-profile-seed:
+	docker compose exec -T api python -m vav.cli.seed_permissions
+	docker compose exec -T api python -m vav.cli.seed_dating_profiles
+
+dating-profile-seed-taxonomies:
+	docker compose exec -T api python -m vav.cli.seed_dating_taxonomies
+
+dating-profile-test:
+	docker compose exec -T api pytest tests/matchmaking_profiles/unit tests/matchmaking_profiles/integration -q
+
+dating-profile-concurrency-test:
+	docker compose exec -T api pytest tests/matchmaking_profiles/concurrency -q
+
+dating-profile-security-test:
+	docker compose exec -T api pytest tests/matchmaking_profiles/security -q
+
+dating-profile-user-e2e:
+	pnpm exec playwright test e2e/user-dating-profile
+
+dating-profile-admin-e2e:
+	pnpm exec playwright test e2e/admin-dating-profile
+
+dating-profile-verify:
+	$(MAKE) dating-profile-migrate
+	$(MAKE) dating-profile-seed-taxonomies
+	$(MAKE) dating-profile-seed
+	$(MAKE) dating-profile-test
+	$(MAKE) dating-profile-concurrency-test
+	$(MAKE) dating-profile-security-test
+	$(MAKE) dating-profile-user-e2e
+	$(MAKE) dating-profile-admin-e2e

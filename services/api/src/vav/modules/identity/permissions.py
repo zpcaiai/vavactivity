@@ -337,6 +337,34 @@ PRIVACY_PERMISSIONS = {
     "privacy.audit.read",
 }
 
+MATCHMAKING_PROFILE_PERMISSIONS = {
+    "matchmaking.profiles.read",
+    "matchmaking.profiles.sensitive.read",
+    "matchmaking.profiles.update",
+    "matchmaking.profiles.suspend",
+    "matchmaking.profiles.restore",
+    "matchmaking.reviews.read",
+    "matchmaking.reviews.assign",
+    "matchmaking.reviews.decide",
+    "matchmaking.reviews.escalate",
+    "matchmaking.photos.read",
+    "matchmaking.photos.original.read",
+    "matchmaking.photos.review",
+    "matchmaking.preferences.read",
+    "matchmaking.preferences.sensitive.read",
+    "matchmaking.schemas.read",
+    "matchmaking.schemas.manage",
+    "matchmaking.schemas.activate",
+    "matchmaking.taxonomies.read",
+    "matchmaking.taxonomies.manage",
+    "matchmaking.completeness.read",
+    "matchmaking.completeness.manage",
+    "matchmaking.projections.read",
+    "matchmaking.projections.rebuild",
+    "matchmaking.analytics.read",
+    "matchmaking.audit.read",
+}
+
 ALL_PERMISSIONS = (
     IDENTITY_PERMISSIONS
     | CMS_PERMISSIONS
@@ -349,6 +377,7 @@ ALL_PERMISSIONS = (
     | AI_PERMISSIONS
     | NOTIFICATION_PERMISSIONS
     | PRIVACY_PERMISSIONS
+    | MATCHMAKING_PROFILE_PERMISSIONS
 )
 
 ROLE_PERMISSIONS: dict[str, set[str]] = {
@@ -597,6 +626,41 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "knowledge.retrieval.debug",
         "knowledge.evaluations.read",
     },
+    "profile_reviewer": {
+        "matchmaking.profiles.read",
+        "matchmaking.reviews.read",
+        "matchmaking.reviews.assign",
+        "matchmaking.reviews.decide",
+        "matchmaking.photos.read",
+        "matchmaking.photos.review",
+        "matchmaking.audit.read",
+    },
+    "profile_review_lead": {
+        "matchmaking.profiles.read",
+        "matchmaking.profiles.sensitive.read",
+        "matchmaking.profiles.suspend",
+        "matchmaking.profiles.restore",
+        "matchmaking.reviews.read",
+        "matchmaking.reviews.assign",
+        "matchmaking.reviews.decide",
+        "matchmaking.reviews.escalate",
+        "matchmaking.photos.read",
+        "matchmaking.photos.review",
+        "matchmaking.audit.read",
+    },
+    "matchmaking_data_steward": {
+        permission
+        for permission in MATCHMAKING_PROFILE_PERMISSIONS
+        if permission.startswith(
+            (
+                "matchmaking.schemas.",
+                "matchmaking.taxonomies.",
+                "matchmaking.completeness.",
+                "matchmaking.projections.",
+            )
+        )
+    }
+    | {"matchmaking.audit.read"},
     "analyst": {"audit.read", "catalog.audit.read"},
     "support_agent": {"users.read", "catalog.products.read"},
     "member": set(),

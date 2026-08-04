@@ -881,6 +881,86 @@ class Settings(BaseSettings):
         default=730, validation_alias="PRIVACY_AUDIT_RETENTION_DAYS"
     )
 
+    dating_profile_enabled: bool = Field(default=True, validation_alias="DATING_PROFILE_ENABLED")
+    dating_minimum_age: int = Field(default=18, validation_alias="DATING_MINIMUM_AGE")
+    dating_profile_default_locale: str = Field(
+        default="zh-CN", validation_alias="DATING_PROFILE_DEFAULT_LOCALE"
+    )
+    dating_profile_default_privacy_mode: Literal["strict", "balanced", "custom"] = Field(
+        default="strict", validation_alias="DATING_PROFILE_DEFAULT_PRIVACY_MODE"
+    )
+    dating_profile_submission_min_completeness_bps: int = Field(
+        default=8000, validation_alias="DATING_PROFILE_SUBMISSION_MIN_COMPLETENESS_BPS"
+    )
+    dating_profile_recommendation_min_completeness_bps: int = Field(
+        default=9000, validation_alias="DATING_PROFILE_RECOMMENDATION_MIN_COMPLETENESS_BPS"
+    )
+    dating_profile_require_primary_photo: bool = Field(
+        default=True, validation_alias="DATING_PROFILE_REQUIRE_PRIMARY_PHOTO"
+    )
+    dating_profile_require_review: bool = Field(
+        default=True, validation_alias="DATING_PROFILE_REQUIRE_REVIEW"
+    )
+    dating_self_intro_min_chars: int = Field(
+        default=80, validation_alias="DATING_SELF_INTRO_MIN_CHARS"
+    )
+    dating_self_intro_max_chars: int = Field(
+        default=3000, validation_alias="DATING_SELF_INTRO_MAX_CHARS"
+    )
+    dating_narrative_max_chars: int = Field(
+        default=4000, validation_alias="DATING_NARRATIVE_MAX_CHARS"
+    )
+    dating_photo_min_count_for_submission: int = Field(
+        default=1, validation_alias="DATING_PHOTO_MIN_COUNT_FOR_SUBMISSION"
+    )
+    dating_photo_max_count: int = Field(default=8, validation_alias="DATING_PHOTO_MAX_COUNT")
+    dating_photo_max_size_mb: int = Field(default=10, validation_alias="DATING_PHOTO_MAX_SIZE_MB")
+    dating_photo_allowed_types: str = Field(
+        default="image/jpeg,image/png,image/webp", validation_alias="DATING_PHOTO_ALLOWED_TYPES"
+    )
+    dating_photo_view_token_ttl_seconds: int = Field(
+        default=300, validation_alias="DATING_PHOTO_VIEW_TOKEN_TTL_SECONDS"
+    )
+    dating_photo_strip_exif: bool = Field(default=True, validation_alias="DATING_PHOTO_STRIP_EXIF")
+    dating_photo_biometric_identification_enabled: bool = Field(
+        default=False, validation_alias="DATING_PHOTO_BIOMETRIC_IDENTIFICATION_ENABLED"
+    )
+    dating_review_assignment_enabled: bool = Field(
+        default=True, validation_alias="DATING_REVIEW_ASSIGNMENT_ENABLED"
+    )
+    dating_review_auto_approve_enabled: bool = Field(
+        default=False, validation_alias="DATING_REVIEW_AUTO_APPROVE_ENABLED"
+    )
+    dating_review_require_reason_for_rejection: bool = Field(
+        default=True, validation_alias="DATING_REVIEW_REQUIRE_REASON_FOR_REJECTION"
+    )
+    dating_review_require_reason_for_suspension: bool = Field(
+        default=True, validation_alias="DATING_REVIEW_REQUIRE_REASON_FOR_SUSPENSION"
+    )
+    dating_preferences_max_criteria: int = Field(
+        default=50, validation_alias="DATING_PREFERENCES_MAX_CRITERIA"
+    )
+    dating_allow_hard_constraints: bool = Field(
+        default=True, validation_alias="DATING_ALLOW_HARD_CONSTRAINTS"
+    )
+    dating_allow_automatic_relaxation_default: bool = Field(
+        default=False, validation_alias="DATING_ALLOW_AUTOMATIC_RELAXATION_DEFAULT"
+    )
+    dating_projection_job_max_attempts: int = Field(
+        default=10, validation_alias="DATING_PROJECTION_JOB_MAX_ATTEMPTS"
+    )
+    dating_projection_cache_ttl_seconds: int = Field(
+        default=300, validation_alias="DATING_PROJECTION_CACHE_TTL_SECONDS"
+    )
+
+    @property
+    def dating_photo_allowed_type_set(self) -> frozenset[str]:
+        return frozenset(
+            item.strip().casefold()
+            for item in self.dating_photo_allowed_types.split(",")
+            if item.strip()
+        )
+
     @model_validator(mode="after")
     def reject_development_credentials_in_production(self) -> Settings:
         if self.environment == "production" and (
@@ -928,6 +1008,20 @@ class Settings(BaseSettings):
             raise ValueError("AI long-term memory requires explicit opt-in")
         if self.privacy_allow_unbounded_retention:
             raise ValueError("unbounded privacy retention cannot be enabled")
+        if self.dating_minimum_age < 18:
+            raise ValueError("dating profiles require an adult minimum age of at least 18")
+        if self.dating_photo_biometric_identification_enabled:
+            raise ValueError("biometric identification cannot be enabled for dating photos")
+        if self.dating_allow_automatic_relaxation_default:
+            raise ValueError("hard partner criteria cannot be relaxed by default")
+        if self.dating_review_auto_approve_enabled and self.environment == "production":
+            raise ValueError("production dating profiles require human review")
+        if self.dating_profile_recommendation_min_completeness_bps < (
+            self.dating_profile_submission_min_completeness_bps
+        ):
+            raise ValueError(
+                "recommendation completeness threshold cannot be lower than submission threshold"
+            )
         if self.environment == "production" and (
             not self.privacy_field_encryption_enabled
             or not self.privacy_export_encryption_enabled
@@ -945,6 +1039,7 @@ class Settings(BaseSettings):
                 "ai_assistant": self.ai_enabled,
                 "notifications": self.notification_enabled,
                 "privacy": self.privacy_enabled,
+                "dating_profile": self.dating_profile_enabled,
             },
         }
 

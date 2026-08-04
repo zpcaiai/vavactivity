@@ -39,10 +39,14 @@ make verify
 - `make lint`：检查 Python 与 TypeScript 代码。
 - `make test`：运行后端和前端测试。
 - `make verify`：从 Compose 配置到服务探针执行完整 Batch 1 验收。
+- `make dating-profile-verify`：执行 Batch 13 婚恋档案的迁移、种子、四类测试与前后台 E2E。
 
 ## 产品边界
 
 阶段范围和未决政策以 `project-manifest.yaml` 为准。所有未决事项采用关闭或显式缺失配置，不能被实现为生产默认值。Batch 1 不包含真实注册、支付、AI 辅导或匹配业务。
+
+婚恋档案（Batch 13）为成年用户限定，默认严格隐私：联系方式在任何查看场景都不会自动公开，
+资料完整度只衡量填写完成度，照片需人工审核，择偶条件仅本人与推荐引擎可见。
 
 更多资料见 `docs/product`、`docs/architecture`、`docs/security`、`docs/runbooks` 和 `docs/acceptance`。
 

@@ -3361,6 +3361,28 @@
         "title": "FieldVisibility",
         "type": "string"
       },
+      "FieldVisibilityRequest": {
+        "properties": {
+          "field_code": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Field Code",
+            "type": "string"
+          },
+          "visibility": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Visibility",
+            "type": "string"
+          }
+        },
+        "required": [
+          "field_code",
+          "visibility"
+        ],
+        "title": "FieldVisibilityRequest",
+        "type": "object"
+      },
       "FieldVisibilityRuleRequest": {
         "properties": {
           "allowed_purposes": {
@@ -5272,6 +5294,119 @@
         "title": "ModuleCreateRequest",
         "type": "object"
       },
+      "NarrativeUpdateRequest": {
+        "properties": {
+          "ai_assisted": {
+            "default": false,
+            "title": "Ai Assisted",
+            "type": "boolean"
+          },
+          "ai_content_confirmed": {
+            "default": false,
+            "title": "Ai Content Confirmed",
+            "type": "boolean"
+          },
+          "faith_journey": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faith Journey"
+          },
+          "family_vision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Family Vision"
+          },
+          "hoped_for_relationship": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hoped For Relationship"
+          },
+          "interests_and_lifestyle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interests And Lifestyle"
+          },
+          "locale": {
+            "maxLength": 16,
+            "minLength": 2,
+            "title": "Locale",
+            "type": "string"
+          },
+          "marriage_vision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Marriage Vision"
+          },
+          "relationship_values": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relationship Values"
+          },
+          "self_introduction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Self Introduction"
+          },
+          "strengths_and_growth": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strengths And Growth"
+          }
+        },
+        "required": [
+          "locale"
+        ],
+        "title": "NarrativeUpdateRequest",
+        "type": "object"
+      },
       "NavigationItemInput": {
         "properties": {
           "external_url": {
@@ -5634,6 +5769,39 @@
         "title": "PaymentCreateRequest",
         "type": "object"
       },
+      "PhotoUploadRequest": {
+        "properties": {
+          "content_base64": {
+            "minLength": 1,
+            "title": "Content Base64",
+            "type": "string"
+          },
+          "filename": {
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Filename",
+            "type": "string"
+          },
+          "mime_type": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Mime Type",
+            "type": "string"
+          },
+          "photo_role": {
+            "default": "gallery",
+            "title": "Photo Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "filename",
+          "mime_type",
+          "content_base64"
+        ],
+        "title": "PhotoUploadRequest",
+        "type": "object"
+      },
       "PostEventChoiceRequest": {
         "properties": {
           "choice": {
@@ -5655,6 +5823,89 @@
           "chosen_user_id"
         ],
         "title": "PostEventChoiceRequest",
+        "type": "object"
+      },
+      "PreferenceCriterionRequest": {
+        "properties": {
+          "allow_system_relaxation": {
+            "default": false,
+            "title": "Allow System Relaxation",
+            "type": "boolean"
+          },
+          "allow_unknown": {
+            "default": true,
+            "title": "Allow Unknown",
+            "type": "boolean"
+          },
+          "criterion_code": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Criterion Code",
+            "type": "string"
+          },
+          "desired_value": {
+            "title": "Desired Value"
+          },
+          "hard_constraint": {
+            "default": false,
+            "title": "Hard Constraint",
+            "type": "boolean"
+          },
+          "importance": {
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Importance",
+            "type": "string"
+          },
+          "operator": {
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Operator",
+            "type": "string"
+          },
+          "relaxation_acknowledged": {
+            "default": false,
+            "title": "Relaxation Acknowledged",
+            "type": "boolean"
+          },
+          "user_explanation": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Explanation"
+          }
+        },
+        "required": [
+          "criterion_code",
+          "operator",
+          "desired_value",
+          "importance"
+        ],
+        "title": "PreferenceCriterionRequest",
+        "type": "object"
+      },
+      "PreferenceUpdateRequest": {
+        "properties": {
+          "allow_recommendation_relaxation": {
+            "default": false,
+            "title": "Allow Recommendation Relaxation",
+            "type": "boolean"
+          },
+          "criteria": {
+            "items": {
+              "$ref": "#/components/schemas/PreferenceCriterionRequest"
+            },
+            "title": "Criteria",
+            "type": "array"
+          }
+        },
+        "title": "PreferenceUpdateRequest",
         "type": "object"
       },
       "PrerequisiteCreateRequest": {
@@ -6306,6 +6557,30 @@
         "title": "PrivacySettingsUpdateRequest",
         "type": "object"
       },
+      "PrivacyUpdateRequest": {
+        "properties": {
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/FieldVisibilityRequest"
+            },
+            "title": "Rules",
+            "type": "array"
+          },
+          "visible_in_matchmaking": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visible In Matchmaking"
+          }
+        },
+        "title": "PrivacyUpdateRequest",
+        "type": "object"
+      },
       "ProductCreateRequest": {
         "properties": {
           "category_id": {
@@ -6792,6 +7067,46 @@
           "reason"
         ],
         "title": "ProductUpdateRequest",
+        "type": "object"
+      },
+      "ProfileCreateRequest": {
+        "properties": {
+          "locale": {
+            "anyOf": [
+              {
+                "maxLength": 16,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locale"
+          }
+        },
+        "title": "ProfileCreateRequest",
+        "type": "object"
+      },
+      "ProfileFieldUpdateRequest": {
+        "properties": {
+          "expected_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
+          },
+          "values": {
+            "additionalProperties": true,
+            "title": "Values",
+            "type": "object"
+          }
+        },
+        "title": "ProfileFieldUpdateRequest",
         "type": "object"
       },
       "ProfileUpdateRequest": {
@@ -7763,6 +8078,24 @@
         "title": "ReminderRequest",
         "type": "object"
       },
+      "RestoreRequest": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "title": "RestoreRequest",
+        "type": "object"
+      },
       "RestrictionRequest": {
         "properties": {
           "reason_code": {
@@ -7910,6 +8243,279 @@
           "query"
         ],
         "title": "RetrievalRequest",
+        "type": "object"
+      },
+      "ReviewApproveRequest": {
+        "properties": {
+          "expected_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
+          },
+          "internal_summary": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Internal Summary"
+          },
+          "user_message": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Message"
+          }
+        },
+        "title": "ReviewApproveRequest",
+        "type": "object"
+      },
+      "ReviewAssignRequest": {
+        "properties": {
+          "assignee_id": {
+            "format": "uuid",
+            "title": "Assignee Id",
+            "type": "string"
+          },
+          "expected_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
+          }
+        },
+        "required": [
+          "assignee_id"
+        ],
+        "title": "ReviewAssignRequest",
+        "type": "object"
+      },
+      "ReviewChangesRequest": {
+        "properties": {
+          "expected_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
+          },
+          "internal_summary": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Internal Summary"
+          },
+          "user_message": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "User Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_message"
+        ],
+        "title": "ReviewChangesRequest",
+        "type": "object"
+      },
+      "ReviewEscalateRequest": {
+        "properties": {
+          "expected_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "ReviewEscalateRequest",
+        "type": "object"
+      },
+      "ReviewItemRequest": {
+        "properties": {
+          "decision": {
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Decision",
+            "type": "string"
+          },
+          "field_code": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Field Code"
+          },
+          "internal_note": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Internal Note"
+          },
+          "item_type": {
+            "pattern": "^(field|photo)$",
+            "title": "Item Type",
+            "type": "string"
+          },
+          "photo_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo Id"
+          },
+          "reason_code": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Code"
+          },
+          "user_message_safe": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Message Safe"
+          }
+        },
+        "required": [
+          "item_type",
+          "decision"
+        ],
+        "title": "ReviewItemRequest",
+        "type": "object"
+      },
+      "ReviewRejectRequest": {
+        "properties": {
+          "expected_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
+          },
+          "internal_summary": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Internal Summary"
+          },
+          "reason_code": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "user_message": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "User Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason_code",
+          "user_message"
+        ],
+        "title": "ReviewRejectRequest",
+        "type": "object"
+      },
+      "ReviewStartRequest": {
+        "properties": {
+          "expected_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
+          }
+        },
+        "title": "ReviewStartRequest",
         "type": "object"
       },
       "RichTextBlock": {
@@ -8760,6 +9366,18 @@
         "title": "Stackability",
         "type": "string"
       },
+      "SubmitRequest": {
+        "properties": {
+          "change_summary": {
+            "default": "",
+            "maxLength": 1000,
+            "title": "Change Summary",
+            "type": "string"
+          }
+        },
+        "title": "SubmitRequest",
+        "type": "object"
+      },
       "SubscriptionCancelRequest": {
         "properties": {
           "immediate": {
@@ -8820,6 +9438,21 @@
           "explanation"
         ],
         "title": "SuppressionRequest",
+        "type": "object"
+      },
+      "SuspendRequest": {
+        "properties": {
+          "reason_code": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Reason Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason_code"
+        ],
+        "title": "SuspendRequest",
         "type": "object"
       },
       "TemplateDefinitionRequest": {
@@ -12275,6 +12908,842 @@
         "summary": "Start Playback",
         "tags": [
           "courses"
+        ]
+      }
+    },
+    "/api/v1/account/dating-profile": {
+      "get": {
+        "operationId": "get_own_profile_api_v1_account_dating_profile_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Own Profile Api V1 Account Dating Profile Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Own Profile",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      },
+      "patch": {
+        "operationId": "patch_profile_fields_api_v1_account_dating_profile_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileFieldUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Patch Profile Fields Api V1 Account Dating Profile Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Patch Profile Fields",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      },
+      "post": {
+        "operationId": "create_own_profile_api_v1_account_dating_profile_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Own Profile Api V1 Account Dating Profile Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Own Profile",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      }
+    },
+    "/api/v1/account/dating-profile/completeness": {
+      "get": {
+        "operationId": "get_completeness_api_v1_account_dating_profile_completeness_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Completeness Api V1 Account Dating Profile Completeness Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Completeness",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      }
+    },
+    "/api/v1/account/dating-profile/narratives": {
+      "put": {
+        "operationId": "put_narratives_api_v1_account_dating_profile_narratives_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NarrativeUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Put Narratives Api V1 Account Dating Profile Narratives Put",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Put Narratives",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      }
+    },
+    "/api/v1/account/dating-profile/pause": {
+      "post": {
+        "operationId": "pause_api_v1_account_dating_profile_pause_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Pause Api V1 Account Dating Profile Pause Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Pause",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      }
+    },
+    "/api/v1/account/dating-profile/photos": {
+      "get": {
+        "operationId": "list_photos_api_v1_account_dating_profile_photos_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Photos Api V1 Account Dating Profile Photos Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Photos",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      },
+      "post": {
+        "operationId": "upload_photo_api_v1_account_dating_profile_photos_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PhotoUploadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Upload Photo Api V1 Account Dating Profile Photos Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Upload Photo",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      }
+    },
+    "/api/v1/account/dating-profile/photos/{photo_id}": {
+      "delete": {
+        "operationId": "remove_photo_api_v1_account_dating_profile_photos__photo_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "photo_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Photo Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Remove Photo Api V1 Account Dating Profile Photos  Photo Id  Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Remove Photo",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      }
+    },
+    "/api/v1/account/dating-profile/photos/{photo_id}/primary": {
+      "post": {
+        "operationId": "make_primary_api_v1_account_dating_profile_photos__photo_id__primary_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "photo_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Photo Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Make Primary Api V1 Account Dating Profile Photos  Photo Id  Primary Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Make Primary",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      }
+    },
+    "/api/v1/account/dating-profile/preferences": {
+      "get": {
+        "operationId": "get_preferences_api_v1_account_dating_profile_preferences_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Preferences Api V1 Account Dating Profile Preferences Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Preferences",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      },
+      "put": {
+        "operationId": "put_preferences_api_v1_account_dating_profile_preferences_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreferenceUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Put Preferences Api V1 Account Dating Profile Preferences Put",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Put Preferences",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      }
+    },
+    "/api/v1/account/dating-profile/preview": {
+      "get": {
+        "operationId": "preview_profile_api_v1_account_dating_profile_preview_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "view_context",
+            "required": false,
+            "schema": {
+              "default": "profile_detail",
+              "title": "View Context",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Preview Profile Api V1 Account Dating Profile Preview Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Preview Profile",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      }
+    },
+    "/api/v1/account/dating-profile/privacy": {
+      "get": {
+        "operationId": "get_privacy_api_v1_account_dating_profile_privacy_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Privacy Api V1 Account Dating Profile Privacy Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Privacy",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      },
+      "put": {
+        "operationId": "put_privacy_api_v1_account_dating_profile_privacy_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrivacyUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Put Privacy Api V1 Account Dating Profile Privacy Put",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Put Privacy",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      }
+    },
+    "/api/v1/account/dating-profile/reactivate": {
+      "post": {
+        "operationId": "reactivate_api_v1_account_dating_profile_reactivate_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reactivate Api V1 Account Dating Profile Reactivate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reactivate",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      }
+    },
+    "/api/v1/account/dating-profile/review-feedback": {
+      "get": {
+        "operationId": "get_review_feedback_api_v1_account_dating_profile_review_feedback_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Review Feedback Api V1 Account Dating Profile Review Feedback Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Review Feedback",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      }
+    },
+    "/api/v1/account/dating-profile/review-status": {
+      "get": {
+        "operationId": "get_review_status_api_v1_account_dating_profile_review_status_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Review Status Api V1 Account Dating Profile Review Status Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Review Status",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      }
+    },
+    "/api/v1/account/dating-profile/schema": {
+      "get": {
+        "operationId": "get_schema_api_v1_account_dating_profile_schema_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {
+              "default": "zh-CN",
+              "title": "Locale",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Schema Api V1 Account Dating Profile Schema Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Schema",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      }
+    },
+    "/api/v1/account/dating-profile/submit": {
+      "post": {
+        "operationId": "submit_profile_api_v1_account_dating_profile_submit_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Submit Profile Api V1 Account Dating Profile Submit Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Submit Profile",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      }
+    },
+    "/api/v1/account/dating-profile/versions/{left}/diff/{right}": {
+      "get": {
+        "operationId": "diff_versions_api_v1_account_dating_profile_versions__left__diff__right__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "left",
+            "required": true,
+            "schema": {
+              "title": "Left",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "right",
+            "required": true,
+            "schema": {
+              "title": "Right",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Diff Versions Api V1 Account Dating Profile Versions  Left  Diff  Right  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Diff Versions",
+        "tags": [
+          "matchmaking-profiles"
         ]
       }
     },
@@ -24314,6 +25783,1219 @@
         ]
       }
     },
+    "/api/v1/admin/dating-profile-audit": {
+      "get": {
+        "operationId": "audit_events_api_v1_admin_dating_profile_audit_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "subject_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Subject Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Audit Events Api V1 Admin Dating Profile Audit Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Audit Events",
+        "tags": [
+          "matchmaking-profiles-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/dating-profile-photo-reviews": {
+      "get": {
+        "operationId": "photo_review_queue_api_v1_admin_dating_profile_photo_reviews_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Photo Review Queue Api V1 Admin Dating Profile Photo Reviews Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Photo Review Queue",
+        "tags": [
+          "matchmaking-profiles-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/dating-profile-reviews": {
+      "get": {
+        "operationId": "list_reviews_api_v1_admin_dating_profile_reviews_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Reviews Api V1 Admin Dating Profile Reviews Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Reviews",
+        "tags": [
+          "matchmaking-profiles-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/dating-profile-reviews/{case_id}": {
+      "get": {
+        "operationId": "review_detail_api_v1_admin_dating_profile_reviews__case_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Review Detail Api V1 Admin Dating Profile Reviews  Case Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Review Detail",
+        "tags": [
+          "matchmaking-profiles-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/dating-profile-reviews/{case_id}/approve": {
+      "post": {
+        "operationId": "approve_api_v1_admin_dating_profile_reviews__case_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewApproveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Api V1 Admin Dating Profile Reviews  Case Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve",
+        "tags": [
+          "matchmaking-profiles-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/dating-profile-reviews/{case_id}/assign": {
+      "post": {
+        "operationId": "assign_api_v1_admin_dating_profile_reviews__case_id__assign_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewAssignRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Assign Api V1 Admin Dating Profile Reviews  Case Id  Assign Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Assign",
+        "tags": [
+          "matchmaking-profiles-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/dating-profile-reviews/{case_id}/escalate": {
+      "post": {
+        "operationId": "escalate_api_v1_admin_dating_profile_reviews__case_id__escalate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewEscalateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Escalate Api V1 Admin Dating Profile Reviews  Case Id  Escalate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Escalate",
+        "tags": [
+          "matchmaking-profiles-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/dating-profile-reviews/{case_id}/items": {
+      "post": {
+        "operationId": "add_item_api_v1_admin_dating_profile_reviews__case_id__items_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewItemRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Add Item Api V1 Admin Dating Profile Reviews  Case Id  Items Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Add Item",
+        "tags": [
+          "matchmaking-profiles-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/dating-profile-reviews/{case_id}/reject": {
+      "post": {
+        "operationId": "reject_api_v1_admin_dating_profile_reviews__case_id__reject_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRejectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reject Api V1 Admin Dating Profile Reviews  Case Id  Reject Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reject",
+        "tags": [
+          "matchmaking-profiles-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/dating-profile-reviews/{case_id}/request-changes": {
+      "post": {
+        "operationId": "request_changes_api_v1_admin_dating_profile_reviews__case_id__request_changes_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewChangesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Request Changes Api V1 Admin Dating Profile Reviews  Case Id  Request Changes Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Request Changes",
+        "tags": [
+          "matchmaking-profiles-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/dating-profile-reviews/{case_id}/start": {
+      "post": {
+        "operationId": "start_api_v1_admin_dating_profile_reviews__case_id__start_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewStartRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Start Api V1 Admin Dating Profile Reviews  Case Id  Start Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Start",
+        "tags": [
+          "matchmaking-profiles-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/dating-profile-versions/{left}/diff/{right}": {
+      "get": {
+        "operationId": "admin_diff_api_v1_admin_dating_profile_versions__left__diff__right__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "left",
+            "required": true,
+            "schema": {
+              "title": "Left",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "right",
+            "required": true,
+            "schema": {
+              "title": "Right",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "profile_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Profile Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Admin Diff Api V1 Admin Dating Profile Versions  Left  Diff  Right  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Admin Diff",
+        "tags": [
+          "matchmaking-profiles-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/dating-profiles": {
+      "get": {
+        "operationId": "list_profiles_api_v1_admin_dating_profiles_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Profiles Api V1 Admin Dating Profiles Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Profiles",
+        "tags": [
+          "matchmaking-profiles-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/dating-profiles/{profile_id}": {
+      "get": {
+        "operationId": "profile_detail_api_v1_admin_dating_profiles__profile_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "profile_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Profile Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Profile Detail Api V1 Admin Dating Profiles  Profile Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Profile Detail",
+        "tags": [
+          "matchmaking-profiles-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/dating-profiles/{profile_id}/restore": {
+      "post": {
+        "operationId": "restore_api_v1_admin_dating_profiles__profile_id__restore_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "profile_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Profile Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RestoreRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Restore Api V1 Admin Dating Profiles  Profile Id  Restore Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Restore",
+        "tags": [
+          "matchmaking-profiles-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/dating-profiles/{profile_id}/suspend": {
+      "post": {
+        "operationId": "suspend_api_v1_admin_dating_profiles__profile_id__suspend_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "profile_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Profile Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuspendRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Suspend Api V1 Admin Dating Profiles  Profile Id  Suspend Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Suspend",
+        "tags": [
+          "matchmaking-profiles-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/dating-projections": {
+      "get": {
+        "operationId": "projections_api_v1_admin_dating_projections_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Projections Api V1 Admin Dating Projections Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Projections",
+        "tags": [
+          "matchmaking-profiles-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/dating-projections/process-jobs": {
+      "post": {
+        "operationId": "process_jobs_api_v1_admin_dating_projections_process_jobs_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Process Jobs Api V1 Admin Dating Projections Process Jobs Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Process Jobs",
+        "tags": [
+          "matchmaking-profiles-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/dating-projections/{profile_id}/rebuild": {
+      "post": {
+        "operationId": "rebuild_api_v1_admin_dating_projections__profile_id__rebuild_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "profile_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Profile Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Rebuild Api V1 Admin Dating Projections  Profile Id  Rebuild Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rebuild",
+        "tags": [
+          "matchmaking-profiles-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/dating-schema-releases": {
+      "get": {
+        "operationId": "schema_releases_api_v1_admin_dating_schema_releases_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Schema Releases Api V1 Admin Dating Schema Releases Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Schema Releases",
+        "tags": [
+          "matchmaking-profiles-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/dating-taxonomies": {
+      "get": {
+        "operationId": "taxonomies_api_v1_admin_dating_taxonomies_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {
+              "default": "zh-CN",
+              "title": "Locale",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Taxonomies Api V1 Admin Dating Taxonomies Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Taxonomies",
+        "tags": [
+          "matchmaking-profiles-admin"
+        ]
+      }
+    },
     "/api/v1/admin/exercise-attempts/{attempt_id}/grade": {
       "post": {
         "operationId": "manual_grade_api_v1_admin_exercise_attempts__attempt_id__grade_post",
@@ -32116,6 +34798,196 @@
         "summary": "Course Detail",
         "tags": [
           "courses"
+        ]
+      }
+    },
+    "/api/v1/dating-profiles/photos/{photo_id}/content": {
+      "get": {
+        "description": "Resolve a view token. The storage object key is never returned.",
+        "operationId": "photo_content_api_v1_dating_profiles_photos__photo_id__content_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "photo_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Photo Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Photo Content Api V1 Dating Profiles Photos  Photo Id  Content Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Photo Content",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      }
+    },
+    "/api/v1/dating-profiles/{profile_id}": {
+      "get": {
+        "operationId": "view_profile_api_v1_dating_profiles__profile_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "profile_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Profile Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "view_context",
+            "required": false,
+            "schema": {
+              "default": "profile_detail",
+              "title": "View Context",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response View Profile Api V1 Dating Profiles  Profile Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "View Profile",
+        "tags": [
+          "matchmaking-profiles"
+        ]
+      }
+    },
+    "/api/v1/dating-profiles/{profile_id}/photos/{photo_id}/view-token": {
+      "post": {
+        "operationId": "create_view_token_api_v1_dating_profiles__profile_id__photos__photo_id__view_token_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "profile_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Profile Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "photo_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Photo Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "view_context",
+            "required": false,
+            "schema": {
+              "default": "profile_detail",
+              "title": "View Context",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create View Token Api V1 Dating Profiles  Profile Id  Photos  Photo Id  View Token Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create View Token",
+        "tags": [
+          "matchmaking-profiles"
         ]
       }
     },

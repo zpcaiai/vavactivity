@@ -18,6 +18,7 @@ import MediaLibraryPage from "@/pages/MediaLibraryPage.vue";
 import KnowledgeManagementPage from "@/pages/KnowledgeManagementPage.vue";
 import AiManagementPage from "@/pages/AiManagementPage.vue";
 import NotificationManagementPage from "@/pages/NotificationManagementPage.vue";
+import MatchmakingProfileManagementPage from "@/pages/MatchmakingProfileManagementPage.vue";
 import PrivacyManagementPage from "@/pages/PrivacyManagementPage.vue";
 import ModuleListPage from "@/pages/ModuleListPage.vue";
 import NavigationManagementPage from "@/pages/NavigationManagementPage.vue";
@@ -53,6 +54,16 @@ const notificationSectionPermissions: Record<string, string> = {
   suppressions: "notifications.suppressions.read",
   unsubscribes: "notifications.preferences.read",
   audit: "notifications.audit.read"
+};
+
+const matchmakingSectionPermissions: Record<string, string> = {
+  profiles: "matchmaking.profiles.read",
+  reviews: "matchmaking.reviews.read",
+  "photo-reviews": "matchmaking.photos.read",
+  "schema-releases": "matchmaking.schemas.read",
+  taxonomies: "matchmaking.taxonomies.read",
+  projections: "matchmaking.projections.read",
+  audit: "matchmaking.audit.read"
 };
 
 const privacySectionPermissions: Record<string, string> = {
@@ -330,6 +341,24 @@ export const router = createRouter({
           name: "admin-notifications-campaign-detail",
           component: NotificationManagementPage,
           meta: { title: "通知活动详情", permission: "notifications.campaigns.read", notificationSection: "campaigns" }
+        },
+        ...Object.keys(matchmakingSectionPermissions).map((section) => ({
+          path: `matchmaking/${section}`,
+          name: `admin-matchmaking-${section}`,
+          component: MatchmakingProfileManagementPage,
+          meta: { title: "婚恋档案运营中心", permission: matchmakingSectionPermissions[section], matchmakingSection: section }
+        })),
+        {
+          path: "matchmaking/profiles/:profileId",
+          name: "admin-matchmaking-profile-detail",
+          component: MatchmakingProfileManagementPage,
+          meta: { title: "婚恋档案详情", permission: "matchmaking.profiles.read", matchmakingSection: "profiles" }
+        },
+        {
+          path: "matchmaking/reviews/:caseId",
+          name: "admin-matchmaking-review-detail",
+          component: MatchmakingProfileManagementPage,
+          meta: { title: "档案审核详情", permission: "matchmaking.reviews.read", matchmakingSection: "reviews" }
         },
         ...Object.keys(privacySectionPermissions).map((section) => ({
           path: `privacy/${section}`,
