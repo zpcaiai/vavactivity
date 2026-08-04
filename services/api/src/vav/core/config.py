@@ -953,6 +953,86 @@ class Settings(BaseSettings):
         default=300, validation_alias="DATING_PROJECTION_CACHE_TTL_SECONDS"
     )
 
+    recommendation_enabled: bool = Field(default=True, validation_alias="RECOMMENDATION_ENABLED")
+    recommendation_default_strategy: str = Field(
+        default="baseline-bidirectional", validation_alias="RECOMMENDATION_DEFAULT_STRATEGY"
+    )
+    recommendation_batch_job_interval_hours: int = Field(
+        default=24, validation_alias="RECOMMENDATION_BATCH_JOB_INTERVAL_HOURS"
+    )
+    recommendation_max_candidates_per_user: int = Field(
+        default=1000, validation_alias="RECOMMENDATION_MAX_CANDIDATES_PER_USER"
+    )
+    recommendation_candidate_validity_days: int = Field(
+        default=7, validation_alias="RECOMMENDATION_CANDIDATE_VALIDITY_DAYS"
+    )
+    recommendation_require_active_approved_profile: bool = Field(
+        default=True, validation_alias="RECOMMENDATION_REQUIRE_ACTIVE_APPROVED_PROFILE"
+    )
+    recommendation_hard_constraint_auto_relax: bool = Field(
+        default=False, validation_alias="RECOMMENDATION_HARD_CONSTRAINT_AUTO_RELAX"
+    )
+    recommendation_allow_user_relaxation: bool = Field(
+        default=True, validation_alias="RECOMMENDATION_ALLOW_USER_RELAXATION"
+    )
+    recommendation_unknown_value_policy: Literal[
+        "lower_confidence", "neutral_score", "configured_penalty"
+    ] = Field(default="lower_confidence", validation_alias="RECOMMENDATION_UNKNOWN_VALUE_POLICY")
+    recommendation_min_directional_score_bps: int = Field(
+        default=4000, validation_alias="RECOMMENDATION_MIN_DIRECTIONAL_SCORE_BPS"
+    )
+    recommendation_min_bidirectional_score_bps: int = Field(
+        default=5000, validation_alias="RECOMMENDATION_MIN_BIDIRECTIONAL_SCORE_BPS"
+    )
+    recommendation_min_confidence_bps: int = Field(
+        default=5000, validation_alias="RECOMMENDATION_MIN_CONFIDENCE_BPS"
+    )
+    recommendation_daily_batch_size: int = Field(
+        default=10, validation_alias="RECOMMENDATION_DAILY_BATCH_SIZE"
+    )
+    recommendation_batch_ttl_days: int = Field(
+        default=7, validation_alias="RECOMMENDATION_BATCH_TTL_DAYS"
+    )
+    recommendation_supplemental_batch_enabled: bool = Field(
+        default=True, validation_alias="RECOMMENDATION_SUPPLEMENTAL_BATCH_ENABLED"
+    )
+    recommendation_max_daily_received: int = Field(
+        default=20, validation_alias="RECOMMENDATION_MAX_DAILY_RECEIVED"
+    )
+    recommendation_max_daily_shown_per_profile: int = Field(
+        default=50, validation_alias="RECOMMENDATION_MAX_DAILY_SHOWN_PER_PROFILE"
+    )
+    recommendation_repeat_exposure_cooldown_days: int = Field(
+        default=30, validation_alias="RECOMMENDATION_REPEAT_EXPOSURE_COOLDOWN_DAYS"
+    )
+    recommendation_exposure_visible_min_ms: int = Field(
+        default=1000, validation_alias="RECOMMENDATION_EXPOSURE_VISIBLE_MIN_MS"
+    )
+    recommendation_skip_cooldown_days: int = Field(
+        default=60, validation_alias="RECOMMENDATION_SKIP_COOLDOWN_DAYS"
+    )
+    recommendation_exploration_slot_count: int = Field(
+        default=2, validation_alias="RECOMMENDATION_EXPLORATION_SLOT_COUNT"
+    )
+    recommendation_cold_start_min_exposures: int = Field(
+        default=5, validation_alias="RECOMMENDATION_COLD_START_MIN_EXPOSURES"
+    )
+    recommendation_feedback_personalization_default: bool = Field(
+        default=True, validation_alias="RECOMMENDATION_FEEDBACK_PERSONALIZATION_DEFAULT"
+    )
+    recommendation_experiments_enabled: bool = Field(
+        default=False, validation_alias="RECOMMENDATION_EXPERIMENTS_ENABLED"
+    )
+    recommendation_experiment_approval_required: bool = Field(
+        default=True, validation_alias="RECOMMENDATION_EXPERIMENT_APPROVAL_REQUIRED"
+    )
+    recommendation_fail_closed_on_moderation_error: bool = Field(
+        default=True, validation_alias="RECOMMENDATION_FAIL_CLOSED_ON_MODERATION_ERROR"
+    )
+    recommendation_require_zero_blocked_pair_leakage: bool = Field(
+        default=True, validation_alias="RECOMMENDATION_REQUIRE_ZERO_BLOCKED_PAIR_LEAKAGE"
+    )
+
     @property
     def dating_photo_allowed_type_set(self) -> frozenset[str]:
         return frozenset(
@@ -1016,6 +1096,22 @@ class Settings(BaseSettings):
             raise ValueError("hard partner criteria cannot be relaxed by default")
         if self.dating_review_auto_approve_enabled and self.environment == "production":
             raise ValueError("production dating profiles require human review")
+        if self.recommendation_hard_constraint_auto_relax:
+            raise ValueError("recommendation hard constraints cannot be relaxed automatically")
+        if not self.recommendation_fail_closed_on_moderation_error:
+            raise ValueError("recommendations must fail closed when moderation is unavailable")
+        if not self.recommendation_require_zero_blocked_pair_leakage:
+            raise ValueError("blocked pairs must never be recommendable")
+        if self.recommendation_experiments_enabled and (
+            not self.recommendation_experiment_approval_required
+        ):
+            raise ValueError("recommendation experiments require approval when enabled")
+        if self.recommendation_min_bidirectional_score_bps < (
+            self.recommendation_min_directional_score_bps
+        ):
+            raise ValueError(
+                "the bidirectional score floor cannot be lower than the directional floor"
+            )
         if self.dating_profile_recommendation_min_completeness_bps < (
             self.dating_profile_submission_min_completeness_bps
         ):
@@ -1040,6 +1136,7 @@ class Settings(BaseSettings):
                 "notifications": self.notification_enabled,
                 "privacy": self.privacy_enabled,
                 "dating_profile": self.dating_profile_enabled,
+                "recommendations": self.recommendation_enabled,
             },
         }
 

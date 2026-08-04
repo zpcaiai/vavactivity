@@ -147,6 +147,26 @@ export function seedDatingProfileFixture() {
   }
 }
 
+export function seedRecommendationFixture() {
+  if (process.env.VAV_E2E_SKIP_DATING_SEED === "1") return;
+  for (const moduleName of [
+    "vav.cli.seed_permissions",
+    "vav.cli.seed_privacy",
+    "vav.cli.seed_dating_taxonomies",
+    "vav.cli.seed_dating_profiles",
+    "vav.cli.seed_recommendations",
+    "vav.cli.seed_recommendation_evaluations",
+    "vav.cli.seed_recommendation_fixtures",
+    "vav.cli.build_recommendation_pool"
+  ]) {
+    execFileSync(
+      "docker",
+      ["compose", "exec", "-T", "api", "python", "-m", moduleName],
+      { stdio: "pipe" }
+    );
+  }
+}
+
 /** Give an e2e member the protected date of birth the adult check reads. */
 export function seedProtectedDateOfBirth(email: string, isoDate = "1992-05-04") {
   const escaped = email.replaceAll("'", "''");

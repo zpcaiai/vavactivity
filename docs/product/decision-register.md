@@ -59,6 +59,11 @@
 | `dating_profile_default_visibility` | trust_and_safety | undecided | 新档案一律 Strict，字段默认可见性只能收紧不能放宽 |
 | `dating_photo_moderation_provider` | platform_and_trust | undecided | 自动检测仅作审核辅助；人脸识别与跨站搜索默认禁用且不得自动判定冒用 |
 | `dating_profile_review_staffing` | operations | undecided | 审核员默认无敏感字段、原图与暂停权限；双人复核门槛待运营确认 |
+| `recommendation_faith_weighting_policy` | product_and_ministry | undecided | 信仰相关特征的默认权重来自版本化策略记录；信仰重要性只作软性对齐，不得被解释为属灵评分或排序资格 |
+| `recommendation_membership_benefit_scope` | business_and_trust | undecided | 会员等级只能影响自己的每日数量、筛选器与批次频率；不得影响对方的硬性条件、安全限制或隐私设置 |
+| `recommendation_experiment_governance` | product_and_privacy | undecided | 实验默认关闭且需审批；任何实验不得绕过硬性条件、安全护栏或解释规则 |
+| `recommendation_daily_batch_size_policy` | product | undecided | 每日推荐数量与补充批次为可配置项，默认保守；不得以提高曝光为由突破对方的展示预算 |
+| `recommendation_cross_region_matching_policy` | product_and_legal | undecided | 跨地区与跨境推荐范围未定；地理兼容性只使用粗粒度代码，不读取精确位置 |
 
 ## 决策记录格式
 

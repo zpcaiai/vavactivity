@@ -1123,6 +1123,31 @@
         "title": "AvailabilityRuleRequest",
         "type": "object"
       },
+      "BatchRequest": {
+        "properties": {
+          "batch_type": {
+            "default": "daily",
+            "pattern": "^(daily|supplemental)$",
+            "title": "Batch Type",
+            "type": "string"
+          },
+          "requested_size": {
+            "anyOf": [
+              {
+                "maximum": 50.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested Size"
+          }
+        },
+        "title": "BatchRequest",
+        "type": "object"
+      },
       "BillingType": {
         "enum": [
           "one_time",
@@ -3158,6 +3183,26 @@
         "title": "ErasureRequest",
         "type": "object"
       },
+      "EvaluationRunRequest": {
+        "properties": {
+          "dataset_id": {
+            "format": "uuid",
+            "title": "Dataset Id",
+            "type": "string"
+          },
+          "strategy_id": {
+            "format": "uuid",
+            "title": "Strategy Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dataset_id",
+          "strategy_id"
+        ],
+        "title": "EvaluationRunRequest",
+        "type": "object"
+      },
       "ExecuteConfirmedToolRequest": {
         "properties": {
           "arguments": {
@@ -3277,6 +3322,89 @@
         "title": "ExerciseCreateRequest",
         "type": "object"
       },
+      "ExperimentCreateRequest": {
+        "properties": {
+          "allocation_policy": {
+            "additionalProperties": true,
+            "title": "Allocation Policy",
+            "type": "object"
+          },
+          "control_strategy_id": {
+            "format": "uuid",
+            "title": "Control Strategy Id",
+            "type": "string"
+          },
+          "eligibility_definition": {
+            "additionalProperties": true,
+            "title": "Eligibility Definition",
+            "type": "object"
+          },
+          "experiment_code": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Experiment Code",
+            "type": "string"
+          },
+          "guardrail_metrics": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Guardrail Metrics",
+            "type": "array"
+          },
+          "hypothesis": {
+            "minLength": 1,
+            "title": "Hypothesis",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "primary_metrics": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Primary Metrics",
+            "type": "array"
+          },
+          "treatment_strategy_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Treatment Strategy Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "experiment_code",
+          "name",
+          "hypothesis",
+          "control_strategy_id",
+          "treatment_strategy_ids"
+        ],
+        "title": "ExperimentCreateRequest",
+        "type": "object"
+      },
+      "ExperimentDecisionRequest": {
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "ExperimentDecisionRequest",
+        "type": "object"
+      },
       "ExportRequest": {
         "properties": {
           "modules": {
@@ -3310,42 +3438,44 @@
         "title": "ExportRequest",
         "type": "object"
       },
-      "FeedbackRequest": {
+      "ExposureRequest": {
         "properties": {
-          "rating": {
+          "duration_ms": {
             "anyOf": [
               {
-                "enum": [
-                  "up",
-                  "down"
-                ],
-                "type": "string"
+                "maximum": 3600000.0,
+                "minimum": 0.0,
+                "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Rating"
+            "title": "Duration Ms"
           },
-          "reason": {
-            "anyOf": [
-              {
-                "maxLength": 2000,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reason"
+          "exposure_type": {
+            "pattern": "^(card_impression|card_visible|profile_opened|photo_viewed)$",
+            "title": "Exposure Type",
+            "type": "string"
           },
-          "reported": {
-            "default": false,
-            "title": "Reported",
-            "type": "boolean"
+          "idempotency_key": {
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "source": {
+            "default": "user_web",
+            "maxLength": 32,
+            "title": "Source",
+            "type": "string"
           }
         },
-        "title": "FeedbackRequest",
+        "required": [
+          "exposure_type",
+          "idempotency_key"
+        ],
+        "title": "ExposureRequest",
         "type": "object"
       },
       "FieldVisibility": {
@@ -7780,6 +7910,21 @@
         "title": "QuoteData",
         "type": "object"
       },
+      "RebuildRequest": {
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "RebuildRequest",
+        "type": "object"
+      },
       "ReconciliationResolveRequest": {
         "properties": {
           "reason": {
@@ -9366,6 +9511,99 @@
         "title": "Stackability",
         "type": "string"
       },
+      "StrategyCreateRequest": {
+        "properties": {
+          "bidirectional_policy": {
+            "additionalProperties": true,
+            "title": "Bidirectional Policy",
+            "type": "object"
+          },
+          "cold_start_policy": {
+            "additionalProperties": true,
+            "title": "Cold Start Policy",
+            "type": "object"
+          },
+          "diversification_policy": {
+            "additionalProperties": true,
+            "title": "Diversification Policy",
+            "type": "object"
+          },
+          "explanation_policy": {
+            "additionalProperties": true,
+            "title": "Explanation Policy",
+            "type": "object"
+          },
+          "exposure_policy": {
+            "additionalProperties": true,
+            "title": "Exposure Policy",
+            "type": "object"
+          },
+          "feature_manifest": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Feature Manifest",
+            "type": "array"
+          },
+          "hard_constraint_policy": {
+            "additionalProperties": true,
+            "title": "Hard Constraint Policy",
+            "type": "object"
+          },
+          "ranking_policy": {
+            "additionalProperties": true,
+            "title": "Ranking Policy",
+            "type": "object"
+          },
+          "scoring_policy": {
+            "additionalProperties": true,
+            "title": "Scoring Policy",
+            "type": "object"
+          },
+          "semantic_version": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Semantic Version",
+            "type": "string"
+          },
+          "strategy_code": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Strategy Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "strategy_code",
+          "semantic_version",
+          "hard_constraint_policy",
+          "feature_manifest",
+          "scoring_policy",
+          "bidirectional_policy",
+          "ranking_policy",
+          "diversification_policy",
+          "exposure_policy",
+          "explanation_policy"
+        ],
+        "title": "StrategyCreateRequest",
+        "type": "object"
+      },
+      "StrategyDecisionRequest": {
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "StrategyDecisionRequest",
+        "type": "object"
+      },
       "SubmitRequest": {
         "properties": {
           "change_summary": {
@@ -10013,6 +10251,70 @@
         "title": "TranslationStatus",
         "type": "string"
       },
+      "TuningRequest": {
+        "properties": {
+          "allow_relaxed_recommendations": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Allow Relaxed Recommendations"
+          },
+          "daily_received_limit": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Daily Received Limit"
+          },
+          "exploration_level": {
+            "anyOf": [
+              {
+                "maxLength": 32,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exploration Level"
+          },
+          "feedback_personalization_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feedback Personalization Enabled"
+          },
+          "recommendations_paused": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recommendations Paused"
+          }
+        },
+        "title": "TuningRequest",
+        "type": "object"
+      },
       "UpdateNotificationPreferencesRequest": {
         "properties": {
           "items": {
@@ -10324,6 +10626,44 @@
         "title": "RegistryStatusRequest",
         "type": "object"
       },
+      "vav__modules__ai_assistant__schemas__FeedbackRequest": {
+        "properties": {
+          "rating": {
+            "anyOf": [
+              {
+                "enum": [
+                  "up",
+                  "down"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "reported": {
+            "default": false,
+            "title": "Reported",
+            "type": "boolean"
+          }
+        },
+        "title": "FeedbackRequest",
+        "type": "object"
+      },
       "vav__modules__catalog__schemas__ReasonRequest": {
         "properties": {
           "reason": {
@@ -10460,6 +10800,70 @@
           "reason"
         ],
         "title": "StatusReasonRequest",
+        "type": "object"
+      },
+      "vav__modules__recommendations__schemas__FeedbackRequest": {
+        "properties": {
+          "feedback_type": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Feedback Type",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "reason_code": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Code"
+          },
+          "reason_details": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Details"
+          },
+          "recommendation_item_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recommendation Item Id"
+          },
+          "recommended_user_id": {
+            "format": "uuid",
+            "title": "Recommended User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "recommended_user_id",
+          "feedback_type",
+          "idempotency_key"
+        ],
+        "title": "FeedbackRequest",
         "type": "object"
       }
     },
@@ -15039,6 +15443,197 @@
         "summary": "Patch Profile",
         "tags": [
           "privacy"
+        ]
+      }
+    },
+    "/api/v1/account/recommendation-history": {
+      "get": {
+        "operationId": "recommendation_history_api_v1_account_recommendation_history_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Recommendation History Api V1 Account Recommendation History Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Recommendation History",
+        "tags": [
+          "recommendations"
+        ]
+      }
+    },
+    "/api/v1/account/recommendation-preferences": {
+      "get": {
+        "operationId": "get_preferences_api_v1_account_recommendation_preferences_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Preferences Api V1 Account Recommendation Preferences Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Preferences",
+        "tags": [
+          "recommendations"
+        ]
+      },
+      "put": {
+        "operationId": "update_preferences_api_v1_account_recommendation_preferences_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TuningRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Preferences Api V1 Account Recommendation Preferences Put",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Preferences",
+        "tags": [
+          "recommendations"
+        ]
+      }
+    },
+    "/api/v1/account/recommendation-preferences/reset": {
+      "post": {
+        "operationId": "reset_preferences_api_v1_account_recommendation_preferences_reset_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reset Preferences Api V1 Account Recommendation Preferences Reset Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reset Preferences",
+        "tags": [
+          "recommendations"
+        ]
+      }
+    },
+    "/api/v1/account/recommendation-transparency": {
+      "get": {
+        "description": "What the member may learn about how their own recommendations are built.",
+        "operationId": "transparency_api_v1_account_recommendation_transparency_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Transparency Api V1 Account Recommendation Transparency Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Transparency",
+        "tags": [
+          "recommendations"
         ]
       }
     },
@@ -32719,6 +33314,1071 @@
         ]
       }
     },
+    "/api/v1/admin/recommendations/audit": {
+      "get": {
+        "operationId": "audit_events_api_v1_admin_recommendations_audit_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "subject_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Subject Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Audit Events Api V1 Admin Recommendations Audit Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Audit Events",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/batches": {
+      "get": {
+        "operationId": "list_batches_api_v1_admin_recommendations_batches_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Batches Api V1 Admin Recommendations Batches Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Batches",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/batches/{batch_id}": {
+      "get": {
+        "operationId": "batch_detail_api_v1_admin_recommendations_batches__batch_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "batch_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Batch Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Batch Detail Api V1 Admin Recommendations Batches  Batch Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Batch Detail",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/batches/{batch_id}/invalidate": {
+      "post": {
+        "operationId": "invalidate_batch_api_v1_admin_recommendations_batches__batch_id__invalidate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "batch_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Batch Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RebuildRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Invalidate Batch Api V1 Admin Recommendations Batches  Batch Id  Invalidate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Invalidate Batch",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/constraints": {
+      "get": {
+        "operationId": "list_constraints_api_v1_admin_recommendations_constraints_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Constraints Api V1 Admin Recommendations Constraints Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Constraints",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/dashboard": {
+      "get": {
+        "operationId": "dashboard_api_v1_admin_recommendations_dashboard_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Dashboard Api V1 Admin Recommendations Dashboard Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dashboard",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/diagnostics/{user_id}": {
+      "get": {
+        "description": "Aggregate diagnostics. Individual private criteria are never shown.",
+        "operationId": "diagnostics_api_v1_admin_recommendations_diagnostics__user_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Diagnostics Api V1 Admin Recommendations Diagnostics  User Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Diagnostics",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/evaluations": {
+      "get": {
+        "operationId": "list_evaluations_api_v1_admin_recommendations_evaluations_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Evaluations Api V1 Admin Recommendations Evaluations Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Evaluations",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/evaluations/run": {
+      "post": {
+        "operationId": "run_evaluation_api_v1_admin_recommendations_evaluations_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluationRunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Run Evaluation Api V1 Admin Recommendations Evaluations Run Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Run Evaluation",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/experiments": {
+      "get": {
+        "operationId": "list_experiments_api_v1_admin_recommendations_experiments_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Experiments Api V1 Admin Recommendations Experiments Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Experiments",
+        "tags": [
+          "recommendations-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_experiment_api_v1_admin_recommendations_experiments_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperimentCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Experiment Api V1 Admin Recommendations Experiments Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Experiment",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/experiments/{experiment_id}/start": {
+      "post": {
+        "description": "Starting requires the feature flag plus a separate approver.",
+        "operationId": "start_experiment_api_v1_admin_recommendations_experiments__experiment_id__start_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "experiment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Experiment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperimentDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Start Experiment Api V1 Admin Recommendations Experiments  Experiment Id  Start Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Start Experiment",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/exposures": {
+      "get": {
+        "operationId": "exposures_api_v1_admin_recommendations_exposures_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Exposures Api V1 Admin Recommendations Exposures Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Exposures",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/features": {
+      "get": {
+        "operationId": "list_features_api_v1_admin_recommendations_features_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Features Api V1 Admin Recommendations Features Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Features",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/feedback": {
+      "get": {
+        "description": "Aggregate feedback only. Free-text reasons stay encrypted.",
+        "operationId": "feedback_summary_api_v1_admin_recommendations_feedback_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Feedback Summary Api V1 Admin Recommendations Feedback Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Feedback Summary",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/pool/rebuild": {
+      "post": {
+        "operationId": "rebuild_pool_api_v1_admin_recommendations_pool_rebuild_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RebuildRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Rebuild Pool Api V1 Admin Recommendations Pool Rebuild Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rebuild Pool",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/strategies": {
+      "get": {
+        "operationId": "list_strategies_api_v1_admin_recommendations_strategies_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Strategies Api V1 Admin Recommendations Strategies Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Strategies",
+        "tags": [
+          "recommendations-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_strategy_api_v1_admin_recommendations_strategies_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StrategyCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Strategy Api V1 Admin Recommendations Strategies Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Strategy",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/strategies/{strategy_id}": {
+      "get": {
+        "operationId": "strategy_detail_api_v1_admin_recommendations_strategies__strategy_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "strategy_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Strategy Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Strategy Detail Api V1 Admin Recommendations Strategies  Strategy Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Strategy Detail",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/strategies/{strategy_id}/activate": {
+      "post": {
+        "description": "Activation requires approval plus a passing evaluation, enforced in SQL.",
+        "operationId": "activate_strategy_api_v1_admin_recommendations_strategies__strategy_id__activate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "strategy_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Strategy Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StrategyDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Activate Strategy Api V1 Admin Recommendations Strategies  Strategy Id  Activate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Activate Strategy",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/strategies/{strategy_id}/approve": {
+      "post": {
+        "description": "Approval is separate from authorship and from activation.",
+        "operationId": "approve_strategy_api_v1_admin_recommendations_strategies__strategy_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "strategy_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Strategy Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StrategyDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Strategy Api V1 Admin Recommendations Strategies  Strategy Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Strategy",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/strategies/{strategy_id}/rollback": {
+      "post": {
+        "operationId": "rollback_strategy_api_v1_admin_recommendations_strategies__strategy_id__rollback_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "strategy_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Strategy Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StrategyDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Rollback Strategy Api V1 Admin Recommendations Strategies  Strategy Id  Rollback Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rollback Strategy",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/users/{user_id}/rebuild": {
+      "post": {
+        "description": "Rebuild one member's pool entry and candidates. Never hand-place a pair.",
+        "operationId": "rebuild_for_user_api_v1_admin_recommendations_users__user_id__rebuild_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RebuildRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Rebuild For User Api V1 Admin Recommendations Users  User Id  Rebuild Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rebuild For User",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
     "/api/v1/admin/roles": {
       "get": {
         "operationId": "list_roles_api_v1_admin_roles_get",
@@ -33584,7 +35244,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/FeedbackRequest"
+                "$ref": "#/components/schemas/vav__modules__ai_assistant__schemas__FeedbackRequest"
               }
             }
           },
@@ -37489,6 +39149,242 @@
         "summary": "Public Testimonial",
         "tags": [
           "content"
+        ]
+      }
+    },
+    "/api/v1/recommendations": {
+      "get": {
+        "operationId": "list_recommendations_api_v1_recommendations_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Recommendations Api V1 Recommendations Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Recommendations",
+        "tags": [
+          "recommendations"
+        ]
+      }
+    },
+    "/api/v1/recommendations/batches": {
+      "post": {
+        "description": "Generate the next batch, bounded by today's receive budget.",
+        "operationId": "create_batch_api_v1_recommendations_batches_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Batch Api V1 Recommendations Batches Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Batch",
+        "tags": [
+          "recommendations"
+        ]
+      }
+    },
+    "/api/v1/recommendations/feedback": {
+      "post": {
+        "operationId": "record_feedback_api_v1_recommendations_feedback_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/vav__modules__recommendations__schemas__FeedbackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Record Feedback Api V1 Recommendations Feedback Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Record Feedback",
+        "tags": [
+          "recommendations"
+        ]
+      }
+    },
+    "/api/v1/recommendations/{item_id}": {
+      "get": {
+        "description": "One recommendation, re-checked against the candidate's current state.",
+        "operationId": "recommendation_detail_api_v1_recommendations__item_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Recommendation Detail Api V1 Recommendations  Item Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Recommendation Detail",
+        "tags": [
+          "recommendations"
+        ]
+      }
+    },
+    "/api/v1/recommendations/{item_id}/exposure": {
+      "post": {
+        "operationId": "record_exposure_api_v1_recommendations__item_id__exposure_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExposureRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Record Exposure Api V1 Recommendations  Item Id  Exposure Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Record Exposure",
+        "tags": [
+          "recommendations"
         ]
       }
     },

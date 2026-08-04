@@ -40,6 +40,7 @@ make verify
 - `make test`：运行后端和前端测试。
 - `make verify`：从 Compose 配置到服务探针执行完整 Batch 1 验收。
 - `make dating-profile-verify`：执行 Batch 13 婚恋档案的迁移、种子、四类测试与前后台 E2E。
+- `make recommendation-verify`：执行 Batch 14 推荐引擎的迁移、种子、五类测试、离线评估与前后台 E2E。
 
 ## 产品边界
 
@@ -47,6 +48,10 @@ make verify
 
 婚恋档案（Batch 13）为成年用户限定，默认严格隐私：联系方式在任何查看场景都不会自动公开，
 资料完整度只衡量填写完成度，照片需人工审核，择偶条件仅本人与推荐引擎可见。
+
+推荐引擎（Batch 14）只读取 Batch 13 的去标识化投影，双向校验硬性条件：任何一方不接受即不推荐。
+硬性条件不会被系统自动放宽，解释文案只来自审核过的模板，不展示分数、百分比或成功概率，
+安全反馈不会被当作口味数据，策略上线必须先通过带安全护栏的离线评估。
 
 更多资料见 `docs/product`、`docs/architecture`、`docs/security`、`docs/runbooks` 和 `docs/acceptance`。
 

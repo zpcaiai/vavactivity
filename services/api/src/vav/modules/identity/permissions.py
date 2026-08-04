@@ -365,6 +365,42 @@ MATCHMAKING_PROFILE_PERMISSIONS = {
     "matchmaking.audit.read",
 }
 
+RECOMMENDATION_PERMISSIONS = {
+    "recommendations.strategies.read",
+    "recommendations.strategies.create",
+    "recommendations.strategies.update",
+    "recommendations.strategies.approve",
+    "recommendations.strategies.activate",
+    "recommendations.strategies.rollback",
+    "recommendations.features.read",
+    "recommendations.features.manage",
+    "recommendations.constraints.read",
+    "recommendations.constraints.manage",
+    "recommendations.batches.read",
+    "recommendations.batches.rebuild",
+    "recommendations.batches.invalidate",
+    "recommendations.candidates.read",
+    "recommendations.candidates.sensitive.read",
+    "recommendations.diagnostics.run",
+    "recommendations.exposures.read",
+    "recommendations.exposures.manage",
+    "recommendations.feedback.read",
+    "recommendations.feedback.sensitive.read",
+    "recommendations.evaluations.read",
+    "recommendations.evaluations.manage",
+    "recommendations.evaluations.run",
+    "recommendations.evaluations.approve",
+    "recommendations.experiments.read",
+    "recommendations.experiments.create",
+    "recommendations.experiments.approve",
+    "recommendations.experiments.start",
+    "recommendations.experiments.stop",
+    "recommendations.analytics.read",
+    "recommendations.incidents.read",
+    "recommendations.incidents.manage",
+    "recommendations.audit.read",
+}
+
 ALL_PERMISSIONS = (
     IDENTITY_PERMISSIONS
     | CMS_PERMISSIONS
@@ -378,6 +414,7 @@ ALL_PERMISSIONS = (
     | NOTIFICATION_PERMISSIONS
     | PRIVACY_PERMISSIONS
     | MATCHMAKING_PROFILE_PERMISSIONS
+    | RECOMMENDATION_PERMISSIONS
 )
 
 ROLE_PERMISSIONS: dict[str, set[str]] = {
@@ -661,6 +698,44 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         )
     }
     | {"matchmaking.audit.read"},
+    "recommendation_operator": {
+        "recommendations.strategies.read",
+        "recommendations.features.read",
+        "recommendations.constraints.read",
+        "recommendations.batches.read",
+        "recommendations.batches.rebuild",
+        "recommendations.candidates.read",
+        "recommendations.diagnostics.run",
+        "recommendations.exposures.read",
+        "recommendations.feedback.read",
+        "recommendations.evaluations.read",
+        "recommendations.analytics.read",
+        "recommendations.audit.read",
+    },
+    "recommendation_data_scientist": {
+        "recommendations.strategies.read",
+        "recommendations.strategies.create",
+        "recommendations.strategies.update",
+        "recommendations.features.read",
+        "recommendations.features.manage",
+        "recommendations.constraints.read",
+        "recommendations.evaluations.read",
+        "recommendations.evaluations.manage",
+        "recommendations.evaluations.run",
+        "recommendations.experiments.read",
+        "recommendations.experiments.create",
+        "recommendations.analytics.read",
+    },
+    "recommendation_release_manager": {
+        permission
+        for permission in RECOMMENDATION_PERMISSIONS
+        if permission.startswith(("recommendations.strategies.", "recommendations.experiments."))
+    }
+    | {
+        "recommendations.evaluations.read",
+        "recommendations.evaluations.approve",
+        "recommendations.audit.read",
+    },
     "analyst": {"audit.read", "catalog.audit.read"},
     "support_agent": {"users.read", "catalog.products.read"},
     "member": set(),

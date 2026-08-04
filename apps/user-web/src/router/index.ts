@@ -22,6 +22,7 @@ import CounselingServicesPage from "@/features/counseling/pages/CounselingServic
 import AiAssistantPage from "@/features/ai-assistant/pages/AiAssistantPage.vue";
 import NotificationsPage from "@/features/notifications/pages/NotificationsPage.vue";
 import DatingProfilePage from "@/features/dating-profile/pages/DatingProfilePage.vue";
+import RecommendationsPage from "@/features/recommendations/pages/RecommendationsPage.vue";
 import PrivacyCenterPage from "@/features/privacy/pages/PrivacyCenterPage.vue";
 import UnsubscribePage from "@/features/notifications/pages/UnsubscribePage.vue";
 import AuthPage from "@/pages/AuthPage.vue";
@@ -107,6 +108,10 @@ export const router = createRouter({
         { path: "account/dating-profile/privacy", name: "account-dating-profile-privacy", component: DatingProfilePage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
         { path: "account/dating-profile/preview", name: "account-dating-profile-preview", component: DatingProfilePage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
         { path: "account/dating-profile/review", name: "account-dating-profile-review", component: DatingProfilePage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
+        { path: "account/recommendations", name: "account-recommendations", component: RecommendationsPage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
+        { path: "account/recommendations/settings", name: "account-recommendation-settings", component: RecommendationsPage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
+        { path: "account/recommendations/history", name: "account-recommendation-history", component: RecommendationsPage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
+        { path: "account/recommendations/transparency", name: "account-recommendation-transparency", component: RecommendationsPage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
         { path: "account/profile", name: "account-profile", component: PrivacyCenterPage, meta: { requiresAuth: true } },
         { path: "account/contact-points", name: "account-contact-points", component: PrivacyCenterPage, meta: { requiresAuth: true } },
         { path: "account/privacy", name: "account-privacy", component: PrivacyCenterPage, meta: { requiresAuth: true } },

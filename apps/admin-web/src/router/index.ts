@@ -19,6 +19,7 @@ import KnowledgeManagementPage from "@/pages/KnowledgeManagementPage.vue";
 import AiManagementPage from "@/pages/AiManagementPage.vue";
 import NotificationManagementPage from "@/pages/NotificationManagementPage.vue";
 import MatchmakingProfileManagementPage from "@/pages/MatchmakingProfileManagementPage.vue";
+import RecommendationOperationsPage from "@/pages/RecommendationOperationsPage.vue";
 import PrivacyManagementPage from "@/pages/PrivacyManagementPage.vue";
 import ModuleListPage from "@/pages/ModuleListPage.vue";
 import NavigationManagementPage from "@/pages/NavigationManagementPage.vue";
@@ -64,6 +65,20 @@ const matchmakingSectionPermissions: Record<string, string> = {
   taxonomies: "matchmaking.taxonomies.read",
   projections: "matchmaking.projections.read",
   audit: "matchmaking.audit.read"
+};
+
+const recommendationSectionPermissions: Record<string, string> = {
+  dashboard: "recommendations.analytics.read",
+  strategies: "recommendations.strategies.read",
+  features: "recommendations.features.read",
+  constraints: "recommendations.constraints.read",
+  batches: "recommendations.batches.read",
+  exposures: "recommendations.exposures.read",
+  feedback: "recommendations.feedback.read",
+  evaluations: "recommendations.evaluations.read",
+  experiments: "recommendations.experiments.read",
+  diagnostics: "recommendations.diagnostics.run",
+  audit: "recommendations.audit.read"
 };
 
 const privacySectionPermissions: Record<string, string> = {
@@ -359,6 +374,18 @@ export const router = createRouter({
           name: "admin-matchmaking-review-detail",
           component: MatchmakingProfileManagementPage,
           meta: { title: "档案审核详情", permission: "matchmaking.reviews.read", matchmakingSection: "reviews" }
+        },
+        ...Object.keys(recommendationSectionPermissions).map((section) => ({
+          path: `recommendations/${section}`,
+          name: `admin-recommendations-${section}`,
+          component: RecommendationOperationsPage,
+          meta: { title: "推荐运营中心", permission: recommendationSectionPermissions[section], recommendationSection: section }
+        })),
+        {
+          path: "recommendations/batches/:batchId",
+          name: "admin-recommendations-batch-detail",
+          component: RecommendationOperationsPage,
+          meta: { title: "推荐批次详情", permission: "recommendations.batches.read", recommendationSection: "batches" }
         },
         ...Object.keys(privacySectionPermissions).map((section) => ({
           path: `privacy/${section}`,

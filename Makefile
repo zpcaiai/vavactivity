@@ -23,6 +23,9 @@
 	dating-profile-migrate dating-profile-seed dating-profile-seed-taxonomies dating-profile-test \
 	dating-profile-concurrency-test dating-profile-security-test dating-profile-user-e2e \
 	dating-profile-admin-e2e dating-profile-verify \
+	recommendation-migrate recommendation-seed recommendation-seed-fixtures recommendation-test \
+	recommendation-concurrency-test recommendation-security-test recommendation-fairness-test \
+	recommendation-eval recommendation-user-e2e recommendation-admin-e2e recommendation-verify \
 	privacy-migrate privacy-seed privacy-seed-inventory privacy-test privacy-security-test \
 	privacy-concurrency-test privacy-retention-test privacy-user-e2e privacy-admin-e2e privacy-verify
 
@@ -389,3 +392,49 @@ dating-profile-verify:
 	$(MAKE) dating-profile-security-test
 	$(MAKE) dating-profile-user-e2e
 	$(MAKE) dating-profile-admin-e2e
+
+recommendation-migrate:
+	docker compose exec -T api alembic upgrade head
+
+recommendation-seed:
+	docker compose exec -T api python -m vav.cli.seed_permissions
+	docker compose exec -T api python -m vav.cli.seed_recommendations
+	docker compose exec -T api python -m vav.cli.seed_recommendation_evaluations
+
+recommendation-seed-fixtures:
+	docker compose exec -T api python -m vav.cli.seed_recommendation_fixtures
+	docker compose exec -T api python -m vav.cli.build_recommendation_pool
+	docker compose exec -T api python -m vav.cli.generate_recommendation_fixture_batches
+
+recommendation-test:
+	docker compose exec -T api pytest tests/recommendations/unit tests/recommendations/integration -q
+
+recommendation-concurrency-test:
+	docker compose exec -T api pytest tests/recommendations/concurrency -q
+
+recommendation-security-test:
+	docker compose exec -T api pytest tests/recommendations/security -q
+
+recommendation-fairness-test:
+	docker compose exec -T api pytest tests/recommendations/fairness -q
+
+recommendation-eval:
+	docker compose exec -T api python -m vav.cli.run_recommendation_evaluation
+
+recommendation-user-e2e:
+	pnpm exec playwright test e2e/user-recommendations
+
+recommendation-admin-e2e:
+	pnpm exec playwright test e2e/admin-recommendations
+
+recommendation-verify:
+	$(MAKE) recommendation-migrate
+	$(MAKE) recommendation-seed
+	$(MAKE) recommendation-seed-fixtures
+	$(MAKE) recommendation-test
+	$(MAKE) recommendation-concurrency-test
+	$(MAKE) recommendation-security-test
+	$(MAKE) recommendation-fairness-test
+	$(MAKE) recommendation-eval
+	$(MAKE) recommendation-user-e2e
+	$(MAKE) recommendation-admin-e2e

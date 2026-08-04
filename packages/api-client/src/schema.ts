@@ -1481,6 +1481,78 @@ export interface paths {
         patch: operations["patch_profile_api_v1_account_profile_patch"];
         trace?: never;
     };
+    "/api/v1/account/recommendation-history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Recommendation History */
+        get: operations["recommendation_history_api_v1_account_recommendation_history_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/recommendation-preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Preferences */
+        get: operations["get_preferences_api_v1_account_recommendation_preferences_get"];
+        /** Update Preferences */
+        put: operations["update_preferences_api_v1_account_recommendation_preferences_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/recommendation-preferences/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reset Preferences */
+        post: operations["reset_preferences_api_v1_account_recommendation_preferences_reset_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/recommendation-transparency": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Transparency
+         * @description What the member may learn about how their own recommendations are built.
+         */
+        get: operations["transparency_api_v1_account_recommendation_transparency_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/activities": {
         parameters: {
             query?: never;
@@ -6826,6 +6898,383 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/recommendations/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Audit Events */
+        get: operations["audit_events_api_v1_admin_recommendations_audit_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/batches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Batches */
+        get: operations["list_batches_api_v1_admin_recommendations_batches_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/batches/{batch_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Batch Detail */
+        get: operations["batch_detail_api_v1_admin_recommendations_batches__batch_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/batches/{batch_id}/invalidate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Invalidate Batch */
+        post: operations["invalidate_batch_api_v1_admin_recommendations_batches__batch_id__invalidate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/constraints": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Constraints */
+        get: operations["list_constraints_api_v1_admin_recommendations_constraints_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Dashboard */
+        get: operations["dashboard_api_v1_admin_recommendations_dashboard_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/diagnostics/{user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Diagnostics
+         * @description Aggregate diagnostics. Individual private criteria are never shown.
+         */
+        get: operations["diagnostics_api_v1_admin_recommendations_diagnostics__user_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/evaluations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Evaluations */
+        get: operations["list_evaluations_api_v1_admin_recommendations_evaluations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/evaluations/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Run Evaluation */
+        post: operations["run_evaluation_api_v1_admin_recommendations_evaluations_run_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/experiments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Experiments */
+        get: operations["list_experiments_api_v1_admin_recommendations_experiments_get"];
+        put?: never;
+        /** Create Experiment */
+        post: operations["create_experiment_api_v1_admin_recommendations_experiments_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/experiments/{experiment_id}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start Experiment
+         * @description Starting requires the feature flag plus a separate approver.
+         */
+        post: operations["start_experiment_api_v1_admin_recommendations_experiments__experiment_id__start_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/exposures": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Exposures */
+        get: operations["exposures_api_v1_admin_recommendations_exposures_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/features": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Features */
+        get: operations["list_features_api_v1_admin_recommendations_features_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Feedback Summary
+         * @description Aggregate feedback only. Free-text reasons stay encrypted.
+         */
+        get: operations["feedback_summary_api_v1_admin_recommendations_feedback_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/pool/rebuild": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rebuild Pool */
+        post: operations["rebuild_pool_api_v1_admin_recommendations_pool_rebuild_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/strategies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Strategies */
+        get: operations["list_strategies_api_v1_admin_recommendations_strategies_get"];
+        put?: never;
+        /** Create Strategy */
+        post: operations["create_strategy_api_v1_admin_recommendations_strategies_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/strategies/{strategy_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Strategy Detail */
+        get: operations["strategy_detail_api_v1_admin_recommendations_strategies__strategy_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/strategies/{strategy_id}/activate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Activate Strategy
+         * @description Activation requires approval plus a passing evaluation, enforced in SQL.
+         */
+        post: operations["activate_strategy_api_v1_admin_recommendations_strategies__strategy_id__activate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/strategies/{strategy_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve Strategy
+         * @description Approval is separate from authorship and from activation.
+         */
+        post: operations["approve_strategy_api_v1_admin_recommendations_strategies__strategy_id__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/strategies/{strategy_id}/rollback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rollback Strategy */
+        post: operations["rollback_strategy_api_v1_admin_recommendations_strategies__strategy_id__rollback_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/users/{user_id}/rebuild": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rebuild For User
+         * @description Rebuild one member's pool entry and candidates. Never hand-place a pair.
+         */
+        post: operations["rebuild_for_user_api_v1_admin_recommendations_users__user_id__rebuild_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/roles": {
         parameters: {
             query?: never;
@@ -8347,6 +8796,97 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Recommendations */
+        get: operations["list_recommendations_api_v1_recommendations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recommendations/batches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create Batch
+         * @description Generate the next batch, bounded by today's receive budget.
+         */
+        post: operations["create_batch_api_v1_recommendations_batches_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recommendations/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record Feedback */
+        post: operations["record_feedback_api_v1_recommendations_feedback_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recommendations/{item_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Recommendation Detail
+         * @description One recommendation, re-checked against the candidate's current state.
+         */
+        get: operations["recommendation_detail_api_v1_recommendations__item_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recommendations/{item_id}/exposure": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record Exposure */
+        post: operations["record_exposure_api_v1_recommendations__item_id__exposure_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/subscriptions": {
         parameters: {
             query?: never;
@@ -8865,6 +9405,16 @@ export interface components {
             weekday: number;
             /** Weekly Limit */
             weekly_limit?: number | null;
+        };
+        /** BatchRequest */
+        BatchRequest: {
+            /**
+             * Batch Type
+             * @default daily
+             */
+            batch_type: string;
+            /** Requested Size */
+            requested_size?: number | null;
         };
         /**
          * BillingType
@@ -9580,6 +10130,19 @@ export interface components {
             /** Requested Scope */
             requested_scope?: string[];
         };
+        /** EvaluationRunRequest */
+        EvaluationRunRequest: {
+            /**
+             * Dataset Id
+             * Format: uuid
+             */
+            dataset_id: string;
+            /**
+             * Strategy Id
+             * Format: uuid
+             */
+            strategy_id: string;
+        };
         /** ExecuteConfirmedToolRequest */
         ExecuteConfirmedToolRequest: {
             /** Arguments */
@@ -9631,6 +10194,39 @@ export interface components {
              */
             reveal_answers_policy: "never" | "after_pass" | "after_final_attempt";
         };
+        /** ExperimentCreateRequest */
+        ExperimentCreateRequest: {
+            /** Allocation Policy */
+            allocation_policy?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Control Strategy Id
+             * Format: uuid
+             */
+            control_strategy_id: string;
+            /** Eligibility Definition */
+            eligibility_definition?: {
+                [key: string]: unknown;
+            };
+            /** Experiment Code */
+            experiment_code: string;
+            /** Guardrail Metrics */
+            guardrail_metrics?: string[];
+            /** Hypothesis */
+            hypothesis: string;
+            /** Name */
+            name: string;
+            /** Primary Metrics */
+            primary_metrics?: string[];
+            /** Treatment Strategy Ids */
+            treatment_strategy_ids: string[];
+        };
+        /** ExperimentDecisionRequest */
+        ExperimentDecisionRequest: {
+            /** Reason */
+            reason: string;
+        };
         /** ExportRequest */
         ExportRequest: {
             /** Modules */
@@ -9644,17 +10240,19 @@ export interface components {
              */
             requested_format: "json" | "csv" | "html";
         };
-        /** FeedbackRequest */
-        FeedbackRequest: {
-            /** Rating */
-            rating?: ("up" | "down") | null;
-            /** Reason */
-            reason?: string | null;
+        /** ExposureRequest */
+        ExposureRequest: {
+            /** Duration Ms */
+            duration_ms?: number | null;
+            /** Exposure Type */
+            exposure_type: string;
+            /** Idempotency Key */
+            idempotency_key: string;
             /**
-             * Reported
-             * @default false
+             * Source
+             * @default user_web
              */
-            reported: boolean;
+            source: string;
         };
         /**
          * FieldVisibility
@@ -11166,6 +11764,11 @@ export interface components {
             /** Quote */
             quote: string;
         };
+        /** RebuildRequest */
+        RebuildRequest: {
+            /** Reason */
+            reason: string;
+        };
         /** ReconciliationResolveRequest */
         ReconciliationResolveRequest: {
             /** Reason */
@@ -11761,6 +12364,54 @@ export interface components {
          * @enum {string}
          */
         Stackability: "exclusive" | "stackable" | "stackable_with_automatic_only";
+        /** StrategyCreateRequest */
+        StrategyCreateRequest: {
+            /** Bidirectional Policy */
+            bidirectional_policy: {
+                [key: string]: unknown;
+            };
+            /** Cold Start Policy */
+            cold_start_policy?: {
+                [key: string]: unknown;
+            };
+            /** Diversification Policy */
+            diversification_policy: {
+                [key: string]: unknown;
+            };
+            /** Explanation Policy */
+            explanation_policy: {
+                [key: string]: unknown;
+            };
+            /** Exposure Policy */
+            exposure_policy: {
+                [key: string]: unknown;
+            };
+            /** Feature Manifest */
+            feature_manifest: {
+                [key: string]: unknown;
+            }[];
+            /** Hard Constraint Policy */
+            hard_constraint_policy: {
+                [key: string]: unknown;
+            };
+            /** Ranking Policy */
+            ranking_policy: {
+                [key: string]: unknown;
+            };
+            /** Scoring Policy */
+            scoring_policy: {
+                [key: string]: unknown;
+            };
+            /** Semantic Version */
+            semantic_version: string;
+            /** Strategy Code */
+            strategy_code: string;
+        };
+        /** StrategyDecisionRequest */
+        StrategyDecisionRequest: {
+            /** Reason */
+            reason: string;
+        };
         /** SubmitRequest */
         SubmitRequest: {
             /**
@@ -12004,6 +12655,19 @@ export interface components {
          * @enum {string}
          */
         TranslationStatus: "missing" | "draft" | "review_required" | "ready" | "outdated";
+        /** TuningRequest */
+        TuningRequest: {
+            /** Allow Relaxed Recommendations */
+            allow_relaxed_recommendations?: boolean | null;
+            /** Daily Received Limit */
+            daily_received_limit?: number | null;
+            /** Exploration Level */
+            exploration_level?: string | null;
+            /** Feedback Personalization Enabled */
+            feedback_personalization_enabled?: boolean | null;
+            /** Recommendations Paused */
+            recommendations_paused?: boolean | null;
+        };
         /** UpdateNotificationPreferencesRequest */
         UpdateNotificationPreferencesRequest: {
             /** Items */
@@ -12116,6 +12780,18 @@ export interface components {
              */
             status: "active" | "disabled";
         };
+        /** FeedbackRequest */
+        vav__modules__ai_assistant__schemas__FeedbackRequest: {
+            /** Rating */
+            rating?: ("up" | "down") | null;
+            /** Reason */
+            reason?: string | null;
+            /**
+             * Reported
+             * @default false
+             */
+            reported: boolean;
+        };
         /** ReasonRequest */
         vav__modules__catalog__schemas__ReasonRequest: {
             /** Reason */
@@ -12165,6 +12841,24 @@ export interface components {
         vav__modules__privacy__schemas__StatusReasonRequest: {
             /** Reason */
             reason: string;
+        };
+        /** FeedbackRequest */
+        vav__modules__recommendations__schemas__FeedbackRequest: {
+            /** Feedback Type */
+            feedback_type: string;
+            /** Idempotency Key */
+            idempotency_key: string;
+            /** Reason Code */
+            reason_code?: string | null;
+            /** Reason Details */
+            reason_details?: string | null;
+            /** Recommendation Item Id */
+            recommendation_item_id?: string | null;
+            /**
+             * Recommended User Id
+             * Format: uuid
+             */
+            recommended_user_id: string;
         };
     };
     responses: never;
@@ -15274,6 +15968,141 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    recommendation_history_api_v1_account_recommendation_history_get: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_preferences_api_v1_account_recommendation_preferences_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    update_preferences_api_v1_account_recommendation_preferences_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TuningRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reset_preferences_api_v1_account_recommendation_preferences_reset_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    transparency_api_v1_account_recommendation_transparency_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
         };
@@ -26787,6 +27616,712 @@ export interface operations {
             };
         };
     };
+    audit_events_api_v1_admin_recommendations_audit_get: {
+        parameters: {
+            query?: {
+                subject_id?: string | null;
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_batches_api_v1_admin_recommendations_batches_get: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    batch_detail_api_v1_admin_recommendations_batches__batch_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                batch_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    invalidate_batch_api_v1_admin_recommendations_batches__batch_id__invalidate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                batch_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RebuildRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_constraints_api_v1_admin_recommendations_constraints_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    dashboard_api_v1_admin_recommendations_dashboard_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    diagnostics_api_v1_admin_recommendations_diagnostics__user_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_evaluations_api_v1_admin_recommendations_evaluations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    run_evaluation_api_v1_admin_recommendations_evaluations_run_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EvaluationRunRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_experiments_api_v1_admin_recommendations_experiments_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_experiment_api_v1_admin_recommendations_experiments_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExperimentCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_experiment_api_v1_admin_recommendations_experiments__experiment_id__start_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                experiment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExperimentDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    exposures_api_v1_admin_recommendations_exposures_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    list_features_api_v1_admin_recommendations_features_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    feedback_summary_api_v1_admin_recommendations_feedback_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    rebuild_pool_api_v1_admin_recommendations_pool_rebuild_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RebuildRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_strategies_api_v1_admin_recommendations_strategies_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_strategy_api_v1_admin_recommendations_strategies_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StrategyCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    strategy_detail_api_v1_admin_recommendations_strategies__strategy_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                strategy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    activate_strategy_api_v1_admin_recommendations_strategies__strategy_id__activate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                strategy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StrategyDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    approve_strategy_api_v1_admin_recommendations_strategies__strategy_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                strategy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StrategyDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rollback_strategy_api_v1_admin_recommendations_strategies__strategy_id__rollback_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                strategy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StrategyDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rebuild_for_user_api_v1_admin_recommendations_users__user_id__rebuild_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RebuildRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_roles_api_v1_admin_roles_get: {
         parameters: {
             query?: never;
@@ -27332,7 +28867,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["FeedbackRequest"];
+                "application/json": components["schemas"]["vav__modules__ai_assistant__schemas__FeedbackRequest"];
             };
         };
         responses: {
@@ -29861,6 +31396,168 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_recommendations_api_v1_recommendations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_batch_api_v1_recommendations_batches_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BatchRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    record_feedback_api_v1_recommendations_feedback_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__recommendations__schemas__FeedbackRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    recommendation_detail_api_v1_recommendations__item_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    record_exposure_api_v1_recommendations__item_id__exposure_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExposureRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
