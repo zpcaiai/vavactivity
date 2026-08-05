@@ -743,9 +743,7 @@ async def list_invalidations(
 @router.get("/incidents")
 async def list_incidents(
     request: Request,
-    _principal: AuthenticatedPrincipal = Depends(
-        require_permission("matchmaking.incidents.read")
-    ),
+    _principal: AuthenticatedPrincipal = Depends(require_permission("matchmaking.incidents.read")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     rows = (

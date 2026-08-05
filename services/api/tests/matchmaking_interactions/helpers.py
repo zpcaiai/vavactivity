@@ -24,9 +24,7 @@ class InteractionFixture:
     second_item_id: UUID
 
 
-async def _item_for(
-    session: AsyncSession, *, viewer_id: UUID, target_id: UUID
-) -> UUID:
+async def _item_for(session: AsyncSession, *, viewer_id: UUID, target_id: UUID) -> UUID:
     batch = await batches.generate_batch(session, viewer_id, requested_size=1)
     found = await session.scalar(
         text(

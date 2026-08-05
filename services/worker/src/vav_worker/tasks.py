@@ -28,7 +28,9 @@ from vav.modules.notifications.service import (
 )
 from vav.common.exceptions import VavError
 from vav.modules.matchmaking_interactions import invitations as interaction_invitations
-from vav.modules.matchmaking_interactions import invalidation as interaction_invalidation
+from vav.modules.matchmaking_interactions import (
+    invalidation as interaction_invalidation,
+)
 from vav.modules.privacy.service import execute_erasure_plan, process_export_request
 from vav.modules.recommendations import batches as recommendation_batches
 from vav.modules.recommendations import service as recommendation_service
@@ -641,7 +643,9 @@ def aggregate_recommendation_feedback() -> dict[str, int]:
 async def _maintain_matchmaking_interactions() -> dict[str, int]:
     """Expire time-bound interaction state and fail closed on changed contacts."""
     async with session_factory() as session:
-        expired_invitations = await interaction_invitations.expire_due_invitations(session)
+        expired_invitations = await interaction_invitations.expire_due_invitations(
+            session
+        )
         expired_likes = len(
             list(
                 (
@@ -694,8 +698,10 @@ async def _maintain_matchmaking_interactions() -> dict[str, int]:
         )
         suspended_grants = 0
         for owner_id in stale_owners:
-            suspended_grants += await interaction_invalidation.suspend_stale_contact_grants(
-                session, user_id=owner_id
+            suspended_grants += (
+                await interaction_invalidation.suspend_stale_contact_grants(
+                    session, user_id=owner_id
+                )
             )
         purged_idempotency = len(
             list(

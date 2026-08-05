@@ -26,14 +26,21 @@ async def test_one_sided_like_is_private_and_mutual_like_creates_one_match() -> 
             idempotency_key=f"like-{uuid4()}",
         )
         assert first["outcome"] == "one_sided"
-        assert await session.scalar(
-            text(
-                "SELECT count(*) FROM outbox_events WHERE topic='matchmaking.mutual_match.created' "
-                "AND payload->>'pair_id'=(SELECT id::text FROM matchmaking_pairs "
-                "WHERE user_low_id IN (:a,:b) AND user_high_id IN (:a,:b))"
-            ),
-            {"a": fixture.first.id, "b": fixture.second.id},
-        ) == 0
+        assert (
+            await session.scalar(
+                text(
+                    "SELECT count(*) FROM outbox_events WHERE topic=:topic "
+                    "AND payload->>'pair_id'=(SELECT id::text FROM matchmaking_pairs "
+                    "WHERE user_low_id IN (:a,:b) AND user_high_id IN (:a,:b))"
+                ),
+                {
+                    "topic": "matchmaking.mutual_match.created",
+                    "a": fixture.first.id,
+                    "b": fixture.second.id,
+                },
+            )
+            == 0
+        )
 
         second = await likes.create_like(
             session,
@@ -43,17 +50,20 @@ async def test_one_sided_like_is_private_and_mutual_like_creates_one_match() -> 
         )
         assert second["outcome"] == "mutual_match"
         match_id = UUID(second["mutual_match_id"])
-        assert await session.scalar(
-            text("SELECT count(*) FROM matchmaking_mutual_matches WHERE id=:id"),
-            {"id": match_id},
-        ) == 1
-        assert await session.scalar(
-            text(
-                "SELECT count(*) FROM outbox_events WHERE topic='matchmaking.mutual_match.created' "
-                "AND aggregate_id=:id"
-            ),
-            {"id": str(match_id)},
-        ) == 1
+        assert (
+            await session.scalar(
+                text("SELECT count(*) FROM matchmaking_mutual_matches WHERE id=:id"),
+                {"id": match_id},
+            )
+            == 1
+        )
+        assert (
+            await session.scalar(
+                text("SELECT count(*) FROM outbox_events WHERE topic=:topic AND aggregate_id=:id"),
+                {"topic": "matchmaking.mutual_match.created", "id": str(match_id)},
+            )
+            == 1
+        )
 
 
 @pytest.mark.asyncio
@@ -63,15 +73,19 @@ async def test_invitation_acceptance_is_separate_and_hands_off_once() -> None:
         match_id = await create_match(session, fixture)
         invitation_id = await accept_introduction(session, fixture, match_id)
         row = (
-            await session.execute(
-                text(
-                    "SELECT status,relationship_handoff_id "
-                    "FROM matchmaking_introduction_invitations "
-                    "WHERE id=:id"
-                ),
-                {"id": invitation_id},
+            (
+                await session.execute(
+                    text(
+                        "SELECT status,relationship_handoff_id "
+                        "FROM matchmaking_introduction_invitations "
+                        "WHERE id=:id"
+                    ),
+                    {"id": invitation_id},
+                )
             )
-        ).mappings().one()
+            .mappings()
+            .one()
+        )
         assert row["status"] == "accepted"
         assert row["relationship_handoff_id"] is not None
         with pytest.raises(VavError) as error:
@@ -141,7 +155,5 @@ async def test_match_member_read_is_not_available_to_a_third_user() -> None:
         match_id = await create_match(session, fixture)
         third_fixture = await create_interaction_fixture(session)
         with pytest.raises(VavError) as error:
-            await matches.member_match(
-                session, user_id=third_fixture.first.id, match_id=match_id
-            )
+            await matches.member_match(session, user_id=third_fixture.first.id, match_id=match_id)
         assert error.value.code == "MUTUAL_MATCH_NOT_FOUND"

@@ -55,8 +55,6 @@ def test_invitation_screening_blocks_consent_bypasses(message: str, code: str) -
 def test_skip_is_a_cooldown_not_a_permanent_block() -> None:
     now = datetime(2026, 8, 5, tzinfo=UTC)
     assert (
-        skip_cooldown_until(
-            SkipType.NOT_NOW, now=now, not_now_days=30, not_interested_days=180
-        )
+        skip_cooldown_until(SkipType.NOT_NOW, now=now, not_now_days=30, not_interested_days=180)
         - now
     ).days == 30

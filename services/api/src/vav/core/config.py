@@ -1209,8 +1209,7 @@ class Settings(BaseSettings):
             raise ValueError("a one-sided like can never notify its target")
         if (
             self.environment == "production"
-            and self.matchmaking_contact_exchange_policy
-            == "automatic_after_invitation_accepted"
+            and self.matchmaking_contact_exchange_policy == "automatic_after_invitation_accepted"
         ):
             raise ValueError(
                 "automatic contact exchange requires an approved product and privacy decision"
