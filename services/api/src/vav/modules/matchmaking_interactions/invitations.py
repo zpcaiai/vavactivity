@@ -379,10 +379,26 @@ async def accept_invitation(
                 "relationship_handoff_id": str(handoff_id),
                 "mutual_match_id": str(invitation["mutual_match_id"]),
                 "invitation_id": str(invitation_id),
+                "pair_id": str(invitation["pair_id"]),
                 "user_low_id": str(low),
                 "user_high_id": str(high),
             },
         )
+    )
+    # Batch 16 owns the durable relationship. Materialising it in this same
+    # transaction closes the gap between accepting an invitation and the
+    # replayable outbox consumer observing the handoff. The unique handoff id
+    # keeps a later replay idempotent.
+    from vav.modules.relationships import service as relationship_service
+
+    await relationship_service.create_from_handoff(
+        session,
+        relationship_handoff_id=handoff_id,
+        mutual_match_id=invitation["mutual_match_id"],
+        invitation_id=invitation_id,
+        pair_id=invitation["pair_id"],
+        user_low_id=low,
+        user_high_id=high,
     )
     return {
         "invitation_id": str(invitation_id),

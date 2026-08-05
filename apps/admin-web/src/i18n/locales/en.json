@@ -23,6 +23,7 @@
     "notifications": "Notification operations",
     "privacy": "Privacy operations",
     "interactions": "Interaction operations",
+    "relationships": "Relationship operations",
     "settings": "Site settings",
     "admins": "Administrators",
     "audit": "Audit log"

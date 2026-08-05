@@ -427,6 +427,38 @@ MATCHMAKING_INTERACTION_PERMISSIONS = {
     "matchmaking.audit.read",
 }
 
+RELATIONSHIP_PERMISSIONS = {
+    "relationships.read",
+    "relationships.sensitive.read",
+    "relationships.stages.read",
+    "relationships.stages.manage",
+    "relationships.stages.activate",
+    "relationships.proposals.read",
+    "relationships.proposals.content.read",
+    "relationships.proposals.invalidate",
+    "relationships.pauses.read",
+    "relationships.pauses.sensitive.read",
+    "relationships.pauses.invalidate",
+    "relationships.endings.read",
+    "relationships.endings.sensitive.read",
+    "relationships.milestones.read",
+    "relationships.checkins.read",
+    "relationships.checkins.sensitive.read",
+    "relationships.reflections.sensitive.read",
+    "relationships.reminders.read",
+    "relationships.reminders.manage",
+    "relationships.reminders.cancel",
+    "relationships.diagnostics.run",
+    "relationships.events.replay",
+    "relationships.freeze",
+    "relationships.unfreeze",
+    "relationships.end_for_safety",
+    "relationships.analytics.read",
+    "relationships.incidents.read",
+    "relationships.incidents.manage",
+    "relationships.audit.read",
+}
+
 ALL_PERMISSIONS = (
     IDENTITY_PERMISSIONS
     | CMS_PERMISSIONS
@@ -442,6 +474,7 @@ ALL_PERMISSIONS = (
     | MATCHMAKING_PROFILE_PERMISSIONS
     | RECOMMENDATION_PERMISSIONS
     | MATCHMAKING_INTERACTION_PERMISSIONS
+    | RELATIONSHIP_PERMISSIONS
 )
 
 ROLE_PERMISSIONS: dict[str, set[str]] = {
@@ -790,6 +823,37 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "matchmaking.invitations.read",
         "matchmaking.diagnostics.run",
         "matchmaking.dead_letters.resolve",
+    },
+    "relationship_operator": {
+        "relationships.read",
+        "relationships.stages.read",
+        "relationships.proposals.read",
+        "relationships.pauses.read",
+        "relationships.endings.read",
+        "relationships.milestones.read",
+        "relationships.checkins.read",
+        "relationships.reminders.read",
+        "relationships.reminders.manage",
+        "relationships.reminders.cancel",
+        "relationships.diagnostics.run",
+        "relationships.analytics.read",
+        "relationships.audit.read",
+    },
+    "relationship_safety_reviewer": RELATIONSHIP_PERMISSIONS
+    - {
+        "relationships.stages.manage",
+        "relationships.stages.activate",
+        "relationships.events.replay",
+    },
+    "relationship_support": {
+        "relationships.read",
+        "relationships.stages.read",
+        "relationships.proposals.read",
+        "relationships.pauses.read",
+        "relationships.endings.read",
+        "relationships.diagnostics.run",
+        "relationships.events.replay",
+        "relationships.audit.read",
     },
     "analyst": {"audit.read", "catalog.audit.read"},
     "support_agent": {"users.read", "catalog.products.read"},

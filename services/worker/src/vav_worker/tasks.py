@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from datetime import UTC, datetime
 
 from sqlalchemy import select, text
 
 from vav.core.database import get_engine, session_factory
+from vav.core.config import get_settings
 from vav.models.content import ContentEntry
 from vav.models.courses import Course, CourseEnrollment
 from vav.modules.activities.service import (
@@ -730,3 +732,60 @@ async def _maintain_matchmaking_interactions() -> dict[str, int]:
 @celery_app.task(name="vav.matchmaking_interactions.maintain")  # type: ignore[misc]
 def maintain_matchmaking_interactions() -> dict[str, int]:
     return asyncio.run(_maintain_matchmaking_interactions())
+
+
+async def _dispatch_relationship_reminders() -> dict[str, int]:
+    """Publish only opted-in, neutral reminders whose journey is still eligible."""
+    async with session_factory() as session:
+        rows = (
+            (
+                await session.execute(
+                    text(
+                        "SELECT p.id,p.journey_id,p.participant_user_id,p.reminder_type,p.cadence_days,p.last_sent_at "
+                        "FROM relationship_reminder_plans p JOIN relationship_journeys j ON j.id=p.journey_id "
+                        "WHERE p.status='active' AND p.next_due_at<=now() "
+                        "AND ((j.status='active' AND p.reminder_type<>'private_pause_reflection') "
+                        "OR (j.status='paused' AND p.reminder_type='private_pause_reflection')) "
+                        "AND (CASE WHEN date_trunc('month',COALESCE(p.last_sent_at,'epoch'::timestamptz))<date_trunc('month',now()) THEN 0 ELSE p.sent_this_month END) "
+                        "< :maximum FOR UPDATE OF p SKIP LOCKED LIMIT 200"
+                    ),
+                    {"maximum": get_settings().relationship_reminder_max_per_month},
+                )
+            )
+            .mappings()
+            .all()
+        )
+        for row in rows:
+            await session.execute(
+                text(
+                    "INSERT INTO outbox_events (topic,aggregate_type,aggregate_id,payload) "
+                    "VALUES ('relationships.reminder.due','relationship_reminder',:id,CAST(:payload AS jsonb))"
+                ),
+                {
+                    "id": str(row["id"]),
+                    "payload": json.dumps(
+                        {
+                            "user_id": str(row["participant_user_id"]),
+                            "journey_id": str(row["journey_id"]),
+                            "reminder_plan_id": str(row["id"]),
+                            "reminder_type": row["reminder_type"],
+                            "message": "You have an optional relationship reflection available.",
+                        }
+                    ),
+                },
+            )
+            await session.execute(
+                text(
+                    "UPDATE relationship_reminder_plans SET last_sent_at=now(),next_due_at=now()+make_interval(days => :days),"
+                    "sent_this_month=CASE WHEN date_trunc('month',COALESCE(last_sent_at,'epoch'::timestamptz))<date_trunc('month',now()) THEN 1 ELSE sent_this_month+1 END,updated_at=now() WHERE id=:id"
+                ),
+                {"id": row["id"], "days": row["cadence_days"]},
+            )
+        await session.commit()
+    await get_engine().dispose()
+    return {"published_relationship_reminders": len(rows)}
+
+
+@celery_app.task(name="vav.relationships.reminders")  # type: ignore[misc]
+def dispatch_relationship_reminders() -> dict[str, int]:
+    return asyncio.run(_dispatch_relationship_reminders())

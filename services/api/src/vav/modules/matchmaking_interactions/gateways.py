@@ -320,12 +320,7 @@ class RecommendationGateway:
 
 
 class RelationshipGateway:
-    """Batch 16 relationship state.
-
-    Batch 16 does not exist yet. Until it does, an accepted introduction is the
-    only signal that a relationship has begun, and this gateway reads it from
-    the invitations this module owns rather than inventing a placeholder table.
-    """
+    """Batch 16 relationship state, exposed as an allow/deny fact only."""
 
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
@@ -335,9 +330,9 @@ class RelationshipGateway:
         started = (
             await self._session.execute(
                 text(
-                    "SELECT count(*) FROM matchmaking_mutual_matches "
+                    "SELECT count(*) FROM relationship_journeys "
                     "WHERE user_low_id=:low AND user_high_id=:high "
-                    "AND status='introduction_accepted'"
+                    "AND status IN ('pending_activation','active','paused','safety_frozen')"
                 ),
                 {"low": low, "high": high},
             )

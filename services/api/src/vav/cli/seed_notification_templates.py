@@ -31,6 +31,7 @@ TEMPLATE_CODES = (
     ("checkin-available", "activity", "service"),
     ("activity-cancelled", "activity", "service"),
     ("mutual-choice-created", "matchmaking", "service"),
+    ("relationship-reflection-available", "relationship", "service"),
     ("enrollment-activated", "course", "service"),
     ("content-released", "course", "service"),
     ("assignment-graded", "course", "service"),

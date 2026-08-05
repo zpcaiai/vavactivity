@@ -28,6 +28,7 @@ import RecommendationPreferencesPage from "@/features/recommendations/pages/Reco
 import RecommendationHistoryPage from "@/features/recommendations/pages/RecommendationHistoryPage.vue";
 import RecommendationTransparencyPage from "@/features/recommendations/pages/RecommendationTransparencyPage.vue";
 import MatchmakingInteractionsPage from "@/features/matchmaking-interactions/pages/MatchmakingInteractionsPage.vue";
+import RelationshipJourneyPage from "@/features/relationships/pages/RelationshipJourneyPage.vue";
 import PrivacyCenterPage from "@/features/privacy/pages/PrivacyCenterPage.vue";
 import UnsubscribePage from "@/features/notifications/pages/UnsubscribePage.vue";
 import AuthPage from "@/pages/AuthPage.vue";
@@ -125,6 +126,12 @@ export const router = createRouter({
         { path: "account/matchmaking/invitations", name: "account-matchmaking-invitations", component: MatchmakingInteractionsPage, meta: { requiresAuth: true, requiresVerifiedEmail: true, interactionSection: "invitations" } },
         { path: "account/matchmaking/invitations/:id", name: "account-matchmaking-invitation-detail", component: MatchmakingInteractionsPage, meta: { requiresAuth: true, requiresVerifiedEmail: true, interactionSection: "invitations" } },
         { path: "account/matchmaking/contact-exchanges/:id", name: "account-matchmaking-contact-exchange", component: MatchmakingInteractionsPage, meta: { requiresAuth: true, requiresVerifiedEmail: true, interactionSection: "contact" } },
+        { path: "account/relationships", name: "account-relationships", component: RelationshipJourneyPage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
+        { path: "account/relationships/:id", name: "account-relationship-detail", component: RelationshipJourneyPage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
+        { path: "account/relationships/:id/stage", name: "account-relationship-stage", component: RelationshipJourneyPage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
+        { path: "account/relationships/:id/milestones", name: "account-relationship-milestones", component: RelationshipJourneyPage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
+        { path: "account/relationships/:id/checkins", name: "account-relationship-checkins", component: RelationshipJourneyPage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
+        { path: "account/relationships/:id/reflections", name: "account-relationship-reflections", component: RelationshipJourneyPage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
         { path: "account/profile", name: "account-profile", component: PrivacyCenterPage, meta: { requiresAuth: true } },
         { path: "account/contact-points", name: "account-contact-points", component: PrivacyCenterPage, meta: { requiresAuth: true } },
         { path: "account/privacy", name: "account-privacy", component: PrivacyCenterPage, meta: { requiresAuth: true } },

@@ -1126,6 +1126,85 @@ class Settings(BaseSettings):
         default=24, ge=1, validation_alias="MATCHMAKING_IDEMPOTENCY_TTL_HOURS"
     )
 
+    relationship_journeys_enabled: bool = Field(
+        default=True, validation_alias="RELATIONSHIP_JOURNEYS_ENABLED"
+    )
+    relationship_default_stage_registry: str = Field(
+        default="relationship-stages-v1", validation_alias="RELATIONSHIP_DEFAULT_STAGE_REGISTRY"
+    )
+    relationship_default_policy_version: str = Field(
+        default="1.0.0", validation_alias="RELATIONSHIP_DEFAULT_POLICY_VERSION"
+    )
+    relationship_stage_proposal_ttl_days: int = Field(
+        default=14, ge=1, validation_alias="RELATIONSHIP_STAGE_PROPOSAL_TTL_DAYS"
+    )
+    relationship_require_mutual_stage_confirmation: bool = Field(
+        default=True, validation_alias="RELATIONSHIP_REQUIRE_MUTUAL_STAGE_CONFIRMATION"
+    )
+    relationship_allow_stage_skip_forward: bool = Field(
+        default=False, validation_alias="RELATIONSHIP_ALLOW_STAGE_SKIP_FORWARD"
+    )
+    relationship_allow_stage_backward_proposal: bool = Field(
+        default=True, validation_alias="RELATIONSHIP_ALLOW_STAGE_BACKWARD_PROPOSAL"
+    )
+    relationship_pause_enabled: bool = Field(
+        default=True, validation_alias="RELATIONSHIP_PAUSE_ENABLED"
+    )
+    relationship_pause_immediate: bool = Field(
+        default=True, validation_alias="RELATIONSHIP_PAUSE_IMMEDIATE"
+    )
+    relationship_resume_requires_mutual_confirmation: bool = Field(
+        default=True, validation_alias="RELATIONSHIP_RESUME_REQUIRES_MUTUAL_CONFIRMATION"
+    )
+    relationship_auto_resume_enabled: bool = Field(
+        default=False, validation_alias="RELATIONSHIP_AUTO_RESUME_ENABLED"
+    )
+    relationship_ending_requires_other_party_approval: bool = Field(
+        default=False, validation_alias="RELATIONSHIP_ENDING_REQUIRES_OTHER_PARTY_APPROVAL"
+    )
+    relationship_ending_confirmation_required: bool = Field(
+        default=True, validation_alias="RELATIONSHIP_ENDING_CONFIRMATION_REQUIRED"
+    )
+    relationship_end_contact_access_on_end: bool = Field(
+        default=True, validation_alias="RELATIONSHIP_END_CONTACT_ACCESS_ON_END"
+    )
+    relationship_ended_pair_cooldown_days: int = Field(
+        default=180, ge=1, validation_alias="RELATIONSHIP_ENDED_PAIR_COOLDOWN_DAYS"
+    )
+    relationship_checkins_enabled: bool = Field(
+        default=True, validation_alias="RELATIONSHIP_CHECKINS_ENABLED"
+    )
+    relationship_private_reflection_enabled: bool = Field(
+        default=True, validation_alias="RELATIONSHIP_PRIVATE_REFLECTION_ENABLED"
+    )
+    relationship_shared_checkin_default: bool = Field(
+        default=False, validation_alias="RELATIONSHIP_SHARED_CHECKIN_DEFAULT"
+    )
+    relationship_checkin_default_interval_days: int = Field(
+        default=30, ge=1, validation_alias="RELATIONSHIP_CHECKIN_DEFAULT_INTERVAL_DAYS"
+    )
+    relationship_reminders_enabled: bool = Field(
+        default=True, validation_alias="RELATIONSHIP_REMINDERS_ENABLED"
+    )
+    relationship_reminder_opt_in_required: bool = Field(
+        default=True, validation_alias="RELATIONSHIP_REMINDER_OPT_IN_REQUIRED"
+    )
+    relationship_reminder_max_per_month: int = Field(
+        default=4, ge=0, validation_alias="RELATIONSHIP_REMINDER_MAX_PER_MONTH"
+    )
+    relationship_manipulative_reminders_disabled: bool = Field(
+        default=True, validation_alias="RELATIONSHIP_MANIPULATIVE_REMINDERS_DISABLED"
+    )
+    relationship_fail_closed_on_moderation_error: bool = Field(
+        default=True, validation_alias="RELATIONSHIP_FAIL_CLOSED_ON_MODERATION_ERROR"
+    )
+    relationship_block_creates_safety_freeze: bool = Field(
+        default=True, validation_alias="RELATIONSHIP_BLOCK_CREATES_SAFETY_FREEZE"
+    )
+    relationship_idempotency_ttl_hours: int = Field(
+        default=24, ge=1, validation_alias="RELATIONSHIP_IDEMPOTENCY_TTL_HOURS"
+    )
+
     @property
     def dating_photo_allowed_type_set(self) -> frozenset[str]:
         return frozenset(
@@ -1220,6 +1299,24 @@ class Settings(BaseSettings):
             raise ValueError("only verified contact points can be exchanged")
         if self.environment == "production" and self.matchmaking_allow_direct_profile_like:
             raise ValueError("liking an arbitrary profile requires an approved product decision")
+        if not self.relationship_require_mutual_stage_confirmation:
+            raise ValueError("formal relationship stages require mutual confirmation")
+        if self.relationship_auto_resume_enabled:
+            raise ValueError("relationship journeys cannot resume automatically")
+        if self.relationship_ending_requires_other_party_approval:
+            raise ValueError("one participant must always be able to end a relationship journey")
+        if not self.relationship_ending_confirmation_required:
+            raise ValueError("ending a relationship journey requires an explicit confirmation")
+        if not self.relationship_end_contact_access_on_end:
+            raise ValueError("ending a relationship journey must revoke contact access")
+        if not self.relationship_reminder_opt_in_required:
+            raise ValueError("relationship reminders require explicit opt-in")
+        if not self.relationship_manipulative_reminders_disabled:
+            raise ValueError("manipulative relationship reminders must remain disabled")
+        if not self.relationship_fail_closed_on_moderation_error:
+            raise ValueError("relationship safety checks must fail closed")
+        if not self.relationship_block_creates_safety_freeze:
+            raise ValueError("a block must freeze the relationship journey")
         if (
             self.environment == "production"
             and self.recommendation_experiments_enabled

@@ -114,6 +114,12 @@ celery_app.conf.update(
                 os.getenv("MATCHMAKING_INTERACTION_MAINTENANCE_INTERVAL_SECONDS", "60")
             ),
         },
+        "dispatch-relationship-reminders": {
+            "task": "vav.relationships.reminders",
+            "schedule": float(
+                os.getenv("RELATIONSHIP_REMINDER_JOB_INTERVAL_SECONDS", "60")
+            ),
+        },
     },
 )
 

@@ -236,6 +236,29 @@ export function seedMatchmakingInteractionFixture(): string {
   ]);
 }
 
+/** Accept the pending Batch 15 introduction through the domain service so the
+ * Batch 16 relationship handoff and its initial timeline are real. */
+export function seedRelationshipFixture(): string {
+  seedMatchmakingInteractionFixture();
+  return apiPython([
+    "import asyncio",
+    "from sqlalchemy import text",
+    "from vav.core.database import session_factory",
+    "from vav.modules.matchmaking_interactions import invitations",
+    "async def main():",
+    "    async with session_factory() as session:",
+    "        existing = (await session.execute(text(\"SELECT j.id,u.email FROM relationship_journeys j JOIN users u ON u.id=j.user_low_id WHERE u.email LIKE 'recommendation-fixture-%@example.com' ORDER BY j.created_at DESC LIMIT 1\"))).first()",
+    "        if existing is not None:",
+    "            print(existing.email)",
+    "            return",
+    "        invitation = (await session.execute(text(\"SELECT i.id,i.recipient_user_id,u.email FROM matchmaking_introduction_invitations i JOIN users u ON u.id=i.sender_user_id WHERE u.email LIKE 'recommendation-fixture-%@example.com' AND i.status='pending' ORDER BY i.created_at DESC LIMIT 1\"))).mappings().one()",
+    "        await invitations.accept_invitation(session,user_id=invitation['recipient_user_id'],invitation_id=invitation['id'])",
+    "        await session.commit()",
+    "        print(invitation['email'])",
+    "asyncio.run(main())"
+  ]);
+}
+
 /** Password `vav.cli.seed_recommendation_fixtures` gives every fixture member. */
 export const recommendationFixturePassword = "RecommendationFixture!2026";
 

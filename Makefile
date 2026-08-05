@@ -34,6 +34,10 @@
 	interaction-security-test interaction-privacy-test interaction-user-e2e \
 	interaction-admin-e2e interaction-verify
 
+.PHONY: relationship-migrate relationship-seed relationship-seed-stages relationship-test \
+	relationship-concurrency-test relationship-security-test relationship-privacy-test \
+	relationship-user-e2e relationship-admin-e2e relationship-verify
+
 bootstrap:
 	./scripts/bootstrap.sh
 
@@ -484,3 +488,41 @@ interaction-verify:
 	$(MAKE) interaction-privacy-test
 	$(MAKE) interaction-user-e2e
 	$(MAKE) interaction-admin-e2e
+
+relationship-migrate:
+	docker compose exec -T api alembic upgrade head
+
+relationship-seed:
+	docker compose exec -T api python -m vav.cli.seed_permissions
+	docker compose exec -T api python -m vav.cli.seed_relationships
+
+relationship-seed-stages:
+	docker compose exec -T api python -m vav.cli.seed_relationships
+
+relationship-test:
+	docker compose exec -T api pytest tests/relationships/unit tests/relationships/integration -q
+
+relationship-concurrency-test:
+	docker compose exec -T api pytest tests/relationships/concurrency -q
+
+relationship-security-test:
+	docker compose exec -T api pytest tests/relationships/security -q
+
+relationship-privacy-test:
+	docker compose exec -T api pytest tests/relationships/privacy -q
+
+relationship-user-e2e:
+	pnpm exec playwright test e2e/user-relationships
+
+relationship-admin-e2e:
+	pnpm exec playwright test e2e/admin-relationships
+
+relationship-verify:
+	$(MAKE) relationship-migrate
+	$(MAKE) relationship-seed
+	$(MAKE) relationship-test
+	$(MAKE) relationship-concurrency-test
+	$(MAKE) relationship-security-test
+	$(MAKE) relationship-privacy-test
+	$(MAKE) relationship-user-e2e
+	$(MAKE) relationship-admin-e2e

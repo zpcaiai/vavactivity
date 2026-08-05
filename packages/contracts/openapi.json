@@ -23,6 +23,39 @@
         "title": "Action",
         "type": "object"
       },
+      "ActionItemRequest": {
+        "properties": {
+          "assigned_to_user_id": {
+            "format": "uuid",
+            "title": "Assigned To User Id",
+            "type": "string"
+          },
+          "details": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Details"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "assigned_to_user_id",
+          "title"
+        ],
+        "title": "ActionItemRequest",
+        "type": "object"
+      },
       "ActivityCancelRequest": {
         "properties": {
           "notify_participants": {
@@ -600,6 +633,28 @@
           "role_codes"
         ],
         "title": "AdminInvitationRequest",
+        "type": "object"
+      },
+      "AdminSafetyRequest": {
+        "properties": {
+          "purpose": {
+            "maxLength": 128,
+            "minLength": 4,
+            "title": "Purpose",
+            "type": "string"
+          },
+          "reason_code": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Reason Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason_code",
+          "purpose"
+        ],
+        "title": "AdminSafetyRequest",
         "type": "object"
       },
       "AdminSensitiveReadRequest": {
@@ -1667,82 +1722,6 @@
           "slug"
         ],
         "title": "CategoryLocalizationInput",
-        "type": "object"
-      },
-      "CheckinRequest": {
-        "properties": {
-          "action": {
-            "default": "check_in",
-            "enum": [
-              "check_in",
-              "revoke"
-            ],
-            "title": "Action",
-            "type": "string"
-          },
-          "device_reference": {
-            "anyOf": [
-              {
-                "maxLength": 128,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Device Reference"
-          },
-          "reason": {
-            "anyOf": [
-              {
-                "maxLength": 1000,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reason"
-          },
-          "registration_number": {
-            "anyOf": [
-              {
-                "maxLength": 64,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Registration Number"
-          },
-          "session_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Session Id"
-          },
-          "token": {
-            "anyOf": [
-              {
-                "maxLength": 1000,
-                "minLength": 20,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Token"
-          }
-        },
-        "title": "CheckinRequest",
         "type": "object"
       },
       "CheckoutOrderRequest": {
@@ -3249,6 +3228,55 @@
           "email"
         ],
         "title": "EmailRequest",
+        "type": "object"
+      },
+      "EndingRequest": {
+        "properties": {
+          "confirmed": {
+            "title": "Confirmed",
+            "type": "boolean"
+          },
+          "private_reason": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Private Reason"
+          },
+          "reason_code": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Code"
+          },
+          "visible_message": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visible Message"
+          }
+        },
+        "required": [
+          "confirmed"
+        ],
+        "title": "EndingRequest",
         "type": "object"
       },
       "EnrollmentActionRequest": {
@@ -5595,6 +5623,130 @@
         "title": "MentorLocalizationRequest",
         "type": "object"
       },
+      "MilestoneRequest": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "milestone_type": {
+            "default": "personal",
+            "maxLength": 64,
+            "title": "Milestone Type",
+            "type": "string"
+          },
+          "occurred_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Occurred On"
+          },
+          "title": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          },
+          "visibility": {
+            "default": "shared",
+            "enum": [
+              "private",
+              "shared"
+            ],
+            "title": "Visibility",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "MilestoneRequest",
+        "type": "object"
+      },
+      "MilestoneUpdateRequest": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "expected_version": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
+          },
+          "occurred_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Occurred On"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "enum": [
+                  "private",
+                  "shared"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visibility"
+          }
+        },
+        "title": "MilestoneUpdateRequest",
+        "type": "object"
+      },
       "ModuleCreateRequest": {
         "properties": {
           "internal_name": {
@@ -6128,6 +6280,36 @@
           "new_password"
         ],
         "title": "PasswordResetRequest",
+        "type": "object"
+      },
+      "PauseRequest": {
+        "properties": {
+          "private_reason": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Private Reason"
+          },
+          "visible_message": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visible Message"
+          }
+        },
+        "title": "PauseRequest",
         "type": "object"
       },
       "PaymentCreateRequest": {
@@ -7988,6 +8170,36 @@
         "title": "PromotionUpdateRequest",
         "type": "object"
       },
+      "ProposalDecisionRequest": {
+        "properties": {
+          "expected_version": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
+          },
+          "reason_code": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Code"
+          }
+        },
+        "title": "ProposalDecisionRequest",
+        "type": "object"
+      },
       "ProposalRequest": {
         "properties": {
           "expected_proposal_version": {
@@ -8327,6 +8539,33 @@
         "title": "ReferralActionRequest",
         "type": "object"
       },
+      "ReflectionRequest": {
+        "properties": {
+          "ai_processing_consent_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ai Processing Consent Id"
+          },
+          "reflection": {
+            "maxLength": 10000,
+            "minLength": 1,
+            "title": "Reflection",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reflection"
+        ],
+        "title": "ReflectionRequest",
+        "type": "object"
+      },
       "RefundActionRequest": {
         "properties": {
           "reason": {
@@ -8468,6 +8707,32 @@
         "title": "RegistrationCreateRequest",
         "type": "object"
       },
+      "ReminderPlanRequest": {
+        "properties": {
+          "cadence_days": {
+            "default": 30,
+            "maximum": 365.0,
+            "minimum": 1.0,
+            "title": "Cadence Days",
+            "type": "integer"
+          },
+          "opted_in": {
+            "title": "Opted In",
+            "type": "boolean"
+          },
+          "reminder_type": {
+            "maxLength": 64,
+            "title": "Reminder Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reminder_type",
+          "opted_in"
+        ],
+        "title": "ReminderPlanRequest",
+        "type": "object"
+      },
       "ReminderRequest": {
         "properties": {
           "category": {
@@ -8576,6 +8841,24 @@
           "reason_code"
         ],
         "title": "RestrictionRequest",
+        "type": "object"
+      },
+      "ResumeRequest": {
+        "properties": {
+          "expected_version": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
+          }
+        },
+        "title": "ResumeRequest",
         "type": "object"
       },
       "RetentionPolicyRequest": {
@@ -9862,6 +10145,32 @@
         "title": "Stackability",
         "type": "string"
       },
+      "StageProposalRequest": {
+        "properties": {
+          "message": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "to_stage_code": {
+            "maxLength": 64,
+            "title": "To Stage Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "to_stage_code"
+        ],
+        "title": "StageProposalRequest",
+        "type": "object"
+      },
       "StrategyCreateRequest": {
         "properties": {
           "applicable_regions": {
@@ -10870,6 +11179,82 @@
         "title": "WaitlistReorderRequest",
         "type": "object"
       },
+      "vav__modules__activities__schemas__CheckinRequest": {
+        "properties": {
+          "action": {
+            "default": "check_in",
+            "enum": [
+              "check_in",
+              "revoke"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "device_reference": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device Reference"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "registration_number": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registration Number"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "token": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "minLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Token"
+          }
+        },
+        "title": "CheckinRequest",
+        "type": "object"
+      },
       "vav__modules__activities__schemas__ReasonRequest": {
         "properties": {
           "reason": {
@@ -11175,6 +11560,26 @@
           "feedback_type"
         ],
         "title": "FeedbackRequest",
+        "type": "object"
+      },
+      "vav__modules__relationships__schemas__CheckinRequest": {
+        "properties": {
+          "responses": {
+            "additionalProperties": true,
+            "title": "Responses",
+            "type": "object"
+          },
+          "visibility": {
+            "default": "private",
+            "enum": [
+              "private",
+              "shared"
+            ],
+            "title": "Visibility",
+            "type": "string"
+          }
+        },
+        "title": "CheckinRequest",
         "type": "object"
       }
     },
@@ -17064,6 +17469,1528 @@
         ]
       }
     },
+    "/api/v1/account/relationship-action-items/{action_item_id}/accept": {
+      "post": {
+        "operationId": "accept_action_item_api_v1_account_relationship_action_items__action_item_id__accept_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "action_item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Action Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Accept Action Item Api V1 Account Relationship Action Items  Action Item Id  Accept Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Accept Action Item",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/relationship-action-items/{action_item_id}/complete": {
+      "post": {
+        "operationId": "complete_action_item_api_v1_account_relationship_action_items__action_item_id__complete_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "action_item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Action Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Complete Action Item Api V1 Account Relationship Action Items  Action Item Id  Complete Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Complete Action Item",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/relationship-action-items/{action_item_id}/decline": {
+      "post": {
+        "operationId": "decline_action_item_api_v1_account_relationship_action_items__action_item_id__decline_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "action_item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Action Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Decline Action Item Api V1 Account Relationship Action Items  Action Item Id  Decline Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Decline Action Item",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/relationship-milestones/{milestone_id}": {
+      "delete": {
+        "operationId": "delete_milestone_api_v1_account_relationship_milestones__milestone_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "milestone_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Milestone Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Delete Milestone Api V1 Account Relationship Milestones  Milestone Id  Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Milestone",
+        "tags": [
+          "relationships"
+        ]
+      },
+      "patch": {
+        "operationId": "update_milestone_api_v1_account_relationship_milestones__milestone_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "milestone_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Milestone Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MilestoneUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Milestone Api V1 Account Relationship Milestones  Milestone Id  Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Milestone",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/relationship-pauses/{pause_id}/accept-resume": {
+      "post": {
+        "operationId": "accept_resume_api_v1_account_relationship_pauses__pause_id__accept_resume_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pause_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Pause Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResumeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Accept Resume Api V1 Account Relationship Pauses  Pause Id  Accept Resume Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Accept Resume",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/relationship-pauses/{pause_id}/decline-resume": {
+      "post": {
+        "operationId": "decline_resume_api_v1_account_relationship_pauses__pause_id__decline_resume_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pause_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Pause Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResumeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Decline Resume Api V1 Account Relationship Pauses  Pause Id  Decline Resume Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Decline Resume",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/relationship-reminders/{reminder_plan_id}": {
+      "delete": {
+        "operationId": "cancel_reminder_plan_api_v1_account_relationship_reminders__reminder_plan_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reminder_plan_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Reminder Plan Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Cancel Reminder Plan Api V1 Account Relationship Reminders  Reminder Plan Id  Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Cancel Reminder Plan",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/relationship-stage-proposals/{proposal_id}/accept": {
+      "post": {
+        "operationId": "accept_stage_api_v1_account_relationship_stage_proposals__proposal_id__accept_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "proposal_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Proposal Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProposalDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Accept Stage Api V1 Account Relationship Stage Proposals  Proposal Id  Accept Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Accept Stage",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/relationship-stage-proposals/{proposal_id}/cancel": {
+      "post": {
+        "operationId": "cancel_stage_api_v1_account_relationship_stage_proposals__proposal_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "proposal_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Proposal Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Cancel Stage Api V1 Account Relationship Stage Proposals  Proposal Id  Cancel Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Cancel Stage",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/relationship-stage-proposals/{proposal_id}/decline": {
+      "post": {
+        "operationId": "decline_stage_api_v1_account_relationship_stage_proposals__proposal_id__decline_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "proposal_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Proposal Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProposalDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Decline Stage Api V1 Account Relationship Stage Proposals  Proposal Id  Decline Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Decline Stage",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/relationships": {
+      "get": {
+        "operationId": "journeys_api_v1_account_relationships_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Journeys Api V1 Account Relationships Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Journeys",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/relationships/{journey_id}": {
+      "get": {
+        "operationId": "journey_api_v1_account_relationships__journey_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "journey_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Journey Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Journey Api V1 Account Relationships  Journey Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Journey",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/relationships/{journey_id}/action-items": {
+      "get": {
+        "operationId": "action_items_api_v1_account_relationships__journey_id__action_items_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "journey_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Journey Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Action Items Api V1 Account Relationships  Journey Id  Action Items Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Action Items",
+        "tags": [
+          "relationships"
+        ]
+      },
+      "post": {
+        "operationId": "create_action_item_api_v1_account_relationships__journey_id__action_items_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "journey_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Journey Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActionItemRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Action Item Api V1 Account Relationships  Journey Id  Action Items Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Action Item",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/relationships/{journey_id}/checkins": {
+      "post": {
+        "operationId": "create_checkin_api_v1_account_relationships__journey_id__checkins_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "journey_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Journey Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/vav__modules__relationships__schemas__CheckinRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Checkin Api V1 Account Relationships  Journey Id  Checkins Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Checkin",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/relationships/{journey_id}/end": {
+      "post": {
+        "operationId": "end_api_v1_account_relationships__journey_id__end_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "journey_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Journey Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EndingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response End Api V1 Account Relationships  Journey Id  End Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "End",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/relationships/{journey_id}/milestones": {
+      "get": {
+        "operationId": "milestones_api_v1_account_relationships__journey_id__milestones_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "journey_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Journey Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Milestones Api V1 Account Relationships  Journey Id  Milestones Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Milestones",
+        "tags": [
+          "relationships"
+        ]
+      },
+      "post": {
+        "operationId": "create_milestone_api_v1_account_relationships__journey_id__milestones_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "journey_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Journey Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MilestoneRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Milestone Api V1 Account Relationships  Journey Id  Milestones Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Milestone",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/relationships/{journey_id}/pause": {
+      "post": {
+        "operationId": "pause_api_v1_account_relationships__journey_id__pause_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "journey_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Journey Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PauseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Pause Api V1 Account Relationships  Journey Id  Pause Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Pause",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/relationships/{journey_id}/reflections": {
+      "get": {
+        "operationId": "reflections_api_v1_account_relationships__journey_id__reflections_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "journey_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Journey Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reflections Api V1 Account Relationships  Journey Id  Reflections Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reflections",
+        "tags": [
+          "relationships"
+        ]
+      },
+      "post": {
+        "operationId": "create_reflection_api_v1_account_relationships__journey_id__reflections_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "journey_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Journey Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReflectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Reflection Api V1 Account Relationships  Journey Id  Reflections Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Reflection",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/relationships/{journey_id}/reminders": {
+      "get": {
+        "operationId": "reminder_plans_api_v1_account_relationships__journey_id__reminders_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "journey_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Journey Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reminder Plans Api V1 Account Relationships  Journey Id  Reminders Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reminder Plans",
+        "tags": [
+          "relationships"
+        ]
+      },
+      "post": {
+        "operationId": "create_reminder_plan_api_v1_account_relationships__journey_id__reminders_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "journey_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Journey Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReminderPlanRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Reminder Plan Api V1 Account Relationships  Journey Id  Reminders Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Reminder Plan",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/relationships/{journey_id}/resume-request": {
+      "post": {
+        "operationId": "resume_request_api_v1_account_relationships__journey_id__resume_request_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "journey_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Journey Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResumeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Resume Request Api V1 Account Relationships  Journey Id  Resume Request Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Resume Request",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/relationships/{journey_id}/stage-proposals": {
+      "get": {
+        "operationId": "proposals_api_v1_account_relationships__journey_id__stage_proposals_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "journey_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Journey Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Proposals Api V1 Account Relationships  Journey Id  Stage Proposals Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Proposals",
+        "tags": [
+          "relationships"
+        ]
+      },
+      "post": {
+        "operationId": "propose_stage_api_v1_account_relationships__journey_id__stage_proposals_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "journey_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Journey Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StageProposalRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Propose Stage Api V1 Account Relationships  Journey Id  Stage Proposals Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Propose Stage",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/relationships/{journey_id}/timeline": {
+      "get": {
+        "operationId": "timeline_api_v1_account_relationships__journey_id__timeline_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "journey_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Journey Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Timeline Api V1 Account Relationships  Journey Id  Timeline Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Timeline",
+        "tags": [
+          "relationships"
+        ]
+      }
+    },
     "/api/v1/activities": {
       "get": {
         "operationId": "list_public_activities_api_v1_activities_get",
@@ -18218,7 +20145,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CheckinRequest"
+                "$ref": "#/components/schemas/vav__modules__activities__schemas__CheckinRequest"
               }
             }
           },
@@ -36794,6 +38721,292 @@
         "summary": "Rebuild User",
         "tags": [
           "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/relationships": {
+      "get": {
+        "operationId": "journeys_api_v1_admin_relationships_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Journeys Api V1 Admin Relationships Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Journeys",
+        "tags": [
+          "relationships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/relationships/dashboard": {
+      "get": {
+        "operationId": "dashboard_api_v1_admin_relationships_dashboard_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Dashboard Api V1 Admin Relationships Dashboard Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dashboard",
+        "tags": [
+          "relationships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/relationships/{journey_id}": {
+      "get": {
+        "operationId": "journey_api_v1_admin_relationships__journey_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "journey_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Journey Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Journey Api V1 Admin Relationships  Journey Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Journey",
+        "tags": [
+          "relationships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/relationships/{journey_id}/end-for-safety": {
+      "post": {
+        "operationId": "safety_end_api_v1_admin_relationships__journey_id__end_for_safety_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "journey_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Journey Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminSafetyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Safety End Api V1 Admin Relationships  Journey Id  End For Safety Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Safety End",
+        "tags": [
+          "relationships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/relationships/{journey_id}/freeze": {
+      "post": {
+        "operationId": "freeze_api_v1_admin_relationships__journey_id__freeze_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "journey_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Journey Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminSafetyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Freeze Api V1 Admin Relationships  Journey Id  Freeze Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Freeze",
+        "tags": [
+          "relationships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/relationships/{journey_id}/unfreeze": {
+      "post": {
+        "operationId": "unfreeze_api_v1_admin_relationships__journey_id__unfreeze_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "journey_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Journey Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminSafetyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Unfreeze Api V1 Admin Relationships  Journey Id  Unfreeze Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Unfreeze",
+        "tags": [
+          "relationships-admin"
         ]
       }
     },

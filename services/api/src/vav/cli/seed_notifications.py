@@ -192,6 +192,18 @@ SUBSCRIPTIONS: tuple[tuple[Any, ...], ...] = (
         [],
     ),
     (
+        "relationship-reminder-due-v1",
+        "relationships.reminder.due",
+        "relationship_reflection_available",
+        "relationship",
+        "low",
+        "event_user",
+        "relationship-reflection-available",
+        "service_optional",
+        ["in_app"],
+        [],
+    ),
+    (
         "course-enrollment-activated-v1",
         "course.enrollment.activated",
         "enrollment_activated",

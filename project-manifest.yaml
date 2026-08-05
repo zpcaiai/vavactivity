@@ -49,7 +49,7 @@ module_registry:
   matches: {owner: matchmaking, status: foundation_in_progress, phase: phase_2}
   introductions: {owner: matchmaking, status: foundation_in_progress, phase: phase_2}
   contact_exchange: {owner: matchmaking_and_privacy, status: foundation_in_progress, phase: phase_2}
-  relationship_state: {owner: matchmaking, status: planned, phase: phase_2}
+  relationship_state: {owner: matchmaking_and_privacy, status: foundation_in_progress, phase: phase_2}
   memberships: {owner: backend, status: foundation_in_progress, phase: phase_2}
   moderation: {owner: trust_and_safety, status: planned, phase: phase_2}
 
@@ -84,6 +84,26 @@ phases:
       - moderation
 
 pending_decisions:
+  relationship_stage_registry:
+    owner: product_and_trust
+    status: interim_configured
+    value: relationship-stages-v1
+  relationship_stage_skip_policy:
+    owner: product_and_trust
+    status: interim_configured
+    value: forward_skip_disabled
+  relationship_resume_policy:
+    owner: product_and_trust
+    status: interim_configured
+    value: mutual_confirmation_no_auto_resume
+  relationship_ending_policy:
+    owner: product_privacy_and_legal
+    status: interim_configured
+    value: unilateral_after_explicit_confirmation
+  relationship_reminder_policy:
+    owner: product_and_trust
+    status: interim_configured
+    value: opt_in_neutral_max_4_per_month
   matchmaking_direct_profile_like:
     owner: product_and_trust
     status: undecided

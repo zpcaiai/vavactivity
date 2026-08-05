@@ -25,6 +25,7 @@ import NavigationManagementPage from "@/pages/NavigationManagementPage.vue";
 import PricingSimulationPage from "@/pages/PricingSimulationPage.vue";
 import RecommendationManagementPage from "@/pages/RecommendationManagementPage.vue";
 import MatchmakingInteractionManagementPage from "@/pages/MatchmakingInteractionManagementPage.vue";
+import RelationshipManagementPage from "@/pages/RelationshipManagementPage.vue";
 import { useAccessStore } from "@/stores/access";
 
 const modules = [
@@ -96,6 +97,19 @@ export const interactionSectionPermissions: Record<string, string> = {
   "dead-letters": "matchmaking.dead_letters.resolve",
   incidents: "matchmaking.incidents.read",
   audit: "matchmaking.audit.read"
+};
+
+export const relationshipSectionPermissions: Record<string, string> = {
+  dashboard: "relationships.analytics.read",
+  journeys: "relationships.read",
+  stages: "relationships.stages.read",
+  proposals: "relationships.proposals.read",
+  pauses: "relationships.pauses.read",
+  endings: "relationships.endings.read",
+  milestones: "relationships.milestones.read",
+  checkins: "relationships.checkins.read",
+  reminders: "relationships.reminders.read",
+  audit: "relationships.audit.read"
 };
 
 const privacySectionPermissions: Record<string, string> = {
@@ -433,6 +447,18 @@ export const router = createRouter({
           name: "admin-matchmaking-contact-exchange-detail",
           component: MatchmakingInteractionManagementPage,
           meta: { title: "联系方式授权诊断", permission: "matchmaking.contact_exchange.read", interactionSection: "contact-exchanges" }
+        },
+        ...Object.keys(relationshipSectionPermissions).map((section) => ({
+          path: `relationships/${section}`,
+          name: `admin-relationships-${section}`,
+          component: RelationshipManagementPage,
+          meta: { title: "关系运营中心", permission: relationshipSectionPermissions[section], relationshipSection: section }
+        })),
+        {
+          path: "relationships/journeys/:id",
+          name: "admin-relationship-journey-detail",
+          component: RelationshipManagementPage,
+          meta: { title: "关系旅程诊断", permission: "relationships.read", relationshipSection: "journeys" }
         },
         ...Object.keys(privacySectionPermissions).map((section) => ({
           path: `privacy/${section}`,
