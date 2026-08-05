@@ -1,3 +1,4 @@
+import json
 from datetime import UTC, datetime
 
 # ruff: noqa: E501
@@ -66,9 +67,13 @@ async def _free_fixture() -> tuple[UUID, str]:
             text(
                 "INSERT INTO membership_plan_benefits "
                 "(membership_plan_version_id,benefit_definition_id,benefit_value) "
-                "VALUES (:version,:definition,'{\"enabled\":true}'::jsonb)"
+                "VALUES (:version,:definition,CAST(:benefit_value AS jsonb))"
             ),
-            {"version": version, "definition": definition},
+            {
+                "version": version,
+                "definition": definition,
+                "benefit_value": json.dumps({"enabled": True}),
+            },
         )
         user_id = user.id
         await session.commit()
