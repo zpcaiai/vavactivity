@@ -32,8 +32,8 @@ async def _free_fixture() -> tuple[UUID, str]:
             await session.execute(
                 text(
                     "INSERT INTO membership_plans "
-                    "(plan_code,internal_name,plan_type,status,default_locale,created_by,updated_by) "
-                    "VALUES (:code,'Test Free','free','active','en',:actor,:actor) RETURNING id"
+                    "(plan_code,internal_name,plan_type,status,default_locale,display_order,created_by,updated_by) "
+                    "VALUES (:code,'Test Free','free','active','en',-1000,:actor,:actor) RETURNING id"
                 ),
                 {"code": code, "actor": user.id},
             )
