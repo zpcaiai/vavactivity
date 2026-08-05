@@ -511,6 +511,27 @@
         "title": "AdminEnrollmentGrantRequest",
         "type": "object"
       },
+      "AdminInvalidateRequest": {
+        "properties": {
+          "purpose": {
+            "maxLength": 128,
+            "minLength": 4,
+            "title": "Purpose",
+            "type": "string"
+          },
+          "reason_code": {
+            "maxLength": 128,
+            "title": "Reason Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason_code",
+          "purpose"
+        ],
+        "title": "AdminInvalidateRequest",
+        "type": "object"
+      },
       "AdminInvitationAcceptRequest": {
         "properties": {
           "password": {
@@ -579,6 +600,21 @@
           "role_codes"
         ],
         "title": "AdminInvitationRequest",
+        "type": "object"
+      },
+      "AdminSensitiveReadRequest": {
+        "properties": {
+          "purpose": {
+            "maxLength": 128,
+            "minLength": 4,
+            "title": "Purpose",
+            "type": "string"
+          }
+        },
+        "required": [
+          "purpose"
+        ],
+        "title": "AdminSensitiveReadRequest",
         "type": "object"
       },
       "AiMemoryCandidateRequest": {
@@ -1846,6 +1882,24 @@
         "title": "CheckoutPreviewRequest",
         "type": "object"
       },
+      "CloseMatchRequest": {
+        "properties": {
+          "reason_code": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Code"
+          }
+        },
+        "title": "CloseMatchRequest",
+        "type": "object"
+      },
       "CollectionBlock": {
         "properties": {
           "data": {
@@ -2050,6 +2104,25 @@
         "title": "ContactAssignRequest",
         "type": "object"
       },
+      "ContactConsentRequest": {
+        "properties": {
+          "platform_only": {
+            "default": false,
+            "title": "Platform Only",
+            "type": "boolean"
+          },
+          "selected_contact_point_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Selected Contact Point Ids",
+            "type": "array"
+          }
+        },
+        "title": "ContactConsentRequest",
+        "type": "object"
+      },
       "ContactPointCreateRequest": {
         "properties": {
           "contact_type": {
@@ -2127,6 +2200,35 @@
           "resolution"
         ],
         "title": "ContactResolveRequest",
+        "type": "object"
+      },
+      "ContactRevealRequest": {
+        "properties": {
+          "reveal_token": {
+            "maxLength": 256,
+            "minLength": 8,
+            "title": "Reveal Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reveal_token"
+        ],
+        "title": "ContactRevealRequest",
+        "type": "object"
+      },
+      "ContactRevealTokenRequest": {
+        "properties": {
+          "contact_point_id": {
+            "format": "uuid",
+            "title": "Contact Point Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "contact_point_id"
+        ],
+        "title": "ContactRevealTokenRequest",
         "type": "object"
       },
       "ContactStatusRequest": {
@@ -3048,6 +3150,36 @@
           "accept_ai_disclosure"
         ],
         "title": "CreateConversationRequest",
+        "type": "object"
+      },
+      "DeclineInvitationRequest": {
+        "properties": {
+          "expected_invitation_version": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Invitation Version"
+          },
+          "reason_code": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Code"
+          }
+        },
+        "title": "DeclineInvitationRequest",
         "type": "object"
       },
       "DocumentRequest": {
@@ -4304,6 +4436,42 @@
           "quantity"
         ],
         "title": "InventoryReservationRequest",
+        "type": "object"
+      },
+      "InvitationDecisionRequest": {
+        "properties": {
+          "expected_invitation_version": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Invitation Version"
+          }
+        },
+        "title": "InvitationDecisionRequest",
+        "type": "object"
+      },
+      "InvitationRequest": {
+        "properties": {
+          "message": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          }
+        },
+        "title": "InvitationRequest",
         "type": "object"
       },
       "LearningEventRequest": {
@@ -9275,6 +9443,41 @@
           "value_type"
         ],
         "title": "SiteSettingRequest",
+        "type": "object"
+      },
+      "SkipRequest": {
+        "properties": {
+          "reason_code": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Code"
+          },
+          "reason_details": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Details"
+          },
+          "skip_type": {
+            "default": "not_now",
+            "title": "Skip Type",
+            "type": "string"
+          }
+        },
+        "title": "SkipRequest",
         "type": "object"
       },
       "SkuCreateRequest": {
@@ -14376,6 +14579,1106 @@
         "summary": "Submit Attempt",
         "tags": [
           "courses"
+        ]
+      }
+    },
+    "/api/v1/account/matchmaking/contact-exchanges/{exchange_id}": {
+      "get": {
+        "operationId": "get_contact_exchange_api_v1_account_matchmaking_contact_exchanges__exchange_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "exchange_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Exchange Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Contact Exchange Api V1 Account Matchmaking Contact Exchanges  Exchange Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Contact Exchange",
+        "tags": [
+          "matchmaking-interactions"
+        ]
+      }
+    },
+    "/api/v1/account/matchmaking/contact-exchanges/{exchange_id}/consent": {
+      "delete": {
+        "operationId": "withdraw_contact_consent_api_v1_account_matchmaking_contact_exchanges__exchange_id__consent_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "exchange_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Exchange Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Withdraw Contact Consent Api V1 Account Matchmaking Contact Exchanges  Exchange Id  Consent Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Withdraw Contact Consent",
+        "tags": [
+          "matchmaking-interactions"
+        ]
+      },
+      "post": {
+        "operationId": "submit_contact_consent_api_v1_account_matchmaking_contact_exchanges__exchange_id__consent_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "exchange_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Exchange Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContactConsentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Submit Contact Consent Api V1 Account Matchmaking Contact Exchanges  Exchange Id  Consent Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Submit Contact Consent",
+        "tags": [
+          "matchmaking-interactions"
+        ]
+      }
+    },
+    "/api/v1/account/matchmaking/contact-exchanges/{exchange_id}/reveal": {
+      "post": {
+        "operationId": "reveal_contact_api_v1_account_matchmaking_contact_exchanges__exchange_id__reveal_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "exchange_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Exchange Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContactRevealRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reveal Contact Api V1 Account Matchmaking Contact Exchanges  Exchange Id  Reveal Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reveal Contact",
+        "tags": [
+          "matchmaking-interactions"
+        ]
+      }
+    },
+    "/api/v1/account/matchmaking/contact-exchanges/{exchange_id}/reveal-token": {
+      "post": {
+        "operationId": "issue_reveal_token_api_v1_account_matchmaking_contact_exchanges__exchange_id__reveal_token_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "exchange_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Exchange Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContactRevealTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Issue Reveal Token Api V1 Account Matchmaking Contact Exchanges  Exchange Id  Reveal Token Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Issue Reveal Token",
+        "tags": [
+          "matchmaking-interactions"
+        ]
+      }
+    },
+    "/api/v1/account/matchmaking/invitations": {
+      "get": {
+        "operationId": "list_invitations_api_v1_account_matchmaking_invitations_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Invitations Api V1 Account Matchmaking Invitations Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Invitations",
+        "tags": [
+          "matchmaking-interactions"
+        ]
+      }
+    },
+    "/api/v1/account/matchmaking/invitations/{invitation_id}": {
+      "get": {
+        "operationId": "get_invitation_api_v1_account_matchmaking_invitations__invitation_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "invitation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Invitation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Invitation Api V1 Account Matchmaking Invitations  Invitation Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Invitation",
+        "tags": [
+          "matchmaking-interactions"
+        ]
+      }
+    },
+    "/api/v1/account/matchmaking/invitations/{invitation_id}/accept": {
+      "post": {
+        "operationId": "accept_invitation_api_v1_account_matchmaking_invitations__invitation_id__accept_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "invitation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Invitation Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvitationDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Accept Invitation Api V1 Account Matchmaking Invitations  Invitation Id  Accept Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Accept Invitation",
+        "tags": [
+          "matchmaking-interactions"
+        ]
+      }
+    },
+    "/api/v1/account/matchmaking/invitations/{invitation_id}/cancel": {
+      "post": {
+        "operationId": "cancel_invitation_api_v1_account_matchmaking_invitations__invitation_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "invitation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Invitation Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvitationDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Cancel Invitation Api V1 Account Matchmaking Invitations  Invitation Id  Cancel Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Cancel Invitation",
+        "tags": [
+          "matchmaking-interactions"
+        ]
+      }
+    },
+    "/api/v1/account/matchmaking/invitations/{invitation_id}/decline": {
+      "post": {
+        "operationId": "decline_invitation_api_v1_account_matchmaking_invitations__invitation_id__decline_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "invitation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Invitation Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeclineInvitationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Decline Invitation Api V1 Account Matchmaking Invitations  Invitation Id  Decline Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Decline Invitation",
+        "tags": [
+          "matchmaking-interactions"
+        ]
+      }
+    },
+    "/api/v1/account/matchmaking/likes/{like_id}": {
+      "delete": {
+        "operationId": "withdraw_like_api_v1_account_matchmaking_likes__like_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "like_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Like Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Withdraw Like Api V1 Account Matchmaking Likes  Like Id  Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Withdraw Like",
+        "tags": [
+          "matchmaking-interactions"
+        ]
+      }
+    },
+    "/api/v1/account/matchmaking/mutual-matches": {
+      "get": {
+        "operationId": "list_mutual_matches_api_v1_account_matchmaking_mutual_matches_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Mutual Matches Api V1 Account Matchmaking Mutual Matches Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Mutual Matches",
+        "tags": [
+          "matchmaking-interactions"
+        ]
+      }
+    },
+    "/api/v1/account/matchmaking/mutual-matches/{match_id}": {
+      "get": {
+        "operationId": "get_mutual_match_api_v1_account_matchmaking_mutual_matches__match_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Mutual Match Api V1 Account Matchmaking Mutual Matches  Match Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Mutual Match",
+        "tags": [
+          "matchmaking-interactions"
+        ]
+      }
+    },
+    "/api/v1/account/matchmaking/mutual-matches/{match_id}/close": {
+      "post": {
+        "operationId": "close_mutual_match_api_v1_account_matchmaking_mutual_matches__match_id__close_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloseMatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Close Mutual Match Api V1 Account Matchmaking Mutual Matches  Match Id  Close Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Close Mutual Match",
+        "tags": [
+          "matchmaking-interactions"
+        ]
+      }
+    },
+    "/api/v1/account/matchmaking/mutual-matches/{match_id}/contact-exchange": {
+      "post": {
+        "operationId": "request_contact_exchange_api_v1_account_matchmaking_mutual_matches__match_id__contact_exchange_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Request Contact Exchange Api V1 Account Matchmaking Mutual Matches  Match Id  Contact Exchange Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Request Contact Exchange",
+        "tags": [
+          "matchmaking-interactions"
+        ]
+      }
+    },
+    "/api/v1/account/matchmaking/mutual-matches/{match_id}/invitations": {
+      "post": {
+        "operationId": "send_invitation_api_v1_account_matchmaking_mutual_matches__match_id__invitations_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "match_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Match Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvitationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Send Invitation Api V1 Account Matchmaking Mutual Matches  Match Id  Invitations Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Send Invitation",
+        "tags": [
+          "matchmaking-interactions"
+        ]
+      }
+    },
+    "/api/v1/account/matchmaking/outgoing-likes": {
+      "get": {
+        "operationId": "list_outgoing_likes_api_v1_account_matchmaking_outgoing_likes_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Outgoing Likes Api V1 Account Matchmaking Outgoing Likes Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Outgoing Likes",
+        "tags": [
+          "matchmaking-interactions"
+        ]
+      }
+    },
+    "/api/v1/account/matchmaking/skips": {
+      "get": {
+        "operationId": "list_skips_api_v1_account_matchmaking_skips_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Skips Api V1 Account Matchmaking Skips Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Skips",
+        "tags": [
+          "matchmaking-interactions"
+        ]
+      }
+    },
+    "/api/v1/account/matchmaking/skips/{skip_id}": {
+      "delete": {
+        "operationId": "withdraw_skip_api_v1_account_matchmaking_skips__skip_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "skip_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Skip Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Withdraw Skip Api V1 Account Matchmaking Skips  Skip Id  Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Withdraw Skip",
+        "tags": [
+          "matchmaking-interactions"
         ]
       }
     },
@@ -29391,6 +30694,695 @@
         ]
       }
     },
+    "/api/v1/admin/matchmaking/interactions/audit": {
+      "get": {
+        "operationId": "list_audit_api_v1_admin_matchmaking_interactions_audit_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Audit Api V1 Admin Matchmaking Interactions Audit Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Audit",
+        "tags": [
+          "matchmaking-interactions-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/matchmaking/interactions/contact-exchanges": {
+      "get": {
+        "operationId": "list_contact_exchanges_api_v1_admin_matchmaking_interactions_contact_exchanges_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Contact Exchanges Api V1 Admin Matchmaking Interactions Contact Exchanges Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Contact Exchanges",
+        "tags": [
+          "matchmaking-interactions-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/matchmaking/interactions/contact-exchanges/{exchange_id}": {
+      "get": {
+        "operationId": "contact_exchange_diagnostics_api_v1_admin_matchmaking_interactions_contact_exchanges__exchange_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "exchange_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Exchange Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Contact Exchange Diagnostics Api V1 Admin Matchmaking Interactions Contact Exchanges  Exchange Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Contact Exchange Diagnostics",
+        "tags": [
+          "matchmaking-interactions-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/matchmaking/interactions/contact-exchanges/{exchange_id}/revoke": {
+      "post": {
+        "description": "Revoke a contact grant that should not have been issued.\n\nAn administrator can take access away. There is no counterpart that grants\nit — that requires both members.",
+        "operationId": "revoke_contact_exchange_api_v1_admin_matchmaking_interactions_contact_exchanges__exchange_id__revoke_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "exchange_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Exchange Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminInvalidateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Revoke Contact Exchange Api V1 Admin Matchmaking Interactions Contact Exchanges  Exchange Id  Revoke Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Revoke Contact Exchange",
+        "tags": [
+          "matchmaking-interactions-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/matchmaking/interactions/dashboard": {
+      "get": {
+        "description": "Process metrics.\n\nThese describe how the mechanism is running. They are not a measure of\nanybody's relationship quality, and the response says so.",
+        "operationId": "dashboard_api_v1_admin_matchmaking_interactions_dashboard_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Dashboard Api V1 Admin Matchmaking Interactions Dashboard Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dashboard",
+        "tags": [
+          "matchmaking-interactions-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/matchmaking/interactions/dead-letters": {
+      "get": {
+        "operationId": "list_dead_letters_api_v1_admin_matchmaking_interactions_dead_letters_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Dead Letters Api V1 Admin Matchmaking Interactions Dead Letters Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Dead Letters",
+        "tags": [
+          "matchmaking-interactions-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/matchmaking/interactions/dead-letters/{dead_letter_id}/resolve": {
+      "post": {
+        "operationId": "resolve_dead_letter_api_v1_admin_matchmaking_interactions_dead_letters__dead_letter_id__resolve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dead_letter_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Dead Letter Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminSensitiveReadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Resolve Dead Letter Api V1 Admin Matchmaking Interactions Dead Letters  Dead Letter Id  Resolve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Resolve Dead Letter",
+        "tags": [
+          "matchmaking-interactions-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/matchmaking/interactions/diagnostics/duplicates": {
+      "get": {
+        "description": "Look for the invariants the database is supposed to make impossible.\n\nIf any of these ever returns a non-zero count, a constraint has been lost —\nwhich is worth knowing before the data drifts further.",
+        "operationId": "duplicate_diagnostics_api_v1_admin_matchmaking_interactions_diagnostics_duplicates_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Duplicate Diagnostics Api V1 Admin Matchmaking Interactions Diagnostics Duplicates Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Duplicate Diagnostics",
+        "tags": [
+          "matchmaking-interactions-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/matchmaking/interactions/incidents": {
+      "get": {
+        "operationId": "list_incidents_api_v1_admin_matchmaking_interactions_incidents_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Incidents Api V1 Admin Matchmaking Interactions Incidents Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Incidents",
+        "tags": [
+          "matchmaking-interactions-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/matchmaking/interactions/invalidations": {
+      "get": {
+        "operationId": "list_invalidations_api_v1_admin_matchmaking_interactions_invalidations_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Invalidations Api V1 Admin Matchmaking Interactions Invalidations Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Invalidations",
+        "tags": [
+          "matchmaking-interactions-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/matchmaking/interactions/invitations": {
+      "get": {
+        "description": "Invitation states without their bodies.\n\nReading what somebody wrote requires the separate content permission and a\nstated purpose.",
+        "operationId": "list_invitations_api_v1_admin_matchmaking_interactions_invitations_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Invitations Api V1 Admin Matchmaking Interactions Invitations Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Invitations",
+        "tags": [
+          "matchmaking-interactions-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/matchmaking/interactions/invitations/{invitation_id}/content": {
+      "post": {
+        "description": "Read one invitation body during an investigation.",
+        "operationId": "invitation_content_api_v1_admin_matchmaking_interactions_invitations__invitation_id__content_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "invitation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Invitation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminSensitiveReadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Invitation Content Api V1 Admin Matchmaking Interactions Invitations  Invitation Id  Content Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Invitation Content",
+        "tags": [
+          "matchmaking-interactions-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/matchmaking/interactions/matches": {
+      "get": {
+        "operationId": "list_matches_api_v1_admin_matchmaking_interactions_matches_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Matches Api V1 Admin Matchmaking Interactions Matches Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Matches",
+        "tags": [
+          "matchmaking-interactions-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/matchmaking/interactions/pairs": {
+      "get": {
+        "description": "List canonical pairs without exposing either member's choices.",
+        "operationId": "list_pairs_api_v1_admin_matchmaking_interactions_pairs_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Pairs Api V1 Admin Matchmaking Interactions Pairs Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Pairs",
+        "tags": [
+          "matchmaking-interactions-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/matchmaking/interactions/pairs/{pair_id}": {
+      "get": {
+        "description": "The default operator view of a pair.\n\nIt carries statuses, versions and a timeline. It does not carry the list of\none-sided likes, a skip reason, an invitation body, contact details or\neither member's preferences.",
+        "operationId": "pair_diagnostics_api_v1_admin_matchmaking_interactions_pairs__pair_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pair_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Pair Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Pair Diagnostics Api V1 Admin Matchmaking Interactions Pairs  Pair Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Pair Diagnostics",
+        "tags": [
+          "matchmaking-interactions-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/matchmaking/interactions/pairs/{pair_id}/invalidate": {
+      "post": {
+        "description": "Invalidate every open interaction on a pair.",
+        "operationId": "invalidate_pair_api_v1_admin_matchmaking_interactions_pairs__pair_id__invalidate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pair_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Pair Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminInvalidateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Invalidate Pair Api V1 Admin Matchmaking Interactions Pairs  Pair Id  Invalidate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Invalidate Pair",
+        "tags": [
+          "matchmaking-interactions-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/matchmaking/interactions/pairs/{pair_id}/sensitive": {
+      "post": {
+        "description": "Investigation view.\n\nA purpose is mandatory and every read is written to the platform-wide\nsensitive-access log before the data is returned.",
+        "operationId": "pair_sensitive_view_api_v1_admin_matchmaking_interactions_pairs__pair_id__sensitive_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pair_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Pair Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminSensitiveReadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Pair Sensitive View Api V1 Admin Matchmaking Interactions Pairs  Pair Id  Sensitive Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Pair Sensitive View",
+        "tags": [
+          "matchmaking-interactions-admin"
+        ]
+      }
+    },
     "/api/v1/admin/media": {
       "get": {
         "operationId": "list_media_api_v1_admin_media_get",
@@ -39823,6 +41815,148 @@
         "summary": "Submit Feedback",
         "tags": [
           "recommendations"
+        ]
+      }
+    },
+    "/api/v1/recommendations/{recommendation_item_id}/like": {
+      "post": {
+        "operationId": "like_recommendation_api_v1_recommendations__recommendation_item_id__like_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "recommendation_item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Recommendation Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Like Recommendation Api V1 Recommendations  Recommendation Item Id  Like Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Like Recommendation",
+        "tags": [
+          "matchmaking-interactions"
+        ]
+      }
+    },
+    "/api/v1/recommendations/{recommendation_item_id}/skip": {
+      "post": {
+        "operationId": "skip_recommendation_api_v1_recommendations__recommendation_item_id__skip_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "recommendation_item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Recommendation Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkipRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Skip Recommendation Api V1 Recommendations  Recommendation Item Id  Skip Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Skip Recommendation",
+        "tags": [
+          "matchmaking-interactions"
         ]
       }
     },

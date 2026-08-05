@@ -108,6 +108,12 @@ celery_app.conf.update(
             "task": "vav.recommendations.aggregate_feedback",
             "schedule": 600.0,
         },
+        "maintain-matchmaking-interactions": {
+            "task": "vav.matchmaking_interactions.maintain",
+            "schedule": float(
+                os.getenv("MATCHMAKING_INTERACTION_MAINTENANCE_INTERVAL_SECONDS", "60")
+            ),
+        },
     },
 )
 

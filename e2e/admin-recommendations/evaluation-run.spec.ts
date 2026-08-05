@@ -30,7 +30,9 @@ async function openEvaluations(page: Page) {
   await page.getByRole("button", { name: "安全登录" }).click();
   await expect(page).toHaveURL(/\/admin\/dashboard$/);
   await page.goto(`${adminBaseUrl}/admin/recommendations/evaluations`);
-  await expect(page.getByRole("heading", { name: "推荐运营中心" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "推荐运营中心", level: 2 })
+  ).toBeVisible();
 }
 
 async function runEvaluation(page: Page) {
@@ -72,6 +74,6 @@ test("the evaluation record is what a release is checked against", async ({ page
     .click();
 
   await expect(page.getByRole("heading", { name: "评估记录" })).toBeVisible();
-  await expect(page.getByText(/阻断项 \[.*\] · 护栏 \[.*\]/)).toBeVisible();
+  await expect(page.getByText(/阻断项 \[.*\] · 护栏 \[.*\]/).first()).toBeVisible();
   await expect(page.getByText("尚无评估记录，该版本不可上线。")).toHaveCount(0);
 });

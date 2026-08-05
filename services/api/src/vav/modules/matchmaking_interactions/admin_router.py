@@ -99,6 +99,46 @@ def _rate_bps(numerator: int, denominator: int) -> int:
     return round(numerator * 10_000 / denominator)
 
 
+@router.get("/pairs")
+async def list_pairs(
+    request: Request,
+    _principal: AuthenticatedPrincipal = Depends(
+        require_permission("matchmaking.interactions.read")
+    ),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    """List canonical pairs without exposing either member's choices."""
+    rows = (
+        await session.execute(
+            text(
+                "SELECT p.id,p.user_low_id,p.user_high_id,p.status,p.pair_version,"
+                "p.restriction_version,p.created_at,p.updated_at,"
+                "(SELECT count(*) FROM matchmaking_mutual_matches m WHERE m.pair_id=p.id) "
+                "AS match_count,(SELECT count(*) FROM matchmaking_introduction_invitations i "
+                "WHERE i.pair_id=p.id) AS invitation_count FROM matchmaking_pairs p "
+                "ORDER BY p.updated_at DESC LIMIT 300"
+            )
+        )
+    ).mappings()
+    return success(
+        [
+            {
+                "pair_id": str(row["id"]),
+                "members": [_anonymous(row["user_low_id"]), _anonymous(row["user_high_id"])],
+                "status": row["status"],
+                "pair_version": row["pair_version"],
+                "restriction_version": row["restriction_version"],
+                "match_count": int(row["match_count"] or 0),
+                "invitation_count": int(row["invitation_count"] or 0),
+                "created_at": row["created_at"],
+                "updated_at": row["updated_at"],
+            }
+            for row in rows
+        ],
+        request_id_from_request(request),
+    )
+
+
 @router.get("/pairs/{pair_id}")
 async def pair_diagnostics(
     pair_id: UUID,
@@ -454,7 +494,7 @@ async def resolve_dead_letter(
         raise VavError("DEAD_LETTER_NOT_OPEN", "That dead letter is not open.", status_code=409)
     await service.audit(
         session,
-        event_type="matchmaking.interaction.event_replayed",
+        event_type="matchmaking.interaction.dead_letter_resolved",
         subject_type="dead_letter",
         subject_id=dead_letter_id,
         actor_id=principal.user.id,
@@ -563,6 +603,101 @@ async def list_invitations(
     )
 
 
+@router.get("/contact-exchanges")
+async def list_contact_exchanges(
+    request: Request,
+    _principal: AuthenticatedPrincipal = Depends(
+        require_permission("matchmaking.contact_exchange.read")
+    ),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    rows = (
+        await session.execute(
+            text(
+                "SELECT r.id,r.mutual_match_id,r.pair_id,r.status,r.policy,r.consent_version,"
+                "r.created_at,r.activated_at,r.revoked_at,"
+                "(SELECT count(*) FROM matchmaking_contact_exchange_consents c "
+                "WHERE c.contact_exchange_request_id=r.id AND c.status='consented') AS consents,"
+                "(SELECT count(*) FROM matchmaking_contact_exchange_grants g "
+                "WHERE g.contact_exchange_request_id=r.id AND g.status='active') AS active_grants "
+                "FROM matchmaking_contact_exchange_requests r ORDER BY r.created_at DESC LIMIT 300"
+            )
+        )
+    ).mappings()
+    return success(
+        [
+            dict(row)
+            | {
+                "id": str(row["id"]),
+                "mutual_match_id": str(row["mutual_match_id"]),
+                "pair_id": str(row["pair_id"]),
+                "consents": int(row["consents"] or 0),
+                "active_grants": int(row["active_grants"] or 0),
+            }
+            for row in rows
+        ],
+        request_id_from_request(request),
+    )
+
+
+@router.get("/contact-exchanges/{exchange_id}")
+async def contact_exchange_diagnostics(
+    exchange_id: UUID,
+    request: Request,
+    _principal: AuthenticatedPrincipal = Depends(
+        require_permission("matchmaking.contact_exchange.read")
+    ),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    request_rows = (
+        await session.execute(
+            text(
+                "SELECT id,mutual_match_id,pair_id,status,policy,policy_version,consent_version,"
+                "created_at,activated_at,revoked_at,invalidated_at "
+                "FROM matchmaking_contact_exchange_requests WHERE id=:id"
+            ),
+            {"id": exchange_id},
+        )
+    ).mappings()
+    exchange = request_rows.first()
+    if exchange is None:
+        raise VavError(
+            "CONTACT_EXCHANGE_NOT_FOUND", "That contact exchange was not found.", status_code=404
+        )
+    consent_rows = (
+        await session.execute(
+            text(
+                "SELECT status,platform_only_preferred,consented_at,withdrawn_at "
+                "FROM matchmaking_contact_exchange_consents "
+                "WHERE contact_exchange_request_id=:id ORDER BY created_at"
+            ),
+            {"id": exchange_id},
+        )
+    ).mappings()
+    grant_rows = (
+        await session.execute(
+            text(
+                "SELECT status,granted_at,expires_at,suspended_at,revoked_at,revoke_reason "
+                "FROM matchmaking_contact_exchange_grants "
+                "WHERE contact_exchange_request_id=:id ORDER BY granted_at"
+            ),
+            {"id": exchange_id},
+        )
+    ).mappings()
+    return success(
+        {
+            "exchange": dict(exchange) | {"id": str(exchange["id"])},
+            "consents": [dict(row) for row in consent_rows],
+            "grants": [dict(row) for row in grant_rows],
+            "redaction_notice": (
+                "Contact values, selected point identifiers and one-sided consent details are "
+                "excluded from routine operations views."
+            ),
+        },
+        request_id_from_request(request),
+    )
+
+
 @router.get("/audit")
 async def list_audit(
     request: Request,
@@ -578,6 +713,64 @@ async def list_audit(
         )
     ).mappings()
     return success([dict(row) for row in rows], request_id_from_request(request))
+
+
+@router.get("/invalidations")
+async def list_invalidations(
+    request: Request,
+    _principal: AuthenticatedPrincipal = Depends(
+        require_permission("matchmaking.interactions.read")
+    ),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    rows = (
+        await session.execute(
+            text(
+                "SELECT h.pair_id,h.entity_type,h.entity_id,h.action,h.from_status,h.to_status,"
+                "h.reason_code,h.safe_metadata,h.occurred_at FROM matchmaking_interaction_history h "
+                "WHERE h.action IN ('invalidated','revoked','suspended','frozen') "
+                "OR h.to_status IN ('invalidated','revoked','suspended','safety_frozen','restricted') "
+                "ORDER BY h.occurred_at DESC LIMIT 300"
+            )
+        )
+    ).mappings()
+    return success(
+        [dict(row) | {"pair_id": str(row["pair_id"])} for row in rows],
+        request_id_from_request(request),
+    )
+
+
+@router.get("/incidents")
+async def list_incidents(
+    request: Request,
+    _principal: AuthenticatedPrincipal = Depends(
+        require_permission("matchmaking.incidents.read")
+    ),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    rows = (
+        await session.execute(
+            text(
+                "SELECT event_type,subject_type,subject_id,purpose,reason,safe_context,created_at "
+                "FROM matchmaking_interaction_audit_events WHERE "
+                "event_type LIKE 'matchmaking.%invalidated%' OR "
+                "event_type LIKE 'matchmaking.%revoked%' OR "
+                "event_type LIKE 'matchmaking.%denied%' OR "
+                "reason IN ('block_created','restriction_created','high_risk_report',"
+                "'moderation_unavailable') ORDER BY created_at DESC LIMIT 300"
+            )
+        )
+    ).mappings()
+    return success(
+        {
+            "incidents": [dict(row) for row in rows],
+            "boundary": (
+                "This is the Batch 15 interaction incident projection. Full report, block and "
+                "investigation ownership remains in Batch 18."
+            ),
+        },
+        request_id_from_request(request),
+    )
 
 
 #: Statuses the admin UI groups as "needs attention". Kept here so the API and

@@ -32,7 +32,9 @@ async function signIn(page: Page) {
 test("a version without a passing offline evaluation cannot be released", async ({ page }) => {
   await signIn(page);
   await page.goto(`${adminBaseUrl}/admin/recommendations/strategies`);
-  await expect(page.getByRole("heading", { name: "推荐运营中心" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "推荐运营中心", level: 2 })
+  ).toBeVisible();
   await expect(
     page.getByText(
       "上线前置条件：必须存在通过的离线评估，且审批人与上线人必须是不同的管理员。后端会再次校验，前端不提供跳过入口。"
@@ -61,7 +63,9 @@ test("the version detail states that it has no evaluation record yet", async ({ 
     .getByRole("button", { name: "查看" })
     .click();
 
-  await expect(page.getByText(`策略 ${recommendationCandidateStrategyCode}`)).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: `策略 ${recommendationCandidateStrategyCode}` })
+  ).toBeVisible();
   await expect(page.getByRole("heading", { name: "评估记录" })).toBeVisible();
   await expect(page.getByText("尚无评估记录，该版本不可上线。")).toBeVisible();
 });

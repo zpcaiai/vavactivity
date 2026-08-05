@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import {
+  resetLoginRateLimits,
   seedDatingProfileFixture,
   seedProtectedDateOfBirth,
   verifyUserFixture
@@ -11,6 +12,7 @@ test.beforeAll(() => seedDatingProfileFixture());
 const password = "VavDating!2026_Secure#";
 
 async function registerMember(page: import("@playwright/test").Page, email: string) {
+  resetLoginRateLimits();
   await page.goto("/zh-CN/auth/register");
   await page.getByLabel("邮箱").fill(email);
   await page.getByLabel("密码").fill(password);
@@ -22,6 +24,7 @@ async function registerMember(page: import("@playwright/test").Page, email: stri
   await page.getByLabel("邮箱").fill(email);
   await page.getByLabel("密码").fill(password);
   await page.getByRole("button", { name: "欢迎回来" }).click();
+  await expect(page).toHaveURL(/\/zh-CN\/account\/security$/u);
 }
 
 test("an adult member creates a dating profile with strict privacy defaults", async ({ page }) => {
@@ -29,7 +32,9 @@ test("an adult member creates a dating profile with strict privacy defaults", as
   await registerMember(page, email);
 
   await page.goto("/zh-CN/account/dating-profile");
-  await expect(page.getByRole("heading", { name: "婚恋档案" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "婚恋档案", exact: true })
+  ).toBeVisible();
   await expect(page.getByText("联系方式在任何场景下都不会自动公开")).toBeVisible();
 
   await page.getByRole("button", { name: "创建婚恋档案" }).click();

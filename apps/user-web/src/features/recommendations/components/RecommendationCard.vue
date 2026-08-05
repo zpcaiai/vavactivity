@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
 import CompatibilitySummary from "@/features/recommendations/components/CompatibilitySummary.vue";
 import ExposureNotice from "@/features/recommendations/components/ExposureNotice.vue";
 import InformationGap from "@/features/recommendations/components/InformationGap.vue";
 import PreferenceRelaxationCard from "@/features/recommendations/components/PreferenceRelaxationCard.vue";
 import type { RecommendationItem } from "@/features/recommendations/types";
+import { matchmakingInteractionsApi } from "@/features/matchmaking-interactions/api";
 
 /**
  * One recommendation, exactly as the backend froze it for this viewer.
@@ -30,7 +31,45 @@ const props = defineProps<{
 const emit = defineEmits<{
   (event: "open", itemId: string): void;
   (event: "not-relevant", itemId: string): void;
+  (event: "interacted", itemId: string): void;
 }>();
+
+const acting = ref(false);
+const interactionNotice = ref("");
+const interactionError = ref("");
+
+async function like() {
+  if (!window.confirm("喜欢只会在双方都选择彼此后通知对方。确定表达兴趣吗？")) return;
+  acting.value = true;
+  interactionError.value = "";
+  try {
+    const result = await matchmakingInteractionsApi.like(props.item.recommendation_item_id);
+    interactionNotice.value = result.outcome === "mutual_match"
+      ? "你们已经双方互选，可以进入认识邀请。"
+      : "已记录你的选择；单向喜欢不会通知对方。";
+    emit("interacted", props.item.recommendation_item_id);
+  } catch (cause) {
+    interactionError.value = cause instanceof Error ? cause.message : "喜欢操作失败";
+  } finally {
+    acting.value = false;
+  }
+}
+
+async function skip() {
+  acting.value = true;
+  interactionError.value = "";
+  try {
+    await matchmakingInteractionsApi.skip(props.item.recommendation_item_id, {
+      skip_type: "not_now"
+    });
+    interactionNotice.value = "已暂时跳过；对方不会看到这个选择。";
+    emit("interacted", props.item.recommendation_item_id);
+  } catch (cause) {
+    interactionError.value = cause instanceof Error ? cause.message : "跳过操作失败";
+  } finally {
+    acting.value = false;
+  }
+}
 
 const profile = computed(() => props.item.profile ?? {});
 
@@ -104,6 +143,21 @@ const photoInitial = computed(() => displayName.value.slice(0, 1));
       :status="item.status"
     />
 
+    <p
+      v-if="interactionNotice"
+      class="interaction-notice"
+      role="status"
+    >
+      {{ interactionNotice }}
+    </p>
+    <p
+      v-if="interactionError"
+      class="interaction-error"
+      role="alert"
+    >
+      {{ interactionError }}
+    </p>
+
     <footer class="actions">
       <button
         v-if="detailPath || !detailed"
@@ -115,17 +169,17 @@ const photoInitial = computed(() => displayName.value.slice(0, 1));
       </button>
       <button
         type="button"
-        disabled
-        title="互选功能将在下一批次开放"
+        :disabled="acting"
+        @click="like"
       >
-        感兴趣（即将开放）
+        感兴趣
       </button>
       <button
         type="button"
-        disabled
-        title="互选功能将在下一批次开放"
+        :disabled="acting"
+        @click="skip"
       >
-        暂时跳过（即将开放）
+        暂时跳过
       </button>
       <button
         type="button"
@@ -152,4 +206,6 @@ const photoInitial = computed(() => displayName.value.slice(0, 1));
 .actions button:disabled { opacity: 0.45; cursor: not-allowed; }
 .actions button.primary { background: #1f2933; color: #fff; border-color: #1f2933; }
 .actions button.quiet { border-style: dashed; }
+.interaction-notice { margin: 0; padding: .6rem .8rem; border-radius: .5rem; background: #eaf6ec; color: #1c5a2a; }
+.interaction-error { margin: 0; padding: .6rem .8rem; border-radius: .5rem; background: #fdecea; color: #8a1c12; }
 </style>

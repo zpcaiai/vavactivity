@@ -249,7 +249,11 @@ def _match_dto(match: dict[str, Any], user_id: UUID) -> dict[str, Any]:
         "source": match["source"],
         "status": match["status"],
         "matched_at": match["matched_at"],
+        "invitation_id": str(match["invitation_id"]) if match.get("invitation_id") else None,
         "invitation_status": match.get("invitation_status"),
+        "contact_exchange_id": (
+            str(match["contact_exchange_id"]) if match.get("contact_exchange_id") else None
+        ),
         "contact_exchange_status": match.get("contact_exchange_status"),
     }
 

@@ -351,9 +351,14 @@ async def list_matches(session: AsyncSession, user_id: UUID) -> list[dict[str, A
         await session.execute(
             text(
                 "SELECT m.*, "
+                "(SELECT id FROM matchmaking_introduction_invitations i "
+                "  WHERE i.mutual_match_id=m.id ORDER BY i.created_at DESC LIMIT 1) "
+                "  AS invitation_id, "
                 "(SELECT status FROM matchmaking_introduction_invitations i "
                 "  WHERE i.mutual_match_id=m.id ORDER BY i.created_at DESC LIMIT 1) "
                 "  AS invitation_status, "
+                "(SELECT id FROM matchmaking_contact_exchange_requests c "
+                "  WHERE c.mutual_match_id=m.id) AS contact_exchange_id, "
                 "(SELECT status FROM matchmaking_contact_exchange_requests c "
                 "  WHERE c.mutual_match_id=m.id) AS contact_exchange_status "
                 "FROM matchmaking_mutual_matches m "

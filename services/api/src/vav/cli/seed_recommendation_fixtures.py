@@ -144,7 +144,10 @@ def _json(value: Any) -> str:
 
 
 def _email(key: str) -> str:
-    return f"{FIXTURE_PREFIX}-{key}@example.test"
+    # `EmailStr` correctly rejects the reserved `.test` suffix at login time.
+    # `example.com` is accepted by the same validator and remains non-deliverable
+    # test data by convention.
+    return f"{FIXTURE_PREFIX}-{key}@example.com"
 
 
 async def _ensure_user(session: AsyncSession, fixture: dict[str, Any], password_hash: str) -> Any:
@@ -152,6 +155,29 @@ async def _ensure_user(session: AsyncSession, fixture: dict[str, Any], password_
     user_id = await session.scalar(
         text("SELECT id FROM users WHERE email=:email"), {"email": email}
     )
+    if user_id is None:
+        # Older fixture releases used `.test`, which current `EmailStr`
+        # validation correctly refuses at login. Migrate that synthetic row in
+        # place so its stable profile number and generated history remain
+        # idempotent instead of creating a second fixture identity.
+        legacy_email = f"{FIXTURE_PREFIX}-{fixture['key']}@example.test"
+        user_id = await session.scalar(
+            text("SELECT id FROM users WHERE email=:email"), {"email": legacy_email}
+        )
+        if user_id is not None:
+            await session.execute(
+                text(
+                    "UPDATE users SET email=:email,display_email=:display_email,password_hash=:hash,"
+                    "status='active',email_verified_at=COALESCE(email_verified_at,now()),"
+                    "updated_at=now() WHERE id=:id"
+                ),
+                {
+                    "id": user_id,
+                    "email": email,
+                    "display_email": email,
+                    "hash": password_hash,
+                },
+            )
     if user_id is None:
         user_id = await session.scalar(
             text(

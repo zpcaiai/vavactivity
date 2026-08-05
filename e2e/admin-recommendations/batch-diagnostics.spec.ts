@@ -25,7 +25,9 @@ async function openBatches(page: Page) {
   await page.getByRole("button", { name: "安全登录" }).click();
   await expect(page).toHaveURL(/\/admin\/dashboard$/);
   await page.goto(`${adminBaseUrl}/admin/recommendations/batches`);
-  await expect(page.getByRole("heading", { name: "推荐运营中心" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "推荐运营中心", level: 2 })
+  ).toBeVisible();
 }
 
 test("a batch is inspected as ranked candidate pairs, never as named members", async ({

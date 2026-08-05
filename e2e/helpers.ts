@@ -169,6 +169,71 @@ export function seedRecommendationFixture() {
       { stdio: "pipe" }
     );
   }
+  // Batch 15 browser tests may have consumed a synthetic recommendation with
+  // like/skip. Restore only those synthetic cards so Batch 14 acceptance stays
+  // repeatable regardless of suite order; production/member rows are untouched.
+  execFileSync(
+    "docker",
+    [
+      "compose",
+      "exec",
+      "-T",
+      "postgres",
+      "psql",
+      "-U",
+      "vav",
+      "-d",
+      "vav",
+      "-v",
+      "ON_ERROR_STOP=1",
+      "-c",
+      "UPDATE recommendation_items SET status='ready', exposed_at=NULL, viewed_at=NULL, invalidated_at=NULL, invalidation_reason=NULL WHERE viewer_user_id IN (SELECT id FROM users WHERE email LIKE 'recommendation-fixture-%@example.com') AND (status IN ('liked','skipped') OR (status='invalidated' AND invalidation_reason='member_settings_changed'))"
+    ],
+    { stdio: "pipe" }
+  );
+}
+
+/**
+ * Build a Batch 15 match and pending invitation through the real services.
+ * The members are synthetic Batch 14 fixtures; no production account is read
+ * or mutated and no row is inserted behind the domain services' backs.
+ */
+export function seedMatchmakingInteractionFixture(): string {
+  seedRecommendationFixture();
+  execFileSync(
+    "docker",
+    ["compose", "exec", "-T", "api", "python", "-m", "vav.cli.seed_matchmaking_interactions"],
+    { stdio: "pipe" }
+  );
+  return apiPython([
+    "import asyncio",
+    "from uuid import UUID",
+    "from sqlalchemy import text",
+    "from vav.core.database import session_factory",
+    "from vav.modules.matchmaking_interactions import likes, invitations",
+    "async def main():",
+    "    async with session_factory() as session:",
+    "        existing = (await session.execute(text(\"SELECT m.id,u.email FROM matchmaking_introduction_invitations i JOIN matchmaking_mutual_matches m ON m.id=i.mutual_match_id JOIN users u ON u.id=i.sender_user_id WHERE u.email LIKE 'recommendation-fixture-%@example.com' AND i.status='pending' ORDER BY i.created_at DESC LIMIT 1\"))).first()",
+    "        if existing is not None:",
+    "            print(existing.email)",
+    "            return",
+    "        active = (await session.execute(text(\"SELECT m.id AS match_id,m.user_low_id AS sender_user_id,u.email FROM matchmaking_mutual_matches m JOIN users u ON u.id=m.user_low_id WHERE u.email LIKE 'recommendation-fixture-%@example.com' AND m.status='active' ORDER BY m.created_at DESC LIMIT 1\"))).mappings().first()",
+    "        if active is not None:",
+    "            await invitations.send_invitation(session, sender_user_id=active['sender_user_id'], match_id=active['match_id'], message='愿意在平台内进一步认识吗？', idempotency_key='e2e-introduction-active')",
+    "            await session.commit()",
+    "            print(active['email'])",
+    "            return",
+    "        row = (await session.execute(text(\"SELECT i.id AS first_item,j.id AS second_item,i.viewer_user_id AS first_user,i.recommended_user_id AS second_user,u.email FROM recommendation_items i JOIN recommendation_items j ON j.viewer_user_id=i.recommended_user_id AND j.recommended_user_id=i.viewer_user_id JOIN users u ON u.id=i.viewer_user_id WHERE i.status IN ('ready','exposed','viewed') AND j.status IN ('ready','exposed','viewed') AND u.email LIKE 'recommendation-fixture-%@example.com' ORDER BY i.created_at DESC LIMIT 1\"))).mappings().first()",
+    "        if row is None:",
+    "            raise SystemExit('no reciprocal actionable recommendation fixture')",
+    "        await likes.create_like(session, viewer_user_id=row['first_user'], recommendation_item_id=row['first_item'], idempotency_key='e2e-first-like')",
+    "        matched = await likes.create_like(session, viewer_user_id=row['second_user'], recommendation_item_id=row['second_item'], idempotency_key='e2e-second-like')",
+    "        match_id = UUID(matched['mutual_match_id'])",
+    "        await invitations.send_invitation(session, sender_user_id=row['first_user'], match_id=match_id, message='愿意在平台内进一步认识吗？', idempotency_key='e2e-introduction')",
+    "        await session.commit()",
+    "        print(row['email'])",
+    "asyncio.run(main())"
+  ]);
 }
 
 /** Password `vav.cli.seed_recommendation_fixtures` gives every fixture member. */
@@ -197,7 +262,7 @@ export const recommendationFixtureDisplayNames = [
 export function recommendationFixtureEmail(
   key: (typeof recommendationFixtureKeys)[number]
 ): string {
-  return `recommendation-fixture-${key}@example.test`;
+  return `recommendation-fixture-${key}@example.com`;
 }
 
 /** An operator role that deliberately lacks the sensitive and experiment scopes. */
@@ -271,7 +336,7 @@ export function recommendationFixtureUserId(
 export function recommendationCandidatePairId(): string {
   return requiredPostgresValue(
     "a recommendation candidate pair",
-    "SELECT id FROM recommendation_candidate_pairs ORDER BY created_at DESC LIMIT 1"
+    "SELECT id FROM recommendation_candidate_pairs ORDER BY generated_at DESC LIMIT 1"
   );
 }
 

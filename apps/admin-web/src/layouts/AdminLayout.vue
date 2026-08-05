@@ -35,6 +35,7 @@ const menu = [
   { path: "/admin/ai", labelKey: "menu.ai", icon: DataAnalysis },
   { path: "/admin/notifications/dashboard", labelKey: "menu.notifications", icon: Document },
   { path: "/admin/privacy/dashboard", labelKey: "menu.privacy", icon: Lock },
+  { path: "/admin/matchmaking-interactions/dashboard", labelKey: "menu.interactions", icon: User },
   { path: "/admin/content/settings", labelKey: "menu.settings", icon: Setting },
   { path: "/admin/access/admins", labelKey: "menu.admins", icon: Lock },
   { path: "/admin/audit/auth", labelKey: "menu.audit", icon: DataAnalysis }
@@ -66,6 +67,7 @@ const visibleMenu = computed(() => {
       "/admin/ai": "ai.conversations.read",
       "/admin/notifications/dashboard": "notifications.analytics.read",
       "/admin/privacy/dashboard": "privacy.requests.read",
+      "/admin/matchmaking-interactions/dashboard": "matchmaking.analytics.read",
       "/admin/content/settings": "content.settings.read",
       "/admin/access/admins": "admins.read",
       "/admin/audit/auth": "audit.read"

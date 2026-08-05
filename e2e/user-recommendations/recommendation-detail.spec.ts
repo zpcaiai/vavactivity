@@ -56,19 +56,19 @@ test("the detail view explains the match through mutual strengths and the viewer
 
   await expect(
     page.getByText(
-      "联系方式、精确出生日期和对方的择偶条件不会在此展示。互相认识的能力将在互选功能开放后提供。"
+      "联系方式、精确出生日期和对方的择偶条件不会在此展示。感兴趣与暂时跳过不会向对方公开；只有双方都感兴趣时才会建立互选。"
     )
   ).toBeVisible();
 });
 
-test("like and skip are visibly not available yet and only 不合适 can be sent", async ({
+test("like and skip are available while every one-sided choice stays private", async ({
   page
 }) => {
   await openFirstRecommendation(page);
 
   const card = page.getByRole("article").first();
-  await expect(card.getByRole("button", { name: "感兴趣（即将开放）" })).toBeDisabled();
-  await expect(card.getByRole("button", { name: "暂时跳过（即将开放）" })).toBeDisabled();
+  await expect(card.getByRole("button", { name: "感兴趣", exact: true })).toBeEnabled();
+  await expect(card.getByRole("button", { name: "暂时跳过", exact: true })).toBeEnabled();
   await expect(card.getByRole("button", { name: "不合适" })).toBeEnabled();
 
   await card.getByRole("button", { name: "不合适" }).click();

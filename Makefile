@@ -26,6 +26,14 @@
 	privacy-migrate privacy-seed privacy-seed-inventory privacy-test privacy-security-test \
 	privacy-concurrency-test privacy-retention-test privacy-user-e2e privacy-admin-e2e privacy-verify
 
+.PHONY: recommendation-migrate recommendation-seed recommendation-seed-evaluations \
+	recommendation-build-pool recommendation-generate-fixtures recommendation-test \
+	recommendation-concurrency-test recommendation-security-test recommendation-fairness-test \
+	recommendation-eval recommendation-user-e2e recommendation-admin-e2e recommendation-verify \
+	interaction-migrate interaction-seed interaction-test interaction-concurrency-test \
+	interaction-security-test interaction-privacy-test interaction-user-e2e \
+	interaction-admin-e2e interaction-verify
+
 bootstrap:
 	./scripts/bootstrap.sh
 
@@ -441,3 +449,38 @@ recommendation-verify:
 	$(MAKE) recommendation-eval
 	$(MAKE) recommendation-user-e2e
 	$(MAKE) recommendation-admin-e2e
+
+interaction-migrate:
+	docker compose exec -T api alembic upgrade head
+
+interaction-seed:
+	docker compose exec -T api python -m vav.cli.seed_permissions
+	docker compose exec -T api python -m vav.cli.seed_matchmaking_interactions
+
+interaction-test:
+	docker compose exec -T api pytest tests/matchmaking_interactions/unit tests/matchmaking_interactions/integration -q
+
+interaction-concurrency-test:
+	docker compose exec -T api pytest tests/matchmaking_interactions/concurrency -q
+
+interaction-security-test:
+	docker compose exec -T api pytest tests/matchmaking_interactions/security -q
+
+interaction-privacy-test:
+	docker compose exec -T api pytest tests/matchmaking_interactions/privacy -q
+
+interaction-user-e2e:
+	pnpm exec playwright test e2e/user-matchmaking-interactions
+
+interaction-admin-e2e:
+	pnpm exec playwright test e2e/admin-matchmaking-interactions
+
+interaction-verify:
+	$(MAKE) interaction-migrate
+	$(MAKE) interaction-seed
+	$(MAKE) interaction-test
+	$(MAKE) interaction-concurrency-test
+	$(MAKE) interaction-security-test
+	$(MAKE) interaction-privacy-test
+	$(MAKE) interaction-user-e2e
+	$(MAKE) interaction-admin-e2e

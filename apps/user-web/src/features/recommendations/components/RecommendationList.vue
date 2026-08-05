@@ -15,6 +15,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (event: "open", itemId: string): void;
   (event: "not-relevant", itemId: string): void;
+  (event: "interacted", itemId: string): void;
 }>();
 
 const { observeCard, unobserveCard, reportProfileOpened } = useRecommendationExposure({
@@ -70,6 +71,7 @@ function open(itemId: string) {
         :preferences-path="preferencesPath"
         @open="open"
         @not-relevant="emit('not-relevant', $event)"
+        @interacted="emit('interacted', $event)"
       />
     </li>
   </ul>

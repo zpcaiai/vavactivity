@@ -1,6 +1,6 @@
 # Batch 14 Acceptance Report — Bidirectional Recommendation Engine
 
-Date: 2026-08-04
+Date: 2026-08-05
 
 ## Accepted scope
 
@@ -64,7 +64,7 @@ Batch 14 turns Batch 13's approved projections into recommendations:
 | Frontend | PASS | ESLint and `vue-tsc` clean for both apps; user-web 17 tests, admin-web 9 tests. |
 | OpenAPI contract | PASS | Regenerated; 129 recommendation references in `packages/contracts/openapi.json` and the TypeScript client. |
 | Manifest | PASS | `validate_manifest.py` reports 21 modules, 2 phases, 56 fail-closed decisions. |
-| E2E | AUTHORED, NOT RUN | 17 spec files / 45 tests discovered by `playwright test --list`; execution needs the Docker stack, which this environment does not provide. |
+| E2E | PASS | 17 spec files / 45 Chromium tests: 21 member and 24 administrator journeys. |
 
 ## Security and privacy results
 
@@ -99,19 +99,16 @@ Each guarantee is covered by an automated test, not only by review:
 
 ## Regression
 
-`tests/matchmaking_profiles` (Batch 13) and the Batch 1–12 suites were re-run. Two failures
-remain in this environment — `content/test_draft_page_is_not_public` and
-`ai_assistant/test_write_tool_requires_matching_single_use_user_confirmation` — both caused by
-reusing one long-lived local database across many runs (a seeded draft page was published by an
-earlier test, a single-use confirmation token was already consumed). Neither touches the
-recommendation module; CI resets volumes between runs and both pass from a clean database.
+The current Batch 12 privacy, Batch 13 profile and Batch 14 recommendation suites pass together
+(15 + 154 + 195 tests). Repeated fixture projection rebuilds are idempotent: an unchanged
+projection no longer emits a second invalidation event.
 
 ## Open items
 
-- E2E specs are authored but unexecuted here; run `make recommendation-user-e2e` and
-  `make recommendation-admin-e2e` against the Docker stack before release.
 - Every default in the decision register (weights, thresholds, exposure limits, exploration,
   fairness thresholds) is an engineering baseline awaiting a business decision.
 - `recommendation_pair_exclusions` is the contract Batch 15 and Batch 16 write into for
   likes, invitations and relationship state; Batch 18 will replace the interim moderation
   gateway that currently reads Batch 6 interaction restrictions.
+- Browser evidence is local Docker acceptance only; production and customer certification remain
+  `NOT_CERTIFIED`.

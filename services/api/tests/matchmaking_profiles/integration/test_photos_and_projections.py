@@ -352,6 +352,14 @@ async def test_repeated_rebuilds_are_idempotent() -> None:
             {"id": profile["id"]},
         )
         assert int(version or 0) == 1
+        emitted = await session.scalar(
+            text(
+                "SELECT count(*) FROM outbox_events WHERE topic='dating_profile.projection.updated' "
+                "AND aggregate_id=:id"
+            ),
+            {"id": str(profile["id"])},
+        )
+        assert int(emitted or 0) == 1
 
 
 @pytest.mark.asyncio

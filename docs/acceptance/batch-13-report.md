@@ -1,6 +1,6 @@
 # Batch 13 Acceptance Report — Dating Profiles, Preferences and Review
 
-Date: 2026-08-04
+Date: 2026-08-05
 
 ## Accepted scope
 
@@ -50,6 +50,7 @@ Batch 13 delivers the matchmaking profile domain that Phase 2 depends on:
 | Frontend | PASS | ESLint and `vue-tsc` clean for both apps; 7 user-web and 6 admin-web unit tests pass. |
 | OpenAPI contract | PASS | Regenerated; 84 dating-profile / matchmaking references present in `packages/contracts/openapi.json` and the TypeScript client. |
 | Manifest | PASS | `validate_manifest.py` reports 21 modules, 2 phases, 49 fail-closed decisions. |
+| E2E | PASS | 14/14 Chromium tests: 9 member profile journeys and 5 administrator review journeys. |
 
 ## Security and privacy results
 
@@ -106,9 +107,7 @@ Each of these is covered by an automated test, not only by review:
 decision register. Each is implemented as an optional field with a restricted default; none is
 encoded as a permanent social or theological rule.
 
-## Not executed in this environment
+## Current evidence boundary
 
-`make dating-profile-verify` includes the two Playwright suites, which need the full Docker
-Compose stack with both web apps running. The specs are committed under
-`e2e/user-dating-profile` and `e2e/admin-dating-profile`; they were not executed here because
-verification ran against a native PostgreSQL/Redis pair rather than Compose.
+The Playwright suites were executed against the local Docker PostgreSQL/API stack and local web
+development servers. This is implementation acceptance, not production or customer certification.

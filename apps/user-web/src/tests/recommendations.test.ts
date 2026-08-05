@@ -14,6 +14,15 @@ import type {
 } from "@/features/recommendations/types";
 import { router } from "@/router";
 
+const interactionMocks = vi.hoisted(() => ({
+  like: vi.fn(),
+  skip: vi.fn()
+}));
+
+vi.mock("@/features/matchmaking-interactions/api", () => ({
+  matchmakingInteractionsApi: interactionMocks
+}));
+
 const item: RecommendationItem = {
   recommendation_item_id: "11111111-1111-4111-8111-111111111111",
   rank_position: 1,
@@ -97,12 +106,30 @@ describe("recommendation card", () => {
     expect(text).toContain("平台不提供匹配分数或百分比");
   });
 
-  it("renders like and skip as disabled placeholders and keeps 不合适 active", async () => {
+  it("records a private like and reports a mutual match only from the outcome field", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    interactionMocks.like.mockResolvedValueOnce({ outcome: "mutual_match" });
+    const wrapper = mount(RecommendationCard, { props: { item }, ...globalStubs });
+    await wrapper.get("button:nth-of-type(2)").trigger("click");
+    await vi.waitFor(() => expect(interactionMocks.like).toHaveBeenCalledWith(item.recommendation_item_id));
+    expect(wrapper.text()).toContain("你们已经双方互选");
+    expect(wrapper.emitted("interacted")?.[0]).toEqual([item.recommendation_item_id]);
+  });
+
+  it("records a private skip without notifying the other member", async () => {
+    interactionMocks.skip.mockResolvedValueOnce({ outcome: "skipped" });
+    const wrapper = mount(RecommendationCard, { props: { item }, ...globalStubs });
+    await wrapper.get("button:nth-of-type(3)").trigger("click");
+    await vi.waitFor(() => expect(interactionMocks.skip).toHaveBeenCalledWith(
+      item.recommendation_item_id,
+      { skip_type: "not_now" }
+    ));
+    expect(wrapper.text()).toContain("对方不会看到这个选择");
+  });
+
+  it("keeps the not-relevant feedback action available", async () => {
     const wrapper = mount(RecommendationCard, { props: { item }, ...globalStubs });
     const buttons = wrapper.findAll("button");
-    const disabled = buttons.filter((button) => button.attributes("disabled") !== undefined);
-    expect(disabled).toHaveLength(2);
-    expect(disabled.map((button) => button.text()).join()).toContain("即将开放");
 
     const notRelevant = buttons.find((button) => button.text() === "不合适");
     expect(notRelevant?.attributes("disabled")).toBeUndefined();

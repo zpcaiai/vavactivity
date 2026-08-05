@@ -286,6 +286,7 @@ async def check_interaction_allowed(
     actor_user_id: UUID,
     target_user_id: UUID,
     require_target_profile: bool = True,
+    allow_active_relationship: bool = False,
 ) -> EligibilityResult:
     """The recheck every write and every display runs.
 
@@ -317,7 +318,7 @@ async def check_interaction_allowed(
     if not moderation.allowed:
         return EligibilityResult(False, moderation.reason_code)
 
-    if await RelationshipGateway(session).has_active_relationship(
+    if not allow_active_relationship and await RelationshipGateway(session).has_active_relationship(
         user_a_id=actor_user_id, user_b_id=target_user_id
     ):
         return EligibilityResult(False, "relationship_started")

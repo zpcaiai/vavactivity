@@ -176,6 +176,7 @@ onMounted(async () => {
       :preferences-path="preferencesPath"
       @open="openItem"
       @not-relevant="openDialog"
+      @interacted="refresh"
     />
 
     <RecommendationEmptyState

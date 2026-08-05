@@ -1969,6 +1969,13 @@ async def rebuild_projection(session: AsyncSession, profile_id: UUID) -> dict[st
         preference_version=preference_version,
         privacy_version=privacy_version,
     )
+    previous_checksum = await session.scalar(
+        text(
+            "SELECT projection_checksum FROM dating_profile_recommendation_projections "
+            "WHERE dating_profile_id=:id"
+        ),
+        {"id": profile_id},
+    )
 
     await session.execute(
         text(
@@ -2020,19 +2027,20 @@ async def rebuild_projection(session: AsyncSession, profile_id: UUID) -> dict[st
             "checksum": digest,
         },
     )
-    await emit_event(
-        session,
-        "dating_profile.projection.updated",
-        profile_id,
-        {"checksum": digest, "approved_version": profile["approved_version_number"]},
-    )
-    await audit(
-        session,
-        "matchmaking.projection.updated",
-        "dating_profile",
-        profile_id,
-        context={"checksum": digest},
-    )
+    if previous_checksum != digest:
+        await emit_event(
+            session,
+            "dating_profile.projection.updated",
+            profile_id,
+            {"checksum": digest, "approved_version": profile["approved_version_number"]},
+        )
+        await audit(
+            session,
+            "matchmaking.projection.updated",
+            "dating_profile",
+            profile_id,
+            context={"checksum": digest},
+        )
     await session.commit()
     return {"eligible": True, "checksum": digest, "profile_id": str(profile_id)}
 

@@ -24,6 +24,7 @@ import ModuleListPage from "@/pages/ModuleListPage.vue";
 import NavigationManagementPage from "@/pages/NavigationManagementPage.vue";
 import PricingSimulationPage from "@/pages/PricingSimulationPage.vue";
 import RecommendationManagementPage from "@/pages/RecommendationManagementPage.vue";
+import MatchmakingInteractionManagementPage from "@/pages/MatchmakingInteractionManagementPage.vue";
 import { useAccessStore } from "@/stores/access";
 
 const modules = [
@@ -83,6 +84,18 @@ export const recommendationSectionPermissions: Record<string, string> = {
   experiments: "recommendations.experiments.read",
   incidents: "recommendations.incidents.read",
   audit: "recommendations.audit.read"
+};
+
+export const interactionSectionPermissions: Record<string, string> = {
+  dashboard: "matchmaking.analytics.read",
+  pairs: "matchmaking.interactions.read",
+  matches: "matchmaking.matches.read",
+  invitations: "matchmaking.invitations.read",
+  "contact-exchanges": "matchmaking.contact_exchange.read",
+  invalidations: "matchmaking.interactions.read",
+  "dead-letters": "matchmaking.dead_letters.resolve",
+  incidents: "matchmaking.incidents.read",
+  audit: "matchmaking.audit.read"
 };
 
 const privacySectionPermissions: Record<string, string> = {
@@ -402,6 +415,24 @@ export const router = createRouter({
           name: "admin-recommendations-experiment-detail",
           component: RecommendationManagementPage,
           meta: { title: "推荐实验详情", permission: "recommendations.experiments.read", recommendationSection: "experiments" }
+        },
+        ...Object.keys(interactionSectionPermissions).map((section) => ({
+          path: `matchmaking-interactions/${section}`,
+          name: `admin-matchmaking-interactions-${section}`,
+          component: MatchmakingInteractionManagementPage,
+          meta: { title: "互动运营中心", permission: interactionSectionPermissions[section], interactionSection: section }
+        })),
+        {
+          path: "matchmaking-interactions/pairs/:id",
+          name: "admin-matchmaking-interactions-pair-detail",
+          component: MatchmakingInteractionManagementPage,
+          meta: { title: "互动用户对诊断", permission: "matchmaking.interactions.read", interactionSection: "pairs" }
+        },
+        {
+          path: "matchmaking-interactions/contact-exchanges/:id",
+          name: "admin-matchmaking-contact-exchange-detail",
+          component: MatchmakingInteractionManagementPage,
+          meta: { title: "联系方式授权诊断", permission: "matchmaking.contact_exchange.read", interactionSection: "contact-exchanges" }
         },
         ...Object.keys(privacySectionPermissions).map((section) => ({
           path: `privacy/${section}`,

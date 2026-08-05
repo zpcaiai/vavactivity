@@ -45,9 +45,10 @@ module_registry:
   dating_profile: {owner: product, status: foundation_in_progress, phase: phase_2}
   partner_preferences: {owner: product, status: foundation_in_progress, phase: phase_2}
   recommendations: {owner: matchmaking, status: foundation_in_progress, phase: phase_2}
-  likes: {owner: matchmaking, status: planned, phase: phase_2}
-  matches: {owner: matchmaking, status: planned, phase: phase_2}
-  introductions: {owner: matchmaking, status: planned, phase: phase_2}
+  likes: {owner: matchmaking, status: foundation_in_progress, phase: phase_2}
+  matches: {owner: matchmaking, status: foundation_in_progress, phase: phase_2}
+  introductions: {owner: matchmaking, status: foundation_in_progress, phase: phase_2}
+  contact_exchange: {owner: matchmaking_and_privacy, status: foundation_in_progress, phase: phase_2}
   relationship_state: {owner: matchmaking, status: planned, phase: phase_2}
   memberships: {owner: backend, status: foundation_in_progress, phase: phase_2}
   moderation: {owner: trust_and_safety, status: planned, phase: phase_2}
@@ -77,11 +78,40 @@ phases:
       - likes
       - matches
       - introductions
+      - contact_exchange
       - relationship_state
       - memberships
       - moderation
 
 pending_decisions:
+  matchmaking_direct_profile_like:
+    owner: product_and_trust
+    status: undecided
+    value: null
+  matchmaking_contact_exchange_policy:
+    owner: product_privacy_and_legal
+    status: undecided
+    value: null
+  matchmaking_invitation_expiry_policy:
+    owner: product
+    status: undecided
+    value: null
+  matchmaking_repeat_invitation_policy:
+    owner: product
+    status: undecided
+    value: null
+  matchmaking_declined_pair_cooldown:
+    owner: product_and_matchmaking
+    status: undecided
+    value: null
+  matchmaking_contact_grant_ttl:
+    owner: privacy_and_product
+    status: undecided
+    value: null
+  matchmaking_skip_cooldowns:
+    owner: product_and_matchmaking
+    status: undecided
+    value: null
   recommendation_default_feature_weights:
     owner: product_and_matchmaking
     status: undecided

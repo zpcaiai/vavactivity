@@ -120,7 +120,7 @@ function submit() {
 
 <style scoped>
 .dialog-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.35); display: grid; place-items: center; padding: 1rem; z-index: 50; }
-.dialog { width: min(32rem, 100%); background: #fff; border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
+.dialog { width: min(32rem, 100%); max-height: calc(100vh - 2rem); overflow-y: auto; background: #fff; border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
 .dialog h2 { margin: 0; font-size: 1.05rem; }
 .hint { font-size: 0.85rem; opacity: 0.75; line-height: 1.6; margin: 0; }
 fieldset { border: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.35rem; }

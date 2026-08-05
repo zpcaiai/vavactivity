@@ -27,6 +27,7 @@ import RecommendationDetailPage from "@/features/recommendations/pages/Recommend
 import RecommendationPreferencesPage from "@/features/recommendations/pages/RecommendationPreferencesPage.vue";
 import RecommendationHistoryPage from "@/features/recommendations/pages/RecommendationHistoryPage.vue";
 import RecommendationTransparencyPage from "@/features/recommendations/pages/RecommendationTransparencyPage.vue";
+import MatchmakingInteractionsPage from "@/features/matchmaking-interactions/pages/MatchmakingInteractionsPage.vue";
 import PrivacyCenterPage from "@/features/privacy/pages/PrivacyCenterPage.vue";
 import UnsubscribePage from "@/features/notifications/pages/UnsubscribePage.vue";
 import AuthPage from "@/pages/AuthPage.vue";
@@ -117,6 +118,13 @@ export const router = createRouter({
         { path: "account/recommendation-preferences", name: "account-recommendation-preferences", component: RecommendationPreferencesPage, meta: { requiresAuth: true } },
         { path: "account/recommendation-history", name: "account-recommendation-history", component: RecommendationHistoryPage, meta: { requiresAuth: true } },
         { path: "account/recommendation-transparency", name: "account-recommendation-transparency", component: RecommendationTransparencyPage, meta: { requiresAuth: true } },
+        { path: "account/matchmaking/likes", name: "account-matchmaking-likes", component: MatchmakingInteractionsPage, meta: { requiresAuth: true, requiresVerifiedEmail: true, interactionSection: "likes" } },
+        { path: "account/matchmaking/skips", name: "account-matchmaking-skips", component: MatchmakingInteractionsPage, meta: { requiresAuth: true, requiresVerifiedEmail: true, interactionSection: "skips" } },
+        { path: "account/matchmaking/matches", name: "account-matchmaking-matches", component: MatchmakingInteractionsPage, meta: { requiresAuth: true, requiresVerifiedEmail: true, interactionSection: "matches" } },
+        { path: "account/matchmaking/matches/:id", name: "account-matchmaking-match-detail", component: MatchmakingInteractionsPage, meta: { requiresAuth: true, requiresVerifiedEmail: true, interactionSection: "matches" } },
+        { path: "account/matchmaking/invitations", name: "account-matchmaking-invitations", component: MatchmakingInteractionsPage, meta: { requiresAuth: true, requiresVerifiedEmail: true, interactionSection: "invitations" } },
+        { path: "account/matchmaking/invitations/:id", name: "account-matchmaking-invitation-detail", component: MatchmakingInteractionsPage, meta: { requiresAuth: true, requiresVerifiedEmail: true, interactionSection: "invitations" } },
+        { path: "account/matchmaking/contact-exchanges/:id", name: "account-matchmaking-contact-exchange", component: MatchmakingInteractionsPage, meta: { requiresAuth: true, requiresVerifiedEmail: true, interactionSection: "contact" } },
         { path: "account/profile", name: "account-profile", component: PrivacyCenterPage, meta: { requiresAuth: true } },
         { path: "account/contact-points", name: "account-contact-points", component: PrivacyCenterPage, meta: { requiresAuth: true } },
         { path: "account/privacy", name: "account-privacy", component: PrivacyCenterPage, meta: { requiresAuth: true } },

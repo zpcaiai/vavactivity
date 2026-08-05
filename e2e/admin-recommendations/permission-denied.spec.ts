@@ -53,7 +53,9 @@ test("the monitoring sections the operator may read stay available", async ({ pa
   await signInOperator(page);
 
   await page.goto(`${adminBaseUrl}/admin/recommendations/dashboard`);
-  await expect(page.getByRole("heading", { name: "推荐运营中心" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "推荐运营中心", level: 2 })
+  ).toBeVisible();
   await expect(page.getByLabel("推荐总览")).toBeVisible();
 
   // The tab strip only offers what this operator is allowed to open.

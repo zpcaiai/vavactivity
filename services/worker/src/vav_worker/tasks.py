@@ -27,6 +27,8 @@ from vav.modules.notifications.service import (
     process_due_deliveries,
 )
 from vav.common.exceptions import VavError
+from vav.modules.matchmaking_interactions import invitations as interaction_invitations
+from vav.modules.matchmaking_interactions import invalidation as interaction_invalidation
 from vav.modules.privacy.service import execute_erasure_plan, process_export_request
 from vav.modules.recommendations import batches as recommendation_batches
 from vav.modules.recommendations import service as recommendation_service
@@ -634,3 +636,91 @@ async def _aggregate_recommendation_feedback() -> dict[str, int]:
 @celery_app.task(name="vav.recommendations.aggregate_feedback")  # type: ignore[misc]
 def aggregate_recommendation_feedback() -> dict[str, int]:
     return asyncio.run(_aggregate_recommendation_feedback())
+
+
+async def _maintain_matchmaking_interactions() -> dict[str, int]:
+    """Expire time-bound interaction state and fail closed on changed contacts."""
+    async with session_factory() as session:
+        expired_invitations = await interaction_invitations.expire_due_invitations(session)
+        expired_likes = len(
+            list(
+                (
+                    await session.scalars(
+                        text(
+                            "UPDATE matchmaking_likes SET status='expired' "
+                            "WHERE status='active' AND expires_at<=now() RETURNING id"
+                        )
+                    )
+                ).all()
+            )
+        )
+        expired_skips = len(
+            list(
+                (
+                    await session.scalars(
+                        text(
+                            "UPDATE matchmaking_skips SET status='expired',expired_at=now() "
+                            "WHERE status='active' AND cooldown_until<=now() RETURNING id"
+                        )
+                    )
+                ).all()
+            )
+        )
+        invalidated_tokens = len(
+            list(
+                (
+                    await session.scalars(
+                        text(
+                            "UPDATE matchmaking_contact_reveal_tokens SET status='invalidated',"
+                            "invalidated_at=now() WHERE status='issued' AND expires_at<=now() RETURNING id"
+                        )
+                    )
+                ).all()
+            )
+        )
+        stale_owners = list(
+            (
+                await session.scalars(
+                    text(
+                        "SELECT DISTINCT g.owner_user_id FROM matchmaking_contact_exchange_grants g "
+                        "JOIN LATERAL jsonb_array_elements_text(g.contact_point_ids) selected(id) ON true "
+                        "LEFT JOIN user_contact_points c ON c.id=selected.id::uuid "
+                        "AND c.user_id=g.owner_user_id WHERE g.status='active' AND "
+                        "(c.id IS NULL OR c.status<>'verified' OR "
+                        "COALESCE(g.contact_hash_snapshot->>selected.id,'')<>COALESCE(c.value_hmac,''))"
+                    )
+                )
+            ).all()
+        )
+        suspended_grants = 0
+        for owner_id in stale_owners:
+            suspended_grants += await interaction_invalidation.suspend_stale_contact_grants(
+                session, user_id=owner_id
+            )
+        purged_idempotency = len(
+            list(
+                (
+                    await session.scalars(
+                        text(
+                            "DELETE FROM matchmaking_idempotency_records "
+                            "WHERE expires_at<=now() RETURNING id"
+                        )
+                    )
+                ).all()
+            )
+        )
+        await session.commit()
+    await get_engine().dispose()
+    return {
+        "expired_invitations": expired_invitations,
+        "expired_likes": expired_likes,
+        "expired_skips": expired_skips,
+        "invalidated_reveal_tokens": invalidated_tokens,
+        "suspended_contact_grants": suspended_grants,
+        "purged_idempotency_records": purged_idempotency,
+    }
+
+
+@celery_app.task(name="vav.matchmaking_interactions.maintain")  # type: ignore[misc]
+def maintain_matchmaking_interactions() -> dict[str, int]:
+    return asyncio.run(_maintain_matchmaking_interactions())

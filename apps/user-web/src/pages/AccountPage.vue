@@ -39,6 +39,9 @@ const locale = computed(() => String(route.params.locale));
       <RouterLink :to="`/${locale}/account/privacy`">
         隐私与数据中心
       </RouterLink>
+      <RouterLink :to="`/${locale}/account/matchmaking/matches`">
+        互选与认识邀请
+      </RouterLink>
     </nav>
     <EmptyState
       v-else

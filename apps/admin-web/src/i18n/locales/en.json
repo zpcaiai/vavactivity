@@ -22,6 +22,7 @@
     "ai": "AI operations",
     "notifications": "Notification operations",
     "privacy": "Privacy operations",
+    "interactions": "Interaction operations",
     "settings": "Site settings",
     "admins": "Administrators",
     "audit": "Audit log"

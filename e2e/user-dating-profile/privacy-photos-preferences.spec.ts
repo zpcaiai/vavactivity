@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import {
+  resetLoginRateLimits,
   seedDatingProfileFixture,
   seedProtectedDateOfBirth,
   verifyUserFixture
@@ -11,6 +12,7 @@ test.beforeAll(() => seedDatingProfileFixture());
 const password = "VavDating!2026_Secure#";
 
 async function memberWithProfile(page: import("@playwright/test").Page, prefix: string) {
+  resetLoginRateLimits();
   const email = `${prefix}-${Date.now()}@example.com`;
   await page.goto("/zh-CN/auth/register");
   await page.getByLabel("邮箱").fill(email);
@@ -23,6 +25,7 @@ async function memberWithProfile(page: import("@playwright/test").Page, prefix: 
   await page.getByLabel("邮箱").fill(email);
   await page.getByLabel("密码").fill(password);
   await page.getByRole("button", { name: "欢迎回来" }).click();
+  await expect(page).toHaveURL(/\/zh-CN\/account\/security$/u);
   await page.goto("/zh-CN/account/dating-profile");
   await page.getByRole("button", { name: "创建婚恋档案" }).click();
   return email;
@@ -60,9 +63,9 @@ test("preview shows a different field set per viewing context", async ({ page })
   await memberWithProfile(page, "dating-preview");
   await page.getByRole("button", { name: "档案预览", exact: true }).click();
   await page.getByLabel("查看场景").selectOption("recommendation_card");
-  await expect(page.getByText(/联系方式：不可见/)).toBeVisible();
+  await expect(page.getByText(/联系方式：\s*不可见/)).toBeVisible();
   await page.getByLabel("查看场景").selectOption("mutual_match");
-  await expect(page.getByText(/联系方式：不可见/)).toBeVisible();
+  await expect(page.getByText(/联系方式：\s*不可见/)).toBeVisible();
 });
 
 test("narratives warn against contact details", async ({ page }) => {
