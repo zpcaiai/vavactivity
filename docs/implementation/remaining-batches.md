@@ -26,7 +26,9 @@ commands):
 **543 is the real backend baseline.** Any future report that claims a larger number without a
 matching test count is wrong.
 
-Batches 1–13 are committed. Batches 15–32 are not started — no code, no migrations, no plans.
+Batches 1–16 are committed. Batch 17 implementation is in progress with local static gates
+passing; its fresh-database CI and acceptance evidence remain pending. Batches 18–32 have not
+started.
 
 ## The roadmap is 32 batches, not 33
 

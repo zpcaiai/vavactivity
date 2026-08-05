@@ -84,26 +84,42 @@ phases:
       - moderation
 
 pending_decisions:
+  membership_default_free_plan:
+    owner: product_and_platform
+    status: undecided
+    value: null
+  membership_paid_authority:
+    owner: finance_and_platform
+    status: undecided
+    value: null
+  membership_plan_stacking:
+    owner: product_and_finance
+    status: undecided
+    value: null
+  membership_trial_repeat_policy:
+    owner: product_and_fraud
+    status: undecided
+    value: null
   relationship_stage_registry:
     owner: product_and_trust
-    status: interim_configured
-    value: relationship-stages-v1
+    status: undecided
+    value: null
   relationship_stage_skip_policy:
     owner: product_and_trust
-    status: interim_configured
-    value: forward_skip_disabled
+    status: undecided
+    value: null
   relationship_resume_policy:
     owner: product_and_trust
-    status: interim_configured
-    value: mutual_confirmation_no_auto_resume
+    status: undecided
+    value: null
   relationship_ending_policy:
     owner: product_privacy_and_legal
-    status: interim_configured
-    value: unilateral_after_explicit_confirmation
+    status: undecided
+    value: null
   relationship_reminder_policy:
     owner: product_and_trust
-    status: interim_configured
-    value: opt_in_neutral_max_4_per_month
+    status: undecided
+    value: null
   matchmaking_direct_profile_like:
     owner: product_and_trust
     status: undecided

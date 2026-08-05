@@ -63,6 +63,7 @@ jobs:
           uv run --package vav-platform-api python -m vav.cli.seed_notifications
           uv run --package vav-platform-api python -m vav.cli.seed_privacy
           uv run --package vav-platform-api python -m vav.cli.seed_privacy_inventory
+          uv run --package vav-platform-api python -m vav.cli.seed_memberships
       - run: uv run --package vav-platform-api pytest services/api/tests
       - run: uv run --package vav-platform-api python scripts/check_migration_heads.py
       - name: Verify the CI database reached the migration head
@@ -105,6 +106,7 @@ jobs:
           uv run --package vav-platform-api python -m vav.cli.seed_notifications
           uv run --package vav-platform-api python -m vav.cli.seed_privacy
           uv run --package vav-platform-api python -m vav.cli.seed_privacy_inventory
+          uv run --package vav-platform-api python -m vav.cli.seed_memberships
           uv run --package vav-platform-api python -m vav.cli.seed_test_user \
             --confirm-insecure-test-account
       - name: Verify the live Neon schema

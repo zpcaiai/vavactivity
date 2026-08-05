@@ -28,7 +28,7 @@ from vav.modules.recommendations.domain import (
     RecommendationBatchType,
     canonical_pair,
 )
-from vav.modules.recommendations.gateways import NotificationGateway
+from vav.modules.recommendations.gateways import MembershipGateway, NotificationGateway
 from vav.modules.recommendations.scoring import DirectionalCompatibilityScore, FeatureScore
 
 #: Fields a recommendation card may ever contain.
@@ -81,7 +81,10 @@ async def budget_row(session: AsyncSession, user_id: UUID, budget_date: date) ->
     settings = get_settings()
     member_settings = await service.user_settings(session, user_id)
     limit = member_settings.get("daily_received_limit")
-    daily_limit = int(limit) if limit is not None else settings.recommendation_max_daily_received
+    entitled_limit = await MembershipGateway(session).daily_received_limit(
+        user_id, default_limit=settings.recommendation_max_daily_received
+    )
+    daily_limit = min(int(limit), entitled_limit) if limit is not None else entitled_limit
     await session.execute(
         text(
             "INSERT INTO recommendation_exposure_budgets "

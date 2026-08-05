@@ -26,6 +26,7 @@ import PricingSimulationPage from "@/pages/PricingSimulationPage.vue";
 import RecommendationManagementPage from "@/pages/RecommendationManagementPage.vue";
 import MatchmakingInteractionManagementPage from "@/pages/MatchmakingInteractionManagementPage.vue";
 import RelationshipManagementPage from "@/pages/RelationshipManagementPage.vue";
+import MembershipManagementPage from "@/pages/MembershipManagementPage.vue";
 import { useAccessStore } from "@/stores/access";
 
 const modules = [
@@ -110,6 +111,25 @@ export const relationshipSectionPermissions: Record<string, string> = {
   checkins: "relationships.checkins.read",
   reminders: "relationships.reminders.read",
   audit: "relationships.audit.read"
+};
+
+export const membershipSectionPermissions: Record<string, string> = {
+  dashboard: "memberships.analytics.read",
+  plans: "memberships.plans.read",
+  "plan-versions": "memberships.plans.read",
+  benefits: "memberships.benefits.read",
+  "sku-mappings": "memberships.sku_mappings.read",
+  accounts: "memberships.accounts.read",
+  cycles: "memberships.accounts.read",
+  changes: "memberships.changes.read",
+  quotas: "memberships.quotas.read",
+  usage: "memberships.quotas.read",
+  adjustments: "memberships.quotas.read",
+  "manual-grants": "memberships.manual_grants.read",
+  trials: "memberships.trials.read",
+  reconciliation: "memberships.reconciliation.read",
+  incidents: "memberships.incidents.read",
+  audit: "memberships.audit.read"
 };
 
 const privacySectionPermissions: Record<string, string> = {
@@ -460,6 +480,12 @@ export const router = createRouter({
           component: RelationshipManagementPage,
           meta: { title: "关系旅程诊断", permission: "relationships.read", relationshipSection: "journeys" }
         },
+        ...Object.keys(membershipSectionPermissions).map((section) => ({
+          path: `memberships/${section}`,
+          name: `admin-memberships-${section}`,
+          component: MembershipManagementPage,
+          meta: { title: "会员运营中心", permission: membershipSectionPermissions[section], membershipSection: section }
+        })),
         ...Object.keys(privacySectionPermissions).map((section) => ({
           path: `privacy/${section}`,
           name: `admin-privacy-${section}`,

@@ -29,6 +29,7 @@ import RecommendationHistoryPage from "@/features/recommendations/pages/Recommen
 import RecommendationTransparencyPage from "@/features/recommendations/pages/RecommendationTransparencyPage.vue";
 import MatchmakingInteractionsPage from "@/features/matchmaking-interactions/pages/MatchmakingInteractionsPage.vue";
 import RelationshipJourneyPage from "@/features/relationships/pages/RelationshipJourneyPage.vue";
+import MembershipPage from "@/features/memberships/pages/MembershipPage.vue";
 import PrivacyCenterPage from "@/features/privacy/pages/PrivacyCenterPage.vue";
 import UnsubscribePage from "@/features/notifications/pages/UnsubscribePage.vue";
 import AuthPage from "@/pages/AuthPage.vue";
@@ -145,7 +146,14 @@ export const router = createRouter({
         { path: "account/ai-memory", name: "account-ai-memory", component: PrivacyCenterPage, meta: { requiresAuth: true } },
         { path: "account/email-preferences", redirect: (to) => `/${String(to.params.locale)}/account/notification-preferences` },
         { path: "notifications/unsubscribe/:token", name: "notification-unsubscribe", component: UnsubscribePage },
-        { path: "membership", name: "membership", component: CatalogPage, meta: { catalogTitle: "婚恋会员", catalogCategory: "memberships" } },
+        { path: "membership", name: "membership", component: MembershipPage },
+        { path: "membership/plans", name: "membership-plans", component: MembershipPage },
+        { path: "membership/plans/:planCode", name: "membership-plan-detail", component: MembershipPage },
+        { path: "account/membership", name: "account-membership", component: MembershipPage, meta: { requiresAuth: true } },
+        { path: "account/membership/benefits", name: "account-membership-benefits", component: MembershipPage, meta: { requiresAuth: true } },
+        { path: "account/membership/usage", name: "account-membership-usage", component: MembershipPage, meta: { requiresAuth: true } },
+        { path: "account/membership/manage", name: "account-membership-manage", component: MembershipPage, meta: { requiresAuth: true } },
+        { path: "account/membership/history", name: "account-membership-history", component: MembershipPage, meta: { requiresAuth: true } },
         { path: "login", redirect: (to) => `/${String(to.params.locale)}/auth/login` },
         { path: "register", redirect: (to) => `/${String(to.params.locale)}/auth/register` },
         { path: "auth/login", name: "login", component: AuthPage, props: { mode: "login" } },

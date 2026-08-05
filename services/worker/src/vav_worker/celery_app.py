@@ -120,6 +120,25 @@ celery_app.conf.update(
                 os.getenv("RELATIONSHIP_REMINDER_JOB_INTERVAL_SECONDS", "60")
             ),
         },
+        "release-expired-membership-quotas": {
+            "task": "vav.memberships.release_expired_quotas",
+            "schedule": 60.0,
+        },
+        "reset-membership-periodic-quotas": {
+            "task": "vav.memberships.reset_periodic_quotas",
+            "schedule": 300.0,
+        },
+        "expire-memberships": {
+            "task": "vav.memberships.expire",
+            "schedule": 300.0,
+        },
+        "reconcile-memberships": {
+            "task": "vav.memberships.reconcile",
+            "schedule": float(
+                os.getenv("MEMBERSHIP_RECONCILIATION_INTERVAL_MINUTES", "30")
+            )
+            * 60.0,
+        },
     },
 )
 

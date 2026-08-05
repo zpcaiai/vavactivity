@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from uuid import UUID, uuid4
 
-from sqlalchemy import or_, select, update
+from sqlalchemy import or_, select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from vav.common.exceptions import VavError
@@ -143,6 +143,17 @@ class IdentityService:
             target_type="user",
             target_id=user.id,
         )
+        if self.settings.membership_enabled:
+            free_plan_ready = await session.scalar(
+                text(
+                    "SELECT EXISTS (SELECT 1 FROM membership_plans "
+                    "WHERE plan_type='free' AND status='active' AND current_version_id IS NOT NULL)"
+                )
+            )
+            if free_plan_ready:
+                from vav.modules.memberships.projection import ensure_free_membership
+
+                await ensure_free_membership(session, user.id, commit=False)
         await session.commit()
         return user, raw_token
 
@@ -209,6 +220,17 @@ class IdentityService:
             target_type="user",
             target_id=user.id,
         )
+        if self.settings.membership_enabled:
+            free_plan_ready = await session.scalar(
+                text(
+                    "SELECT EXISTS (SELECT 1 FROM membership_plans "
+                    "WHERE plan_type='free' AND status='active' AND current_version_id IS NOT NULL)"
+                )
+            )
+            if free_plan_ready:
+                from vav.modules.memberships.projection import ensure_free_membership
+
+                await ensure_free_membership(session, user.id, commit=False)
         await session.commit()
         return user
 

@@ -459,6 +459,42 @@ RELATIONSHIP_PERMISSIONS = {
     "relationships.audit.read",
 }
 
+MEMBERSHIP_PERMISSIONS = {
+    "memberships.plans.read",
+    "memberships.plans.create",
+    "memberships.plans.update",
+    "memberships.plans.approve",
+    "memberships.plans.activate",
+    "memberships.plans.retire",
+    "memberships.benefits.read",
+    "memberships.benefits.manage",
+    "memberships.sku_mappings.read",
+    "memberships.sku_mappings.manage",
+    "memberships.accounts.read",
+    "memberships.accounts.sensitive.read",
+    "memberships.accounts.rebuild",
+    "memberships.accounts.pause",
+    "memberships.accounts.revoke",
+    "memberships.changes.read",
+    "memberships.changes.manage",
+    "memberships.changes.cancel",
+    "memberships.quotas.read",
+    "memberships.quotas.adjust",
+    "memberships.quotas.sensitive.read",
+    "memberships.manual_grants.read",
+    "memberships.manual_grants.create",
+    "memberships.manual_grants.approve",
+    "memberships.manual_grants.revoke",
+    "memberships.trials.read",
+    "memberships.trials.manage",
+    "memberships.reconciliation.read",
+    "memberships.reconciliation.resolve",
+    "memberships.analytics.read",
+    "memberships.incidents.read",
+    "memberships.incidents.manage",
+    "memberships.audit.read",
+}
+
 ALL_PERMISSIONS = (
     IDENTITY_PERMISSIONS
     | CMS_PERMISSIONS
@@ -475,6 +511,7 @@ ALL_PERMISSIONS = (
     | RECOMMENDATION_PERMISSIONS
     | MATCHMAKING_INTERACTION_PERMISSIONS
     | RELATIONSHIP_PERMISSIONS
+    | MEMBERSHIP_PERMISSIONS
 )
 
 ROLE_PERMISSIONS: dict[str, set[str]] = {
@@ -854,6 +891,51 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "relationships.diagnostics.run",
         "relationships.events.replay",
         "relationships.audit.read",
+    },
+    "membership_operator": {
+        "memberships.plans.read",
+        "memberships.benefits.read",
+        "memberships.sku_mappings.read",
+        "memberships.accounts.read",
+        "memberships.changes.read",
+        "memberships.quotas.read",
+        "memberships.manual_grants.read",
+        "memberships.trials.read",
+        "memberships.reconciliation.read",
+        "memberships.analytics.read",
+        "memberships.audit.read",
+    },
+    "membership_product_manager": {
+        permission
+        for permission in MEMBERSHIP_PERMISSIONS
+        if permission.startswith(
+            (
+                "memberships.plans.",
+                "memberships.benefits.",
+                "memberships.sku_mappings.",
+                "memberships.trials.",
+            )
+        )
+    }
+    | {"memberships.analytics.read", "memberships.audit.read"},
+    "membership_support": {
+        "memberships.accounts.read",
+        "memberships.changes.read",
+        "memberships.changes.manage",
+        "memberships.reconciliation.read",
+        "memberships.audit.read",
+    },
+    "membership_finance_reviewer": {
+        permission
+        for permission in MEMBERSHIP_PERMISSIONS
+        if permission.startswith("memberships.manual_grants.")
+        or permission.startswith("memberships.reconciliation.")
+    }
+    | {
+        "memberships.accounts.read",
+        "memberships.changes.read",
+        "memberships.analytics.read",
+        "memberships.audit.read",
     },
     "analyst": {"audit.read", "catalog.audit.read"},
     "support_agent": {"users.read", "catalog.products.read"},

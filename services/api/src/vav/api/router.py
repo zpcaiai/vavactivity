@@ -21,6 +21,9 @@ from vav.modules.matchmaking_profiles.admin_router import (
     router as matchmaking_profiles_admin_router,
 )
 from vav.modules.matchmaking_profiles.router import router as matchmaking_profiles_router
+from vav.modules.memberships.admin_router import router as memberships_admin_router
+from vav.modules.memberships.admin_router import version_router as membership_versions_admin_router
+from vav.modules.memberships.router import router as memberships_router
 from vav.modules.notifications.admin_router import router as notifications_admin_router
 from vav.modules.notifications.router import router as notifications_router
 from vav.modules.privacy.admin_router import router as privacy_admin_router
@@ -58,3 +61,6 @@ api_router.include_router(
 )
 api_router.include_router(relationships_router, tags=["relationships"])
 api_router.include_router(relationships_admin_router, tags=["relationships-admin"])
+api_router.include_router(memberships_router, tags=["memberships"])
+api_router.include_router(memberships_admin_router, tags=["memberships-admin"])
+api_router.include_router(membership_versions_admin_router, tags=["memberships-admin"])

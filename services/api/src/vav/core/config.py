@@ -1205,6 +1205,66 @@ class Settings(BaseSettings):
         default=24, ge=1, validation_alias="RELATIONSHIP_IDEMPOTENCY_TTL_HOURS"
     )
 
+    membership_enabled: bool = Field(default=True, validation_alias="MEMBERSHIP_ENABLED")
+    membership_default_free_plan: str = Field(
+        default="free-v1", validation_alias="MEMBERSHIP_DEFAULT_FREE_PLAN"
+    )
+    membership_allow_multiple_paid_plans: bool = Field(
+        default=False, validation_alias="MEMBERSHIP_ALLOW_MULTIPLE_PAID_PLANS"
+    )
+    membership_require_active_entitlement: bool = Field(
+        default=True, validation_alias="MEMBERSHIP_REQUIRE_ACTIVE_ENTITLEMENT"
+    )
+    membership_default_grace_period_days: int = Field(
+        default=3, ge=0, validation_alias="MEMBERSHIP_DEFAULT_GRACE_PERIOD_DAYS"
+    )
+    membership_fail_closed_on_entitlement_error: bool = Field(
+        default=True, validation_alias="MEMBERSHIP_FAIL_CLOSED_ON_ENTITLEMENT_ERROR"
+    )
+    membership_fallback_to_free_on_expiry: bool = Field(
+        default=True, validation_alias="MEMBERSHIP_FALLBACK_TO_FREE_ON_EXPIRY"
+    )
+    membership_change_confirmation_required: bool = Field(
+        default=True, validation_alias="MEMBERSHIP_CHANGE_CONFIRMATION_REQUIRED"
+    )
+    membership_quota_enabled: bool = Field(
+        default=True, validation_alias="MEMBERSHIP_QUOTA_ENABLED"
+    )
+    membership_quota_reservation_ttl_minutes: int = Field(
+        default=15, ge=1, validation_alias="MEMBERSHIP_QUOTA_RESERVATION_TTL_MINUTES"
+    )
+    membership_quota_max_adjustment_without_approval: int = Field(
+        default=10,
+        ge=0,
+        validation_alias="MEMBERSHIP_QUOTA_MAX_ADJUSTMENT_WITHOUT_APPROVAL",
+    )
+    membership_trials_enabled: bool = Field(
+        default=True, validation_alias="MEMBERSHIP_TRIALS_ENABLED"
+    )
+    membership_trial_repeat_allowed: bool = Field(
+        default=False, validation_alias="MEMBERSHIP_TRIAL_REPEAT_ALLOWED"
+    )
+    membership_manual_grant_approval_required: bool = Field(
+        default=True, validation_alias="MEMBERSHIP_MANUAL_GRANT_APPROVAL_REQUIRED"
+    )
+    membership_manual_grant_max_days_without_approval: int = Field(
+        default=7,
+        ge=0,
+        validation_alias="MEMBERSHIP_MANUAL_GRANT_MAX_DAYS_WITHOUT_APPROVAL",
+    )
+    membership_reconciliation_enabled: bool = Field(
+        default=True, validation_alias="MEMBERSHIP_RECONCILIATION_ENABLED"
+    )
+    membership_reconciliation_interval_minutes: int = Field(
+        default=30, ge=1, validation_alias="MEMBERSHIP_RECONCILIATION_INTERVAL_MINUTES"
+    )
+    membership_access_cache_ttl_seconds: int = Field(
+        default=60, ge=0, validation_alias="MEMBERSHIP_ACCESS_CACHE_TTL_SECONDS"
+    )
+    membership_plan_cache_ttl_seconds: int = Field(
+        default=300, ge=0, validation_alias="MEMBERSHIP_PLAN_CACHE_TTL_SECONDS"
+    )
+
     @property
     def dating_photo_allowed_type_set(self) -> frozenset[str]:
         return frozenset(
@@ -1317,6 +1377,20 @@ class Settings(BaseSettings):
             raise ValueError("relationship safety checks must fail closed")
         if not self.relationship_block_creates_safety_freeze:
             raise ValueError("a block must freeze the relationship journey")
+        if self.membership_allow_multiple_paid_plans:
+            raise ValueError("stacked paid memberships require an explicit future product design")
+        if not self.membership_require_active_entitlement:
+            raise ValueError("paid membership requires an active commerce entitlement")
+        if not self.membership_fail_closed_on_entitlement_error:
+            raise ValueError("membership entitlement checks must fail closed")
+        if not self.membership_fallback_to_free_on_expiry:
+            raise ValueError("expired paid memberships must retain the free fallback")
+        if not self.membership_change_confirmation_required:
+            raise ValueError("membership changes require explicit user confirmation")
+        if self.membership_trial_repeat_allowed:
+            raise ValueError("repeat trials require an explicit anti-abuse policy")
+        if not self.membership_manual_grant_approval_required:
+            raise ValueError("manual membership grants require approval")
         if (
             self.environment == "production"
             and self.recommendation_experiments_enabled
@@ -1346,6 +1420,7 @@ class Settings(BaseSettings):
                 "privacy": self.privacy_enabled,
                 "dating_profile": self.dating_profile_enabled,
                 "recommendations": self.recommendation_enabled,
+                "memberships": self.membership_enabled,
             },
         }
 

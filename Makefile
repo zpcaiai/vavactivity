@@ -526,3 +526,41 @@ relationship-verify:
 	$(MAKE) relationship-privacy-test
 	$(MAKE) relationship-user-e2e
 	$(MAKE) relationship-admin-e2e
+
+membership-migrate:
+	docker compose exec -T api alembic upgrade head
+
+membership-seed:
+	docker compose exec -T api python -m vav.cli.seed_permissions
+	docker compose exec -T api python -m vav.cli.seed_memberships
+
+membership-seed-benefits:
+	docker compose exec -T api python -m vav.cli.seed_memberships
+
+membership-test:
+	docker compose exec -T api pytest tests/memberships/unit tests/memberships/integration -q
+
+membership-concurrency-test:
+	docker compose exec -T api pytest tests/memberships/concurrency -q
+
+membership-security-test:
+	docker compose exec -T api pytest tests/memberships/security -q
+
+membership-reconciliation-test:
+	docker compose exec -T api pytest tests/memberships/reconciliation -q
+
+membership-user-e2e:
+	pnpm exec playwright test e2e/user-memberships
+
+membership-admin-e2e:
+	pnpm exec playwright test e2e/admin-memberships
+
+membership-verify:
+	$(MAKE) membership-migrate
+	$(MAKE) membership-seed
+	$(MAKE) membership-test
+	$(MAKE) membership-concurrency-test
+	$(MAKE) membership-security-test
+	$(MAKE) membership-reconciliation-test
+	$(MAKE) membership-user-e2e
+	$(MAKE) membership-admin-e2e

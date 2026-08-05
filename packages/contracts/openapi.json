@@ -1,6 +1,70 @@
 {
   "components": {
     "schemas": {
+      "AccessDecisionRequest": {
+        "properties": {
+          "capability_code": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Capability Code",
+            "type": "string"
+          },
+          "purpose": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Purpose",
+            "type": "string"
+          },
+          "request_context": {
+            "additionalProperties": true,
+            "title": "Request Context",
+            "type": "object"
+          },
+          "requested_quantity": {
+            "default": 1,
+            "maximum": 1000000.0,
+            "minimum": 1.0,
+            "title": "Requested Quantity",
+            "type": "integer"
+          },
+          "resource_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resource Id"
+          },
+          "resource_type": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resource Type"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "capability_code",
+          "purpose"
+        ],
+        "title": "AccessDecisionRequest",
+        "type": "object"
+      },
       "Action": {
         "properties": {
           "href": {
@@ -1282,6 +1346,53 @@
         "title": "BatchRequest",
         "type": "object"
       },
+      "BenefitCreateRequest": {
+        "properties": {
+          "benefit_code": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Benefit Code",
+            "type": "string"
+          },
+          "benefit_type": {
+            "pattern": "^(capability|resource_scope|quota|limit_override|price_benefit|priority_access)$",
+            "title": "Benefit Type",
+            "type": "string"
+          },
+          "owning_module": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Owning Module",
+            "type": "string"
+          },
+          "semantic_version": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Semantic Version",
+            "type": "string"
+          },
+          "sensitivity": {
+            "default": "internal",
+            "pattern": "^(public|internal|sensitive)$",
+            "title": "Sensitivity",
+            "type": "string"
+          },
+          "value_schema": {
+            "additionalProperties": true,
+            "title": "Value Schema",
+            "type": "object"
+          }
+        },
+        "required": [
+          "benefit_code",
+          "semantic_version",
+          "benefit_type",
+          "value_schema",
+          "owning_module"
+        ],
+        "title": "BenefitCreateRequest",
+        "type": "object"
+      },
       "BillingType": {
         "enum": [
           "one_time",
@@ -1722,6 +1833,69 @@
           "slug"
         ],
         "title": "CategoryLocalizationInput",
+        "type": "object"
+      },
+      "ChangeCreateRequest": {
+        "properties": {
+          "change_type": {
+            "pattern": "^(upgrade|downgrade|billing_period_change|cancel|reactivate)$",
+            "title": "Change Type",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "to_plan_code": {
+            "maxLength": 128,
+            "minLength": 2,
+            "title": "To Plan Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "to_plan_code",
+          "change_type",
+          "idempotency_key"
+        ],
+        "title": "ChangeCreateRequest",
+        "type": "object"
+      },
+      "ChangeDecisionRequest": {
+        "properties": {
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "expected_version"
+        ],
+        "title": "ChangeDecisionRequest",
+        "type": "object"
+      },
+      "ChangePreviewRequest": {
+        "properties": {
+          "change_type": {
+            "pattern": "^(upgrade|downgrade|billing_period_change|cancel|reactivate)$",
+            "title": "Change Type",
+            "type": "string"
+          },
+          "to_plan_code": {
+            "maxLength": 128,
+            "minLength": 2,
+            "title": "To Plan Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "to_plan_code",
+          "change_type"
+        ],
+        "title": "ChangePreviewRequest",
         "type": "object"
       },
       "CheckoutOrderRequest": {
@@ -3228,6 +3402,11 @@
           "email"
         ],
         "title": "EmailRequest",
+        "type": "object"
+      },
+      "EmptyAction": {
+        "properties": {},
+        "title": "EmptyAction",
         "type": "object"
       },
       "EndingRequest": {
@@ -5390,6 +5569,63 @@
         "title": "ManualGradeRequest",
         "type": "object"
       },
+      "ManualGrantRequest": {
+        "properties": {
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "grant_type": {
+            "pattern": "^(customer_support|service_compensation|promotional|staff|migration)$",
+            "title": "Grant Type",
+            "type": "string"
+          },
+          "membership_plan_version_id": {
+            "format": "uuid",
+            "title": "Membership Plan Version Id",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "reason_code": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "starts_at": {
+            "format": "date-time",
+            "title": "Starts At",
+            "type": "string"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "membership_plan_version_id",
+          "grant_type",
+          "reason_code",
+          "starts_at",
+          "expires_at"
+        ],
+        "title": "ManualGrantRequest",
+        "type": "object"
+      },
       "MediaCompleteRequest": {
         "properties": {
           "checksum_sha256": {
@@ -6360,6 +6596,152 @@
           "content_base64"
         ],
         "title": "PhotoUploadRequest",
+        "type": "object"
+      },
+      "PlanCreateRequest": {
+        "properties": {
+          "default_locale": {
+            "default": "en",
+            "maxLength": 16,
+            "minLength": 2,
+            "title": "Default Locale",
+            "type": "string"
+          },
+          "display_order": {
+            "default": 0,
+            "title": "Display Order",
+            "type": "integer"
+          },
+          "featured": {
+            "default": false,
+            "title": "Featured",
+            "type": "boolean"
+          },
+          "internal_name": {
+            "maxLength": 200,
+            "minLength": 2,
+            "title": "Internal Name",
+            "type": "string"
+          },
+          "plan_code": {
+            "pattern": "^[a-z0-9][a-z0-9._-]{1,127}$",
+            "title": "Plan Code",
+            "type": "string"
+          },
+          "plan_type": {
+            "pattern": "^(free|paid|trial|internal_grant)$",
+            "title": "Plan Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "plan_code",
+          "internal_name",
+          "plan_type"
+        ],
+        "title": "PlanCreateRequest",
+        "type": "object"
+      },
+      "PlanUpdateRequest": {
+        "properties": {
+          "display_order": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Order"
+          },
+          "featured": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Featured"
+          },
+          "internal_name": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Internal Name"
+          }
+        },
+        "title": "PlanUpdateRequest",
+        "type": "object"
+      },
+      "PlanVersionCreateRequest": {
+        "properties": {
+          "access_policy_snapshot": {
+            "additionalProperties": true,
+            "title": "Access Policy Snapshot",
+            "type": "object"
+          },
+          "benefits": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Benefits",
+            "type": "array"
+          },
+          "localizations": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "minItems": 1,
+            "title": "Localizations",
+            "type": "array"
+          },
+          "quota_policy_snapshot": {
+            "additionalProperties": true,
+            "title": "Quota Policy Snapshot",
+            "type": "object"
+          },
+          "semantic_version": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Semantic Version",
+            "type": "string"
+          },
+          "valid_from": {
+            "format": "date-time",
+            "title": "Valid From",
+            "type": "string"
+          },
+          "valid_until": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid Until"
+          }
+        },
+        "required": [
+          "semantic_version",
+          "localizations",
+          "valid_from"
+        ],
+        "title": "PlanVersionCreateRequest",
         "type": "object"
       },
       "PostEventChoiceRequest": {
@@ -7823,6 +8205,46 @@
         "title": "ProgressResetRequest",
         "type": "object"
       },
+      "ProjectionEventRequest": {
+        "properties": {
+          "event_type": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Event Type",
+            "type": "string"
+          },
+          "event_version": {
+            "default": 1,
+            "minimum": 1.0,
+            "title": "Event Version",
+            "type": "integer"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "title": "Payload",
+            "type": "object"
+          },
+          "source_event_id": {
+            "format": "uuid",
+            "title": "Source Event Id",
+            "type": "string"
+          },
+          "source_module": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Source Module",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_module",
+          "source_event_id",
+          "event_type",
+          "payload"
+        ],
+        "title": "ProjectionEventRequest",
+        "type": "object"
+      },
       "PromotionApplicationMode": {
         "enum": [
           "automatic",
@@ -8315,6 +8737,120 @@
         "title": "QuestionCreateRequest",
         "type": "object"
       },
+      "QuotaAdjustmentRequest": {
+        "properties": {
+          "adjustment_type": {
+            "pattern": "^(credit|debit|compensation|correction)$",
+            "title": "Adjustment Type",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "quantity": {
+            "title": "Quantity",
+            "type": "integer"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "reason_code": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Reason Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "quantity",
+          "adjustment_type",
+          "reason_code",
+          "idempotency_key"
+        ],
+        "title": "QuotaAdjustmentRequest",
+        "type": "object"
+      },
+      "QuotaMutationRequest": {
+        "properties": {
+          "idempotency_key": {
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "reservation_id": {
+            "format": "uuid",
+            "title": "Reservation Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reservation_id",
+          "idempotency_key"
+        ],
+        "title": "QuotaMutationRequest",
+        "type": "object"
+      },
+      "QuotaReserveRequest": {
+        "properties": {
+          "benefit_code": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Benefit Code",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "quantity": {
+            "default": 1,
+            "maximum": 1000000.0,
+            "minimum": 1.0,
+            "title": "Quantity",
+            "type": "integer"
+          },
+          "source_module": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Source Module",
+            "type": "string"
+          },
+          "source_reference_id": {
+            "format": "uuid",
+            "title": "Source Reference Id",
+            "type": "string"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "benefit_code",
+          "source_module",
+          "source_reference_id",
+          "idempotency_key"
+        ],
+        "title": "QuotaReserveRequest",
+        "type": "object"
+      },
       "QuoteBlock": {
         "properties": {
           "data": {
@@ -8451,21 +8987,6 @@
           }
         },
         "title": "RecommendationSettingsRequest",
-        "type": "object"
-      },
-      "ReconciliationResolveRequest": {
-        "properties": {
-          "reason": {
-            "maxLength": 2000,
-            "minLength": 10,
-            "title": "Reason",
-            "type": "string"
-          }
-        },
-        "required": [
-          "reason"
-        ],
-        "title": "ReconciliationResolveRequest",
         "type": "object"
       },
       "RecordCreateRequest": {
@@ -9875,44 +10396,6 @@
         "title": "SkuCreateRequest",
         "type": "object"
       },
-      "SkuMappingRequest": {
-        "properties": {
-          "access_duration_days": {
-            "anyOf": [
-              {
-                "exclusiveMinimum": 0.0,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Access Duration Days"
-          },
-          "access_start_policy": {
-            "const": "entitlement_activation",
-            "default": "entitlement_activation",
-            "title": "Access Start Policy",
-            "type": "string"
-          },
-          "catalog_sku_id": {
-            "format": "uuid",
-            "title": "Catalog Sku Id",
-            "type": "string"
-          },
-          "course_version_policy": {
-            "const": "pin_at_enrollment",
-            "default": "pin_at_enrollment",
-            "title": "Course Version Policy",
-            "type": "string"
-          }
-        },
-        "required": [
-          "catalog_sku_id"
-        ],
-        "title": "SkuMappingRequest",
-        "type": "object"
-      },
       "SkuUpdateRequest": {
         "properties": {
           "entitlement_definition": {
@@ -10923,6 +11406,56 @@
         "title": "TranslationStatus",
         "type": "string"
       },
+      "TrialPolicyRequest": {
+        "properties": {
+          "auto_converts": {
+            "default": false,
+            "title": "Auto Converts",
+            "type": "boolean"
+          },
+          "duration_days": {
+            "maximum": 365.0,
+            "minimum": 1.0,
+            "title": "Duration Days",
+            "type": "integer"
+          },
+          "eligibility_policy": {
+            "additionalProperties": true,
+            "title": "Eligibility Policy",
+            "type": "object"
+          },
+          "membership_plan_version_id": {
+            "format": "uuid",
+            "title": "Membership Plan Version Id",
+            "type": "string"
+          },
+          "policy_code": {
+            "pattern": "^[a-z0-9][a-z0-9._-]{1,127}$",
+            "title": "Policy Code",
+            "type": "string"
+          },
+          "requires_payment_method": {
+            "default": false,
+            "title": "Requires Payment Method",
+            "type": "boolean"
+          },
+          "semantic_version": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Semantic Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "policy_code",
+          "semantic_version",
+          "membership_plan_version_id",
+          "duration_days",
+          "eligibility_policy"
+        ],
+        "title": "TrialPolicyRequest",
+        "type": "object"
+      },
       "TuningRequest": {
         "properties": {
           "exploration_level": {
@@ -11396,6 +11929,21 @@
         "title": "ReasonRequest",
         "type": "object"
       },
+      "vav__modules__commerce__schemas__ReconciliationResolveRequest": {
+        "properties": {
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 10,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "ReconciliationResolveRequest",
+        "type": "object"
+      },
       "vav__modules__content__schemas__ReviewRequest": {
         "properties": {
           "reason": {
@@ -11424,6 +11972,44 @@
           "reason"
         ],
         "title": "ReasonRequest",
+        "type": "object"
+      },
+      "vav__modules__courses__schemas__SkuMappingRequest": {
+        "properties": {
+          "access_duration_days": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Access Duration Days"
+          },
+          "access_start_policy": {
+            "const": "entitlement_activation",
+            "default": "entitlement_activation",
+            "title": "Access Start Policy",
+            "type": "string"
+          },
+          "catalog_sku_id": {
+            "format": "uuid",
+            "title": "Catalog Sku Id",
+            "type": "string"
+          },
+          "course_version_policy": {
+            "const": "pin_at_enrollment",
+            "default": "pin_at_enrollment",
+            "title": "Course Version Policy",
+            "type": "string"
+          }
+        },
+        "required": [
+          "catalog_sku_id"
+        ],
+        "title": "SkuMappingRequest",
         "type": "object"
       },
       "vav__modules__identity__schemas__ReasonRequest": {
@@ -11463,6 +12049,95 @@
           "reason"
         ],
         "title": "ReviewRequest",
+        "type": "object"
+      },
+      "vav__modules__memberships__schemas__ReconciliationResolveRequest": {
+        "properties": {
+          "resolution_summary": {
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "Resolution Summary",
+            "type": "string"
+          }
+        },
+        "required": [
+          "resolution_summary"
+        ],
+        "title": "ReconciliationResolveRequest",
+        "type": "object"
+      },
+      "vav__modules__memberships__schemas__SkuMappingRequest": {
+        "properties": {
+          "billing_period": {
+            "pattern": "^(monthly|yearly|custom|none)$",
+            "title": "Billing Period",
+            "type": "string"
+          },
+          "catalog_sku_id": {
+            "format": "uuid",
+            "title": "Catalog Sku Id",
+            "type": "string"
+          },
+          "grace_period_policy": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grace Period Policy"
+          },
+          "membership_plan_id": {
+            "format": "uuid",
+            "title": "Membership Plan Id",
+            "type": "string"
+          },
+          "membership_plan_version_id": {
+            "format": "uuid",
+            "title": "Membership Plan Version Id",
+            "type": "string"
+          },
+          "trial_policy": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trial Policy"
+          },
+          "valid_from": {
+            "format": "date-time",
+            "title": "Valid From",
+            "type": "string"
+          },
+          "valid_until": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid Until"
+          }
+        },
+        "required": [
+          "catalog_sku_id",
+          "membership_plan_id",
+          "membership_plan_version_id",
+          "billing_period",
+          "valid_from"
+        ],
+        "title": "SkuMappingRequest",
         "type": "object"
       },
       "vav__modules__notifications__admin_router__RegistryStatusRequest": {
@@ -16084,6 +16759,384 @@
         "summary": "Withdraw Skip",
         "tags": [
           "matchmaking-interactions"
+        ]
+      }
+    },
+    "/api/v1/account/membership": {
+      "get": {
+        "operationId": "current_membership_api_v1_account_membership_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Current Membership Api V1 Account Membership Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Current Membership",
+        "tags": [
+          "memberships"
+        ]
+      }
+    },
+    "/api/v1/account/membership/benefits": {
+      "get": {
+        "operationId": "membership_benefits_api_v1_account_membership_benefits_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Membership Benefits Api V1 Account Membership Benefits Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Membership Benefits",
+        "tags": [
+          "memberships"
+        ]
+      }
+    },
+    "/api/v1/account/membership/change-preview": {
+      "post": {
+        "operationId": "change_preview_api_v1_account_membership_change_preview_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePreviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Change Preview Api V1 Account Membership Change Preview Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Change Preview",
+        "tags": [
+          "memberships"
+        ]
+      }
+    },
+    "/api/v1/account/membership/change-requests": {
+      "post": {
+        "operationId": "create_change_request_api_v1_account_membership_change_requests_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Change Request Api V1 Account Membership Change Requests Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Change Request",
+        "tags": [
+          "memberships"
+        ]
+      }
+    },
+    "/api/v1/account/membership/change-requests/{change_id}": {
+      "get": {
+        "operationId": "get_change_request_api_v1_account_membership_change_requests__change_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "change_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Change Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Change Request Api V1 Account Membership Change Requests  Change Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Change Request",
+        "tags": [
+          "memberships"
+        ]
+      }
+    },
+    "/api/v1/account/membership/change-requests/{change_id}/cancel": {
+      "post": {
+        "operationId": "cancel_change_api_v1_account_membership_change_requests__change_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "change_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Change Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Cancel Change Api V1 Account Membership Change Requests  Change Id  Cancel Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Cancel Change",
+        "tags": [
+          "memberships"
+        ]
+      }
+    },
+    "/api/v1/account/membership/change-requests/{change_id}/confirm": {
+      "post": {
+        "operationId": "confirm_change_api_v1_account_membership_change_requests__change_id__confirm_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "change_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Change Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Confirm Change Api V1 Account Membership Change Requests  Change Id  Confirm Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Confirm Change",
+        "tags": [
+          "memberships"
+        ]
+      }
+    },
+    "/api/v1/account/membership/history": {
+      "get": {
+        "operationId": "membership_history_api_v1_account_membership_history_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Membership History Api V1 Account Membership History Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Membership History",
+        "tags": [
+          "memberships"
+        ]
+      }
+    },
+    "/api/v1/account/membership/usage": {
+      "get": {
+        "operationId": "membership_usage_api_v1_account_membership_usage_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Membership Usage Api V1 Account Membership Usage Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Membership Usage",
+        "tags": [
+          "memberships"
         ]
       }
     },
@@ -24554,7 +25607,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReconciliationResolveRequest"
+                "$ref": "#/components/schemas/vav__modules__commerce__schemas__ReconciliationResolveRequest"
               }
             }
           },
@@ -28893,7 +29946,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SkuMappingRequest"
+                "$ref": "#/components/schemas/vav__modules__courses__schemas__SkuMappingRequest"
               }
             }
           },
@@ -29511,7 +30564,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SkuMappingRequest"
+                "$ref": "#/components/schemas/vav__modules__courses__schemas__SkuMappingRequest"
               }
             }
           },
@@ -33649,6 +34702,1319 @@
         "summary": "Media References",
         "tags": [
           "content"
+        ]
+      }
+    },
+    "/api/v1/admin/membership-plan-versions/{version_id}/activate": {
+      "post": {
+        "operationId": "activate_version_api_v1_admin_membership_plan_versions__version_id__activate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyAction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Activate Version Api V1 Admin Membership Plan Versions  Version Id  Activate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Activate Version",
+        "tags": [
+          "memberships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/membership-plan-versions/{version_id}/approve": {
+      "post": {
+        "operationId": "approve_version_api_v1_admin_membership_plan_versions__version_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyAction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Version Api V1 Admin Membership Plan Versions  Version Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Version",
+        "tags": [
+          "memberships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/membership-plan-versions/{version_id}/retire": {
+      "post": {
+        "operationId": "retire_version_api_v1_admin_membership_plan_versions__version_id__retire_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyAction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Retire Version Api V1 Admin Membership Plan Versions  Version Id  Retire Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Retire Version",
+        "tags": [
+          "memberships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/membership-plan-versions/{version_id}/submit-review": {
+      "post": {
+        "operationId": "submit_review_api_v1_admin_membership_plan_versions__version_id__submit_review_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyAction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Submit Review Api V1 Admin Membership Plan Versions  Version Id  Submit Review Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Submit Review",
+        "tags": [
+          "memberships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/memberships/benefits": {
+      "get": {
+        "operationId": "benefits_api_v1_admin_memberships_benefits_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Benefits Api V1 Admin Memberships Benefits Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Benefits",
+        "tags": [
+          "memberships-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_benefit_api_v1_admin_memberships_benefits_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BenefitCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Benefit Api V1 Admin Memberships Benefits Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Benefit",
+        "tags": [
+          "memberships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/memberships/dashboard": {
+      "get": {
+        "operationId": "dashboard_api_v1_admin_memberships_dashboard_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Dashboard Api V1 Admin Memberships Dashboard Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dashboard",
+        "tags": [
+          "memberships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/memberships/manual-grants": {
+      "post": {
+        "operationId": "create_manual_grant_api_v1_admin_memberships_manual_grants_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ManualGrantRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Manual Grant Api V1 Admin Memberships Manual Grants Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Manual Grant",
+        "tags": [
+          "memberships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/memberships/manual-grants/{grant_id}/approve": {
+      "post": {
+        "operationId": "approve_manual_grant_api_v1_admin_memberships_manual_grants__grant_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "grant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Grant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyAction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Manual Grant Api V1 Admin Memberships Manual Grants  Grant Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Manual Grant",
+        "tags": [
+          "memberships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/memberships/manual-grants/{grant_id}/revoke": {
+      "post": {
+        "operationId": "revoke_manual_grant_api_v1_admin_memberships_manual_grants__grant_id__revoke_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "grant_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Grant Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyAction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Revoke Manual Grant Api V1 Admin Memberships Manual Grants  Grant Id  Revoke Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Revoke Manual Grant",
+        "tags": [
+          "memberships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/memberships/membership-plan-versions/{version_id}/activate": {
+      "post": {
+        "operationId": "activate_version_api_v1_admin_memberships_membership_plan_versions__version_id__activate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyAction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Activate Version Api V1 Admin Memberships Membership Plan Versions  Version Id  Activate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Activate Version",
+        "tags": [
+          "memberships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/memberships/membership-plan-versions/{version_id}/approve": {
+      "post": {
+        "operationId": "approve_version_api_v1_admin_memberships_membership_plan_versions__version_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyAction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Version Api V1 Admin Memberships Membership Plan Versions  Version Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Version",
+        "tags": [
+          "memberships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/memberships/membership-plan-versions/{version_id}/retire": {
+      "post": {
+        "operationId": "retire_version_api_v1_admin_memberships_membership_plan_versions__version_id__retire_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyAction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Retire Version Api V1 Admin Memberships Membership Plan Versions  Version Id  Retire Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Retire Version",
+        "tags": [
+          "memberships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/memberships/membership-plan-versions/{version_id}/submit-review": {
+      "post": {
+        "operationId": "submit_review_api_v1_admin_memberships_membership_plan_versions__version_id__submit_review_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyAction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Submit Review Api V1 Admin Memberships Membership Plan Versions  Version Id  Submit Review Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Submit Review",
+        "tags": [
+          "memberships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/memberships/plans": {
+      "get": {
+        "operationId": "plans_api_v1_admin_memberships_plans_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Plans Api V1 Admin Memberships Plans Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Plans",
+        "tags": [
+          "memberships-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_plan_api_v1_admin_memberships_plans_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Plan Api V1 Admin Memberships Plans Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Plan",
+        "tags": [
+          "memberships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/memberships/plans/{plan_id}": {
+      "get": {
+        "operationId": "get_plan_api_v1_admin_memberships_plans__plan_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "plan_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Plan Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Plan Api V1 Admin Memberships Plans  Plan Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Plan",
+        "tags": [
+          "memberships-admin"
+        ]
+      },
+      "patch": {
+        "operationId": "update_plan_api_v1_admin_memberships_plans__plan_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "plan_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Plan Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Plan Api V1 Admin Memberships Plans  Plan Id  Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Plan",
+        "tags": [
+          "memberships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/memberships/plans/{plan_id}/versions": {
+      "post": {
+        "operationId": "create_version_api_v1_admin_memberships_plans__plan_id__versions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "plan_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Plan Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanVersionCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Version Api V1 Admin Memberships Plans  Plan Id  Versions Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Version",
+        "tags": [
+          "memberships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/memberships/quota-buckets/{bucket_id}/adjustments": {
+      "post": {
+        "operationId": "quota_adjustment_api_v1_admin_memberships_quota_buckets__bucket_id__adjustments_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bucket_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Bucket Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuotaAdjustmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Quota Adjustment Api V1 Admin Memberships Quota Buckets  Bucket Id  Adjustments Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Quota Adjustment",
+        "tags": [
+          "memberships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/memberships/reconciliation": {
+      "get": {
+        "operationId": "reconciliation_api_v1_admin_memberships_reconciliation_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reconciliation Api V1 Admin Memberships Reconciliation Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reconciliation",
+        "tags": [
+          "memberships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/memberships/reconciliation/{issue_id}/resolve": {
+      "post": {
+        "operationId": "resolve_reconciliation_api_v1_admin_memberships_reconciliation__issue_id__resolve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "issue_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Issue Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/vav__modules__memberships__schemas__ReconciliationResolveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Resolve Reconciliation Api V1 Admin Memberships Reconciliation  Issue Id  Resolve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Resolve Reconciliation",
+        "tags": [
+          "memberships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/memberships/sku-mappings": {
+      "post": {
+        "operationId": "create_sku_mapping_api_v1_admin_memberships_sku_mappings_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/vav__modules__memberships__schemas__SkuMappingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Sku Mapping Api V1 Admin Memberships Sku Mappings Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Sku Mapping",
+        "tags": [
+          "memberships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/memberships/trials": {
+      "post": {
+        "operationId": "create_trial_policy_api_v1_admin_memberships_trials_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrialPolicyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Trial Policy Api V1 Admin Memberships Trials Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Trial Policy",
+        "tags": [
+          "memberships-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/memberships/{resource}": {
+      "get": {
+        "operationId": "admin_resource_api_v1_admin_memberships__resource__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resource",
+            "required": true,
+            "schema": {
+              "title": "Resource",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Admin Resource Api V1 Admin Memberships  Resource  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Admin Resource",
+        "tags": [
+          "memberships-admin"
         ]
       }
     },
@@ -41718,6 +44084,246 @@
         ]
       }
     },
+    "/api/v1/internal/membership/access-decisions": {
+      "post": {
+        "operationId": "access_decision_api_v1_internal_membership_access_decisions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Access Decision Api V1 Internal Membership Access Decisions Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Access Decision",
+        "tags": [
+          "memberships"
+        ]
+      }
+    },
+    "/api/v1/internal/membership/events": {
+      "post": {
+        "operationId": "membership_event_api_v1_internal_membership_events_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectionEventRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Membership Event Api V1 Internal Membership Events Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Membership Event",
+        "tags": [
+          "memberships"
+        ]
+      }
+    },
+    "/api/v1/internal/membership/quota-consumptions": {
+      "post": {
+        "operationId": "quota_consumption_api_v1_internal_membership_quota_consumptions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuotaMutationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Quota Consumption Api V1 Internal Membership Quota Consumptions Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Quota Consumption",
+        "tags": [
+          "memberships"
+        ]
+      }
+    },
+    "/api/v1/internal/membership/quota-releases": {
+      "post": {
+        "operationId": "quota_release_api_v1_internal_membership_quota_releases_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuotaMutationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Quota Release Api V1 Internal Membership Quota Releases Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Quota Release",
+        "tags": [
+          "memberships"
+        ]
+      }
+    },
+    "/api/v1/internal/membership/quota-reservations": {
+      "post": {
+        "operationId": "quota_reservation_api_v1_internal_membership_quota_reservations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuotaReserveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Quota Reservation Api V1 Internal Membership Quota Reservations Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Quota Reservation",
+        "tags": [
+          "memberships"
+        ]
+      }
+    },
     "/api/v1/internal/notifications/events": {
       "post": {
         "operationId": "receive_domain_event_api_v1_internal_notifications_events_post",
@@ -43451,6 +46057,109 @@
         "summary": "Public Media",
         "tags": [
           "content"
+        ]
+      }
+    },
+    "/api/v1/public/membership-plans": {
+      "get": {
+        "operationId": "public_plans_api_v1_public_membership_plans_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {
+              "default": "en",
+              "maxLength": 16,
+              "minLength": 2,
+              "title": "Locale",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Public Plans Api V1 Public Membership Plans Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Public Plans",
+        "tags": [
+          "memberships"
+        ]
+      }
+    },
+    "/api/v1/public/membership-plans/{plan_code}": {
+      "get": {
+        "operationId": "public_plan_api_v1_public_membership_plans__plan_code__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "plan_code",
+            "required": true,
+            "schema": {
+              "title": "Plan Code",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {
+              "default": "en",
+              "maxLength": 16,
+              "minLength": 2,
+              "title": "Locale",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Public Plan Api V1 Public Membership Plans  Plan Code  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Public Plan",
+        "tags": [
+          "memberships"
         ]
       }
     },

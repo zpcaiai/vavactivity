@@ -166,7 +166,23 @@ class MembershipGateway:
         self._session = session
 
     async def daily_received_limit(self, user_id: UUID, *, default_limit: int) -> int:
-        return default_limit
+        from vav.modules.memberships.service import decide_access
+
+        decision = await decide_access(
+            self._session,
+            user_id=user_id,
+            capability_code="recommendation.daily_received_limit",
+            resource_type=None,
+            resource_id=None,
+            requested_quantity=1,
+        )
+        if not decision["allowed"]:
+            return default_limit
+        value = decision.get("benefit_value") or {}
+        configured = value.get("daily_received_limit")
+        if not isinstance(configured, int) or configured < 0:
+            return default_limit
+        return min(configured, 1_000)
 
 
 class NotificationGateway:

@@ -33,6 +33,8 @@ from vav.modules.matchmaking_interactions import invitations as interaction_invi
 from vav.modules.matchmaking_interactions import (
     invalidation as interaction_invalidation,
 )
+from vav.modules.memberships import quota as membership_quota
+from vav.modules.memberships import projection as membership_projection
 from vav.modules.privacy.service import execute_erasure_plan, process_export_request
 from vav.modules.recommendations import batches as recommendation_batches
 from vav.modules.recommendations import service as recommendation_service
@@ -789,3 +791,158 @@ async def _dispatch_relationship_reminders() -> dict[str, int]:
 @celery_app.task(name="vav.relationships.reminders")  # type: ignore[misc]
 def dispatch_relationship_reminders() -> dict[str, int]:
     return asyncio.run(_dispatch_relationship_reminders())
+
+
+async def _release_expired_membership_quotas() -> dict[str, int]:
+    async with session_factory() as session:
+        released = await membership_quota.release_expired(session)
+    return {"released_membership_quota_reservations": released}
+
+
+@celery_app.task(name="vav.memberships.release_expired_quotas")  # type: ignore[misc]
+def release_expired_membership_quotas() -> dict[str, int]:
+    return asyncio.run(_release_expired_membership_quotas())
+
+
+async def _reset_membership_periodic_quotas() -> dict[str, int]:
+    async with session_factory() as session:
+        created = await membership_projection.refresh_periodic_quotas(session)
+    return {"created_membership_quota_buckets": created}
+
+
+@celery_app.task(name="vav.memberships.reset_periodic_quotas")  # type: ignore[misc]
+def reset_membership_periodic_quotas() -> dict[str, int]:
+    return asyncio.run(_reset_membership_periodic_quotas())
+
+
+async def _expire_memberships() -> dict[str, int]:
+    async with session_factory() as session:
+        rows = list(
+            (
+                await session.execute(
+                    text(
+                        "SELECT * FROM membership_accounts WHERE "
+                        "(status='grace_period' AND grace_period_ends_at <= now()) OR "
+                        "(status='cancel_scheduled' AND cancellation_effective_at <= now()) OR "
+                        "(status IN ('active','trialing') AND expires_at <= now()) "
+                        "ORDER BY COALESCE(grace_period_ends_at,cancellation_effective_at,expires_at) "
+                        "LIMIT 500 FOR UPDATE SKIP LOCKED"
+                    )
+                )
+            ).mappings()
+        )
+        for row in rows:
+            target = "cancelled" if row["status"] == "cancel_scheduled" else "expired"
+            await session.execute(
+                text(
+                    "UPDATE membership_accounts SET status=:status,version=version+1,updated_at=now() "
+                    "WHERE id=:id"
+                ),
+                {"status": target, "id": row["id"]},
+            )
+            await session.execute(
+                text(
+                    "UPDATE membership_benefit_grants SET status='closed' "
+                    "WHERE membership_account_id=:account AND status='active'"
+                ),
+                {"account": row["id"]},
+            )
+            await session.execute(
+                text(
+                    "UPDATE membership_quota_buckets SET status='expired',updated_at=now() "
+                    "WHERE membership_account_id=:account AND status='active'"
+                ),
+                {"account": row["id"]},
+            )
+            await session.execute(
+                text(
+                    "INSERT INTO outbox_events (topic,aggregate_type,aggregate_id,payload) "
+                    "VALUES (:topic,'membership_account',:id,CAST(:payload AS jsonb))"
+                ),
+                {
+                    "topic": f"membership.{target}",
+                    "id": str(row["id"]),
+                    "payload": json.dumps(
+                        {"user_id": str(row["user_id"]), "fallback": "free"}
+                    ),
+                },
+            )
+        await session.commit()
+    return {"expired_memberships": len(rows)}
+
+
+@celery_app.task(name="vav.memberships.expire")  # type: ignore[misc]
+def expire_memberships() -> dict[str, int]:
+    return asyncio.run(_expire_memberships())
+
+
+async def _reconcile_memberships() -> dict[str, int]:
+    if not get_settings().membership_reconciliation_enabled:
+        return {"membership_reconciliation_issues": 0}
+    async with session_factory() as session:
+        rows = list(
+            (
+                await session.execute(
+                    text(
+                        "SELECT a.id,a.user_id,a.status,a.entitlement_id,e.status AS entitlement_status "
+                        "FROM membership_accounts a LEFT JOIN entitlements e ON e.id=a.entitlement_id "
+                        "WHERE a.source_type='paid_subscription' AND a.status IN "
+                        "('active','trialing','grace_period','cancel_scheduled') "
+                        "AND (e.id IS NULL OR e.status <> 'active' OR "
+                        "(e.expires_at IS NOT NULL AND e.expires_at <= now()))"
+                    )
+                )
+            ).mappings()
+        )
+        missing_cycles = list(
+            (
+                await session.execute(
+                    text(
+                        "SELECT id,user_id FROM membership_accounts WHERE source_type='paid_subscription' "
+                        "AND status IN ('active','trialing','grace_period','cancel_scheduled') "
+                        "AND current_cycle_id IS NULL"
+                    )
+                )
+            ).mappings()
+        )
+        issues = [
+            (
+                row,
+                "ENTITLEMENT_INACTIVE",
+                "critical",
+                {
+                    "membership_status": row["status"],
+                    "entitlement_status": row["entitlement_status"],
+                },
+            )
+            for row in rows
+        ] + [
+            (row, "CURRENT_CYCLE_MISSING", "error", {"membership_status": "active"})
+            for row in missing_cycles
+        ]
+        inserted = 0
+        for row, code, severity, snapshot in issues:
+            result = await session.execute(
+                text(
+                    "INSERT INTO membership_reconciliation_issues "
+                    "(user_id,membership_account_id,issue_code,severity,source_snapshot,status) "
+                    "VALUES (:user,:account,:code,:severity,CAST(:snapshot AS jsonb),'open') "
+                    "ON CONFLICT (user_id,membership_account_id,issue_code) "
+                    "WHERE status IN ('open','investigating') DO NOTHING RETURNING id"
+                ),
+                {
+                    "user": row["user_id"],
+                    "account": row["id"],
+                    "code": code,
+                    "severity": severity,
+                    "snapshot": json.dumps(snapshot),
+                },
+            )
+            inserted += int(result.first() is not None)
+        await session.commit()
+    return {"membership_reconciliation_issues": inserted}
+
+
+@celery_app.task(name="vav.memberships.reconcile")  # type: ignore[misc]
+def reconcile_memberships() -> dict[str, int]:
+    return asyncio.run(_reconcile_memberships())

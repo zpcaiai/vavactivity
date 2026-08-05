@@ -18,12 +18,17 @@ Date: 2026-08-05
 | --- | --- | --- |
 | Python static/import | PASS | Ruff clean; compile/import; 26 relationship routes; single Alembic head `0070`. |
 | Backend no-DB tests | PASS | 5 unit/privacy tests. |
-| Backend PostgreSQL integration/concurrency/security | PENDING | Docker Hub registry returned `EOF`; must pass local retry or remote CI before acceptance. |
+| Backend PostgreSQL integration/concurrency/security | PASS | Remote Backend CI migrated a fresh pgvector PostgreSQL database to `0070`; 569 tests passed in 246.72s. |
 | User web | PASS | 2 relationship unit tests; Vue TypeScript project build passes. |
 | Admin web | PASS | 2 relationship route/security tests; Vue TypeScript project build passes. |
 | Browser acceptance | NOT_RUN | Requires the complete Docker application stack and Chromium fixtures. |
-| Production migration/deployment | NOT_RUN | No production mutation authorised or executed. |
+| Remote migration gate | PASS | Backend run `31022732991` and dependent Neon migration job `92365029280` completed successfully. |
+| Production application deployment | NOT_RUN | The database gate does not prove an application deployment or live HTTP reachability. |
 | Customer/security certification | NOT_CERTIFIED | External acceptance remains required. |
 
-This report is updated after each remaining gate. A pending/blocked environment gate is never
-promoted to PASS from source inspection alone.
+Remote evidence: Backend/Neon run
+`https://github.com/zpcaiai/vavactivity/actions/runs/31022732991`; Frontend run
+`https://github.com/zpcaiai/vavactivity/actions/runs/31022733108`; Secret Scan run
+`https://github.com/zpcaiai/vavactivity/actions/runs/31022733326`.
+
+Browser and external certification remain intentionally unclaimed.
