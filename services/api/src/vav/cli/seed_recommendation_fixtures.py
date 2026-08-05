@@ -1,155 +1,154 @@
-"""Seed a balanced synthetic cohort of approved, recommendable profiles.
+"""Seed synthetic, recommendation-eligible dating profiles.
 
-Everything here is synthetic. No real member data is ever copied into a
-development or evaluation fixture set.
+Every value here is invented for local runs, evaluation and tests. No real
+member profile is ever copied into a fixture, which is exactly what the
+evaluation dataset policy requires.
+
+The fixtures are driven into the same state the Batch 13 review flow produces —
+an approved immutable version, a completeness snapshot, an approved primary
+photo and confirmed preferences — and then handed to the real projection
+builder, so Batch 14 consumes the production contract rather than a shortcut.
 """
 
 # ruff: noqa: E501
 from __future__ import annotations
 
 import asyncio
+import hashlib
+import json
 from datetime import UTC, date, datetime
 from typing import Any
-from uuid import UUID
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from vav.cli.seed_dating_taxonomies import seed_dating_taxonomies
 from vav.core.database import session_factory
-from vav.models.identity import User
 from vav.modules.identity.security import PasswordHasher
-from vav.modules.matchmaking_profiles import review as profile_review
-from vav.modules.matchmaking_profiles import service as profile_service
+from vav.modules.matchmaking_profiles.service import rebuild_projection
 from vav.modules.privacy.crypto import encrypt_private
-from vav.modules.recommendations.service import json_value
 
-PASSWORD = "VavRecommendation!2026_Secure#"
+FIXTURE_PREFIX = "recommendation-fixture"
 
-SELF_INTRODUCTION = (
-    "这是一段用于推荐系统本地测试的合成自我介绍文本，用来验证候选生成、硬条件过滤、双向评分、"
-    "排序多样化以及解释输出是否按预期工作。文本长度刻意超过平台设置的自我介绍最小字数要求，"
-    "以便完整走通提交与审核流程。它不包含任何真实个人信息，也不代表任何真实用户的陈述内容。"
-)
-
-#: A balanced cohort so bidirectional eligibility can actually be satisfied.
-COHORT: tuple[dict[str, Any], ...] = (
+#: Synthetic members designed to exercise matching, exclusion and diversity.
+FIXTURES: tuple[dict[str, Any], ...] = (
     {
-        "key": "rec-f1",
+        "key": "mei",
+        "display_name": "Mei R.",
+        "birth_year": 1993,
         "gender": "female",
-        "wants": ["male"],
+        "partner_genders": ["male"],
         "city": "shanghai",
         "region": "east",
-        "birth": 1993,
         "faith": "believer_baptized",
         "tradition": "reformed",
-        "importance": 5,
-        "intent": "marriage_oriented",
-        "schedule": "standard",
-        "interests": ["reading", "music"],
+        "faith_importance": 5,
+        "languages": ["zh-CN", "en"],
+        "interests": ["reading", "music", "hiking"],
+        "smoking": "never",
+        "children": "want_children",
+        "age_range": {"minimum": 28, "maximum": 42},
     },
     {
-        "key": "rec-f2",
-        "gender": "female",
-        "wants": ["male"],
-        "city": "shanghai",
-        "region": "east",
-        "birth": 1990,
-        "faith": "believer_baptized",
-        "tradition": "baptist",
-        "importance": 4,
-        "intent": "marriage_oriented",
-        "schedule": "early_riser",
-        "interests": ["outdoors", "music"],
-    },
-    {
-        "key": "rec-f3",
-        "gender": "female",
-        "wants": ["male"],
-        "city": "taipei",
-        "region": "taiwan",
-        "birth": 1996,
-        "faith": "believer_not_baptized",
-        "tradition": "non_denominational",
-        "importance": 4,
-        "intent": "serious_relationship",
-        "schedule": "night_owl",
-        "interests": ["arts", "travel"],
-    },
-    {
-        "key": "rec-f4",
-        "gender": "female",
-        "wants": ["male"],
-        "city": "beijing",
-        "region": "north",
-        "birth": 1988,
-        "faith": "believer_baptized",
-        "tradition": "house_church",
-        "importance": 5,
-        "intent": "marriage_oriented",
-        "schedule": "standard",
-        "interests": ["reading", "volunteering"],
-    },
-    {
-        "key": "rec-m1",
+        "key": "jonathan",
+        "display_name": "Jonathan T.",
+        "birth_year": 1990,
         "gender": "male",
-        "wants": ["female"],
+        "partner_genders": ["female"],
         "city": "shanghai",
         "region": "east",
-        "birth": 1991,
         "faith": "believer_baptized",
         "tradition": "reformed",
-        "importance": 5,
-        "intent": "marriage_oriented",
-        "schedule": "standard",
-        "interests": ["reading", "sports"],
+        "faith_importance": 5,
+        "languages": ["zh-CN", "en"],
+        "interests": ["reading", "music", "cooking"],
+        "smoking": "never",
+        "children": "want_children",
+        "age_range": {"minimum": 26, "maximum": 38},
     },
     {
-        "key": "rec-m2",
+        "key": "daniel",
+        "display_name": "Daniel K.",
+        "birth_year": 1988,
         "gender": "male",
-        "wants": ["female"],
-        "city": "shanghai",
+        "partner_genders": ["female"],
+        "city": "hangzhou",
         "region": "east",
-        "birth": 1989,
+        "faith": "believer_not_baptized",
+        "tradition": "baptist",
+        "faith_importance": 3,
+        "languages": ["zh-CN"],
+        "interests": ["sports", "travel"],
+        "smoking": "occasionally",
+        "children": "open_to_children",
+        "age_range": {"minimum": 25, "maximum": 40},
+    },
+    {
+        "key": "grace",
+        "display_name": "Grace H.",
+        "birth_year": 1995,
+        "gender": "female",
+        "partner_genders": ["male"],
+        "city": "hangzhou",
+        "region": "east",
         "faith": "believer_baptized",
         "tradition": "baptist",
-        "importance": 4,
-        "intent": "marriage_oriented",
-        "schedule": "early_riser",
-        "interests": ["music", "outdoors"],
+        "faith_importance": 4,
+        "languages": ["zh-CN"],
+        "interests": ["cooking", "travel"],
+        "smoking": "never",
+        "children": "want_children",
+        "age_range": {"minimum": 28, "maximum": 44},
     },
     {
-        "key": "rec-m3",
+        "key": "peter",
+        "display_name": "Peter S.",
+        "birth_year": 1986,
         "gender": "male",
-        "wants": ["female"],
+        "partner_genders": ["female"],
         "city": "taipei",
         "region": "taiwan",
-        "birth": 1994,
-        "faith": "believer_not_baptized",
-        "tradition": "non_denominational",
-        "importance": 3,
-        "intent": "serious_relationship",
-        "schedule": "night_owl",
-        "interests": ["arts", "travel"],
+        "faith": "believer_baptized",
+        "tradition": "reformed",
+        "faith_importance": 5,
+        "languages": ["zh-TW", "en"],
+        "interests": ["reading", "hiking"],
+        "smoking": "never",
+        "children": "want_children",
+        "age_range": {"minimum": 26, "maximum": 40},
     },
     {
-        "key": "rec-m4",
-        "gender": "male",
-        "wants": ["female"],
-        "city": "beijing",
-        "region": "north",
-        "birth": 1987,
+        "key": "hannah",
+        "display_name": "Hannah C.",
+        "birth_year": 1992,
+        "gender": "female",
+        "partner_genders": ["male"],
+        "city": "taipei",
+        "region": "taiwan",
         "faith": "believer_baptized",
-        "tradition": "house_church",
-        "importance": 5,
-        "intent": "marriage_oriented",
-        "schedule": "standard",
-        "interests": ["volunteering", "study"],
+        "tradition": "reformed",
+        "faith_importance": 5,
+        "languages": ["zh-TW", "en"],
+        "interests": ["music", "hiking"],
+        "smoking": "never",
+        "children": "want_children",
+        "age_range": {"minimum": 30, "maximum": 45},
     },
 )
 
+PASSWORD = "RecommendationFixture!2026"
 
-async def _ensure_reviewer(session: AsyncSession) -> User:
-    email = "rec-fixture-reviewer@example.test"
+
+def _json(value: Any) -> str:
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, default=str)
+
+
+def _email(key: str) -> str:
+    return f"{FIXTURE_PREFIX}-{key}@example.test"
+
+
+async def _ensure_user(session: AsyncSession, fixture: dict[str, Any], password_hash: str) -> Any:
+    email = _email(str(fixture["key"]))
     user_id = await session.scalar(
         text("SELECT id FROM users WHERE email=:email"), {"email": email}
     )
@@ -157,294 +156,361 @@ async def _ensure_reviewer(session: AsyncSession) -> User:
         user_id = await session.scalar(
             text(
                 "INSERT INTO users (email,display_email,password_hash,status,email_verified_at,preferred_locale,timezone) "
-                "VALUES (:email,:display,:hash,'active',now(),'zh-CN','UTC') RETURNING id"
+                "VALUES (:email,:display_email,:hash,'active',now(),'zh-CN','UTC') RETURNING id"
             ),
-            {"email": email, "display": email, "hash": PasswordHasher().hash(PASSWORD)},
-        )
-    for role_code in ("profile_reviewer", "profile_review_lead"):
-        role_id = await session.scalar(
-            text("SELECT id FROM roles WHERE code=:code"), {"code": role_code}
-        )
-        if role_id is not None:
-            await session.execute(
-                text(
-                    "INSERT INTO user_roles (user_id,role_id,granted_by,grant_reason) "
-                    "VALUES (:user_id,:role_id,:user_id,'recommendation fixture seed') ON CONFLICT DO NOTHING"
-                ),
-                {"user_id": user_id, "role_id": role_id},
-            )
-    await session.commit()
-    reviewer = await session.get(User, UUID(str(user_id)))
-    assert reviewer is not None
-    return reviewer
-
-
-async def _ensure_member(session: AsyncSession, spec: dict[str, Any]) -> User:
-    email = f"{spec['key']}@example.test"
-    user_id = await session.scalar(
-        text("SELECT id FROM users WHERE email=:email"), {"email": email}
-    )
-    if user_id is None:
-        user_id = await session.scalar(
-            text(
-                "INSERT INTO users (email,display_email,password_hash,status,email_verified_at,preferred_locale,timezone) "
-                "VALUES (:email,:display,:hash,'active',now(),'zh-CN','Asia/Shanghai') RETURNING id"
-            ),
-            {"email": email, "display": email, "hash": PasswordHasher().hash(PASSWORD)},
+            {"email": email, "display_email": email, "hash": password_hash},
         )
     await session.execute(
         text(
-            "INSERT INTO user_profiles (user_id,display_name,date_of_birth_encrypted,preferred_locale,timezone,profile_status) "
-            "VALUES (:id,:name,:dob,'zh-CN','Asia/Shanghai','complete') "
-            "ON CONFLICT (user_id) DO UPDATE SET date_of_birth_encrypted=EXCLUDED.date_of_birth_encrypted"
+            "INSERT INTO user_profiles (user_id,display_name,date_of_birth_encrypted,gender_code,preferred_locale,timezone,profile_status) "
+            "VALUES (:user_id,:name,:dob,:gender,'zh-CN','UTC','complete') "
+            "ON CONFLICT (user_id) DO UPDATE SET display_name=EXCLUDED.display_name,"
+            "date_of_birth_encrypted=EXCLUDED.date_of_birth_encrypted,gender_code=EXCLUDED.gender_code"
         ),
         {
-            "id": user_id,
-            "name": spec["key"].replace("-", " ").title(),
-            "dob": encrypt_private(date(int(spec["birth"]), 5, 20).isoformat()),
+            "user_id": user_id,
+            "name": fixture["display_name"],
+            "dob": encrypt_private(date(int(fixture["birth_year"]), 6, 15).isoformat()),
+            "gender": fixture["gender"],
         },
     )
     await session.execute(
         text(
             "INSERT INTO user_privacy_settings (user_id,visible_in_matchmaking,privacy_mode) "
-            "VALUES (:id,true,'strict') ON CONFLICT (user_id) DO UPDATE SET visible_in_matchmaking=true"
+            "VALUES (:user_id,true,'strict') ON CONFLICT (user_id) DO UPDATE SET visible_in_matchmaking=true"
         ),
-        {"id": user_id},
+        {"user_id": user_id},
     )
-    await session.commit()
-    member = await session.get(User, UUID(str(user_id)))
-    assert member is not None
-    return member
+    return user_id
 
 
-def _fields(spec: dict[str, Any]) -> dict[str, Any]:
+async def _ensure_photo(session: AsyncSession, *, profile_id: Any, user_id: Any, key: str) -> None:
+    """Attach a synthetic approved primary photo.
+
+    The fixture stores no image bytes; it only records the approved photo state
+    the eligibility rule checks for.
+    """
+    existing = await session.scalar(
+        text(
+            "SELECT id FROM dating_profile_photos WHERE dating_profile_id=:id AND photo_role='primary' "
+            "AND deleted_at IS NULL"
+        ),
+        {"id": profile_id},
+    )
+    if existing is not None:
+        return
+    checksum = hashlib.sha256(f"{FIXTURE_PREFIX}:{key}".encode()).hexdigest()
+    asset_id = await session.scalar(
+        text(
+            "INSERT INTO media_assets (storage_provider,bucket_name,object_key,original_filename,"
+            "media_type,mime_type,byte_size,width,height,checksum_sha256,visibility,processing_status,uploaded_by) "
+            "VALUES ('minio','vav-private',:object_key,'fixture.jpg','image','image/jpeg',1024,600,600,"
+            ":checksum,'private','ready',:user_id) "
+            "ON CONFLICT (object_key) DO UPDATE SET updated_at=now() RETURNING id"
+        ),
+        {
+            "object_key": f"fixtures/recommendations/{key}.jpg",
+            "checksum": checksum,
+            "user_id": user_id,
+        },
+    )
+    await session.execute(
+        text(
+            "INSERT INTO dating_profile_photos (dating_profile_id,media_asset_id,photo_role,status,"
+            "visibility,sort_order,content_checksum_sha256,reviewed_at) "
+            "VALUES (:profile_id,:asset_id,'primary','approved','verified_members',0,:checksum,now())"
+        ),
+        {"profile_id": profile_id, "asset_id": asset_id, "checksum": checksum},
+    )
+
+
+def _snapshot_payload(fixture: dict[str, Any]) -> dict[str, Any]:
     return {
-        "basic.gender_code": spec["gender"],
-        "basic.eligible_partner_gender_codes": list(spec["wants"]),
-        "basic.age_display_mode": "exact_age",
-        "basic.relationship_intent": spec["intent"],
-        "basic.height_cm": 170,
+        "basic.gender_code": fixture["gender"],
+        "basic.eligible_partner_gender_codes": fixture["partner_genders"],
+        "basic.relationship_intent": "marriage_oriented",
         "location.country_code": "CN",
-        "location.region_code": spec["region"],
-        "location.city_code": spec["city"],
-        "location.primary_language_codes": ["zh-CN"],
-        "location.additional_language_codes": ["en"],
+        "location.region_code": fixture["region"],
+        "location.city_code": fixture["city"],
         "location.relocation_willingness": "same_country",
-        "location.residence_status_code": "citizen",
-        "location.citizenship_codes": ["CN"],
+        "location.primary_language_codes": fixture["languages"],
         "education_and_work.education_level_code": "bachelor",
         "education_and_work.occupation_category_code": "education",
-        "faith.faith_status_code": spec["faith"],
+        "faith.faith_status_code": fixture["faith"],
+        "faith.church_tradition_codes": [fixture["tradition"]],
         "faith.current_church_participation_code": "weekly",
-        "faith.church_tradition_codes": [spec["tradition"]],
-        "faith.marriage_faith_importance": int(spec["importance"]),
-        "faith.devotional_life_code": "daily",
-        "faith.faith_started_year": 2012,
-        "faith.small_group_participation_code": "regular_member",
-        "faith.ministry_participation_codes": ["teaching"],
-        "faith.future_church_expectation_codes": ["worship_together"],
+        "faith.marriage_faith_importance": fixture["faith_importance"],
         "relationship_history.marital_status_code": "never_married",
         "relationship_history.has_children": False,
-        "relationship_history.prior_marriage_count": 0,
-        "relationship_history.children_living_arrangement_code": "no_children",
-        "relationship_history.open_to_partner_with_children": "open_with_conversation",
-        "relationship_history.relationship_history_disclosure_level": "after_mutual_match",
-        "family.desire_children_code": "want_children",
-        "family.family_closeness_code": "close",
-        "family.current_living_arrangement_code": "living_alone",
-        "family.family_culture_codes": ["christian_household"],
-        "family.parental_care_expectation_codes": ["live_nearby"],
-        "family.parenting_expectation_codes": ["faith_formation"],
-        "family.preferred_future_household_codes": ["nuclear"],
-        "lifestyle.daily_schedule_code": spec["schedule"],
-        "lifestyle.smoking_status_code": "never",
+        "family.desire_children_code": fixture["children"],
+        "lifestyle.daily_schedule_code": "standard",
+        "lifestyle.smoking_status_code": fixture["smoking"],
         "lifestyle.alcohol_use_code": "never",
-        "lifestyle.leisure_interest_codes": list(spec["interests"]),
-        "lifestyle.communication_preference_codes": ["in_person", "video_call"],
-        "lifestyle.diet_codes": ["no_restriction"],
-        "lifestyle.exercise_frequency_code": "several_times_week",
-        "lifestyle.social_style_codes": ["small_gatherings"],
-        "lifestyle.pet_preference_codes": ["likes_pets"],
-        "lifestyle.travel_frequency_code": "occasional",
-        "lifestyle.financial_attitude_codes": ["saver"],
-        "lifestyle.conflict_style_codes": ["talk_immediately"],
+        "lifestyle.leisure_interest_codes": fixture["interests"],
+        "lifestyle.communication_preference_codes": ["messaging", "voice_call"],
     }
 
 
-async def seed_recommendation_fixtures() -> None:
-    from vav.cli.seed_dating_taxonomies import seed_dating_taxonomies
-
+async def seed_fixtures() -> int:
     await seed_dating_taxonomies()
+    hasher = PasswordHasher()
+    password_hash = hasher.hash(PASSWORD)
+    profile_ids: list[Any] = []
 
     async with session_factory() as session:
-        reviewer = await _ensure_reviewer(session)
+        release_id = await session.scalar(
+            text(
+                "SELECT id FROM dating_profile_schema_releases WHERE schema_code='vav-dating-profile' AND status='active'"
+            )
+        )
+        if release_id is None:
+            print("No active dating schema release; nothing to seed.")
+            return 0
 
-    created = 0
-    for spec in COHORT:
-        async with session_factory() as session:
-            member = await _ensure_member(session, spec)
-            existing = await profile_service.get_profile_row(session, member.id)
-            if existing is not None and existing["status"] == "active":
-                continue
-            if existing is None:
-                await profile_service.create_profile(session, member)
-            await profile_service.update_fields(session, member, _fields(spec))
-            await profile_service.update_narratives(
-                session,
-                member,
-                "zh-CN",
+        for index, fixture in enumerate(FIXTURES):
+            user_id = await _ensure_user(session, fixture, password_hash)
+            profile_id = await session.scalar(
+                text("SELECT id FROM dating_profiles WHERE user_id=:user_id"), {"user_id": user_id}
+            )
+            if profile_id is None:
+                profile_id = await session.scalar(
+                    text(
+                        "INSERT INTO dating_profiles (user_id,profile_number,status,review_status,"
+                        "schema_release_id,default_locale,relationship_intent,current_city_code) "
+                        "VALUES (:user_id,:number,'draft','not_required',:release,'zh-CN','marriage_oriented',:city) RETURNING id"
+                    ),
+                    {
+                        "user_id": user_id,
+                        "number": f"VAV-REC-{index + 1:04d}",
+                        "release": release_id,
+                        "city": fixture["city"],
+                    },
+                )
+            for table in (
+                "dating_profile_core_details",
+                "dating_profile_faith_details",
+                "dating_profile_relationship_history",
+                "dating_profile_family_details",
+                "dating_profile_lifestyle_details",
+            ):
+                await session.execute(
+                    text(
+                        f"INSERT INTO {table} (dating_profile_id) VALUES (:id) ON CONFLICT DO NOTHING"
+                    ),
+                    {"id": profile_id},
+                )
+            await session.execute(
+                text(
+                    "UPDATE dating_profile_core_details SET gender_code=:gender,"
+                    "eligible_partner_gender_codes=CAST(:partners AS jsonb),age_display_mode='exact_age',"
+                    "country_code='CN',region_code=:region,city_code=:city,"
+                    "primary_language_codes=CAST(:languages AS jsonb),relocation_willingness='same_country',"
+                    "education_level_code='bachelor',occupation_category_code='education',updated_at=now() "
+                    "WHERE dating_profile_id=:id"
+                ),
                 {
-                    "self_introduction": SELF_INTRODUCTION,
-                    "faith_journey": "一段用于测试的合成信仰旅程叙述。",
-                    "relationship_values": "诚实、委身、彼此扶持。",
-                    "marriage_vision": "希望共同建立以信仰为根基的家庭。",
-                    "family_vision": "希望家庭成为彼此的避风港。",
-                    "strengths_and_growth": "耐心是我的优势，表达情绪仍在学习。",
-                    "interests_and_lifestyle": "喜欢阅读、音乐与户外活动。",
-                    "hoped_for_relationship": "希望认识重视信仰与家庭的伴侣。",
+                    "gender": fixture["gender"],
+                    "partners": _json(fixture["partner_genders"]),
+                    "region": fixture["region"],
+                    "city": fixture["city"],
+                    "languages": _json(fixture["languages"]),
+                    "id": profile_id,
                 },
             )
-            await profile_service.replace_preferences(
-                session,
-                member,
-                [
-                    {
-                        "criterion_code": "age_range",
-                        "operator": "range",
-                        "desired_value": {"minimum": 25, "maximum": 45},
-                        "importance": "required",
-                        "hard_constraint": True,
-                        "allow_unknown": False,
-                    },
-                    {
-                        "criterion_code": "faith_status_code",
-                        "operator": "in",
-                        "desired_value": ["believer_baptized", "believer_not_baptized"],
-                        "importance": "very_important",
-                        "hard_constraint": False,
-                    },
-                    {
-                        "criterion_code": "relationship_intent",
-                        "operator": "in",
-                        "desired_value": ["marriage_oriented", "serious_relationship"],
-                        "importance": "important",
-                        "hard_constraint": False,
-                    },
-                    {
-                        "criterion_code": "leisure_interest_codes",
-                        "operator": "contains_any",
-                        "desired_value": [
-                            "reading",
-                            "music",
-                            "outdoors",
-                            "arts",
-                            "travel",
-                            "volunteering",
-                            "study",
-                            "sports",
-                        ],
-                        "importance": "nice_to_have",
-                        "hard_constraint": False,
-                    },
-                ],
-                allow_relaxation=False,
-            )
-            await _attach_photo(session, member)
-            profile = await profile_service.require_profile(session, member.id)
-            await profile_service.refresh_completeness(session, profile["id"])
-            await session.commit()
-
-            await profile_service.submit_profile(session, member, "Recommendation fixture seed")
-            case_id = await session.scalar(
+            await session.execute(
                 text(
-                    "SELECT id FROM dating_profile_review_cases WHERE dating_profile_id=:id "
-                    "ORDER BY submitted_at DESC LIMIT 1"
+                    "UPDATE dating_profile_faith_details SET faith_status_code=:faith,"
+                    "current_church_participation_code='weekly',church_tradition_codes=CAST(:tradition AS jsonb),"
+                    "marriage_faith_importance=:importance,devotional_life_code='daily',updated_at=now() "
+                    "WHERE dating_profile_id=:id"
                 ),
-                {"id": profile["id"]},
+                {
+                    "faith": fixture["faith"],
+                    "tradition": _json([fixture["tradition"]]),
+                    "importance": fixture["faith_importance"],
+                    "id": profile_id,
+                },
             )
-            await profile_review.start_case(session, reviewer, UUID(str(case_id)), None)
-            await profile_review.approve_case(
-                session,
-                reviewer,
-                UUID(str(case_id)),
-                user_message="Fixture profile approved.",
-                internal_summary=None,
-                expected_version=None,
+            await session.execute(
+                text(
+                    "UPDATE dating_profile_relationship_history SET marital_status_code='never_married',"
+                    "has_children=false,updated_at=now() WHERE dating_profile_id=:id"
+                ),
+                {"id": profile_id},
             )
-            await profile_service.rebuild_projection(session, profile["id"])
-            created += 1
+            await session.execute(
+                text(
+                    "UPDATE dating_profile_family_details SET desire_children_code=:children,updated_at=now() "
+                    "WHERE dating_profile_id=:id"
+                ),
+                {"children": fixture["children"], "id": profile_id},
+            )
+            await session.execute(
+                text(
+                    "UPDATE dating_profile_lifestyle_details SET daily_schedule_code='standard',"
+                    "smoking_status_code=:smoking,alcohol_use_code='never',"
+                    "leisure_interest_codes=CAST(:interests AS jsonb),"
+                    'communication_preference_codes=\'["messaging","voice_call"]\'::jsonb,updated_at=now() '
+                    "WHERE dating_profile_id=:id"
+                ),
+                {
+                    "smoking": fixture["smoking"],
+                    "interests": _json(fixture["interests"]),
+                    "id": profile_id,
+                },
+            )
+            await session.execute(
+                text(
+                    "INSERT INTO dating_profile_narratives (dating_profile_id,locale,self_introduction,marriage_vision,moderation_status) "
+                    "VALUES (:id,'zh-CN',:intro,:vision,'approved') "
+                    "ON CONFLICT (dating_profile_id,locale) DO UPDATE SET moderation_status='approved'"
+                ),
+                {
+                    "id": profile_id,
+                    "intro": (
+                        "这是一段用于推荐引擎本地验证的合成自我介绍，用来检查投影、解释与展示边界是否正确。"
+                        "内容为虚构，不代表任何真实用户。"
+                    ),
+                    "vision": "希望在信仰里彼此扶持，一同建立家庭。",
+                },
+            )
 
-    print(
-        f"Recommendation fixture cohort ready: {len(COHORT)} synthetic members "
-        f"({created} newly approved) at {datetime.now(UTC).isoformat(timespec='seconds')}"
-    )
+            await _ensure_photo(
+                session, profile_id=profile_id, user_id=user_id, key=str(fixture["key"])
+            )
+
+            await session.execute(
+                text(
+                    "INSERT INTO partner_preference_profiles (user_id,dating_profile_id,schema_release_id,status) "
+                    "VALUES (:user_id,:profile_id,:release,'confirmed') "
+                    "ON CONFLICT (dating_profile_id) DO UPDATE SET status='confirmed'"
+                ),
+                {"user_id": user_id, "profile_id": profile_id, "release": release_id},
+            )
+            preference_id = await session.scalar(
+                text("SELECT id FROM partner_preference_profiles WHERE dating_profile_id=:id"),
+                {"id": profile_id},
+            )
+            for criterion in (
+                {
+                    "code": "age_range",
+                    "operator": "range",
+                    "value": fixture["age_range"],
+                    "importance": "required",
+                    "hard": True,
+                },
+                {
+                    "code": "faith_status_code",
+                    "operator": "in",
+                    "value": ["believer_baptized", "believer_not_baptized"],
+                    "importance": "very_important",
+                    "hard": False,
+                },
+                {
+                    "code": "relationship_intent",
+                    "operator": "equals",
+                    "value": "marriage_oriented",
+                    "importance": "very_important",
+                    "hard": False,
+                },
+                {
+                    "code": "leisure_interest_codes",
+                    "operator": "contains_any",
+                    "value": fixture["interests"],
+                    "importance": "nice_to_have",
+                    "hard": False,
+                },
+            ):
+                await session.execute(
+                    text(
+                        "INSERT INTO partner_preference_criteria "
+                        "(partner_preference_profile_id,criterion_code,operator,desired_value,importance,hard_constraint) "
+                        "VALUES (:profile_id,:code,:operator,CAST(:value AS jsonb),:importance,:hard) "
+                        "ON CONFLICT (partner_preference_profile_id,criterion_code) DO UPDATE SET "
+                        "operator=EXCLUDED.operator, desired_value=EXCLUDED.desired_value, "
+                        "importance=EXCLUDED.importance, hard_constraint=EXCLUDED.hard_constraint"
+                    ),
+                    {
+                        "profile_id": preference_id,
+                        "code": criterion["code"],
+                        "operator": criterion["operator"],
+                        "value": _json(criterion["value"]),
+                        "importance": criterion["importance"],
+                        "hard": criterion["hard"],
+                    },
+                )
+
+            await _approve_version(session, profile_id=profile_id, user_id=user_id, fixture=fixture)
+            profile_ids.append(profile_id)
+
+        await session.commit()
+
+    async with session_factory() as session:
+        for profile_id in profile_ids:
+            await rebuild_projection(session, profile_id)
+    return len(profile_ids)
 
 
-async def _attach_photo(session: AsyncSession, member: User) -> None:
-    """Attach a synthetic, already-approved primary photo."""
-    from vav.modules.matchmaking_profiles import photos as photo_processing
-
-    profile = await profile_service.require_profile(session, member.id)
+async def _approve_version(
+    session: AsyncSession, *, profile_id: Any, user_id: Any, fixture: dict[str, Any]
+) -> None:
+    """Record the approved immutable version and completeness snapshot."""
+    payload = {"fields": _snapshot_payload(fixture), "preference_criteria": []}
+    serialised = _json(payload)
+    checksum = hashlib.sha256(serialised.encode()).hexdigest()
     existing = await session.scalar(
         text(
-            "SELECT count(*) FROM dating_profile_photos WHERE dating_profile_id=:id AND deleted_at IS NULL"
+            "SELECT version_number FROM dating_profile_versions WHERE dating_profile_id=:id "
+            "AND approved_at IS NOT NULL ORDER BY version_number DESC LIMIT 1"
         ),
-        {"id": profile["id"]},
+        {"id": profile_id},
     )
-    if int(existing or 0):
-        return
-
-    import io
-
-    from PIL import Image
-
-    seed = abs(hash(str(member.id))) % 97 + 1
-    image = Image.new("RGB", (900, 900))
-    image.putdata(
-        [
-            (
-                (x * 7 + y * 3 + seed) % 200 + 30,
-                (x * 3 + y * 11 + seed) % 200 + 30,
-                (x * 13 + y * 5 + seed) % 200 + 30,
-            )
-            for y in range(900)
-            for x in range(900)
-        ]
-    )
-    buffer = io.BytesIO()
-    image.save(buffer, format="JPEG")
-    processed = photo_processing.process_image(buffer.getvalue(), "image/jpeg")
-
-    media_id = await session.scalar(
+    if existing is None:
+        release_id = await session.scalar(
+            text("SELECT schema_release_id FROM dating_profiles WHERE id=:id"), {"id": profile_id}
+        )
+        await session.execute(
+            text(
+                "INSERT INTO dating_profile_versions (dating_profile_id,version_number,schema_release_id,"
+                "snapshot_encrypted,snapshot_checksum_sha256,change_summary,created_by,review_status,"
+                "submitted_at,approved_at) "
+                "VALUES (:id,1,:release,:snapshot,:checksum,'fixture seed',:user_id,'approved',now(),now())"
+            ),
+            {
+                "id": profile_id,
+                "release": release_id,
+                "snapshot": encrypt_private(payload),
+                "checksum": checksum,
+                "user_id": user_id,
+            },
+        )
+    await session.execute(
         text(
-            "INSERT INTO media_assets (storage_provider,bucket_name,object_key,original_filename,media_type,"
-            "mime_type,byte_size,width,height,checksum_sha256,visibility,processing_status,uploaded_by) "
-            "VALUES ('s3','vav-private',:key,'fixture.jpg','image','image/jpeg',:size,900,900,:checksum,"
-            "'private','processed',:user_id) RETURNING id"
+            "INSERT INTO dating_profile_completeness_snapshots (dating_profile_id,profile_version_number,"
+            "policy_version,total_basis_points,section_scores,submission_eligible,recommendation_eligible) "
+            "VALUES (:id,1,'1.0.0',9500,'{}'::jsonb,true,true) "
+            "ON CONFLICT (dating_profile_id,profile_version_number) DO UPDATE SET "
+            "recommendation_eligible=true, submission_eligible=true, evaluated_at=now()"
         ),
-        {
-            "key": f"private/dating-photos/{profile['id']}/{processed['checksum_sha256']}.jpg",
-            "size": processed["byte_size"],
-            "checksum": processed["checksum_sha256"],
-            "user_id": member.id,
-        },
-    )
-    await session.commit()
-    result = await profile_service.register_photo(
-        session,
-        member,
-        media_asset_id=UUID(str(media_id)),
-        role="primary",
-        checksum=processed["checksum_sha256"],
-        report=processed["report"],
+        {"id": profile_id},
     )
     await session.execute(
-        text("UPDATE dating_profile_photos SET status='approved',reviewed_at=now() WHERE id=:id"),
-        {"id": UUID(result["photo_id"])},
+        text(
+            "UPDATE dating_profiles SET status='active', review_status='approved', "
+            "approved_version_number=1, current_version_number=1, approved_at=COALESCE(approved_at, now()), "
+            "activated_at=COALESCE(activated_at, now()), updated_at=now() WHERE id=:id"
+        ),
+        {"id": profile_id},
     )
-    await session.commit()
-    _ = json_value
+
+
+async def main() -> None:
+    count = await seed_fixtures()
+    print(
+        f"seeded {count} recommendation-eligible fixtures at "
+        f"{datetime.now(UTC).isoformat(timespec='seconds')}"
+    )
 
 
 if __name__ == "__main__":
-    asyncio.run(seed_recommendation_fixtures())
+    asyncio.run(main())

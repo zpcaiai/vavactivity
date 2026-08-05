@@ -32,3 +32,8 @@ test-results/
 *.log
 tmp/
 .minio/
+
+# local delivery / transfer artifacts
+_to_delete/
+_transfer/
+*.tgz

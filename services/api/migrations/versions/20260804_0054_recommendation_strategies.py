@@ -1,4 +1,4 @@
-"""Add versioned recommendation strategies and feature definitions.
+"""Add recommendation strategies, feature definitions, pool entries and audit.
 
 Revision ID: 20260804_0054
 Revises: 20260804_0053
@@ -26,7 +26,7 @@ def upgrade() -> None:
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       strategy_code VARCHAR(128) NOT NULL,
       semantic_version VARCHAR(64) NOT NULL,
-      status VARCHAR(32) NOT NULL,
+      status VARCHAR(32) NOT NULL DEFAULT 'draft',
       hard_constraint_policy JSONB NOT NULL,
       feature_manifest JSONB NOT NULL,
       scoring_policy JSONB NOT NULL,
@@ -38,16 +38,18 @@ def upgrade() -> None:
       cold_start_policy JSONB NOT NULL DEFAULT '{}'::jsonb,
       applicable_regions JSONB NOT NULL DEFAULT '[]'::jsonb,
       applicable_segments JSONB NOT NULL DEFAULT '[]'::jsonb,
-      evaluation_passed BOOLEAN NOT NULL DEFAULT false,
-      created_by UUID NOT NULL REFERENCES users(id),
+      evaluation_run_id UUID,
+      created_by UUID REFERENCES users(id),
       approved_by UUID REFERENCES users(id),
       activated_by UUID REFERENCES users(id),
       created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
       approved_at TIMESTAMPTZ,
       activated_at TIMESTAMPTZ,
       UNIQUE(strategy_code, semantic_version)
     );
-    CREATE UNIQUE INDEX uq_active_recommendation_strategy ON recommendation_strategies(strategy_code) WHERE status='active';
+    CREATE UNIQUE INDEX uq_recommendation_strategy_active ON recommendation_strategies(strategy_code) WHERE status='active';
+
     CREATE TABLE recommendation_feature_definitions (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       feature_code VARCHAR(128) NOT NULL,
@@ -57,11 +59,41 @@ def upgrade() -> None:
       scoring_function_code VARCHAR(128) NOT NULL,
       sensitivity VARCHAR(32) NOT NULL,
       explainable BOOLEAN NOT NULL DEFAULT true,
-      user_configurable BOOLEAN NOT NULL DEFAULT false,
-      status VARCHAR(32) NOT NULL,
+      user_configurable BOOLEAN NOT NULL DEFAULT true,
+      default_weight INTEGER NOT NULL DEFAULT 0 CHECK(default_weight >= 0 AND default_weight <= 100),
+      confidence_only BOOLEAN NOT NULL DEFAULT false,
+      status VARCHAR(32) NOT NULL DEFAULT 'active',
       created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
       UNIQUE(feature_code, semantic_version)
     );
+
+    CREATE TABLE recommendation_pool_entries (
+      user_id UUID PRIMARY KEY REFERENCES users(id),
+      dating_profile_id UUID NOT NULL,
+      profile_projection_version INTEGER NOT NULL,
+      preference_version INTEGER NOT NULL,
+      privacy_settings_version INTEGER NOT NULL,
+      country_code CHAR(2),
+      region_code VARCHAR(128),
+      city_code VARCHAR(128),
+      age_bucket VARCHAR(32),
+      age_years INTEGER,
+      gender_code VARCHAR(64),
+      eligible_partner_gender_codes JSONB NOT NULL DEFAULT '[]'::jsonb,
+      relationship_intent VARCHAR(64),
+      eligible BOOLEAN NOT NULL,
+      eligibility_reasons JSONB NOT NULL DEFAULT '[]'::jsonb,
+      stated_criteria_count INTEGER NOT NULL DEFAULT 0,
+      approved_at TIMESTAMPTZ,
+      searchable_from TIMESTAMPTZ,
+      searchable_until TIMESTAMPTZ,
+      pool_version INTEGER NOT NULL DEFAULT 1 CHECK(pool_version > 0),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE INDEX ix_recommendation_pool_eligible ON recommendation_pool_entries(eligible, country_code, region_code);
+    CREATE INDEX ix_recommendation_pool_age ON recommendation_pool_entries(eligible, age_years);
+    CREATE INDEX ix_recommendation_pool_gender ON recommendation_pool_entries(eligible, gender_code);
+
     CREATE TABLE recommendation_audit_events (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       event_type VARCHAR(128) NOT NULL,
@@ -72,55 +104,15 @@ def upgrade() -> None:
       safe_context JSONB NOT NULL DEFAULT '{}'::jsonb,
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     );
-    CREATE INDEX ix_recommendation_audit_subject ON recommendation_audit_events(subject_type, subject_id, created_at DESC);
     CREATE INDEX ix_recommendation_audit_type ON recommendation_audit_events(event_type, created_at DESC);
+    CREATE INDEX ix_recommendation_audit_subject ON recommendation_audit_events(subject_type, subject_id);
     """)
-    op.execute("""
-    CREATE FUNCTION protect_active_recommendation_strategy() RETURNS trigger AS $$
-    BEGIN
-      IF OLD.status='active' AND (
-        NEW.hard_constraint_policy IS DISTINCT FROM OLD.hard_constraint_policy
-        OR NEW.feature_manifest IS DISTINCT FROM OLD.feature_manifest
-        OR NEW.scoring_policy IS DISTINCT FROM OLD.scoring_policy
-        OR NEW.bidirectional_policy IS DISTINCT FROM OLD.bidirectional_policy
-        OR NEW.ranking_policy IS DISTINCT FROM OLD.ranking_policy
-        OR NEW.semantic_version IS DISTINCT FROM OLD.semantic_version) THEN
-        RAISE EXCEPTION 'active recommendation strategy content is immutable';
-      END IF;
-      RETURN NEW;
-    END;
-    $$ LANGUAGE plpgsql
-    """)
-    op.execute(
-        "CREATE TRIGGER recommendation_strategy_immutable BEFORE UPDATE ON recommendation_strategies FOR EACH ROW EXECUTE FUNCTION protect_active_recommendation_strategy()"
-    )
-    # A strategy can only be activated after evaluation and approval.
-    op.execute("""
-    CREATE FUNCTION require_recommendation_strategy_gates() RETURNS trigger AS $$
-    BEGIN
-      IF NEW.status='active' AND (NEW.approved_by IS NULL OR NEW.evaluation_passed IS NOT TRUE) THEN
-        RAISE EXCEPTION 'a recommendation strategy requires approval and a passing evaluation before activation';
-      END IF;
-      RETURN NEW;
-    END;
-    $$ LANGUAGE plpgsql
-    """)
-    op.execute(
-        "CREATE TRIGGER recommendation_strategy_release_gate BEFORE INSERT OR UPDATE ON recommendation_strategies FOR EACH ROW EXECUTE FUNCTION require_recommendation_strategy_gates()"
-    )
 
 
 def downgrade() -> None:
-    op.execute(
-        "DROP TRIGGER IF EXISTS recommendation_strategy_release_gate ON recommendation_strategies"
-    )
-    op.execute("DROP FUNCTION IF EXISTS require_recommendation_strategy_gates")
-    op.execute(
-        "DROP TRIGGER IF EXISTS recommendation_strategy_immutable ON recommendation_strategies"
-    )
-    op.execute("DROP FUNCTION IF EXISTS protect_active_recommendation_strategy")
     _run("""
     DROP TABLE recommendation_audit_events;
+    DROP TABLE recommendation_pool_entries;
     DROP TABLE recommendation_feature_definitions;
     DROP TABLE recommendation_strategies;
     """)

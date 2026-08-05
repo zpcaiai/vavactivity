@@ -1,9 +1,8 @@
-"""Stable ranking, diversification and exposure adjustments.
+"""Stable ranking, novelty, exposure adjustment and diversification.
 
-Ranking is deterministic for a fixed (strategy, candidate snapshot, seed), so
-refreshing a page never reshuffles a batch. Adjusted scores are reported
-separately from the raw compatibility score — an exposure penalty must never
-masquerade as a lower match.
+Ranking never changes compatibility: adjustments are stored separately from the
+bidirectional score so an adjusted position can always be explained, and the
+whole procedure is deterministic for a fixed seed and candidate snapshot.
 """
 
 # ruff: noqa: E501
@@ -11,173 +10,254 @@ masquerade as a lower match.
 from __future__ import annotations
 
 import hashlib
+from dataclasses import dataclass, field
 from typing import Any
+from uuid import UUID
 
-from vav.modules.recommendations.strategy import DIVERSIFICATION_POLICY, RANKING_POLICY
+from vav.modules.recommendations.domain import clamp_bps
 
-
-def deterministic_jitter(seed: str, candidate_pair_id: str, span_bps: int = 40) -> int:
-    """A tiny reproducible tie-breaker; identical inputs always give the same value."""
-    digest = hashlib.sha256(f"{seed}:{candidate_pair_id}".encode()).hexdigest()
-    return int(digest[:8], 16) % (span_bps + 1)
+RANKING_POLICY_VERSION = "1.0.0"
+DIVERSIFICATION_POLICY_VERSION = "1.0.0"
 
 
-def _dimension_values(candidate: dict[str, Any], dimension: str) -> set[str]:
-    value = candidate.get(dimension)
-    if value is None:
-        return set()
-    if isinstance(value, list):
-        return {str(item) for item in value}
-    return {str(value)}
+@dataclass(frozen=True)
+class RankingCandidate:
+    candidate_pair_id: UUID
+    candidate_user_id: UUID
+    base_score_bps: int
+    minimum_directional_score_bps: int
+    confidence_bps: int
+    #: Days since the candidate profile was approved; ``None`` when unknown.
+    profile_age_days: int | None = None
+    #: Days since this viewer last saw the candidate; ``None`` when never.
+    days_since_last_exposure: int | None = None
+    #: How many viewers saw this profile today.
+    shown_count_today: int = 0
+    #: Whether the profile has never been exposed to anybody.
+    never_exposed: bool = False
+    city_code: str | None = None
+    region_code: str | None = None
+    interest_codes: tuple[str, ...] = ()
+    lifestyle_codes: tuple[str, ...] = ()
+
+    def diversity_signature(self) -> dict[str, Any]:
+        return {
+            "city_code": self.city_code,
+            "region_code": self.region_code,
+            "interest_codes": set(self.interest_codes),
+            "lifestyle_codes": set(self.lifestyle_codes),
+        }
 
 
-def similarity(a: dict[str, Any], b: dict[str, Any], dimensions: list[str]) -> float:
-    """Overlap between two already-qualified candidates, for diversification only."""
-    scores: list[float] = []
-    for dimension in dimensions:
-        left = _dimension_values(a, dimension)
-        right = _dimension_values(b, dimension)
-        if not left and not right:
-            continue
-        union = left | right
-        scores.append(len(left & right) / len(union) if union else 0.0)
-    return sum(scores) / len(scores) if scores else 0.0
+@dataclass(frozen=True)
+class RankedCandidate:
+    candidate_pair_id: UUID
+    candidate_user_id: UUID
+    base_score_bps: int
+    adjusted_score_bps: int
+    novelty_adjustment_bps: int
+    diversity_adjustment_bps: int
+    exposure_adjustment_bps: int
+    exploration_adjustment_bps: int
+    final_rank: int
+    adjustment_snapshot: dict[str, Any] = field(default_factory=dict)
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "candidate_pair_id": str(self.candidate_pair_id),
+            "candidate_user_id": str(self.candidate_user_id),
+            "base_score_bps": self.base_score_bps,
+            "adjusted_score_bps": self.adjusted_score_bps,
+            "novelty_adjustment_bps": self.novelty_adjustment_bps,
+            "diversity_adjustment_bps": self.diversity_adjustment_bps,
+            "exposure_adjustment_bps": self.exposure_adjustment_bps,
+            "exploration_adjustment_bps": self.exploration_adjustment_bps,
+            "final_rank": self.final_rank,
+            "adjustment_snapshot": self.adjustment_snapshot,
+        }
 
 
-def apply_adjustments(
-    candidates: list[dict[str, Any]],
+@dataclass(frozen=True)
+class RankingPolicy:
+    novelty_bonus_bps: int = 400
+    never_exposed_bonus_bps: int = 300
+    repeat_exposure_penalty_bps: int = 600
+    popularity_penalty_bps: int = 500
+    popularity_threshold: int = 30
+    diversity_penalty_bps: int = 700
+    exploration_slot_count: int = 2
+    exploration_bonus_bps: int = 250
+    new_profile_days: int = 14
+    max_same_city_in_top: int = 4
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "novelty_bonus_bps": self.novelty_bonus_bps,
+            "never_exposed_bonus_bps": self.never_exposed_bonus_bps,
+            "repeat_exposure_penalty_bps": self.repeat_exposure_penalty_bps,
+            "popularity_penalty_bps": self.popularity_penalty_bps,
+            "popularity_threshold": self.popularity_threshold,
+            "diversity_penalty_bps": self.diversity_penalty_bps,
+            "exploration_slot_count": self.exploration_slot_count,
+            "exploration_bonus_bps": self.exploration_bonus_bps,
+            "new_profile_days": self.new_profile_days,
+            "max_same_city_in_top": self.max_same_city_in_top,
+            "policy_version": RANKING_POLICY_VERSION,
+            "diversification_policy_version": DIVERSIFICATION_POLICY_VERSION,
+        }
+
+
+def stable_tiebreak(seed: str, candidate_pair_id: UUID) -> str:
+    """Deterministic tiebreaker so a refresh cannot reshuffle a batch."""
+    material = f"{seed}:{candidate_pair_id}".encode()
+    return hashlib.sha256(material).hexdigest()
+
+
+def _novelty_adjustment(candidate: RankingCandidate, policy: RankingPolicy) -> int:
+    bonus = 0
+    if (
+        candidate.profile_age_days is not None
+        and candidate.profile_age_days <= policy.new_profile_days
+    ):
+        bonus += policy.novelty_bonus_bps
+    if candidate.never_exposed:
+        bonus += policy.never_exposed_bonus_bps
+    return bonus
+
+
+def _exposure_adjustment(candidate: RankingCandidate, policy: RankingPolicy) -> int:
+    penalty = 0
+    if candidate.days_since_last_exposure is not None:
+        penalty -= policy.repeat_exposure_penalty_bps
+    if candidate.shown_count_today >= policy.popularity_threshold:
+        penalty -= policy.popularity_penalty_bps
+    return penalty
+
+
+def _similarity(left: dict[str, Any], right: dict[str, Any]) -> float:
+    """Similarity between two already-qualified candidates, used only for spacing."""
+    score = 0.0
+    if left["city_code"] and left["city_code"] == right["city_code"]:
+        score += 0.4
+    elif left["region_code"] and left["region_code"] == right["region_code"]:
+        score += 0.2
+    for key, weight in (("interest_codes", 0.35), ("lifestyle_codes", 0.25)):
+        first: set[str] = left[key]
+        second: set[str] = right[key]
+        if first and second:
+            score += weight * len(first & second) / len(first | second)
+    return min(1.0, score)
+
+
+def rank_candidates(
+    candidates: list[RankingCandidate],
     *,
     seed: str,
-    policy: dict[str, Any] | None = None,
-) -> list[dict[str, Any]]:
-    """Attach novelty, repeat-exposure and popularity adjustments to each candidate."""
-    settings = policy or RANKING_POLICY
-    adjusted: list[dict[str, Any]] = []
+    limit: int,
+    policy: RankingPolicy | None = None,
+) -> list[RankedCandidate]:
+    """Rank qualified candidates deterministically.
+
+    Every candidate handed to this function has already passed eligibility,
+    safety, privacy and both directions of the hard-constraint engine, so no
+    adjustment here can ever create an ineligible recommendation.
+    """
+    active_policy = policy or RankingPolicy()
+    if limit <= 0 or not candidates:
+        return []
+
+    prepared: list[tuple[RankingCandidate, int, int, int]] = []
     for candidate in candidates:
-        base = int(candidate["bidirectional_score_bps"])
-        novelty = int(settings["novelty_bonus_bps"]) if candidate.get("never_exposed") else 0
-        repeat = (
-            -int(settings["repeat_exposure_penalty_bps"])
-            if candidate.get("recently_exposed")
-            else 0
-        )
-        popularity = (
-            -int(settings["popular_profile_penalty_bps"])
-            if int(candidate.get("recent_exposure_count", 0))
-            >= int(settings["popular_profile_exposure_threshold"])
-            else 0
-        )
-        exploration = int(candidate.get("exploration_adjustment_bps", 0))
-        jitter = deterministic_jitter(seed, str(candidate["candidate_pair_id"]))
-        total = max(0, min(10000, base + novelty + repeat + popularity + exploration + jitter))
-        adjusted.append(
-            {
-                **candidate,
-                "base_score_bps": base,
-                "novelty_adjustment_bps": novelty,
-                "exposure_adjustment_bps": repeat + popularity,
-                "exploration_adjustment_bps": exploration,
-                "diversity_adjustment_bps": 0,
-                "adjusted_score_bps": total,
-                "adjustment_snapshot": {
-                    "novelty": novelty,
-                    "repeat_exposure": repeat,
-                    "popularity_suppression": popularity,
-                    "exploration": exploration,
-                    "deterministic_jitter": jitter,
-                    "seed": seed,
-                    # Adjustments never pretend to be compatibility.
-                    "raw_compatibility_preserved": True,
-                },
-            }
-        )
-    return adjusted
+        novelty = _novelty_adjustment(candidate, active_policy)
+        exposure = _exposure_adjustment(candidate, active_policy)
+        pre_score = clamp_bps(candidate.base_score_bps + novelty + exposure)
+        prepared.append((candidate, novelty, exposure, pre_score))
 
-
-def stable_sort(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Deterministic ordering: score, then confidence, then candidate-pair id."""
-    return sorted(
-        candidates,
-        key=lambda item: (
-            -int(item["adjusted_score_bps"]),
-            -int(item.get("confidence_bps", 0)),
-            str(item["candidate_pair_id"]),
+    remaining = sorted(
+        prepared,
+        key=lambda entry: (
+            -entry[3],
+            -entry[0].minimum_directional_score_bps,
+            -entry[0].confidence_bps,
+            stable_tiebreak(seed, entry[0].candidate_pair_id),
         ),
     )
 
-
-def diversify(
-    candidates: list[dict[str, Any]],
-    *,
-    size: int,
-    policy: dict[str, Any] | None = None,
-) -> list[dict[str, Any]]:
-    """Maximal-marginal-relevance selection over already-qualified candidates.
-
-    Diversification only reorders candidates that already passed eligibility,
-    hard constraints and the score floors. It can never admit one that did not.
-    """
-    settings = policy or DIVERSIFICATION_POLICY
-    if settings.get("may_bypass_hard_constraints"):
-        raise ValueError("diversification may never bypass hard constraints")
-
-    ordered = stable_sort(candidates)
-    if size <= 0 or not ordered:
-        return []
-
-    lambda_weight = int(settings["lambda_bps"]) / 10000
-    dimensions = list(settings["dimensions"])
-    max_per_city = int(settings.get("max_per_city", 0)) or None
-
-    selected: list[dict[str, Any]] = []
-    remaining = list(ordered)
+    selected: list[RankedCandidate] = []
+    chosen_signatures: list[dict[str, Any]] = []
     city_counts: dict[str, int] = {}
+    exploration_used = 0
 
-    while remaining and len(selected) < size:
+    while remaining and len(selected) < limit:
         best_index = 0
-        best_value = float("-inf")
-        for index, candidate in enumerate(remaining):
-            city = str(candidate.get("city_code") or "")
-            if max_per_city and city and city_counts.get(city, 0) >= max_per_city:
-                continue
-            relevance = int(candidate["adjusted_score_bps"]) / 10000
-            redundancy = max(
-                (similarity(candidate, chosen, dimensions) for chosen in selected),
-                default=0.0,
-            )
-            value = lambda_weight * relevance - (1 - lambda_weight) * redundancy
-            if value > best_value:
+        best_value: float | None = None
+        best_diversity = 0
+        best_exploration = 0
+        for index, (candidate, _novelty, _exposure, pre_score) in enumerate(remaining):
+            diversity_penalty = 0
+            if chosen_signatures:
+                signature = candidate.diversity_signature()
+                similarity = max(_similarity(signature, other) for other in chosen_signatures)
+                diversity_penalty = -int(round(active_policy.diversity_penalty_bps * similarity))
+                if (
+                    candidate.city_code
+                    and city_counts.get(candidate.city_code, 0)
+                    >= active_policy.max_same_city_in_top
+                ):
+                    diversity_penalty -= active_policy.diversity_penalty_bps
+            exploration_bonus = 0
+            if exploration_used < active_policy.exploration_slot_count and (
+                candidate.never_exposed or candidate.profile_age_days == 0
+            ):
+                exploration_bonus = active_policy.exploration_bonus_bps
+            value = pre_score + diversity_penalty + exploration_bonus
+            if best_value is None or value > best_value:
                 best_value = value
                 best_index = index
-        if best_value == float("-inf"):
-            # Every remaining candidate hit the per-city cap; relax the cap
-            # rather than returning an under-filled batch.
-            max_per_city = None
-            continue
-        chosen = remaining.pop(best_index)
-        city = str(chosen.get("city_code") or "")
-        if city:
-            city_counts[city] = city_counts.get(city, 0) + 1
-        original_rank = ordered.index(chosen)
-        chosen["diversity_adjustment_bps"] = (original_rank - len(selected)) * 10
-        selected.append(chosen)
+                best_diversity = diversity_penalty
+                best_exploration = exploration_bonus
 
-    for position, candidate in enumerate(selected, start=1):
-        candidate["final_rank"] = position
+        candidate, novelty, exposure, pre_score = remaining.pop(best_index)
+        if best_exploration:
+            exploration_used += 1
+        adjusted = clamp_bps(pre_score + best_diversity + best_exploration)
+        selected.append(
+            RankedCandidate(
+                candidate_pair_id=candidate.candidate_pair_id,
+                candidate_user_id=candidate.candidate_user_id,
+                base_score_bps=candidate.base_score_bps,
+                adjusted_score_bps=adjusted,
+                novelty_adjustment_bps=novelty,
+                diversity_adjustment_bps=best_diversity,
+                exposure_adjustment_bps=exposure,
+                exploration_adjustment_bps=best_exploration,
+                final_rank=len(selected) + 1,
+                adjustment_snapshot={
+                    "pre_adjustment_score_bps": pre_score,
+                    "seed": seed,
+                    "policy": active_policy.as_dict(),
+                    "shown_count_today": candidate.shown_count_today,
+                    "days_since_last_exposure": candidate.days_since_last_exposure,
+                    "profile_age_days": candidate.profile_age_days,
+                },
+            )
+        )
+        chosen_signatures.append(candidate.diversity_signature())
+        if candidate.city_code:
+            city_counts[candidate.city_code] = city_counts.get(candidate.city_code, 0) + 1
+
     return selected
 
 
-def intra_list_diversity(
-    selected: list[dict[str, Any]], dimensions: list[str] | None = None
-) -> int:
+def intra_list_diversity(ranked: list[RankingCandidate]) -> int:
     """Average pairwise dissimilarity of a produced list, in basis points."""
-    dims = dimensions or list(DIVERSIFICATION_POLICY["dimensions"])
-    if len(selected) < 2:
-        return 10000
-    pairs = 0
+    if len(ranked) < 2:
+        return 10_000
+    signatures = [candidate.diversity_signature() for candidate in ranked]
     total = 0.0
-    for index, left in enumerate(selected):
-        for right in selected[index + 1 :]:
-            total += 1 - similarity(left, right, dims)
+    pairs = 0
+    for index, left in enumerate(signatures):
+        for right in signatures[index + 1 :]:
+            total += 1 - _similarity(left, right)
             pairs += 1
-    return round(total / pairs * 10000) if pairs else 10000
+    return clamp_bps(total / pairs * 10_000)

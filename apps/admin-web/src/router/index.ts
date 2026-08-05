@@ -19,11 +19,11 @@ import KnowledgeManagementPage from "@/pages/KnowledgeManagementPage.vue";
 import AiManagementPage from "@/pages/AiManagementPage.vue";
 import NotificationManagementPage from "@/pages/NotificationManagementPage.vue";
 import MatchmakingProfileManagementPage from "@/pages/MatchmakingProfileManagementPage.vue";
-import RecommendationOperationsPage from "@/pages/RecommendationOperationsPage.vue";
 import PrivacyManagementPage from "@/pages/PrivacyManagementPage.vue";
 import ModuleListPage from "@/pages/ModuleListPage.vue";
 import NavigationManagementPage from "@/pages/NavigationManagementPage.vue";
 import PricingSimulationPage from "@/pages/PricingSimulationPage.vue";
+import RecommendationManagementPage from "@/pages/RecommendationManagementPage.vue";
 import { useAccessStore } from "@/stores/access";
 
 const modules = [
@@ -67,17 +67,21 @@ const matchmakingSectionPermissions: Record<string, string> = {
   audit: "matchmaking.audit.read"
 };
 
-const recommendationSectionPermissions: Record<string, string> = {
+export const recommendationSectionPermissions: Record<string, string> = {
   dashboard: "recommendations.analytics.read",
   strategies: "recommendations.strategies.read",
   features: "recommendations.features.read",
   constraints: "recommendations.constraints.read",
   batches: "recommendations.batches.read",
+  candidates: "recommendations.candidates.read",
+  diagnostics: "recommendations.diagnostics.run",
+  "pair-diagnostics": "recommendations.candidates.sensitive.read",
   exposures: "recommendations.exposures.read",
+  "cold-start": "recommendations.analytics.read",
   feedback: "recommendations.feedback.read",
   evaluations: "recommendations.evaluations.read",
   experiments: "recommendations.experiments.read",
-  diagnostics: "recommendations.diagnostics.run",
+  incidents: "recommendations.incidents.read",
   audit: "recommendations.audit.read"
 };
 
@@ -378,14 +382,26 @@ export const router = createRouter({
         ...Object.keys(recommendationSectionPermissions).map((section) => ({
           path: `recommendations/${section}`,
           name: `admin-recommendations-${section}`,
-          component: RecommendationOperationsPage,
+          component: RecommendationManagementPage,
           meta: { title: "推荐运营中心", permission: recommendationSectionPermissions[section], recommendationSection: section }
         })),
         {
-          path: "recommendations/batches/:batchId",
+          path: "recommendations/strategies/:id",
+          name: "admin-recommendations-strategy-detail",
+          component: RecommendationManagementPage,
+          meta: { title: "推荐策略详情", permission: "recommendations.strategies.read", recommendationSection: "strategies" }
+        },
+        {
+          path: "recommendations/batches/:id",
           name: "admin-recommendations-batch-detail",
-          component: RecommendationOperationsPage,
+          component: RecommendationManagementPage,
           meta: { title: "推荐批次详情", permission: "recommendations.batches.read", recommendationSection: "batches" }
+        },
+        {
+          path: "recommendations/experiments/:id",
+          name: "admin-recommendations-experiment-detail",
+          component: RecommendationManagementPage,
+          meta: { title: "推荐实验详情", permission: "recommendations.experiments.read", recommendationSection: "experiments" }
         },
         ...Object.keys(privacySectionPermissions).map((section) => ({
           path: `privacy/${section}`,

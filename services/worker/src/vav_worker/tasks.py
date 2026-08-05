@@ -26,7 +26,10 @@ from vav.modules.notifications.service import (
     dispatch_due_reminders,
     process_due_deliveries,
 )
+from vav.common.exceptions import VavError
 from vav.modules.privacy.service import execute_erasure_plan, process_export_request
+from vav.modules.recommendations import batches as recommendation_batches
+from vav.modules.recommendations import service as recommendation_service
 from vav_worker.celery_app import celery_app
 
 
@@ -488,3 +491,146 @@ async def _expire_privacy_data() -> dict[str, int]:
 @celery_app.task(name="vav.privacy.expiry")  # type: ignore[misc]
 def expire_privacy_data() -> dict[str, int]:
     return asyncio.run(_expire_privacy_data())
+
+
+async def _sync_recommendation_pool() -> dict[str, int]:
+    """Keep the recommendation pool in step with approved profile projections."""
+    async with session_factory() as session:
+        rebuilt = await recommendation_service.rebuild_pool(session)
+        await session.commit()
+    await get_engine().dispose()
+    return {"rebuilt_pool_entries": rebuilt}
+
+
+@celery_app.task(name="vav.recommendations.sync_pool")  # type: ignore[misc]
+def sync_recommendation_pool() -> dict[str, int]:
+    return asyncio.run(_sync_recommendation_pool())
+
+
+async def _generate_recommendation_candidates() -> dict[str, int]:
+    """Refresh candidate pairs for members whose current pairs have expired."""
+    generated = 0
+    async with session_factory() as session:
+        rows = list(
+            (
+                await session.execute(
+                    text(
+                        "SELECT p.user_id FROM recommendation_pool_entries p "
+                        "WHERE p.eligible = true AND NOT EXISTS ("
+                        "  SELECT 1 FROM recommendation_candidate_pairs c "
+                        "  WHERE (c.user_low_id = p.user_id OR c.user_high_id = p.user_id) "
+                        "  AND c.status = 'eligible' AND (c.valid_until IS NULL OR c.valid_until > now())"
+                        ") LIMIT 100"
+                    )
+                )
+            ).all()
+        )
+    for (user_id,) in rows:
+        async with session_factory() as session:
+            try:
+                await recommendation_service.generate_candidates(session, user_id)
+                await session.commit()
+                generated += 1
+            except VavError:
+                await session.rollback()
+    await get_engine().dispose()
+    return {"members_refreshed": generated}
+
+
+@celery_app.task(name="vav.recommendations.generate_candidates")  # type: ignore[misc]
+def generate_recommendation_candidates() -> dict[str, int]:
+    return asyncio.run(_generate_recommendation_candidates())
+
+
+async def _generate_recommendation_batches() -> dict[str, int]:
+    """Generate today's batch for members who do not have an active one."""
+    created = 0
+    async with session_factory() as session:
+        rows = list(
+            (
+                await session.execute(
+                    text(
+                        "SELECT p.user_id FROM recommendation_pool_entries p "
+                        "LEFT JOIN recommendation_user_settings s ON s.user_id = p.user_id "
+                        "WHERE p.eligible = true AND COALESCE(s.recommendations_paused, false) = false "
+                        "AND NOT EXISTS ("
+                        "  SELECT 1 FROM recommendation_batches b WHERE b.user_id = p.user_id "
+                        "  AND b.status = 'active' AND b.batch_type = 'daily' "
+                        "  AND b.period_key = to_char(now(), 'YYYY-MM-DD')"
+                        ") LIMIT 200"
+                    )
+                )
+            ).all()
+        )
+    for (user_id,) in rows:
+        async with session_factory() as session:
+            try:
+                await recommendation_batches.generate_batch(session, user_id)
+                await session.commit()
+                created += 1
+            except VavError:
+                await session.rollback()
+    await get_engine().dispose()
+    return {"batches_created": created}
+
+
+@celery_app.task(name="vav.recommendations.generate_batches")  # type: ignore[misc]
+def generate_recommendation_batches() -> dict[str, int]:
+    return asyncio.run(_generate_recommendation_batches())
+
+
+async def _cleanup_recommendation_exposure() -> dict[str, int]:
+    """Expire stale batches and drop budget rows the retention window passed."""
+    async with session_factory() as session:
+        expired = await recommendation_batches.expire_batches(session)
+        removed = len(
+            list(
+                (
+                    await session.scalars(
+                        text(
+                            "DELETE FROM recommendation_exposure_budgets "
+                            "WHERE budget_date < (now() - interval '90 days')::date RETURNING user_id"
+                        )
+                    )
+                ).all()
+            )
+        )
+        await session.execute(
+            text(
+                "UPDATE recommendation_pair_exclusions SET released_at=now() "
+                "WHERE released_at IS NULL AND expires_at IS NOT NULL AND expires_at <= now()"
+            )
+        )
+        await session.commit()
+    await get_engine().dispose()
+    return {"expired_batches": expired, "removed_budget_rows": removed}
+
+
+@celery_app.task(name="vav.recommendations.cleanup_exposure")  # type: ignore[misc]
+def cleanup_recommendation_exposure() -> dict[str, int]:
+    return asyncio.run(_cleanup_recommendation_exposure())
+
+
+async def _aggregate_recommendation_feedback() -> dict[str, int]:
+    """Mark feedback processed and invalidate candidates negative feedback removed."""
+    async with session_factory() as session:
+        processed = len(
+            list(
+                (
+                    await session.scalars(
+                        text(
+                            "UPDATE recommendation_feedback_events SET processed_at=now() "
+                            "WHERE processed_at IS NULL RETURNING id"
+                        )
+                    )
+                ).all()
+            )
+        )
+        await session.commit()
+    await get_engine().dispose()
+    return {"processed_feedback_events": processed}
+
+
+@celery_app.task(name="vav.recommendations.aggregate_feedback")  # type: ignore[misc]
+def aggregate_recommendation_feedback() -> dict[str, int]:
+    return asyncio.run(_aggregate_recommendation_feedback())

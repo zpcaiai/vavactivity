@@ -85,6 +85,29 @@ celery_app.conf.update(
             "task": "vav.privacy.expiry",
             "schedule": 3600.0,
         },
+        "sync-recommendation-pool": {
+            "task": "vav.recommendations.sync_pool",
+            "schedule": 300.0,
+        },
+        "generate-recommendation-candidates": {
+            "task": "vav.recommendations.generate_candidates",
+            "schedule": 900.0,
+        },
+        "generate-recommendation-batches": {
+            "task": "vav.recommendations.generate_batches",
+            "schedule": float(
+                os.getenv("RECOMMENDATION_BATCH_JOB_INTERVAL_HOURS", "24")
+            )
+            * 3600.0,
+        },
+        "cleanup-recommendation-exposure": {
+            "task": "vav.recommendations.cleanup_exposure",
+            "schedule": 3600.0,
+        },
+        "aggregate-recommendation-feedback": {
+            "task": "vav.recommendations.aggregate_feedback",
+            "schedule": 600.0,
+        },
     },
 )
 

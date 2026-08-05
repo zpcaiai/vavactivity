@@ -1,4 +1,4 @@
-"""Add recommendation feedback events and user tuning profiles.
+"""Add recommendation feedback events, user tuning and member settings.
 
 Revision ID: 20260804_0058
 Revises: 20260804_0057
@@ -33,40 +33,42 @@ def upgrade() -> None:
       reason_details_encrypted TEXT,
       source_module VARCHAR(64) NOT NULL,
       source_event_id UUID,
+      processed_at TIMESTAMPTZ,
       occurred_at TIMESTAMPTZ NOT NULL DEFAULT now(),
       received_at TIMESTAMPTZ NOT NULL DEFAULT now(),
       idempotency_key VARCHAR(128) NOT NULL,
       UNIQUE(viewer_user_id, idempotency_key)
     );
-    CREATE INDEX ix_recommendation_feedback_viewer ON recommendation_feedback_events(viewer_user_id, feedback_type, occurred_at DESC);
-    CREATE INDEX ix_recommendation_feedback_pair ON recommendation_feedback_events(viewer_user_id, recommended_user_id, occurred_at DESC);
+    CREATE INDEX ix_recommendation_feedback_viewer ON recommendation_feedback_events(viewer_user_id, occurred_at DESC);
+    CREATE INDEX ix_recommendation_feedback_type ON recommendation_feedback_events(feedback_type, occurred_at DESC);
+
     CREATE TABLE recommendation_user_tuning_profiles (
       user_id UUID PRIMARY KEY REFERENCES users(id),
       tuning_version INTEGER NOT NULL DEFAULT 1 CHECK(tuning_version > 0),
       feature_weight_adjustments JSONB NOT NULL DEFAULT '{}'::jsonb,
       exploration_level VARCHAR(32) NOT NULL DEFAULT 'balanced',
       feedback_personalization_enabled BOOLEAN NOT NULL DEFAULT true,
-      daily_received_limit INTEGER,
-      allow_relaxed_recommendations BOOLEAN NOT NULL DEFAULT false,
-      recommendations_paused BOOLEAN NOT NULL DEFAULT false,
       derived_from_feedback_through TIMESTAMPTZ,
       updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
     );
-    CREATE TABLE recommendation_skip_cooldowns (
-      viewer_user_id UUID NOT NULL REFERENCES users(id),
-      skipped_user_id UUID NOT NULL REFERENCES users(id),
-      reason_code VARCHAR(128),
-      cooldown_until TIMESTAMPTZ NOT NULL,
-      created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-      PRIMARY KEY (viewer_user_id, skipped_user_id)
+
+    CREATE TABLE recommendation_user_settings (
+      user_id UUID PRIMARY KEY REFERENCES users(id),
+      recommendations_paused BOOLEAN NOT NULL DEFAULT false,
+      daily_received_limit INTEGER CHECK(daily_received_limit IS NULL OR daily_received_limit >= 0),
+      delivery_frequency VARCHAR(32) NOT NULL DEFAULT 'daily',
+      extended_recommendations_enabled BOOLEAN NOT NULL DEFAULT false,
+      relaxable_criteria JSONB NOT NULL DEFAULT '[]'::jsonb,
+      preferred_locale VARCHAR(16) NOT NULL DEFAULT 'zh-CN',
+      settings_version INTEGER NOT NULL DEFAULT 1 CHECK(settings_version > 0),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
     );
-    CREATE INDEX ix_recommendation_skip_cooldown_until ON recommendation_skip_cooldowns(cooldown_until);
     """)
 
 
 def downgrade() -> None:
     _run("""
-    DROP TABLE recommendation_skip_cooldowns;
+    DROP TABLE recommendation_user_settings;
     DROP TABLE recommendation_user_tuning_profiles;
     DROP TABLE recommendation_feedback_events;
     """)

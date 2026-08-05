@@ -953,9 +953,12 @@ class Settings(BaseSettings):
         default=300, validation_alias="DATING_PROJECTION_CACHE_TTL_SECONDS"
     )
 
+    # ------------------------------------------------------------------
+    # Recommendations (Batch 14)
+    # ------------------------------------------------------------------
     recommendation_enabled: bool = Field(default=True, validation_alias="RECOMMENDATION_ENABLED")
     recommendation_default_strategy: str = Field(
-        default="baseline-bidirectional", validation_alias="RECOMMENDATION_DEFAULT_STRATEGY"
+        default="baseline-bidirectional-v1", validation_alias="RECOMMENDATION_DEFAULT_STRATEGY"
     )
     recommendation_batch_job_interval_hours: int = Field(
         default=24, validation_alias="RECOMMENDATION_BATCH_JOB_INTERVAL_HOURS"
@@ -975,9 +978,18 @@ class Settings(BaseSettings):
     recommendation_allow_user_relaxation: bool = Field(
         default=True, validation_alias="RECOMMENDATION_ALLOW_USER_RELAXATION"
     )
-    recommendation_unknown_value_policy: Literal[
-        "lower_confidence", "neutral_score", "configured_penalty"
-    ] = Field(default="lower_confidence", validation_alias="RECOMMENDATION_UNKNOWN_VALUE_POLICY")
+    recommendation_unknown_value_policy: Literal["lower_confidence", "exclude", "neutral"] = Field(
+        default="lower_confidence", validation_alias="RECOMMENDATION_UNKNOWN_VALUE_POLICY"
+    )
+    recommendation_missingness_policy: Literal[
+        "ignore_and_lower_confidence", "neutral_score", "configured_penalty"
+    ] = Field(
+        default="ignore_and_lower_confidence",
+        validation_alias="RECOMMENDATION_MISSINGNESS_POLICY",
+    )
+    recommendation_missing_penalty_bps: int = Field(
+        default=0, validation_alias="RECOMMENDATION_MISSING_PENALTY_BPS"
+    )
     recommendation_min_directional_score_bps: int = Field(
         default=4000, validation_alias="RECOMMENDATION_MIN_DIRECTIONAL_SCORE_BPS"
     )
@@ -1009,7 +1021,7 @@ class Settings(BaseSettings):
         default=1000, validation_alias="RECOMMENDATION_EXPOSURE_VISIBLE_MIN_MS"
     )
     recommendation_skip_cooldown_days: int = Field(
-        default=60, validation_alias="RECOMMENDATION_SKIP_COOLDOWN_DAYS"
+        default=30, validation_alias="RECOMMENDATION_SKIP_COOLDOWN_DAYS"
     )
     recommendation_exploration_slot_count: int = Field(
         default=2, validation_alias="RECOMMENDATION_EXPLORATION_SLOT_COUNT"
@@ -1096,28 +1108,28 @@ class Settings(BaseSettings):
             raise ValueError("hard partner criteria cannot be relaxed by default")
         if self.dating_review_auto_approve_enabled and self.environment == "production":
             raise ValueError("production dating profiles require human review")
-        if self.recommendation_hard_constraint_auto_relax:
-            raise ValueError("recommendation hard constraints cannot be relaxed automatically")
-        if not self.recommendation_fail_closed_on_moderation_error:
-            raise ValueError("recommendations must fail closed when moderation is unavailable")
-        if not self.recommendation_require_zero_blocked_pair_leakage:
-            raise ValueError("blocked pairs must never be recommendable")
-        if self.recommendation_experiments_enabled and (
-            not self.recommendation_experiment_approval_required
-        ):
-            raise ValueError("recommendation experiments require approval when enabled")
-        if self.recommendation_min_bidirectional_score_bps < (
-            self.recommendation_min_directional_score_bps
-        ):
-            raise ValueError(
-                "the bidirectional score floor cannot be lower than the directional floor"
-            )
         if self.dating_profile_recommendation_min_completeness_bps < (
             self.dating_profile_submission_min_completeness_bps
         ):
             raise ValueError(
                 "recommendation completeness threshold cannot be lower than submission threshold"
             )
+        if self.recommendation_hard_constraint_auto_relax:
+            raise ValueError("recommendation hard constraints cannot be relaxed automatically")
+        if not self.recommendation_fail_closed_on_moderation_error:
+            raise ValueError("recommendation safety checks must fail closed")
+        if not self.recommendation_require_zero_blocked_pair_leakage:
+            raise ValueError("blocked pairs can never be recommended")
+        if (
+            self.environment == "production"
+            and self.recommendation_experiments_enabled
+            and (not self.recommendation_experiment_approval_required)
+        ):
+            raise ValueError("production recommendation experiments require approval")
+        if self.recommendation_min_bidirectional_score_bps < 0 or (
+            self.recommendation_min_bidirectional_score_bps > 10_000
+        ):
+            raise ValueError("bidirectional score thresholds are basis points between 0 and 10000")
         if self.environment == "production" and (
             not self.privacy_field_encryption_enabled
             or not self.privacy_export_encryption_enabled

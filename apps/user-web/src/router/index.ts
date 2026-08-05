@@ -22,7 +22,11 @@ import CounselingServicesPage from "@/features/counseling/pages/CounselingServic
 import AiAssistantPage from "@/features/ai-assistant/pages/AiAssistantPage.vue";
 import NotificationsPage from "@/features/notifications/pages/NotificationsPage.vue";
 import DatingProfilePage from "@/features/dating-profile/pages/DatingProfilePage.vue";
-import RecommendationsPage from "@/features/recommendations/pages/RecommendationsPage.vue";
+import RecommendationListPage from "@/features/recommendations/pages/RecommendationListPage.vue";
+import RecommendationDetailPage from "@/features/recommendations/pages/RecommendationDetailPage.vue";
+import RecommendationPreferencesPage from "@/features/recommendations/pages/RecommendationPreferencesPage.vue";
+import RecommendationHistoryPage from "@/features/recommendations/pages/RecommendationHistoryPage.vue";
+import RecommendationTransparencyPage from "@/features/recommendations/pages/RecommendationTransparencyPage.vue";
 import PrivacyCenterPage from "@/features/privacy/pages/PrivacyCenterPage.vue";
 import UnsubscribePage from "@/features/notifications/pages/UnsubscribePage.vue";
 import AuthPage from "@/pages/AuthPage.vue";
@@ -108,10 +112,11 @@ export const router = createRouter({
         { path: "account/dating-profile/privacy", name: "account-dating-profile-privacy", component: DatingProfilePage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
         { path: "account/dating-profile/preview", name: "account-dating-profile-preview", component: DatingProfilePage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
         { path: "account/dating-profile/review", name: "account-dating-profile-review", component: DatingProfilePage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
-        { path: "account/recommendations", name: "account-recommendations", component: RecommendationsPage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
-        { path: "account/recommendations/settings", name: "account-recommendation-settings", component: RecommendationsPage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
-        { path: "account/recommendations/history", name: "account-recommendation-history", component: RecommendationsPage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
-        { path: "account/recommendations/transparency", name: "account-recommendation-transparency", component: RecommendationsPage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
+        { path: "recommendations", name: "recommendations", component: RecommendationListPage, meta: { requiresAuth: true } },
+        { path: "recommendations/:recommendationItemId", name: "recommendation-detail", component: RecommendationDetailPage, meta: { requiresAuth: true } },
+        { path: "account/recommendation-preferences", name: "account-recommendation-preferences", component: RecommendationPreferencesPage, meta: { requiresAuth: true } },
+        { path: "account/recommendation-history", name: "account-recommendation-history", component: RecommendationHistoryPage, meta: { requiresAuth: true } },
+        { path: "account/recommendation-transparency", name: "account-recommendation-transparency", component: RecommendationTransparencyPage, meta: { requiresAuth: true } },
         { path: "account/profile", name: "account-profile", component: PrivacyCenterPage, meta: { requiresAuth: true } },
         { path: "account/contact-points", name: "account-contact-points", component: PrivacyCenterPage, meta: { requiresAuth: true } },
         { path: "account/privacy", name: "account-privacy", component: PrivacyCenterPage, meta: { requiresAuth: true } },

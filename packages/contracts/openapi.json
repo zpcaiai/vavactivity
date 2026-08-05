@@ -1123,11 +1123,54 @@
         "title": "AvailabilityRuleRequest",
         "type": "object"
       },
+      "BatchInvalidateRequest": {
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "BatchInvalidateRequest",
+        "type": "object"
+      },
+      "BatchRebuildRequest": {
+        "properties": {
+          "batch_type": {
+            "default": "manual_rebuild",
+            "enum": [
+              "daily",
+              "supplemental",
+              "manual_rebuild"
+            ],
+            "title": "Batch Type",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "BatchRebuildRequest",
+        "type": "object"
+      },
       "BatchRequest": {
         "properties": {
           "batch_type": {
             "default": "daily",
-            "pattern": "^(daily|supplemental)$",
+            "enum": [
+              "daily",
+              "supplemental"
+            ],
             "title": "Batch Type",
             "type": "string"
           },
@@ -3185,10 +3228,31 @@
       },
       "EvaluationRunRequest": {
         "properties": {
-          "dataset_id": {
-            "format": "uuid",
-            "title": "Dataset Id",
+          "dataset_code": {
+            "maxLength": 128,
+            "title": "Dataset Code",
             "type": "string"
+          },
+          "guardrail_thresholds": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "integer"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guardrail Thresholds"
+          },
+          "metrics": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Metrics",
+            "type": "object"
           },
           "strategy_id": {
             "format": "uuid",
@@ -3197,7 +3261,7 @@
           }
         },
         "required": [
-          "dataset_id",
+          "dataset_code",
           "strategy_id"
         ],
         "title": "EvaluationRunRequest",
@@ -3341,7 +3405,6 @@
           },
           "experiment_code": {
             "maxLength": 128,
-            "minLength": 1,
             "title": "Experiment Code",
             "type": "string"
           },
@@ -3352,14 +3415,19 @@
             "title": "Guardrail Metrics",
             "type": "array"
           },
+          "guardrail_thresholds": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Guardrail Thresholds",
+            "type": "object"
+          },
           "hypothesis": {
-            "minLength": 1,
             "title": "Hypothesis",
             "type": "string"
           },
           "name": {
             "maxLength": 300,
-            "minLength": 1,
             "title": "Name",
             "type": "string"
           },
@@ -3375,7 +3443,6 @@
               "format": "uuid",
               "type": "string"
             },
-            "minItems": 1,
             "title": "Treatment Strategy Ids",
             "type": "array"
           }
@@ -3384,25 +3451,40 @@
           "experiment_code",
           "name",
           "hypothesis",
-          "control_strategy_id",
-          "treatment_strategy_ids"
+          "control_strategy_id"
         ],
         "title": "ExperimentCreateRequest",
         "type": "object"
       },
-      "ExperimentDecisionRequest": {
+      "ExperimentGuardrailRequest": {
         "properties": {
-          "reason": {
-            "maxLength": 500,
-            "minLength": 1,
-            "title": "Reason",
-            "type": "string"
+          "metrics": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Metrics",
+            "type": "object"
           }
         },
-        "required": [
-          "reason"
-        ],
-        "title": "ExperimentDecisionRequest",
+        "title": "ExperimentGuardrailRequest",
+        "type": "object"
+      },
+      "ExperimentTransitionRequest": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "title": "ExperimentTransitionRequest",
         "type": "object"
       },
       "ExportRequest": {
@@ -3454,26 +3536,24 @@
             "title": "Duration Ms"
           },
           "exposure_type": {
-            "pattern": "^(card_impression|card_visible|profile_opened|photo_viewed)$",
+            "enum": [
+              "card_impression",
+              "card_visible",
+              "profile_opened",
+              "photo_viewed"
+            ],
             "title": "Exposure Type",
             "type": "string"
           },
-          "idempotency_key": {
-            "maxLength": 128,
-            "minLength": 8,
-            "title": "Idempotency Key",
-            "type": "string"
-          },
           "source": {
-            "default": "user_web",
+            "default": "recommendation_list",
             "maxLength": 32,
             "title": "Source",
             "type": "string"
           }
         },
         "required": [
-          "exposure_type",
-          "idempotency_key"
+          "exposure_type"
         ],
         "title": "ExposureRequest",
         "type": "object"
@@ -7910,19 +7990,87 @@
         "title": "QuoteData",
         "type": "object"
       },
-      "RebuildRequest": {
+      "RecommendationSettingsRequest": {
         "properties": {
-          "reason": {
-            "maxLength": 500,
-            "minLength": 1,
-            "title": "Reason",
-            "type": "string"
+          "daily_received_limit": {
+            "anyOf": [
+              {
+                "maximum": 50.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Daily Received Limit"
+          },
+          "delivery_frequency": {
+            "anyOf": [
+              {
+                "enum": [
+                  "daily",
+                  "weekly",
+                  "manual"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Frequency"
+          },
+          "extended_recommendations_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extended Recommendations Enabled"
+          },
+          "preferred_locale": {
+            "anyOf": [
+              {
+                "maxLength": 16,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Locale"
+          },
+          "recommendations_paused": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recommendations Paused"
+          },
+          "relaxable_criteria": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relaxable Criteria"
           }
         },
-        "required": [
-          "reason"
-        ],
-        "title": "RebuildRequest",
+        "title": "RecommendationSettingsRequest",
         "type": "object"
       },
       "ReconciliationResolveRequest": {
@@ -9513,6 +9661,20 @@
       },
       "StrategyCreateRequest": {
         "properties": {
+          "applicable_regions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Applicable Regions",
+            "type": "array"
+          },
+          "applicable_segments": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Applicable Segments",
+            "type": "array"
+          },
           "bidirectional_policy": {
             "additionalProperties": true,
             "title": "Bidirectional Policy",
@@ -9539,12 +9701,9 @@
             "type": "object"
           },
           "feature_manifest": {
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
+            "additionalProperties": true,
             "title": "Feature Manifest",
-            "type": "array"
+            "type": "object"
           },
           "hard_constraint_policy": {
             "additionalProperties": true,
@@ -9563,13 +9722,11 @@
           },
           "semantic_version": {
             "maxLength": 64,
-            "minLength": 1,
             "title": "Semantic Version",
             "type": "string"
           },
           "strategy_code": {
             "maxLength": 128,
-            "minLength": 1,
             "title": "Strategy Code",
             "type": "string"
           }
@@ -9589,19 +9746,22 @@
         "title": "StrategyCreateRequest",
         "type": "object"
       },
-      "StrategyDecisionRequest": {
+      "StrategyTransitionRequest": {
         "properties": {
           "reason": {
-            "maxLength": 500,
-            "minLength": 1,
-            "title": "Reason",
-            "type": "string"
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
           }
         },
-        "required": [
-          "reason"
-        ],
-        "title": "StrategyDecisionRequest",
+        "title": "StrategyTransitionRequest",
         "type": "object"
       },
       "SubmitRequest": {
@@ -10253,34 +10413,14 @@
       },
       "TuningRequest": {
         "properties": {
-          "allow_relaxed_recommendations": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Allow Relaxed Recommendations"
-          },
-          "daily_received_limit": {
-            "anyOf": [
-              {
-                "maximum": 100.0,
-                "minimum": 1.0,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Daily Received Limit"
-          },
           "exploration_level": {
             "anyOf": [
               {
-                "maxLength": 32,
+                "enum": [
+                  "conservative",
+                  "balanced",
+                  "adventurous"
+                ],
                 "type": "string"
               },
               {
@@ -10299,17 +10439,6 @@
               }
             ],
             "title": "Feedback Personalization Enabled"
-          },
-          "recommendations_paused": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Recommendations Paused"
           }
         },
         "title": "TuningRequest",
@@ -10805,15 +10934,13 @@
       "vav__modules__recommendations__schemas__FeedbackRequest": {
         "properties": {
           "feedback_type": {
-            "maxLength": 64,
-            "minLength": 1,
+            "enum": [
+              "impression",
+              "viewed",
+              "profile_opened",
+              "not_relevant"
+            ],
             "title": "Feedback Type",
-            "type": "string"
-          },
-          "idempotency_key": {
-            "maxLength": 128,
-            "minLength": 8,
-            "title": "Idempotency Key",
             "type": "string"
           },
           "reason_code": {
@@ -10839,29 +10966,10 @@
               }
             ],
             "title": "Reason Details"
-          },
-          "recommendation_item_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Recommendation Item Id"
-          },
-          "recommended_user_id": {
-            "format": "uuid",
-            "title": "Recommended User Id",
-            "type": "string"
           }
         },
         "required": [
-          "recommended_user_id",
-          "feedback_type",
-          "idempotency_key"
+          "feedback_type"
         ],
         "title": "FeedbackRequest",
         "type": "object"
@@ -15449,28 +15557,6 @@
     "/api/v1/account/recommendation-history": {
       "get": {
         "operationId": "recommendation_history_api_v1_account_recommendation_history_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "page",
-            "required": false,
-            "schema": {
-              "default": 1,
-              "title": "Page",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "page_size",
-            "required": false,
-            "schema": {
-              "default": 20,
-              "title": "Page Size",
-              "type": "integer"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -15483,16 +15569,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -15539,7 +15615,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TuningRequest"
+                "$ref": "#/components/schemas/RecommendationSettingsRequest"
               }
             }
           },
@@ -15580,37 +15656,9 @@
         ]
       }
     },
-    "/api/v1/account/recommendation-preferences/reset": {
-      "post": {
-        "operationId": "reset_preferences_api_v1_account_recommendation_preferences_reset_post",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Reset Preferences Api V1 Account Recommendation Preferences Reset Post",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Reset Preferences",
-        "tags": [
-          "recommendations"
-        ]
-      }
-    },
     "/api/v1/account/recommendation-transparency": {
       "get": {
-        "description": "What the member may learn about how their own recommendations are built.",
+        "description": "Explain, for this member, what the engine used and what it did not.\n\nThe page describes categories, the member's own settings and the platform\ndefaults; it never shows another member's data or the internal weights of\nan individual recommendation.",
         "operationId": "transparency_api_v1_account_recommendation_transparency_get",
         "responses": {
           "200": {
@@ -15632,6 +15680,82 @@
           }
         ],
         "summary": "Transparency",
+        "tags": [
+          "recommendations"
+        ]
+      }
+    },
+    "/api/v1/account/recommendation-tuning": {
+      "put": {
+        "operationId": "update_tuning_api_v1_account_recommendation_tuning_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TuningRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Tuning Api V1 Account Recommendation Tuning Put",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Tuning",
+        "tags": [
+          "recommendations"
+        ]
+      }
+    },
+    "/api/v1/account/recommendation-tuning/reset": {
+      "post": {
+        "operationId": "reset_tuning_api_v1_account_recommendation_tuning_reset_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reset Tuning Api V1 Account Recommendation Tuning Reset Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reset Tuning",
         "tags": [
           "recommendations"
         ]
@@ -33316,42 +33440,17 @@
     },
     "/api/v1/admin/recommendations/audit": {
       "get": {
-        "operationId": "audit_events_api_v1_admin_recommendations_audit_get",
+        "operationId": "audit_log_api_v1_admin_recommendations_audit_get",
         "parameters": [
           {
             "in": "query",
-            "name": "subject_id",
+            "name": "limit",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Subject Id"
-            }
-          },
-          {
-            "in": "query",
-            "name": "page",
-            "required": false,
-            "schema": {
-              "default": 1,
-              "title": "Page",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "page_size",
-            "required": false,
-            "schema": {
-              "default": 50,
-              "title": "Page Size",
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
               "type": "integer"
             }
           }
@@ -33362,7 +33461,7 @@
               "application/json": {
                 "schema": {
                   "additionalProperties": true,
-                  "title": "Response Audit Events Api V1 Admin Recommendations Audit Get",
+                  "title": "Response Audit Log Api V1 Admin Recommendations Audit Get",
                   "type": "object"
                 }
               }
@@ -33385,7 +33484,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Audit Events",
+        "summary": "Audit Log",
         "tags": [
           "recommendations-admin"
         ]
@@ -33397,21 +33496,13 @@
         "parameters": [
           {
             "in": "query",
-            "name": "page",
+            "name": "limit",
             "required": false,
             "schema": {
-              "default": 1,
-              "title": "Page",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "page_size",
-            "required": false,
-            "schema": {
-              "default": 20,
-              "title": "Page Size",
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
               "type": "integer"
             }
           }
@@ -33453,7 +33544,7 @@
     },
     "/api/v1/admin/recommendations/batches/{batch_id}": {
       "get": {
-        "operationId": "batch_detail_api_v1_admin_recommendations_batches__batch_id__get",
+        "operationId": "get_batch_api_v1_admin_recommendations_batches__batch_id__get",
         "parameters": [
           {
             "in": "path",
@@ -33472,7 +33563,7 @@
               "application/json": {
                 "schema": {
                   "additionalProperties": true,
-                  "title": "Response Batch Detail Api V1 Admin Recommendations Batches  Batch Id  Get",
+                  "title": "Response Get Batch Api V1 Admin Recommendations Batches  Batch Id  Get",
                   "type": "object"
                 }
               }
@@ -33495,7 +33586,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Batch Detail",
+        "summary": "Get Batch",
         "tags": [
           "recommendations-admin"
         ]
@@ -33520,7 +33611,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RebuildRequest"
+                "$ref": "#/components/schemas/BatchInvalidateRequest"
               }
             }
           },
@@ -33556,6 +33647,63 @@
           }
         ],
         "summary": "Invalidate Batch",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/candidates": {
+      "get": {
+        "description": "Aggregate candidate statistics; no member identities are listed.",
+        "operationId": "candidate_overview_api_v1_admin_recommendations_candidates_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Candidate Overview Api V1 Admin Recommendations Candidates Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Candidate Overview",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/cold-start": {
+      "get": {
+        "operationId": "cold_start_dashboard_api_v1_admin_recommendations_cold_start_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Cold Start Dashboard Api V1 Admin Recommendations Cold Start Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Cold Start Dashboard",
         "tags": [
           "recommendations-admin"
         ]
@@ -33617,57 +33765,6 @@
         ]
       }
     },
-    "/api/v1/admin/recommendations/diagnostics/{user_id}": {
-      "get": {
-        "description": "Aggregate diagnostics. Individual private criteria are never shown.",
-        "operationId": "diagnostics_api_v1_admin_recommendations_diagnostics__user_id__get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "user_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "User Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Diagnostics Api V1 Admin Recommendations Diagnostics  User Id  Get",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Diagnostics",
-        "tags": [
-          "recommendations-admin"
-        ]
-      }
-    },
     "/api/v1/admin/recommendations/evaluations": {
       "get": {
         "operationId": "list_evaluations_api_v1_admin_recommendations_evaluations_get",
@@ -33694,11 +33791,9 @@
         "tags": [
           "recommendations-admin"
         ]
-      }
-    },
-    "/api/v1/admin/recommendations/evaluations/run": {
+      },
       "post": {
-        "operationId": "run_evaluation_api_v1_admin_recommendations_evaluations_run_post",
+        "operationId": "run_evaluation_api_v1_admin_recommendations_evaluations_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -33710,12 +33805,12 @@
           "required": true
         },
         "responses": {
-          "201": {
+          "200": {
             "content": {
               "application/json": {
                 "schema": {
                   "additionalProperties": true,
-                  "title": "Response Run Evaluation Api V1 Admin Recommendations Evaluations Run Post",
+                  "title": "Response Run Evaluation Api V1 Admin Recommendations Evaluations Post",
                   "type": "object"
                 }
               }
@@ -33784,7 +33879,7 @@
           "required": true
         },
         "responses": {
-          "201": {
+          "200": {
             "content": {
               "application/json": {
                 "schema": {
@@ -33818,9 +33913,128 @@
         ]
       }
     },
+    "/api/v1/admin/recommendations/experiments/{experiment_id}/approve": {
+      "post": {
+        "operationId": "approve_experiment_api_v1_admin_recommendations_experiments__experiment_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "experiment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Experiment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperimentTransitionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Experiment Api V1 Admin Recommendations Experiments  Experiment Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Experiment",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/experiments/{experiment_id}/guardrails": {
+      "post": {
+        "operationId": "evaluate_guardrails_api_v1_admin_recommendations_experiments__experiment_id__guardrails_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "experiment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Experiment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperimentGuardrailRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Evaluate Guardrails Api V1 Admin Recommendations Experiments  Experiment Id  Guardrails Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Evaluate Guardrails",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
     "/api/v1/admin/recommendations/experiments/{experiment_id}/start": {
       "post": {
-        "description": "Starting requires the feature flag plus a separate approver.",
         "operationId": "start_experiment_api_v1_admin_recommendations_experiments__experiment_id__start_post",
         "parameters": [
           {
@@ -33838,7 +34052,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ExperimentDecisionRequest"
+                "$ref": "#/components/schemas/ExperimentTransitionRequest"
               }
             }
           },
@@ -33874,6 +34088,66 @@
           }
         ],
         "summary": "Start Experiment",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/experiments/{experiment_id}/stop": {
+      "post": {
+        "operationId": "stop_experiment_api_v1_admin_recommendations_experiments__experiment_id__stop_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "experiment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Experiment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperimentTransitionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Stop Experiment Api V1 Admin Recommendations Experiments  Experiment Id  Stop Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Stop Experiment",
         "tags": [
           "recommendations-admin"
         ]
@@ -33937,15 +34211,15 @@
     },
     "/api/v1/admin/recommendations/feedback": {
       "get": {
-        "description": "Aggregate feedback only. Free-text reasons stay encrypted.",
-        "operationId": "feedback_summary_api_v1_admin_recommendations_feedback_get",
+        "description": "Aggregate feedback only. Free-text reasons stay encrypted and private.",
+        "operationId": "feedback_dashboard_api_v1_admin_recommendations_feedback_get",
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
                   "additionalProperties": true,
-                  "title": "Response Feedback Summary Api V1 Admin Recommendations Feedback Get",
+                  "title": "Response Feedback Dashboard Api V1 Admin Recommendations Feedback Get",
                   "type": "object"
                 }
               }
@@ -33958,20 +34232,71 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Feedback Summary",
+        "summary": "Feedback Dashboard",
         "tags": [
           "recommendations-admin"
         ]
       }
     },
-    "/api/v1/admin/recommendations/pool/rebuild": {
+    "/api/v1/admin/recommendations/incidents": {
+      "get": {
+        "operationId": "incidents_api_v1_admin_recommendations_incidents_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Incidents Api V1 Admin Recommendations Incidents Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Incidents",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/pair-exclusions/{low_id}/{high_id}/release": {
       "post": {
-        "operationId": "rebuild_pool_api_v1_admin_recommendations_pool_rebuild_post",
+        "description": "Release a cooldown exclusion. Safety blocks are never released here.",
+        "operationId": "release_exclusion_api_v1_admin_recommendations_pair_exclusions__low_id___high_id__release_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "low_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Low Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "high_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "High Id",
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RebuildRequest"
+                "$ref": "#/components/schemas/BatchInvalidateRequest"
               }
             }
           },
@@ -33983,7 +34308,7 @@
               "application/json": {
                 "schema": {
                   "additionalProperties": true,
-                  "title": "Response Rebuild Pool Api V1 Admin Recommendations Pool Rebuild Post",
+                  "title": "Response Release Exclusion Api V1 Admin Recommendations Pair Exclusions  Low Id   High Id  Release Post",
                   "type": "object"
                 }
               }
@@ -34006,7 +34331,58 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Rebuild Pool",
+        "summary": "Release Exclusion",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/pairs/{pair_id}": {
+      "get": {
+        "description": "Feature-code level diagnostics for one candidate pair.\n\nRequires the separate sensitive permission and still returns only codes,\nresults and versions — never the underlying profile values.",
+        "operationId": "pair_diagnostics_api_v1_admin_recommendations_pairs__pair_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pair_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Pair Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Pair Diagnostics Api V1 Admin Recommendations Pairs  Pair Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Pair Diagnostics",
         "tags": [
           "recommendations-admin"
         ]
@@ -34052,7 +34428,7 @@
           "required": true
         },
         "responses": {
-          "201": {
+          "200": {
             "content": {
               "application/json": {
                 "schema": {
@@ -34088,7 +34464,7 @@
     },
     "/api/v1/admin/recommendations/strategies/{strategy_id}": {
       "get": {
-        "operationId": "strategy_detail_api_v1_admin_recommendations_strategies__strategy_id__get",
+        "operationId": "get_strategy_api_v1_admin_recommendations_strategies__strategy_id__get",
         "parameters": [
           {
             "in": "path",
@@ -34107,7 +34483,7 @@
               "application/json": {
                 "schema": {
                   "additionalProperties": true,
-                  "title": "Response Strategy Detail Api V1 Admin Recommendations Strategies  Strategy Id  Get",
+                  "title": "Response Get Strategy Api V1 Admin Recommendations Strategies  Strategy Id  Get",
                   "type": "object"
                 }
               }
@@ -34130,7 +34506,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Strategy Detail",
+        "summary": "Get Strategy",
         "tags": [
           "recommendations-admin"
         ]
@@ -34138,7 +34514,6 @@
     },
     "/api/v1/admin/recommendations/strategies/{strategy_id}/activate": {
       "post": {
-        "description": "Activation requires approval plus a passing evaluation, enforced in SQL.",
         "operationId": "activate_strategy_api_v1_admin_recommendations_strategies__strategy_id__activate_post",
         "parameters": [
           {
@@ -34156,7 +34531,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/StrategyDecisionRequest"
+                "$ref": "#/components/schemas/StrategyTransitionRequest"
               }
             }
           },
@@ -34199,7 +34574,6 @@
     },
     "/api/v1/admin/recommendations/strategies/{strategy_id}/approve": {
       "post": {
-        "description": "Approval is separate from authorship and from activation.",
         "operationId": "approve_strategy_api_v1_admin_recommendations_strategies__strategy_id__approve_post",
         "parameters": [
           {
@@ -34217,7 +34591,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/StrategyDecisionRequest"
+                "$ref": "#/components/schemas/StrategyTransitionRequest"
               }
             }
           },
@@ -34260,6 +34634,7 @@
     },
     "/api/v1/admin/recommendations/strategies/{strategy_id}/rollback": {
       "post": {
+        "description": "Roll the active strategy back and re-activate the previous version.",
         "operationId": "rollback_strategy_api_v1_admin_recommendations_strategies__strategy_id__rollback_post",
         "parameters": [
           {
@@ -34277,7 +34652,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/StrategyDecisionRequest"
+                "$ref": "#/components/schemas/StrategyTransitionRequest"
               }
             }
           },
@@ -34318,10 +34693,10 @@
         ]
       }
     },
-    "/api/v1/admin/recommendations/users/{user_id}/rebuild": {
-      "post": {
-        "description": "Rebuild one member's pool entry and candidates. Never hand-place a pair.",
-        "operationId": "rebuild_for_user_api_v1_admin_recommendations_users__user_id__rebuild_post",
+    "/api/v1/admin/recommendations/users/{user_id}/diagnostics": {
+      "get": {
+        "description": "Aggregate funnel diagnostics for one member.\n\nCounts and criterion codes only: no candidate identities and no private\npreference values.",
+        "operationId": "user_diagnostics_api_v1_admin_recommendations_users__user_id__diagnostics_get",
         "parameters": [
           {
             "in": "path",
@@ -34334,23 +34709,13 @@
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RebuildRequest"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
                   "additionalProperties": true,
-                  "title": "Response Rebuild For User Api V1 Admin Recommendations Users  User Id  Rebuild Post",
+                  "title": "Response User Diagnostics Api V1 Admin Recommendations Users  User Id  Diagnostics Get",
                   "type": "object"
                 }
               }
@@ -34373,7 +34738,68 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Rebuild For User",
+        "summary": "User Diagnostics",
+        "tags": [
+          "recommendations-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/recommendations/users/{user_id}/rebuild": {
+      "post": {
+        "description": "Rebuild one member's pool entry and recommendation batch.\n\nA rebuild re-runs the same pipeline for that member; it cannot inject a\nchosen candidate or alter a score.",
+        "operationId": "rebuild_user_api_v1_admin_recommendations_users__user_id__rebuild_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchRebuildRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Rebuild User Api V1 Admin Recommendations Users  User Id  Rebuild Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rebuild User",
         "tags": [
           "recommendations-admin"
         ]
@@ -39182,8 +39608,8 @@
     },
     "/api/v1/recommendations/batches": {
       "post": {
-        "description": "Generate the next batch, bounded by today's receive budget.",
-        "operationId": "create_batch_api_v1_recommendations_batches_post",
+        "description": "Request today's batch or a supplemental one.\n\nRepeat calls return the existing batch, so refreshing can never buy extra\nrecommendations beyond the daily budget.",
+        "operationId": "request_batch_api_v1_recommendations_batches_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -39195,12 +39621,12 @@
           "required": true
         },
         "responses": {
-          "201": {
+          "200": {
             "content": {
               "application/json": {
                 "schema": {
                   "additionalProperties": true,
-                  "title": "Response Create Batch Api V1 Recommendations Batches Post",
+                  "title": "Response Request Batch Api V1 Recommendations Batches Post",
                   "type": "object"
                 }
               }
@@ -39223,55 +39649,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Create Batch",
-        "tags": [
-          "recommendations"
-        ]
-      }
-    },
-    "/api/v1/recommendations/feedback": {
-      "post": {
-        "operationId": "record_feedback_api_v1_recommendations_feedback_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/vav__modules__recommendations__schemas__FeedbackRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Record Feedback Api V1 Recommendations Feedback Post",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Record Feedback",
+        "summary": "Request Batch",
         "tags": [
           "recommendations"
         ]
@@ -39279,8 +39657,7 @@
     },
     "/api/v1/recommendations/{item_id}": {
       "get": {
-        "description": "One recommendation, re-checked against the candidate's current state.",
-        "operationId": "recommendation_detail_api_v1_recommendations__item_id__get",
+        "operationId": "get_recommendation_api_v1_recommendations__item_id__get",
         "parameters": [
           {
             "in": "path",
@@ -39299,7 +39676,7 @@
               "application/json": {
                 "schema": {
                   "additionalProperties": true,
-                  "title": "Response Recommendation Detail Api V1 Recommendations  Item Id  Get",
+                  "title": "Response Get Recommendation Api V1 Recommendations  Item Id  Get",
                   "type": "object"
                 }
               }
@@ -39322,15 +39699,15 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Recommendation Detail",
+        "summary": "Get Recommendation",
         "tags": [
           "recommendations"
         ]
       }
     },
-    "/api/v1/recommendations/{item_id}/exposure": {
+    "/api/v1/recommendations/{item_id}/exposures": {
       "post": {
-        "operationId": "record_exposure_api_v1_recommendations__item_id__exposure_post",
+        "operationId": "record_exposure_api_v1_recommendations__item_id__exposures_post",
         "parameters": [
           {
             "in": "path",
@@ -39359,7 +39736,7 @@
               "application/json": {
                 "schema": {
                   "additionalProperties": true,
-                  "title": "Response Record Exposure Api V1 Recommendations  Item Id  Exposure Post",
+                  "title": "Response Record Exposure Api V1 Recommendations  Item Id  Exposures Post",
                   "type": "object"
                 }
               }
@@ -39383,6 +39760,67 @@
           }
         ],
         "summary": "Record Exposure",
+        "tags": [
+          "recommendations"
+        ]
+      }
+    },
+    "/api/v1/recommendations/{item_id}/feedback": {
+      "post": {
+        "description": "Record the feedback a member may give from a recommendation card.\n\nLikes, skips, withdrawals and introductions belong to the interaction\nmodule; this endpoint accepts only viewing signals and 'not relevant'.",
+        "operationId": "submit_feedback_api_v1_recommendations__item_id__feedback_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/vav__modules__recommendations__schemas__FeedbackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Submit Feedback Api V1 Recommendations  Item Id  Feedback Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Submit Feedback",
         "tags": [
           "recommendations"
         ]

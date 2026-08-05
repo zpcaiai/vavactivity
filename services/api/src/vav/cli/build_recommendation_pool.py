@@ -1,21 +1,19 @@
-"""Rebuild the recommendation pool from the current Batch 13 projections."""
+"""Rebuild the recommendation pool from approved profile projections."""
 
 from __future__ import annotations
 
 import asyncio
 
 from vav.core.database import session_factory
-from vav.modules.recommendations.service import rebuild_pool
+from vav.modules.recommendations import service
 
 
-async def build_recommendation_pool() -> None:
+async def main() -> None:
     async with session_factory() as session:
-        result = await rebuild_pool(session)
-    print(
-        f"Recommendation pool rebuilt: {result['synced']} projections synced, "
-        f"{result['eligible']} eligible"
-    )
+        count = await service.rebuild_pool(session)
+        await session.commit()
+    print(f"rebuilt {count} recommendation pool entries")
 
 
 if __name__ == "__main__":
-    asyncio.run(build_recommendation_pool())
+    asyncio.run(main())

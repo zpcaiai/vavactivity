@@ -1516,23 +1516,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/account/recommendation-preferences/reset": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Reset Preferences */
-        post: operations["reset_preferences_api_v1_account_recommendation_preferences_reset_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/account/recommendation-transparency": {
         parameters: {
             query?: never;
@@ -1542,11 +1525,49 @@ export interface paths {
         };
         /**
          * Transparency
-         * @description What the member may learn about how their own recommendations are built.
+         * @description Explain, for this member, what the engine used and what it did not.
+         *
+         *     The page describes categories, the member's own settings and the platform
+         *     defaults; it never shows another member's data or the internal weights of
+         *     an individual recommendation.
          */
         get: operations["transparency_api_v1_account_recommendation_transparency_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/recommendation-tuning": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update Tuning */
+        put: operations["update_tuning_api_v1_account_recommendation_tuning_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/recommendation-tuning/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reset Tuning */
+        post: operations["reset_tuning_api_v1_account_recommendation_tuning_reset_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -6905,8 +6926,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Audit Events */
-        get: operations["audit_events_api_v1_admin_recommendations_audit_get"];
+        /** Audit Log */
+        get: operations["audit_log_api_v1_admin_recommendations_audit_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6939,8 +6960,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Batch Detail */
-        get: operations["batch_detail_api_v1_admin_recommendations_batches__batch_id__get"];
+        /** Get Batch */
+        get: operations["get_batch_api_v1_admin_recommendations_batches__batch_id__get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6960,6 +6981,43 @@ export interface paths {
         put?: never;
         /** Invalidate Batch */
         post: operations["invalidate_batch_api_v1_admin_recommendations_batches__batch_id__invalidate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Candidate Overview
+         * @description Aggregate candidate statistics; no member identities are listed.
+         */
+        get: operations["candidate_overview_api_v1_admin_recommendations_candidates_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/cold-start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cold Start Dashboard */
+        get: operations["cold_start_dashboard_api_v1_admin_recommendations_cold_start_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -7000,26 +7058,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/admin/recommendations/diagnostics/{user_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Diagnostics
-         * @description Aggregate diagnostics. Individual private criteria are never shown.
-         */
-        get: operations["diagnostics_api_v1_admin_recommendations_diagnostics__user_id__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/admin/recommendations/evaluations": {
         parameters: {
             query?: never;
@@ -7030,24 +7068,8 @@ export interface paths {
         /** List Evaluations */
         get: operations["list_evaluations_api_v1_admin_recommendations_evaluations_get"];
         put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/admin/recommendations/evaluations/run": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
         /** Run Evaluation */
-        post: operations["run_evaluation_api_v1_admin_recommendations_evaluations_run_post"];
+        post: operations["run_evaluation_api_v1_admin_recommendations_evaluations_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7072,6 +7094,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/recommendations/experiments/{experiment_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve Experiment */
+        post: operations["approve_experiment_api_v1_admin_recommendations_experiments__experiment_id__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/experiments/{experiment_id}/guardrails": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Evaluate Guardrails */
+        post: operations["evaluate_guardrails_api_v1_admin_recommendations_experiments__experiment_id__guardrails_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/recommendations/experiments/{experiment_id}/start": {
         parameters: {
             query?: never;
@@ -7081,11 +7137,25 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Start Experiment
-         * @description Starting requires the feature flag plus a separate approver.
-         */
+        /** Start Experiment */
         post: operations["start_experiment_api_v1_admin_recommendations_experiments__experiment_id__start_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/experiments/{experiment_id}/stop": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Stop Experiment */
+        post: operations["stop_experiment_api_v1_admin_recommendations_experiments__experiment_id__stop_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7134,10 +7204,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Feedback Summary
-         * @description Aggregate feedback only. Free-text reasons stay encrypted.
+         * Feedback Dashboard
+         * @description Aggregate feedback only. Free-text reasons stay encrypted and private.
          */
-        get: operations["feedback_summary_api_v1_admin_recommendations_feedback_get"];
+        get: operations["feedback_dashboard_api_v1_admin_recommendations_feedback_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -7146,7 +7216,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/admin/recommendations/pool/rebuild": {
+    "/api/v1/admin/recommendations/incidents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Incidents */
+        get: operations["incidents_api_v1_admin_recommendations_incidents_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/pair-exclusions/{low_id}/{high_id}/release": {
         parameters: {
             query?: never;
             header?: never;
@@ -7155,8 +7242,34 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Rebuild Pool */
-        post: operations["rebuild_pool_api_v1_admin_recommendations_pool_rebuild_post"];
+        /**
+         * Release Exclusion
+         * @description Release a cooldown exclusion. Safety blocks are never released here.
+         */
+        post: operations["release_exclusion_api_v1_admin_recommendations_pair_exclusions__low_id___high_id__release_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/pairs/{pair_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pair Diagnostics
+         * @description Feature-code level diagnostics for one candidate pair.
+         *
+         *     Requires the separate sensitive permission and still returns only codes,
+         *     results and versions — never the underlying profile values.
+         */
+        get: operations["pair_diagnostics_api_v1_admin_recommendations_pairs__pair_id__get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -7188,8 +7301,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Strategy Detail */
-        get: operations["strategy_detail_api_v1_admin_recommendations_strategies__strategy_id__get"];
+        /** Get Strategy */
+        get: operations["get_strategy_api_v1_admin_recommendations_strategies__strategy_id__get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -7207,10 +7320,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Activate Strategy
-         * @description Activation requires approval plus a passing evaluation, enforced in SQL.
-         */
+        /** Activate Strategy */
         post: operations["activate_strategy_api_v1_admin_recommendations_strategies__strategy_id__activate_post"];
         delete?: never;
         options?: never;
@@ -7227,10 +7337,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Approve Strategy
-         * @description Approval is separate from authorship and from activation.
-         */
+        /** Approve Strategy */
         post: operations["approve_strategy_api_v1_admin_recommendations_strategies__strategy_id__approve_post"];
         delete?: never;
         options?: never;
@@ -7247,8 +7354,34 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Rollback Strategy */
+        /**
+         * Rollback Strategy
+         * @description Roll the active strategy back and re-activate the previous version.
+         */
         post: operations["rollback_strategy_api_v1_admin_recommendations_strategies__strategy_id__rollback_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recommendations/users/{user_id}/diagnostics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * User Diagnostics
+         * @description Aggregate funnel diagnostics for one member.
+         *
+         *     Counts and criterion codes only: no candidate identities and no private
+         *     preference values.
+         */
+        get: operations["user_diagnostics_api_v1_admin_recommendations_users__user_id__diagnostics_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -7265,10 +7398,13 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Rebuild For User
-         * @description Rebuild one member's pool entry and candidates. Never hand-place a pair.
+         * Rebuild User
+         * @description Rebuild one member's pool entry and recommendation batch.
+         *
+         *     A rebuild re-runs the same pipeline for that member; it cannot inject a
+         *     chosen candidate or alter a score.
          */
-        post: operations["rebuild_for_user_api_v1_admin_recommendations_users__user_id__rebuild_post"];
+        post: operations["rebuild_user_api_v1_admin_recommendations_users__user_id__rebuild_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -8823,27 +8959,13 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Create Batch
-         * @description Generate the next batch, bounded by today's receive budget.
+         * Request Batch
+         * @description Request today's batch or a supplemental one.
+         *
+         *     Repeat calls return the existing batch, so refreshing can never buy extra
+         *     recommendations beyond the daily budget.
          */
-        post: operations["create_batch_api_v1_recommendations_batches_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/recommendations/feedback": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Record Feedback */
-        post: operations["record_feedback_api_v1_recommendations_feedback_post"];
+        post: operations["request_batch_api_v1_recommendations_batches_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -8857,11 +8979,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Recommendation Detail
-         * @description One recommendation, re-checked against the candidate's current state.
-         */
-        get: operations["recommendation_detail_api_v1_recommendations__item_id__get"];
+        /** Get Recommendation */
+        get: operations["get_recommendation_api_v1_recommendations__item_id__get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -8870,7 +8989,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/recommendations/{item_id}/exposure": {
+    "/api/v1/recommendations/{item_id}/exposures": {
         parameters: {
             query?: never;
             header?: never;
@@ -8880,7 +8999,30 @@ export interface paths {
         get?: never;
         put?: never;
         /** Record Exposure */
-        post: operations["record_exposure_api_v1_recommendations__item_id__exposure_post"];
+        post: operations["record_exposure_api_v1_recommendations__item_id__exposures_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recommendations/{item_id}/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Submit Feedback
+         * @description Record the feedback a member may give from a recommendation card.
+         *
+         *     Likes, skips, withdrawals and introductions belong to the interaction
+         *     module; this endpoint accepts only viewing signals and 'not relevant'.
+         */
+        post: operations["submit_feedback_api_v1_recommendations__item_id__feedback_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -9406,13 +9548,30 @@ export interface components {
             /** Weekly Limit */
             weekly_limit?: number | null;
         };
+        /** BatchInvalidateRequest */
+        BatchInvalidateRequest: {
+            /** Reason */
+            reason: string;
+        };
+        /** BatchRebuildRequest */
+        BatchRebuildRequest: {
+            /**
+             * Batch Type
+             * @default manual_rebuild
+             * @enum {string}
+             */
+            batch_type: "daily" | "supplemental" | "manual_rebuild";
+            /** Reason */
+            reason: string;
+        };
         /** BatchRequest */
         BatchRequest: {
             /**
              * Batch Type
              * @default daily
+             * @enum {string}
              */
-            batch_type: string;
+            batch_type: "daily" | "supplemental";
             /** Requested Size */
             requested_size?: number | null;
         };
@@ -10132,11 +10291,16 @@ export interface components {
         };
         /** EvaluationRunRequest */
         EvaluationRunRequest: {
-            /**
-             * Dataset Id
-             * Format: uuid
-             */
-            dataset_id: string;
+            /** Dataset Code */
+            dataset_code: string;
+            /** Guardrail Thresholds */
+            guardrail_thresholds?: {
+                [key: string]: number;
+            } | null;
+            /** Metrics */
+            metrics?: {
+                [key: string]: number;
+            };
             /**
              * Strategy Id
              * Format: uuid
@@ -10213,6 +10377,10 @@ export interface components {
             experiment_code: string;
             /** Guardrail Metrics */
             guardrail_metrics?: string[];
+            /** Guardrail Thresholds */
+            guardrail_thresholds?: {
+                [key: string]: number;
+            };
             /** Hypothesis */
             hypothesis: string;
             /** Name */
@@ -10220,12 +10388,19 @@ export interface components {
             /** Primary Metrics */
             primary_metrics?: string[];
             /** Treatment Strategy Ids */
-            treatment_strategy_ids: string[];
+            treatment_strategy_ids?: string[];
         };
-        /** ExperimentDecisionRequest */
-        ExperimentDecisionRequest: {
+        /** ExperimentGuardrailRequest */
+        ExperimentGuardrailRequest: {
+            /** Metrics */
+            metrics?: {
+                [key: string]: number;
+            };
+        };
+        /** ExperimentTransitionRequest */
+        ExperimentTransitionRequest: {
             /** Reason */
-            reason: string;
+            reason?: string | null;
         };
         /** ExportRequest */
         ExportRequest: {
@@ -10244,13 +10419,14 @@ export interface components {
         ExposureRequest: {
             /** Duration Ms */
             duration_ms?: number | null;
-            /** Exposure Type */
-            exposure_type: string;
-            /** Idempotency Key */
-            idempotency_key: string;
+            /**
+             * Exposure Type
+             * @enum {string}
+             */
+            exposure_type: "card_impression" | "card_visible" | "profile_opened" | "photo_viewed";
             /**
              * Source
-             * @default user_web
+             * @default recommendation_list
              */
             source: string;
         };
@@ -11764,10 +11940,20 @@ export interface components {
             /** Quote */
             quote: string;
         };
-        /** RebuildRequest */
-        RebuildRequest: {
-            /** Reason */
-            reason: string;
+        /** RecommendationSettingsRequest */
+        RecommendationSettingsRequest: {
+            /** Daily Received Limit */
+            daily_received_limit?: number | null;
+            /** Delivery Frequency */
+            delivery_frequency?: ("daily" | "weekly" | "manual") | null;
+            /** Extended Recommendations Enabled */
+            extended_recommendations_enabled?: boolean | null;
+            /** Preferred Locale */
+            preferred_locale?: string | null;
+            /** Recommendations Paused */
+            recommendations_paused?: boolean | null;
+            /** Relaxable Criteria */
+            relaxable_criteria?: string[] | null;
         };
         /** ReconciliationResolveRequest */
         ReconciliationResolveRequest: {
@@ -12366,6 +12552,10 @@ export interface components {
         Stackability: "exclusive" | "stackable" | "stackable_with_automatic_only";
         /** StrategyCreateRequest */
         StrategyCreateRequest: {
+            /** Applicable Regions */
+            applicable_regions?: string[];
+            /** Applicable Segments */
+            applicable_segments?: string[];
             /** Bidirectional Policy */
             bidirectional_policy: {
                 [key: string]: unknown;
@@ -12389,7 +12579,7 @@ export interface components {
             /** Feature Manifest */
             feature_manifest: {
                 [key: string]: unknown;
-            }[];
+            };
             /** Hard Constraint Policy */
             hard_constraint_policy: {
                 [key: string]: unknown;
@@ -12407,10 +12597,10 @@ export interface components {
             /** Strategy Code */
             strategy_code: string;
         };
-        /** StrategyDecisionRequest */
-        StrategyDecisionRequest: {
+        /** StrategyTransitionRequest */
+        StrategyTransitionRequest: {
             /** Reason */
-            reason: string;
+            reason?: string | null;
         };
         /** SubmitRequest */
         SubmitRequest: {
@@ -12657,16 +12847,10 @@ export interface components {
         TranslationStatus: "missing" | "draft" | "review_required" | "ready" | "outdated";
         /** TuningRequest */
         TuningRequest: {
-            /** Allow Relaxed Recommendations */
-            allow_relaxed_recommendations?: boolean | null;
-            /** Daily Received Limit */
-            daily_received_limit?: number | null;
             /** Exploration Level */
-            exploration_level?: string | null;
+            exploration_level?: ("conservative" | "balanced" | "adventurous") | null;
             /** Feedback Personalization Enabled */
             feedback_personalization_enabled?: boolean | null;
-            /** Recommendations Paused */
-            recommendations_paused?: boolean | null;
         };
         /** UpdateNotificationPreferencesRequest */
         UpdateNotificationPreferencesRequest: {
@@ -12844,21 +13028,15 @@ export interface components {
         };
         /** FeedbackRequest */
         vav__modules__recommendations__schemas__FeedbackRequest: {
-            /** Feedback Type */
-            feedback_type: string;
-            /** Idempotency Key */
-            idempotency_key: string;
+            /**
+             * Feedback Type
+             * @enum {string}
+             */
+            feedback_type: "impression" | "viewed" | "profile_opened" | "not_relevant";
             /** Reason Code */
             reason_code?: string | null;
             /** Reason Details */
             reason_details?: string | null;
-            /** Recommendation Item Id */
-            recommendation_item_id?: string | null;
-            /**
-             * Recommended User Id
-             * Format: uuid
-             */
-            recommended_user_id: string;
         };
     };
     responses: never;
@@ -15974,10 +16152,7 @@ export interface operations {
     };
     recommendation_history_api_v1_account_recommendation_history_get: {
         parameters: {
-            query?: {
-                page?: number;
-                page_size?: number;
-            };
+            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
@@ -15993,15 +16168,6 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -16037,6 +16203,63 @@ export interface operations {
         };
         requestBody: {
             content: {
+                "application/json": components["schemas"]["RecommendationSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transparency_api_v1_account_recommendation_transparency_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    update_tuning_api_v1_account_recommendation_tuning_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
                 "application/json": components["schemas"]["TuningRequest"];
             };
         };
@@ -16063,29 +16286,7 @@ export interface operations {
             };
         };
     };
-    reset_preferences_api_v1_account_recommendation_preferences_reset_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-        };
-    };
-    transparency_api_v1_account_recommendation_transparency_get: {
+    reset_tuning_api_v1_account_recommendation_tuning_reset_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -27616,12 +27817,10 @@ export interface operations {
             };
         };
     };
-    audit_events_api_v1_admin_recommendations_audit_get: {
+    audit_log_api_v1_admin_recommendations_audit_get: {
         parameters: {
             query?: {
-                subject_id?: string | null;
-                page?: number;
-                page_size?: number;
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -27654,8 +27853,7 @@ export interface operations {
     list_batches_api_v1_admin_recommendations_batches_get: {
         parameters: {
             query?: {
-                page?: number;
-                page_size?: number;
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -27685,7 +27883,7 @@ export interface operations {
             };
         };
     };
-    batch_detail_api_v1_admin_recommendations_batches__batch_id__get: {
+    get_batch_api_v1_admin_recommendations_batches__batch_id__get: {
         parameters: {
             query?: never;
             header?: never;
@@ -27729,7 +27927,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RebuildRequest"];
+                "application/json": components["schemas"]["BatchInvalidateRequest"];
             };
         };
         responses: {
@@ -27751,6 +27949,50 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    candidate_overview_api_v1_admin_recommendations_candidates_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    cold_start_dashboard_api_v1_admin_recommendations_cold_start_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
         };
@@ -27799,39 +28041,6 @@ export interface operations {
             };
         };
     };
-    diagnostics_api_v1_admin_recommendations_diagnostics__user_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                user_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     list_evaluations_api_v1_admin_recommendations_evaluations_get: {
         parameters: {
             query?: never;
@@ -27854,7 +28063,7 @@ export interface operations {
             };
         };
     };
-    run_evaluation_api_v1_admin_recommendations_evaluations_run_post: {
+    run_evaluation_api_v1_admin_recommendations_evaluations_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -27868,7 +28077,7 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -27925,7 +28134,81 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            201: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    approve_experiment_api_v1_admin_recommendations_experiments__experiment_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                experiment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExperimentTransitionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    evaluate_guardrails_api_v1_admin_recommendations_experiments__experiment_id__guardrails_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                experiment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExperimentGuardrailRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -27957,7 +28240,44 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ExperimentDecisionRequest"];
+                "application/json": components["schemas"]["ExperimentTransitionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    stop_experiment_api_v1_admin_recommendations_experiments__experiment_id__stop_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                experiment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExperimentTransitionRequest"];
             };
         };
         responses: {
@@ -28027,7 +28347,7 @@ export interface operations {
             };
         };
     };
-    feedback_summary_api_v1_admin_recommendations_feedback_get: {
+    feedback_dashboard_api_v1_admin_recommendations_feedback_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -28049,18 +28369,76 @@ export interface operations {
             };
         };
     };
-    rebuild_pool_api_v1_admin_recommendations_pool_rebuild_post: {
+    incidents_api_v1_admin_recommendations_incidents_get: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RebuildRequest"];
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
             };
         };
+    };
+    release_exclusion_api_v1_admin_recommendations_pair_exclusions__low_id___high_id__release_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                low_id: string;
+                high_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BatchInvalidateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pair_diagnostics_api_v1_admin_recommendations_pairs__pair_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pair_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {
@@ -28120,7 +28498,7 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -28141,7 +28519,7 @@ export interface operations {
             };
         };
     };
-    strategy_detail_api_v1_admin_recommendations_strategies__strategy_id__get: {
+    get_strategy_api_v1_admin_recommendations_strategies__strategy_id__get: {
         parameters: {
             query?: never;
             header?: never;
@@ -28185,7 +28563,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["StrategyDecisionRequest"];
+                "application/json": components["schemas"]["StrategyTransitionRequest"];
             };
         };
         responses: {
@@ -28222,7 +28600,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["StrategyDecisionRequest"];
+                "application/json": components["schemas"]["StrategyTransitionRequest"];
             };
         };
         responses: {
@@ -28259,7 +28637,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["StrategyDecisionRequest"];
+                "application/json": components["schemas"]["StrategyTransitionRequest"];
             };
         };
         responses: {
@@ -28285,7 +28663,40 @@ export interface operations {
             };
         };
     };
-    rebuild_for_user_api_v1_admin_recommendations_users__user_id__rebuild_post: {
+    user_diagnostics_api_v1_admin_recommendations_users__user_id__diagnostics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rebuild_user_api_v1_admin_recommendations_users__user_id__rebuild_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -28296,7 +28707,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RebuildRequest"];
+                "application/json": components["schemas"]["BatchRebuildRequest"];
             };
         };
         responses: {
@@ -31441,7 +31852,7 @@ export interface operations {
             };
         };
     };
-    create_batch_api_v1_recommendations_batches_post: {
+    request_batch_api_v1_recommendations_batches_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -31455,7 +31866,7 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -31476,42 +31887,7 @@ export interface operations {
             };
         };
     };
-    record_feedback_api_v1_recommendations_feedback_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["vav__modules__recommendations__schemas__FeedbackRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    recommendation_detail_api_v1_recommendations__item_id__get: {
+    get_recommendation_api_v1_recommendations__item_id__get: {
         parameters: {
             query?: never;
             header?: never;
@@ -31544,7 +31920,7 @@ export interface operations {
             };
         };
     };
-    record_exposure_api_v1_recommendations__item_id__exposure_post: {
+    record_exposure_api_v1_recommendations__item_id__exposures_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -31556,6 +31932,43 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["ExposureRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_feedback_api_v1_recommendations__item_id__feedback_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__recommendations__schemas__FeedbackRequest"];
             };
         };
         responses: {

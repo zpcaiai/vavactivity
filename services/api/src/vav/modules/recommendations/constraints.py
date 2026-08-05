@@ -1,200 +1,279 @@
-"""Bidirectional hard-constraint evaluation.
+"""Bidirectional hard-constraint engine.
 
-A pair is only eligible when A's hard constraints accept B *and* B's hard
-constraints accept A. A candidate who simply left a field blank is never
-treated as failing: the member's own ``allow_unknown`` setting decides.
+A pair passes only when both directions pass. Only criteria a member marked as
+hard, plus approved platform eligibility rules, can exclude a candidate; a
+missing value follows the member's own unknown policy and is never silently
+treated as a failure.
 """
 
 # ruff: noqa: E501
 
 from __future__ import annotations
 
-from typing import Any
+from dataclasses import dataclass, field
+from typing import Any, Literal
 
-from vav.modules.recommendations.domain import NEVER_RELAXABLE_CONSTRAINTS
-from vav.modules.recommendations.strategy import (
-    HARD_CONSTRAINT_CRITERIA,
-    HARD_CONSTRAINT_POLICY_VERSION,
+from vav.modules.recommendations.domain import (
+    NON_RELAXABLE_CRITERIA,
+    SUPPORTED_HARD_CONSTRAINTS,
 )
+from vav.modules.recommendations.features import extract_value
 
-VIEWER_TO_CANDIDATE = "viewer_to_candidate"
-CANDIDATE_TO_VIEWER = "candidate_to_viewer"
+HARD_CONSTRAINT_POLICY_VERSION = "1.0.0"
 
-
-def _projection_value(projection: dict[str, Any], criterion_code: str) -> Any:
-    """Read the normalised value a criterion compares against."""
-    direct = {
-        "age_range": projection.get("age_years"),
-        "country_code": projection.get("country_code"),
-        "region_code": projection.get("region_code"),
-        "city_code": projection.get("city_code"),
-        "relocation_willingness": projection.get("relocation_willingness"),
-        "language_codes": projection.get("language_codes"),
-        "marital_status_code": projection.get("marital_status_code"),
-        "relationship_intent": projection.get("relationship_intent"),
-    }
-    if criterion_code in direct:
-        return direct[criterion_code]
-
-    faith_codes = list(projection.get("faith_codes") or [])
-    lifestyle_codes = list(projection.get("lifestyle_codes") or [])
-    if criterion_code == "faith_status_code":
-        return next(
-            (code for code in faith_codes if not code.startswith("marriage_faith_importance:")),
-            None,
-        )
-    if criterion_code == "church_tradition_codes":
-        return faith_codes
-    if criterion_code == "marriage_faith_importance":
-        for code in faith_codes:
-            if code.startswith("marriage_faith_importance:"):
-                return int(code.split(":", 1)[1])
-        return None
-    if criterion_code == "has_children":
-        children = projection.get("children_status_code")
-        if children is None:
-            return None
-        return children != "no_children"
-    if criterion_code == "open_to_partner_with_children":
-        return projection.get("children_status_code")
-    for prefix, code in (
-        ("desire_children_code:", "desire_children_code"),
-        ("smoking_status_code:", "smoking_status_code"),
-        ("daily_schedule_code:", "daily_schedule_code"),
-        ("education_level_code:", "education_level_code"),
-    ):
-        if criterion_code == code:
-            for value in lifestyle_codes:
-                if value.startswith(prefix):
-                    return value.split(":", 1)[1]
-            return None
-    return None
+Direction = Literal["viewer_to_candidate", "candidate_to_viewer"]
 
 
-def _compare(operator: str, desired: Any, actual: Any) -> bool:
-    if operator == "equals":
-        return bool(actual == desired)
-    if operator == "in":
-        return actual in set(desired)
-    if operator == "range":
-        return bool(int(desired["minimum"]) <= int(actual) <= int(desired["maximum"]))
-    if operator == "at_least":
-        return bool(actual >= desired)
-    if operator == "at_most":
-        return bool(actual <= desired)
-    if operator == "contains_any":
-        return bool(set(_as_list(actual)) & set(desired))
-    if operator == "contains_all":
-        return set(desired) <= set(_as_list(actual))
-    if operator == "boolean":
-        return bool(actual) is bool(desired)
-    return False
+@dataclass(frozen=True)
+class ConstraintResult:
+    criterion_code: str
+    direction: Direction
+    #: ``None`` means the candidate value is unknown.
+    passed: bool | None
+    reason_code: str
+    source_preference_version: int
+    evaluated_value_snapshot: dict[str, Any] = field(default_factory=dict)
+    unknown_policy: str | None = None
+    relaxed: bool = False
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "criterion_code": self.criterion_code,
+            "direction": self.direction,
+            "passed": self.passed,
+            "reason_code": self.reason_code,
+            "source_preference_version": self.source_preference_version,
+            "evaluated_value_snapshot": self.evaluated_value_snapshot,
+            "unknown_policy": self.unknown_policy,
+            "relaxed": self.relaxed,
+        }
 
 
-def _as_list(value: Any) -> list[Any]:
+@dataclass(frozen=True)
+class HardConstraintEvaluation:
+    passed: bool
+    viewer_constraints: list[ConstraintResult]
+    candidate_constraints: list[ConstraintResult]
+    blocking_codes: list[str]
+    unknown_codes: list[str]
+    relaxed_codes: list[str]
+    policy_version: str = HARD_CONSTRAINT_POLICY_VERSION
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "passed": self.passed,
+            "viewer_constraints": [item.as_dict() for item in self.viewer_constraints],
+            "candidate_constraints": [item.as_dict() for item in self.candidate_constraints],
+            "blocking_codes": self.blocking_codes,
+            "unknown_codes": self.unknown_codes,
+            "relaxed_codes": self.relaxed_codes,
+            "policy_version": self.policy_version,
+        }
+
+
+# --------------------------------------------------------------------------
+# Operator evaluation
+# --------------------------------------------------------------------------
+
+
+def _as_set(value: Any) -> set[str]:
     if value is None:
-        return []
-    if isinstance(value, list):
-        return value
-    return [value]
+        return set()
+    if isinstance(value, list | tuple | set):
+        return {str(item) for item in value}
+    return {str(value)}
+
+
+def _as_number(value: Any) -> float | None:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def evaluate_operator(operator: str, desired: Any, actual: Any) -> bool | None:
+    """Return ``True``/``False``, or ``None`` when the candidate value is unknown."""
+    if actual is None:
+        return None
+    if operator == "equals":
+        if isinstance(actual, list | tuple | set):
+            return str(desired) in _as_set(actual)
+        return str(desired) == str(actual)
+    if operator == "in":
+        wanted = _as_set(desired)
+        if isinstance(actual, list | tuple | set):
+            return bool(wanted & _as_set(actual))
+        return str(actual) in wanted
+    if operator == "contains_any":
+        return bool(_as_set(desired) & _as_set(actual))
+    if operator == "contains_all":
+        return _as_set(desired).issubset(_as_set(actual))
+    if operator == "boolean":
+        expected = bool(desired.get("value", True)) if isinstance(desired, dict) else bool(desired)
+        return bool(actual) is expected
+    if operator in {"range", "at_least", "at_most"}:
+        value = _as_number(actual)
+        if value is None:
+            return None
+        if operator == "range":
+            bounds = _bounds(desired)
+            if bounds is None:
+                return None
+            minimum, maximum = bounds
+            return minimum <= value <= maximum
+        threshold = _as_number(
+            desired.get("value") if isinstance(desired, dict) else desired,
+        )
+        if threshold is None:
+            return None
+        return value >= threshold if operator == "at_least" else value <= threshold
+    raise ValueError(f"unsupported preference operator {operator}")
+
+
+def _bounds(desired: Any) -> tuple[float, float] | None:
+    if isinstance(desired, dict):
+        minimum = _as_number(desired.get("min", desired.get("minimum")))
+        maximum = _as_number(desired.get("max", desired.get("maximum")))
+    elif isinstance(desired, list | tuple) and len(desired) == 2:
+        minimum = _as_number(desired[0])
+        maximum = _as_number(desired[1])
+    else:
+        return None
+    if minimum is None or maximum is None:
+        return None
+    return minimum, maximum
+
+
+# --------------------------------------------------------------------------
+# Platform rules
+# --------------------------------------------------------------------------
 
 
 def relationship_eligibility(
-    viewer_projection: dict[str, Any], candidate_projection: dict[str, Any]
-) -> tuple[bool, str | None]:
-    """Both members must accept the other's gender; never widened by the system."""
-    viewer_gender = viewer_projection.get("gender_code")
-    candidate_gender = candidate_projection.get("gender_code")
-    viewer_accepts = set(viewer_projection.get("eligible_partner_gender_codes") or [])
-    candidate_accepts = set(candidate_projection.get("eligible_partner_gender_codes") or [])
-    if not viewer_gender or not candidate_gender or not viewer_accepts or not candidate_accepts:
-        return False, "relationship_eligibility_unknown"
-    if candidate_gender not in viewer_accepts:
-        return False, "viewer_does_not_accept_candidate"
-    if viewer_gender not in candidate_accepts:
-        return False, "candidate_does_not_accept_viewer"
-    return True, None
+    source: dict[str, Any], target: dict[str, Any]
+) -> tuple[bool | None, str]:
+    """Check that the source member's stated partner genders include the target."""
+    accepted = source.get("eligible_partner_gender_codes") or []
+    target_gender = target.get("gender_code")
+    if not accepted or target_gender is None:
+        return None, "relationship_eligibility_unknown"
+    if str(target_gender) in {str(item) for item in accepted}:
+        return True, "relationship_eligibility_satisfied"
+    return False, "relationship_eligibility_mismatch"
+
+
+def adult_eligibility(projection: dict[str, Any], minimum_age: int) -> tuple[bool | None, str]:
+    age = projection.get("age_years")
+    if age is None:
+        return None, "age_unknown"
+    return (int(age) >= minimum_age, "adult_eligibility")
+
+
+# --------------------------------------------------------------------------
+# Directional evaluation
+# --------------------------------------------------------------------------
 
 
 def evaluate_direction(
     *,
     criteria: list[dict[str, Any]],
+    source_projection: dict[str, Any],
     target_projection: dict[str, Any],
-    direction: str,
-    source_preference_version: int,
+    direction: Direction,
+    preference_version: int,
+    minimum_age: int,
     allow_relaxation: bool,
-    relaxable_criteria: frozenset[str],
-) -> list[dict[str, Any]]:
-    """Evaluate one member's hard constraints against the other's projection."""
-    results: list[dict[str, Any]] = []
+    unknown_value_policy: str,
+) -> list[ConstraintResult]:
+    """Evaluate one member's hard rules against the other member's projection."""
+    results: list[ConstraintResult] = []
+
+    passed, reason = adult_eligibility(target_projection, minimum_age)
+    results.append(
+        ConstraintResult(
+            criterion_code="adult_eligibility",
+            direction=direction,
+            passed=passed if passed is not None else False,
+            reason_code=reason if passed is not False else "below_minimum_age",
+            source_preference_version=preference_version,
+            evaluated_value_snapshot={"minimum_age": minimum_age},
+        )
+    )
+
+    eligible, eligibility_reason = relationship_eligibility(source_projection, target_projection)
+    results.append(
+        ConstraintResult(
+            criterion_code="relationship_eligibility",
+            direction=direction,
+            passed=eligible if eligible is not None else False,
+            reason_code=eligibility_reason,
+            source_preference_version=preference_version,
+            evaluated_value_snapshot={},
+        )
+    )
+
     for criterion in criteria:
         if not criterion.get("hard_constraint"):
             continue
         code = str(criterion["criterion_code"])
-        if code not in HARD_CONSTRAINT_CRITERIA:
-            # Only approved criteria may exclude anyone.
+        if code not in SUPPORTED_HARD_CONSTRAINTS:
+            continue
+        operator = str(criterion["operator"])
+        desired = criterion.get("desired_value")
+        actual = extract_value(target_projection, code)
+        outcome = evaluate_operator(operator, desired, actual)
+
+        allow_unknown = bool(criterion.get("allow_unknown", True))
+        snapshot: dict[str, Any] = {
+            "operator": operator,
+            "candidate_value_known": actual is not None,
+        }
+
+        if outcome is None:
+            resolved = allow_unknown
             results.append(
-                {
-                    "criterion_code": code,
-                    "direction": direction,
-                    "passed": None,
-                    "reason_code": "criterion_not_approved_for_hard_filtering",
-                    "source_preference_version": source_preference_version,
-                    "evaluated_value_snapshot": {},
-                    "unknown_policy": None,
-                }
+                ConstraintResult(
+                    criterion_code=code,
+                    direction=direction,
+                    passed=resolved,
+                    reason_code=("unknown_allowed" if allow_unknown else "unknown_not_allowed"),
+                    source_preference_version=preference_version,
+                    evaluated_value_snapshot=snapshot,
+                    unknown_policy=("allow_unknown" if allow_unknown else unknown_value_policy),
+                )
             )
             continue
 
-        actual = _projection_value(target_projection, code)
-        if actual is None or actual == []:
-            allow_unknown = bool(criterion.get("allow_unknown", True))
+        if outcome:
             results.append(
-                {
-                    "criterion_code": code,
-                    "direction": direction,
-                    # A blank field is "unknown", never an automatic failure.
-                    "passed": bool(allow_unknown),
-                    "reason_code": "unknown_allowed" if allow_unknown else "unknown_not_accepted",
-                    "source_preference_version": source_preference_version,
-                    "evaluated_value_snapshot": {"value_present": False},
-                    "unknown_policy": "allow" if allow_unknown else "exclude",
-                }
+                ConstraintResult(
+                    criterion_code=code,
+                    direction=direction,
+                    passed=True,
+                    reason_code="satisfied",
+                    source_preference_version=preference_version,
+                    evaluated_value_snapshot=snapshot,
+                )
             )
             continue
 
-        try:
-            passed = _compare(str(criterion["operator"]), criterion["desired_value"], actual)
-        except (TypeError, ValueError, KeyError):
-            passed = False
-
-        relaxed = False
-        if (
-            not passed
-            and allow_relaxation
+        relaxable = (
+            allow_relaxation
             and bool(criterion.get("allow_system_relaxation"))
-            and code in relaxable_criteria
-            and code not in NEVER_RELAXABLE_CONSTRAINTS
-        ):
-            passed = True
-            relaxed = True
-
-        results.append(
-            {
-                "criterion_code": code,
-                "direction": direction,
-                "passed": passed,
-                "reason_code": (
-                    "relaxed_with_member_consent"
-                    if relaxed
-                    else ("matched" if passed else "did_not_match")
-                ),
-                "source_preference_version": source_preference_version,
-                # Only the outcome is snapshotted; the other member's value is not.
-                "evaluated_value_snapshot": {"value_present": True, "relaxed": relaxed},
-                "unknown_policy": None,
-            }
+            and code not in NON_RELAXABLE_CRITERIA
         )
+        results.append(
+            ConstraintResult(
+                criterion_code=code,
+                direction=direction,
+                passed=bool(relaxable),
+                reason_code=("relaxed_with_member_permission" if relaxable else "not_satisfied"),
+                source_preference_version=preference_version,
+                evaluated_value_snapshot=snapshot,
+                relaxed=relaxable,
+            )
+        )
+
     return results
 
 
@@ -206,84 +285,63 @@ def evaluate_pair(
     candidate_criteria: list[dict[str, Any]],
     viewer_preference_version: int,
     candidate_preference_version: int,
-    viewer_allows_relaxation: bool = False,
-    relaxable_criteria: frozenset[str] | None = None,
-) -> dict[str, Any]:
-    """Full bidirectional hard-constraint evaluation for one candidate pair."""
-    relaxable = relaxable_criteria or frozenset(
-        {"country_code", "region_code", "city_code", "relocation_willingness"}
-    )
-    eligible, eligibility_reason = relationship_eligibility(viewer_projection, candidate_projection)
-
+    minimum_age: int,
+    allow_viewer_relaxation: bool = False,
+    allow_candidate_relaxation: bool = False,
+    unknown_value_policy: str = "lower_confidence",
+) -> HardConstraintEvaluation:
+    """Evaluate both directions; the pair passes only when both do."""
     viewer_results = evaluate_direction(
         criteria=viewer_criteria,
+        source_projection=viewer_projection,
         target_projection=candidate_projection,
-        direction=VIEWER_TO_CANDIDATE,
-        source_preference_version=viewer_preference_version,
-        allow_relaxation=viewer_allows_relaxation,
-        relaxable_criteria=relaxable,
+        direction="viewer_to_candidate",
+        preference_version=viewer_preference_version,
+        minimum_age=minimum_age,
+        allow_relaxation=allow_viewer_relaxation,
+        unknown_value_policy=unknown_value_policy,
     )
     candidate_results = evaluate_direction(
         criteria=candidate_criteria,
+        source_projection=candidate_projection,
         target_projection=viewer_projection,
-        direction=CANDIDATE_TO_VIEWER,
-        source_preference_version=candidate_preference_version,
-        # The other member's constraints are never relaxed on the viewer's behalf.
-        allow_relaxation=False,
-        relaxable_criteria=frozenset(),
+        direction="candidate_to_viewer",
+        preference_version=candidate_preference_version,
+        minimum_age=minimum_age,
+        allow_relaxation=allow_candidate_relaxation,
+        unknown_value_policy=unknown_value_policy,
     )
 
     blocking: list[str] = []
     unknown: list[str] = []
-    relaxations: list[str] = []
-    if not eligible:
-        blocking.append("relationship_eligibility")
-    for result in viewer_results + candidate_results:
-        if result["passed"] is False:
-            blocking.append(result["criterion_code"])
-        if result["reason_code"] in {"unknown_allowed", "unknown_not_accepted"}:
-            unknown.append(result["criterion_code"])
-        if result["reason_code"] == "relaxed_with_member_consent":
-            relaxations.append(result["criterion_code"])
+    relaxed: list[str] = []
+    for result in (*viewer_results, *candidate_results):
+        if result.passed is False:
+            blocking.append(f"{result.direction}:{result.criterion_code}")
+        if result.unknown_policy is not None or result.reason_code.startswith("unknown"):
+            unknown.append(f"{result.direction}:{result.criterion_code}")
+        if result.relaxed:
+            relaxed.append(f"{result.direction}:{result.criterion_code}")
 
-    return {
-        "passed": not blocking,
-        "viewer_constraints": viewer_results,
-        "candidate_constraints": candidate_results,
-        "blocking_codes": sorted(set(blocking)),
-        "unknown_codes": sorted(set(unknown)),
-        "relaxations_applied": sorted(set(relaxations)),
-        "relationship_eligibility_reason": eligibility_reason,
-        "policy_version": HARD_CONSTRAINT_POLICY_VERSION,
-    }
+    return HardConstraintEvaluation(
+        passed=not blocking,
+        viewer_constraints=viewer_results,
+        candidate_constraints=candidate_results,
+        blocking_codes=sorted(set(blocking)),
+        unknown_codes=sorted(set(unknown)),
+        relaxed_codes=sorted(set(relaxed)),
+    )
 
 
-def diagnostic_summary(evaluations: list[dict[str, Any]]) -> dict[str, Any]:
-    """Aggregate why candidates were excluded, without naming anyone.
+def aggregate_failure_reasons(evaluations: list[HardConstraintEvaluation]) -> dict[str, int]:
+    """Aggregate blocking criteria for diagnostics.
 
-    A member may learn that their faith requirement is narrowing the pool; they
-    may never learn which specific person was excluded, or by which of that
-    person's private criteria.
+    Only criterion codes and counts are produced: a member never learns which
+    individual account rejected them, and operators see statistics only.
     """
     counts: dict[str, int] = {}
-    unknown_counts: dict[str, int] = {}
-    passed = 0
     for evaluation in evaluations:
-        if evaluation["passed"]:
-            passed += 1
-            continue
-        for code in evaluation["blocking_codes"]:
-            counts[code] = counts.get(code, 0) + 1
-        for code in evaluation["unknown_codes"]:
-            unknown_counts[code] = unknown_counts.get(code, 0) + 1
-    total = len(evaluations)
-    return {
-        "evaluated_pairs": total,
-        "passed_pairs": passed,
-        "pass_rate_bps": round(passed * 10000 / total) if total else 0,
-        "blocking_criteria": dict(sorted(counts.items(), key=lambda item: -item[1])),
-        "unknown_information_criteria": dict(
-            sorted(unknown_counts.items(), key=lambda item: -item[1])
-        ),
-        "aggregate_only": True,
-    }
+        for code in evaluation.blocking_codes:
+            criterion = code.split(":", 1)[1]
+            counts[criterion] = counts.get(criterion, 0) + 1
+    return dict(sorted(counts.items(), key=lambda item: (-item[1], item[0])))

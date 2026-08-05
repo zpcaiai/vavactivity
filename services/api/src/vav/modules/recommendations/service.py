@@ -1,18 +1,16 @@
-"""Recommendation application service.
+"""Recommendation application service: pool, candidates, scoring and strategy.
 
-The pipeline is deliberately staged — pool eligibility, safety exclusion,
-bidirectional hard constraints, recall, bidirectional scoring, exposure
-budget, diversification, explanation, frozen batch — rather than scoring the
-whole table and letting a model decide who suits whom.
+Every stage is separate and versioned — pool eligibility, recall, both
+directions of hard constraints, directional scoring, bidirectional composition
+— so each can be tested and diagnosed on its own, and every result can be
+reproduced from the stored snapshots.
 """
 
 # ruff: noqa: E501
 from __future__ import annotations
 
-import hashlib
 import json
-import secrets
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import UUID
 
@@ -21,33 +19,35 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from vav.common.exceptions import VavError
 from vav.core.config import get_settings
-from vav.models.identity import User
-from vav.modules.recommendations import (
-    bidirectional,
-    coldstart,
-    constraints,
-    explanations,
-    ranking,
-    scoring,
-)
-from vav.modules.recommendations import (
-    exposure as exposure_rules,
-)
+from vav.modules.recommendations import bidirectional as bidirectional_engine
+from vav.modules.recommendations import cold_start, constraints
+from vav.modules.recommendations import scoring as scoring_engine
 from vav.modules.recommendations.domain import (
     CandidatePairStatus,
-    RecommendationBatchStatus,
-    RecommendationItemStatus,
-    can_transition_batch,
-    normalise_pair,
+    RecommendationStrategyStatus,
+    can_transition_strategy,
+    canonical_pair,
 )
-from vav.modules.recommendations.strategy import STRATEGY_CODE
+from vav.modules.recommendations.gateways import (
+    InteractionGateway,
+    ModerationGateway,
+)
 
-PROJECTION_COLUMNS = (
-    "dating_profile_id,user_id,approved_profile_version,preference_version,privacy_settings_version,"
-    "eligible,age_bucket,age_years,country_code,region_code,city_code,gender_code,"
-    "eligible_partner_gender_codes,faith_codes,relationship_intent,marital_status_code,"
-    "children_status_code,relocation_willingness,language_codes,lifestyle_codes,"
-    "indexed_preference_criteria,projection_checksum,projection_version"
+PROJECTION_FIELDS: tuple[str, ...] = (
+    "age_bucket",
+    "age_years",
+    "country_code",
+    "region_code",
+    "city_code",
+    "gender_code",
+    "eligible_partner_gender_codes",
+    "faith_codes",
+    "relationship_intent",
+    "marital_status_code",
+    "children_status_code",
+    "relocation_willingness",
+    "language_codes",
+    "lifestyle_codes",
 )
 
 
@@ -61,7 +61,27 @@ def json_value(value: Any) -> str:
 
 def enabled() -> None:
     if not get_settings().recommendation_enabled:
-        raise VavError("RECOMMENDATION_DISABLED", "Recommendations are disabled.", status_code=503)
+        raise VavError("RECOMMENDATIONS_DISABLED", "Recommendations are disabled.", status_code=503)
+
+
+def _jsonb(value: Any) -> Any:
+    """Normalise a JSONB column that may arrive as text or as parsed JSON."""
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            return value
+    return value
+
+
+def projection_payload(row: dict[str, Any]) -> dict[str, Any]:
+    """Extract only the approved projection fields from a projection row."""
+    return {field: _jsonb(row.get(field)) for field in PROJECTION_FIELDS}
+
+
+# --------------------------------------------------------------------------
+# Audit and events
+# --------------------------------------------------------------------------
 
 
 async def audit(
@@ -76,8 +96,8 @@ async def audit(
 ) -> None:
     """Record a recommendation audit event.
 
-    Only versions, rule codes, outcomes and actors are stored — never a
-    profile, a full preference set or a photo.
+    Only identifiers, codes, versions and decisions are stored — never profile
+    values, narratives or full preference criteria.
     """
     await session.execute(
         text(
@@ -115,84 +135,301 @@ async def emit_event(
 
 async def active_strategy(session: AsyncSession) -> dict[str, Any]:
     row = (
-        (
-            await session.execute(
-                text(
-                    "SELECT id,strategy_code,semantic_version,hard_constraint_policy,feature_manifest,"
-                    "scoring_policy,bidirectional_policy,ranking_policy,diversification_policy,"
-                    "exposure_policy,explanation_policy,cold_start_policy "
-                    "FROM recommendation_strategies WHERE strategy_code=:code AND status='active'"
-                ),
-                {"code": get_settings().recommendation_default_strategy or STRATEGY_CODE},
+        await session.execute(
+            text(
+                "SELECT * FROM recommendation_strategies WHERE status='active' "
+                "ORDER BY activated_at DESC NULLS LAST LIMIT 1"
             )
         )
-        .mappings()
-        .first()
-    )
-    if row is None:
+    ).mappings()
+    found = row.first()
+    if found is None:
         raise VavError(
-            "RECOMMENDATION_STRATEGY_NOT_ACTIVE",
+            "RECOMMENDATION_STRATEGY_MISSING",
             "No active recommendation strategy is configured.",
             status_code=503,
         )
-    return dict(row)
+    return dict(found)
 
 
-# --------------------------------------------------------------------------
-# Safety gateway
-# --------------------------------------------------------------------------
+async def strategy_by_id(session: AsyncSession, strategy_id: UUID) -> dict[str, Any]:
+    row = (
+        await session.execute(
+            text("SELECT * FROM recommendation_strategies WHERE id=:id"), {"id": strategy_id}
+        )
+    ).mappings()
+    found = row.first()
+    if found is None:
+        raise VavError("RECOMMENDATION_STRATEGY_NOT_FOUND", "Strategy not found.", status_code=404)
+    return dict(found)
 
 
-async def evaluate_recommendation_pair_safety(
-    session: AsyncSession, viewer_user_id: UUID, candidate_user_id: UUID
+async def create_strategy(
+    session: AsyncSession,
+    *,
+    payload: dict[str, Any],
+    actor_id: UUID | None,
 ) -> dict[str, Any]:
-    """Ask the moderation domain whether a pair may be recommended.
+    row = (
+        await session.execute(
+            text(
+                "INSERT INTO recommendation_strategies "
+                "(strategy_code,semantic_version,status,hard_constraint_policy,feature_manifest,"
+                "scoring_policy,bidirectional_policy,ranking_policy,diversification_policy,"
+                "exposure_policy,explanation_policy,cold_start_policy,applicable_regions,"
+                "applicable_segments,created_by) "
+                "VALUES (:strategy_code,:semantic_version,'draft',CAST(:hard AS jsonb),CAST(:features AS jsonb),"
+                "CAST(:scoring AS jsonb),CAST(:bidirectional AS jsonb),CAST(:ranking AS jsonb),"
+                "CAST(:diversification AS jsonb),CAST(:exposure AS jsonb),CAST(:explanation AS jsonb),"
+                "CAST(:cold_start AS jsonb),CAST(:regions AS jsonb),CAST(:segments AS jsonb),:actor) "
+                "ON CONFLICT (strategy_code, semantic_version) DO NOTHING RETURNING *"
+            ),
+            {
+                "strategy_code": payload["strategy_code"],
+                "semantic_version": payload["semantic_version"],
+                "hard": json_value(payload["hard_constraint_policy"]),
+                "features": json_value(payload["feature_manifest"]),
+                "scoring": json_value(payload["scoring_policy"]),
+                "bidirectional": json_value(payload["bidirectional_policy"]),
+                "ranking": json_value(payload["ranking_policy"]),
+                "diversification": json_value(payload["diversification_policy"]),
+                "exposure": json_value(payload["exposure_policy"]),
+                "explanation": json_value(payload["explanation_policy"]),
+                "cold_start": json_value(payload.get("cold_start_policy", {})),
+                "regions": json_value(payload.get("applicable_regions", [])),
+                "segments": json_value(payload.get("applicable_segments", [])),
+                "actor": actor_id,
+            },
+        )
+    ).mappings()
+    created = row.first()
+    if created is None:
+        raise VavError(
+            "RECOMMENDATION_STRATEGY_EXISTS",
+            "A strategy with this code and version already exists.",
+            status_code=409,
+        )
+    await audit(
+        session,
+        "recommendation.strategy.created",
+        "recommendation_strategy",
+        created["id"],
+        actor_id=actor_id,
+        context={
+            "strategy_code": payload["strategy_code"],
+            "semantic_version": payload["semantic_version"],
+        },
+    )
+    return dict(created)
 
-    Batch 18 owns blocking and restrictions. Until it exists the gateway reads
-    defensively and, on any error, fails closed rather than leaking a pair.
-    """
+
+async def transition_strategy(
+    session: AsyncSession,
+    *,
+    strategy_id: UUID,
+    target_status: str,
+    actor_id: UUID | None,
+    reason: str | None = None,
+) -> dict[str, Any]:
+    """Move a strategy through its lifecycle, enforcing release rules."""
+    current = await strategy_by_id(session, strategy_id)
+    if not can_transition_strategy(str(current["status"]), target_status):
+        raise VavError(
+            "RECOMMENDATION_STRATEGY_TRANSITION_INVALID",
+            f"A strategy cannot move from {current['status']} to {target_status}.",
+            status_code=409,
+        )
+
+    if target_status == RecommendationStrategyStatus.APPROVED.value:
+        await _require_passing_evaluation(session, strategy_id)
+
+    if target_status == RecommendationStrategyStatus.ACTIVE.value:
+        await _require_passing_evaluation(session, strategy_id)
+        if current["approved_by"] is None:
+            raise VavError(
+                "RECOMMENDATION_STRATEGY_NOT_APPROVED",
+                "A strategy must be approved before activation.",
+                status_code=409,
+            )
+        if actor_id is not None and current["approved_by"] == actor_id:
+            raise VavError(
+                "RECOMMENDATION_STRATEGY_SELF_ACTIVATION",
+                "The approver of a strategy cannot also activate it.",
+                status_code=409,
+            )
+        await session.execute(
+            text(
+                "UPDATE recommendation_strategies SET status='superseded', updated_at=now() "
+                "WHERE strategy_code=:code AND status='active'"
+            ),
+            {"code": current["strategy_code"]},
+        )
+
+    assignments = {
+        RecommendationStrategyStatus.APPROVED.value: ("approved_by=:actor, approved_at=now(), "),
+        RecommendationStrategyStatus.ACTIVE.value: ("activated_by=:actor, activated_at=now(), "),
+    }.get(target_status, "")
+
+    row = (
+        await session.execute(
+            text(
+                "UPDATE recommendation_strategies SET status=:status, "
+                f"{assignments}updated_at=now() WHERE id=:id AND status=:expected RETURNING *"
+            ),
+            {
+                "status": target_status,
+                "id": strategy_id,
+                "expected": current["status"],
+                "actor": actor_id,
+            },
+        )
+    ).mappings()
+    updated = row.first()
+    if updated is None:
+        raise VavError(
+            "RECOMMENDATION_STRATEGY_CONFLICT",
+            "The strategy changed while this request was in flight.",
+            status_code=409,
+        )
+
+    event = {
+        RecommendationStrategyStatus.APPROVED.value: "recommendation.strategy.approved",
+        RecommendationStrategyStatus.ACTIVE.value: "recommendation.strategy.activated",
+        RecommendationStrategyStatus.ROLLED_BACK.value: "recommendation.strategy.rolled_back",
+    }.get(target_status, "recommendation.strategy.updated")
+    await audit(
+        session,
+        event,
+        "recommendation_strategy",
+        strategy_id,
+        actor_id=actor_id,
+        reason=reason,
+        context={"status": target_status},
+    )
+    return dict(updated)
+
+
+async def _require_passing_evaluation(session: AsyncSession, strategy_id: UUID) -> None:
+    row = (
+        await session.execute(
+            text(
+                "SELECT status, blocking_failures, guardrail_failures FROM recommendation_evaluation_runs "
+                "WHERE strategy_id=:id ORDER BY started_at DESC LIMIT 1"
+            ),
+            {"id": strategy_id},
+        )
+    ).mappings()
+    latest = row.first()
+    if latest is None or str(latest["status"]) != "passed":
+        await audit(
+            session,
+            "recommendation.release.blocked",
+            "recommendation_strategy",
+            strategy_id,
+            reason="evaluation_not_passed",
+        )
+        raise VavError(
+            "RECOMMENDATION_EVALUATION_REQUIRED",
+            "A strategy needs a passing offline evaluation before release.",
+            status_code=409,
+        )
+
+
+# --------------------------------------------------------------------------
+# Member settings and tuning
+# --------------------------------------------------------------------------
+
+
+async def user_settings(session: AsyncSession, user_id: UUID) -> dict[str, Any]:
     settings = get_settings()
-    try:
-        blocks_exist = await session.scalar(
-            text("SELECT to_regclass('public.user_blocks') IS NOT NULL")
+    row = (
+        await session.execute(
+            text("SELECT * FROM recommendation_user_settings WHERE user_id=:user_id"),
+            {"user_id": user_id},
         )
-        if blocks_exist:
-            blocked = await session.scalar(
-                text(
-                    "SELECT count(*) FROM user_blocks WHERE (blocker_user_id=:a AND blocked_user_id=:b) "
-                    "OR (blocker_user_id=:b AND blocked_user_id=:a)"
-                ),
-                {"a": viewer_user_id, "b": candidate_user_id},
-            )
-            if int(blocked or 0):
-                # The reason is deliberately coarse: no report detail crosses over.
-                return {"allowed": False, "reason_code": "blocked", "restriction_version": 1}
-        restrictions_exist = await session.scalar(
-            text("SELECT to_regclass('public.user_safety_restrictions') IS NOT NULL")
+    ).mappings()
+    found = row.first()
+    if found is not None:
+        record = dict(found)
+        record["relaxable_criteria"] = _jsonb(record.get("relaxable_criteria")) or []
+        return record
+    return {
+        "user_id": user_id,
+        "recommendations_paused": False,
+        "daily_received_limit": None,
+        "delivery_frequency": "daily",
+        "extended_recommendations_enabled": False,
+        "relaxable_criteria": [],
+        "preferred_locale": settings.dating_profile_default_locale,
+        "settings_version": 1,
+    }
+
+
+async def update_user_settings(
+    session: AsyncSession, user_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
+    """Members control quantity, pacing and their own relaxations only.
+
+    Nothing here can bypass safety, another member's conditions or privacy.
+    """
+    current = await user_settings(session, user_id)
+    merged = {**current, **{key: value for key, value in payload.items() if value is not None}}
+    limit = merged.get("daily_received_limit")
+    if limit is not None:
+        merged["daily_received_limit"] = max(
+            0, min(int(limit), get_settings().recommendation_max_daily_received)
         )
-        if restrictions_exist:
-            restricted = await session.scalar(
-                text(
-                    "SELECT count(*) FROM user_safety_restrictions WHERE user_id IN (:a,:b) "
-                    "AND status='active' AND blocks_recommendations=true"
-                ),
-                {"a": viewer_user_id, "b": candidate_user_id},
-            )
-            if int(restricted or 0):
-                return {
-                    "allowed": False,
-                    "reason_code": "safety_restricted",
-                    "restriction_version": 1,
-                }
-    except Exception:  # noqa: BLE001 - the gateway must not leak on failure
-        if settings.recommendation_fail_closed_on_moderation_error:
-            return {
-                "allowed": False,
-                "reason_code": "moderation_unavailable",
-                "restriction_version": 0,
-            }
-        raise
-    return {"allowed": True, "reason_code": None, "restriction_version": 1}
+    await session.execute(
+        text(
+            "INSERT INTO recommendation_user_settings "
+            "(user_id,recommendations_paused,daily_received_limit,delivery_frequency,"
+            "extended_recommendations_enabled,relaxable_criteria,preferred_locale,settings_version,updated_at) "
+            "VALUES (:user_id,:paused,:limit,:frequency,:extended,CAST(:relaxable AS jsonb),:locale,"
+            "COALESCE((SELECT settings_version + 1 FROM recommendation_user_settings WHERE user_id=:user_id),1),now()) "
+            "ON CONFLICT (user_id) DO UPDATE SET recommendations_paused=EXCLUDED.recommendations_paused,"
+            "daily_received_limit=EXCLUDED.daily_received_limit,delivery_frequency=EXCLUDED.delivery_frequency,"
+            "extended_recommendations_enabled=EXCLUDED.extended_recommendations_enabled,"
+            "relaxable_criteria=EXCLUDED.relaxable_criteria,preferred_locale=EXCLUDED.preferred_locale,"
+            "settings_version=recommendation_user_settings.settings_version + 1,updated_at=now()"
+        ),
+        {
+            "user_id": user_id,
+            "paused": bool(merged.get("recommendations_paused", False)),
+            "limit": merged.get("daily_received_limit"),
+            "frequency": str(merged.get("delivery_frequency", "daily")),
+            "extended": bool(merged.get("extended_recommendations_enabled", False)),
+            "relaxable": json_value(merged.get("relaxable_criteria", [])),
+            "locale": str(merged.get("preferred_locale", "zh-CN")),
+        },
+    )
+    await rebuild_pool_entry(session, user_id)
+    await invalidate_candidates(session, user_id, reason="member_settings_changed")
+    return await user_settings(session, user_id)
+
+
+async def tuning_profile(session: AsyncSession, user_id: UUID) -> dict[str, Any]:
+    settings = get_settings()
+    row = (
+        await session.execute(
+            text("SELECT * FROM recommendation_user_tuning_profiles WHERE user_id=:user_id"),
+            {"user_id": user_id},
+        )
+    ).mappings()
+    found = row.first()
+    if found is not None:
+        record = dict(found)
+        record["feature_weight_adjustments"] = (
+            _jsonb(record.get("feature_weight_adjustments")) or {}
+        )
+        return record
+    return {
+        "user_id": user_id,
+        "tuning_version": 1,
+        "feature_weight_adjustments": {},
+        "exploration_level": "balanced",
+        "feedback_personalization_enabled": settings.recommendation_feedback_personalization_default,
+        "derived_from_feedback_through": None,
+    }
 
 
 # --------------------------------------------------------------------------
@@ -200,518 +437,222 @@ async def evaluate_recommendation_pair_safety(
 # --------------------------------------------------------------------------
 
 
-async def sync_pool_entry(session: AsyncSession, user_id: UUID) -> dict[str, Any]:
-    """Refresh one member's pool entry from their Batch 13 projection."""
-    projection = (
-        (
-            await session.execute(
-                text(
-                    f"SELECT {PROJECTION_COLUMNS} FROM dating_profile_recommendation_projections WHERE user_id=:id"
-                ),
-                {"id": user_id},
-            )
+async def rebuild_pool_entry(session: AsyncSession, user_id: UUID) -> dict[str, Any] | None:
+    """Recompute one member's pool eligibility from the approved projection."""
+    settings = get_settings()
+    projection_row = (
+        await session.execute(
+            text("SELECT * FROM dating_profile_recommendation_projections WHERE user_id=:user_id"),
+            {"user_id": user_id},
         )
-        .mappings()
-        .first()
-    )
-    tuning = (
-        (
-            await session.execute(
-                text(
-                    "SELECT recommendations_paused FROM recommendation_user_tuning_profiles WHERE user_id=:id"
-                ),
-                {"id": user_id},
-            )
-        )
-        .mappings()
-        .first()
-    )
-    paused = bool(tuning and tuning["recommendations_paused"])
-
+    ).mappings()
+    projection = projection_row.first()
     if projection is None:
-        removed = await session.execute(
-            text("DELETE FROM recommendation_pool_entries WHERE user_id=:id"), {"id": user_id}
+        await session.execute(
+            text("DELETE FROM recommendation_pool_entries WHERE user_id=:user_id"),
+            {"user_id": user_id},
         )
-        if int(getattr(removed, "rowcount", 0) or 0):
-            await emit_event(
-                session, "recommendation.pool.user_removed", user_id, {"reason": "no_projection"}
-            )
-        return {"user_id": str(user_id), "eligible": False, "reasons": ["projection_not_eligible"]}
+        await audit(
+            session,
+            "recommendation.pool.user_removed",
+            "user",
+            user_id,
+            reason="no_projection",
+        )
+        return None
 
-    account_status = await session.scalar(
-        text("SELECT status FROM users WHERE id=:id"), {"id": user_id}
-    )
-    reasons: list[str] = []
-    if account_status != "active":
-        reasons.append("account_not_active")
-    if not projection["eligible"]:
-        reasons.append("projection_not_eligible")
-    if paused:
-        reasons.append("recommendations_paused")
-    eligible = not reasons
+    record = dict(projection)
+    profile_row = (
+        await session.execute(
+            text(
+                "SELECT p.id, p.status, p.approved_at, u.status AS account_status "
+                "FROM dating_profiles p JOIN users u ON u.id = p.user_id WHERE p.user_id=:user_id"
+            ),
+            {"user_id": user_id},
+        )
+    ).mappings()
+    profile = profile_row.first()
 
+    member_settings = await user_settings(session, user_id)
+    criteria = await preference_criteria(session, user_id)
+
+    reasons: list[str] = list(_jsonb(record.get("ineligible_reason_codes")) or [])
+    eligible = bool(record["eligible"])
+    if profile is None:
+        eligible = False
+        reasons.append("profile_not_found")
+    else:
+        if str(profile["account_status"]) != "active":
+            eligible = False
+            reasons.append("account_not_active")
+        if str(profile["status"]) != "active":
+            eligible = False
+            reasons.append("profile_not_active")
+    if member_settings["recommendations_paused"]:
+        eligible = False
+        reasons.append("recommendation_paused_by_user")
+    age_years = record.get("age_years")
+    if age_years is None:
+        eligible = False
+        reasons.append("age_unknown")
+    elif int(age_years) < settings.dating_minimum_age:
+        eligible = False
+        reasons.append("below_minimum_age")
+
+    payload = {
+        "user_id": user_id,
+        "dating_profile_id": record["dating_profile_id"],
+        "profile_projection_version": record["projection_version"],
+        "preference_version": record["preference_version"],
+        "privacy_settings_version": record["privacy_settings_version"],
+        "country_code": record.get("country_code"),
+        "region_code": record.get("region_code"),
+        "city_code": record.get("city_code"),
+        "age_bucket": record.get("age_bucket"),
+        "age_years": age_years,
+        "gender_code": record.get("gender_code"),
+        "genders": json_value(_jsonb(record.get("eligible_partner_gender_codes")) or []),
+        "relationship_intent": record.get("relationship_intent"),
+        "eligible": eligible,
+        "reasons": json_value(sorted(set(reasons))),
+        "criteria_count": len(criteria),
+        "approved_at": profile["approved_at"] if profile is not None else None,
+    }
     await session.execute(
         text(
             "INSERT INTO recommendation_pool_entries "
-            "(user_id,dating_profile_id,profile_projection_version,preference_version,privacy_settings_version,"
-            "country_code,region_code,city_code,age_bucket,age_years,gender_code,eligible_partner_gender_codes,"
-            "relationship_intent,eligible,eligibility_reasons,recommendations_paused,pool_version,updated_at) "
-            "VALUES (:user_id,:profile_id,:projection_version,:preference_version,:privacy_version,"
-            ":country,:region,:city,:age_bucket,:age_years,:gender,CAST(:partner_genders AS jsonb),"
-            ":intent,:eligible,CAST(:reasons AS jsonb),:paused,1,now()) "
-            "ON CONFLICT (user_id) DO UPDATE SET dating_profile_id=EXCLUDED.dating_profile_id,"
+            "(user_id,dating_profile_id,profile_projection_version,preference_version,"
+            "privacy_settings_version,country_code,region_code,city_code,age_bucket,age_years,"
+            "gender_code,eligible_partner_gender_codes,relationship_intent,eligible,"
+            "eligibility_reasons,stated_criteria_count,approved_at,updated_at) "
+            "VALUES (:user_id,:dating_profile_id,:profile_projection_version,:preference_version,"
+            ":privacy_settings_version,:country_code,:region_code,:city_code,:age_bucket,:age_years,"
+            ":gender_code,CAST(:genders AS jsonb),:relationship_intent,:eligible,"
+            "CAST(:reasons AS jsonb),:criteria_count,:approved_at,now()) "
+            "ON CONFLICT (user_id) DO UPDATE SET "
+            "dating_profile_id=EXCLUDED.dating_profile_id,"
             "profile_projection_version=EXCLUDED.profile_projection_version,"
-            "preference_version=EXCLUDED.preference_version,privacy_settings_version=EXCLUDED.privacy_settings_version,"
-            "country_code=EXCLUDED.country_code,region_code=EXCLUDED.region_code,city_code=EXCLUDED.city_code,"
-            "age_bucket=EXCLUDED.age_bucket,age_years=EXCLUDED.age_years,gender_code=EXCLUDED.gender_code,"
+            "preference_version=EXCLUDED.preference_version,"
+            "privacy_settings_version=EXCLUDED.privacy_settings_version,"
+            "country_code=EXCLUDED.country_code,region_code=EXCLUDED.region_code,"
+            "city_code=EXCLUDED.city_code,age_bucket=EXCLUDED.age_bucket,age_years=EXCLUDED.age_years,"
+            "gender_code=EXCLUDED.gender_code,"
             "eligible_partner_gender_codes=EXCLUDED.eligible_partner_gender_codes,"
             "relationship_intent=EXCLUDED.relationship_intent,eligible=EXCLUDED.eligible,"
-            "eligibility_reasons=EXCLUDED.eligibility_reasons,recommendations_paused=EXCLUDED.recommendations_paused,"
-            "pool_version=recommendation_pool_entries.pool_version+1,updated_at=now()"
+            "eligibility_reasons=EXCLUDED.eligibility_reasons,"
+            "stated_criteria_count=EXCLUDED.stated_criteria_count,approved_at=EXCLUDED.approved_at,"
+            "pool_version=recommendation_pool_entries.pool_version + 1,updated_at=now()"
         ),
-        {
-            "user_id": user_id,
-            "profile_id": projection["dating_profile_id"],
-            "projection_version": projection["projection_version"],
-            "preference_version": projection["preference_version"],
-            "privacy_version": projection["privacy_settings_version"],
-            "country": projection["country_code"],
-            "region": projection["region_code"],
-            "city": projection["city_code"],
-            "age_bucket": projection["age_bucket"],
-            "age_years": projection["age_years"],
-            "gender": projection["gender_code"],
-            "partner_genders": json_value(projection["eligible_partner_gender_codes"]),
-            "intent": projection["relationship_intent"],
-            "eligible": eligible,
-            "reasons": json_value(reasons),
-            "paused": paused,
-        },
+        payload,
     )
-    await emit_event(
-        session,
-        "recommendation.pool.user_added" if eligible else "recommendation.pool.user_removed",
-        user_id,
-        {"eligible": eligible, "reasons": reasons},
-    )
-    return {"user_id": str(user_id), "eligible": eligible, "reasons": reasons}
-
-
-async def rebuild_pool(session: AsyncSession) -> dict[str, Any]:
-    """Refresh every pool entry from the current projections."""
-    enabled()
-    user_ids = (
-        (
-            await session.execute(
-                text("SELECT user_id FROM dating_profile_recommendation_projections")
-            )
-        )
-        .scalars()
-        .all()
-    )
-    eligible = 0
-    for user_id in user_ids:
-        result = await sync_pool_entry(session, user_id)
-        if result["eligible"]:
-            eligible += 1
-    # Members whose projection disappeared must leave the pool too.
-    await session.execute(
-        text(
-            "DELETE FROM recommendation_pool_entries WHERE user_id NOT IN "
-            "(SELECT user_id FROM dating_profile_recommendation_projections)"
-        )
-    )
-    await session.commit()
-    return {"synced": len(user_ids), "eligible": eligible}
-
-
-async def projection_for(session: AsyncSession, user_id: UUID) -> dict[str, Any]:
-    row = (
-        (
-            await session.execute(
-                text(
-                    f"SELECT {PROJECTION_COLUMNS} FROM dating_profile_recommendation_projections WHERE user_id=:id"
-                ),
-                {"id": user_id},
-            )
-        )
-        .mappings()
-        .first()
-    )
-    if row is None:
-        raise VavError(
-            "RECOMMENDATION_PROJECTION_MISSING",
-            "This member has no recommendation projection.",
-            status_code=409,
-        )
-    return dict(row)
-
-
-async def require_pool_entry(session: AsyncSession, user_id: UUID) -> dict[str, Any]:
-    row = (
-        (
-            await session.execute(
-                text("SELECT * FROM recommendation_pool_entries WHERE user_id=:id"),
-                {"id": user_id},
-            )
-        )
-        .mappings()
-        .first()
-    )
-    if row is None:
-        raise VavError(
-            "RECOMMENDATION_NOT_IN_POOL",
-            "You are not currently in the recommendation pool.",
-            status_code=409,
-            details=[{"reasons": ["projection_not_eligible"]}],
-        )
-    if not row["eligible"]:
-        raise VavError(
-            "RECOMMENDATION_NOT_ELIGIBLE",
-            "Your profile does not currently qualify for recommendations.",
-            status_code=409,
-            details=[{"reasons": list(row["eligibility_reasons"])}],
-        )
-    return dict(row)
-
-
-# --------------------------------------------------------------------------
-# Candidate recall and generation
-# --------------------------------------------------------------------------
-
-
-async def _recall_candidates(
-    session: AsyncSession, viewer: dict[str, Any], limit: int
-) -> list[dict[str, Any]]:
-    """Deterministic coarse recall over normalised pool columns only.
-
-    Full profiles are never loaded into memory: recall reads indexed codes and
-    is bounded by ``RECOMMENDATION_MAX_CANDIDATES_PER_USER``.
-    """
-    rows = (
-        (
-            await session.execute(
-                text(
-                    "SELECT p.user_id, p.age_years, p.city_code, p.region_code, p.country_code "
-                    "FROM recommendation_pool_entries p "
-                    "WHERE p.eligible = true AND p.user_id <> :viewer_id "
-                    # Both sides must already accept each other's gender.
-                    "AND p.eligible_partner_gender_codes ? :viewer_gender "
-                    "AND CAST(:partner_genders AS jsonb) ? p.gender_code "
-                    "ORDER BY (p.country_code = :country) DESC, (p.region_code = :region) DESC, "
-                    "(p.city_code = :city) DESC, p.updated_at DESC LIMIT :limit"
-                ),
-                {
-                    "viewer_id": viewer["user_id"],
-                    "viewer_gender": viewer["gender_code"],
-                    "partner_genders": json_value(viewer["eligible_partner_gender_codes"]),
-                    "country": viewer["country_code"],
-                    "region": viewer["region_code"],
-                    "city": viewer["city_code"],
-                    "limit": limit,
-                },
-            )
-        )
-        .mappings()
-        .all()
-    )
-    return [dict(row) for row in rows]
-
-
-async def _excluded_user_ids(session: AsyncSession, viewer_id: UUID) -> set[UUID]:
-    """Everyone this member must not be shown right now."""
-    excluded: set[UUID] = {viewer_id}
-    cooldowns = (
-        (
-            await session.execute(
-                text(
-                    "SELECT skipped_user_id FROM recommendation_skip_cooldowns "
-                    "WHERE viewer_user_id=:id AND cooldown_until > now()"
-                ),
-                {"id": viewer_id},
-            )
-        )
-        .scalars()
-        .all()
-    )
-    excluded.update(cooldowns)
-
-    settings = get_settings()
-    recent = (
-        (
-            await session.execute(
-                text(
-                    "SELECT DISTINCT exposed_user_id FROM recommendation_exposures "
-                    "WHERE viewer_user_id=:id AND exposed_at > now() - make_interval(days => :days)"
-                ),
-                {"id": viewer_id, "days": settings.recommendation_repeat_exposure_cooldown_days},
-            )
-        )
-        .scalars()
-        .all()
-    )
-    excluded.update(recent)
-
-    # Batch 15/16 own interactions and relationships; read them if present.
-    for table, column_a, column_b, clause in (
-        (
-            "matchmaking_interactions",
-            "initiator_user_id",
-            "target_user_id",
-            "status IN ('pending','accepted')",
-        ),
-        ("relationship_journeys", "user_a_id", "user_b_id", "status NOT IN ('ended','archived')"),
-    ):
-        exists = await session.scalar(text(f"SELECT to_regclass('public.{table}') IS NOT NULL"))
-        if not exists:
-            continue
-        rows = (
-            (
-                await session.execute(
-                    text(
-                        f"SELECT {column_a} AS a, {column_b} AS b FROM {table} "
-                        f"WHERE ({column_a}=:id OR {column_b}=:id) AND {clause}"
-                    ),
-                    {"id": viewer_id},
-                )
-            )
-            .mappings()
-            .all()
-        )
-        for row in rows:
-            excluded.add(row["a"])
-            excluded.add(row["b"])
-    return excluded
-
-
-async def generate_candidates(
-    session: AsyncSession, viewer_user_id: UUID, *, commit: bool = True
-) -> dict[str, Any]:
-    """Build and persist evaluated candidate pairs for one member."""
-    enabled()
-    settings = get_settings()
-    strategy = await active_strategy(session)
-    viewer_entry = await require_pool_entry(session, viewer_user_id)
-    viewer_projection = await projection_for(session, viewer_user_id)
-    viewer_criteria = list(viewer_projection["indexed_preference_criteria"])
-
-    tuning = await tuning_profile(session, viewer_user_id)
-    allow_relaxation = bool(
-        settings.recommendation_allow_user_relaxation and tuning["allow_relaxed_recommendations"]
-    )
-    relaxable = frozenset(strategy["hard_constraint_policy"].get("relaxable_criteria", []))
-
-    excluded = await _excluded_user_ids(session, viewer_user_id)
-    recalled = await _recall_candidates(
-        session, viewer_entry, settings.recommendation_max_candidates_per_user
-    )
-
-    evaluations: list[dict[str, Any]] = []
-    generated = 0
-    safety_blocked = 0
-    valid_until = utcnow() + timedelta(days=settings.recommendation_candidate_validity_days)
-
-    for candidate in recalled:
-        candidate_id = candidate["user_id"]
-        if candidate_id in excluded:
-            continue
-        safety = await evaluate_recommendation_pair_safety(session, viewer_user_id, candidate_id)
-        if not safety["allowed"]:
-            safety_blocked += 1
-            continue
-
-        candidate_projection = await projection_for(session, candidate_id)
-        candidate_criteria = list(candidate_projection["indexed_preference_criteria"])
-        evaluation = constraints.evaluate_pair(
-            viewer_projection=viewer_projection,
-            candidate_projection=candidate_projection,
-            viewer_criteria=viewer_criteria,
-            candidate_criteria=candidate_criteria,
-            viewer_preference_version=int(viewer_projection["preference_version"]),
-            candidate_preference_version=int(candidate_projection["preference_version"]),
-            viewer_allows_relaxation=allow_relaxation,
-            relaxable_criteria=relaxable,
-        )
-        evaluations.append(evaluation)
-
-        low_id, high_id = normalise_pair(viewer_user_id, candidate_id)
-        low_projection = viewer_projection if low_id == viewer_user_id else candidate_projection
-        high_projection = candidate_projection if low_id == viewer_user_id else viewer_projection
-        status = (
-            CandidatePairStatus.ELIGIBLE.value
-            if evaluation["passed"]
-            else CandidatePairStatus.HARD_CONSTRAINT_FAILED.value
-        )
-
-        pair_id = await session.scalar(
-            text(
-                "INSERT INTO recommendation_candidate_pairs "
-                "(user_low_id,user_high_id,low_profile_projection_version,high_profile_projection_version,"
-                "low_preference_version,high_preference_version,strategy_id,status,eligibility_snapshot,"
-                "hard_constraint_snapshot,valid_until) "
-                "VALUES (:low,:high,:low_proj,:high_proj,:low_pref,:high_pref,:strategy,:status,"
-                "CAST(:eligibility AS jsonb),CAST(:constraints AS jsonb),:valid_until) "
-                "ON CONFLICT (user_low_id,user_high_id,strategy_id,low_profile_projection_version,"
-                "high_profile_projection_version,low_preference_version,high_preference_version) "
-                "DO UPDATE SET status=EXCLUDED.status,hard_constraint_snapshot=EXCLUDED.hard_constraint_snapshot,"
-                "valid_until=EXCLUDED.valid_until,invalidated_at=NULL,invalidation_reason=NULL RETURNING id"
-            ),
-            {
-                "low": low_id,
-                "high": high_id,
-                "low_proj": low_projection["projection_version"],
-                "high_proj": high_projection["projection_version"],
-                "low_pref": low_projection["preference_version"],
-                "high_pref": high_projection["preference_version"],
-                "strategy": strategy["id"],
-                "status": status,
-                "eligibility": json_value(
-                    {"safety_allowed": True, "recall_stage": "normalised_codes_only"}
-                ),
-                "constraints": json_value(
-                    {
-                        "passed": evaluation["passed"],
-                        "blocking_codes": evaluation["blocking_codes"],
-                        "unknown_codes": evaluation["unknown_codes"],
-                        "relaxations_applied": evaluation["relaxations_applied"],
-                        "policy_version": evaluation["policy_version"],
-                    }
-                ),
-                "valid_until": valid_until,
-            },
-        )
-        generated += 1
-
-        if evaluation["passed"]:
-            await _score_pair(
-                session,
-                pair_id=UUID(str(pair_id)),
-                viewer_user_id=viewer_user_id,
-                candidate_user_id=candidate_id,
-                viewer_projection=viewer_projection,
-                candidate_projection=candidate_projection,
-                viewer_criteria=viewer_criteria,
-                candidate_criteria=candidate_criteria,
-                viewer_adjustments=tuning["feature_weight_adjustments"],
-            )
-
-    diagnostics = constraints.diagnostic_summary(evaluations)
     await audit(
         session,
-        "recommendation.candidates.generated",
+        "recommendation.pool.user_added" if eligible else "recommendation.pool.user_removed",
         "user",
-        viewer_user_id,
-        context={
-            "recalled": len(recalled),
-            "generated": generated,
-            "safety_blocked": safety_blocked,
-            "pass_rate_bps": diagnostics["pass_rate_bps"],
-        },
+        user_id,
+        context={"eligible": eligible, "reason_codes": sorted(set(reasons))},
     )
-    if commit:
-        await session.commit()
-    return {
-        "recalled": len(recalled),
-        "generated": generated,
-        "safety_blocked": safety_blocked,
-        "diagnostics": diagnostics,
-    }
+    if not eligible:
+        await invalidate_candidates(session, user_id, reason="pool_ineligible")
+    return await pool_entry(session, user_id)
 
 
-async def _score_pair(
-    session: AsyncSession,
-    *,
-    pair_id: UUID,
-    viewer_user_id: UUID,
-    candidate_user_id: UUID,
-    viewer_projection: dict[str, Any],
-    candidate_projection: dict[str, Any],
-    viewer_criteria: list[dict[str, Any]],
-    candidate_criteria: list[dict[str, Any]],
-    viewer_adjustments: dict[str, int],
-) -> dict[str, Any]:
-    """Score both directions and persist them separately."""
-    viewer_to_candidate = scoring.score_direction(
-        source_projection=viewer_projection,
-        target_projection=candidate_projection,
-        source_criteria=viewer_criteria,
-        weight_adjustments=viewer_adjustments,
+async def rebuild_pool(session: AsyncSession) -> int:
+    rows = (
+        await session.execute(text("SELECT user_id FROM dating_profile_recommendation_projections"))
+    ).all()
+    for (user_id,) in rows:
+        await rebuild_pool_entry(session, user_id)
+    return len(rows)
+
+
+async def pool_entry(session: AsyncSession, user_id: UUID) -> dict[str, Any] | None:
+    row = (
+        await session.execute(
+            text("SELECT * FROM recommendation_pool_entries WHERE user_id=:user_id"),
+            {"user_id": user_id},
+        )
+    ).mappings()
+    found = row.first()
+    if found is None:
+        return None
+    record = dict(found)
+    record["eligibility_reasons"] = _jsonb(record.get("eligibility_reasons")) or []
+    record["eligible_partner_gender_codes"] = (
+        _jsonb(record.get("eligible_partner_gender_codes")) or []
     )
-    candidate_to_viewer = scoring.score_direction(
-        source_projection=candidate_projection,
-        target_projection=viewer_projection,
-        source_criteria=candidate_criteria,
-    )
-    for source_id, target_id, result in (
-        (viewer_user_id, candidate_user_id, viewer_to_candidate),
-        (candidate_user_id, viewer_user_id, candidate_to_viewer),
-    ):
+    return record
+
+
+async def require_eligible_pool_entry(session: AsyncSession, user_id: UUID) -> dict[str, Any]:
+    entry = await pool_entry(session, user_id)
+    if entry is None or not entry["eligible"]:
+        raise VavError(
+            "RECOMMENDATION_NOT_ELIGIBLE",
+            "This account is not currently part of the recommendation pool.",
+            status_code=409,
+            details=list(entry["eligibility_reasons"]) if entry else ["no_pool_entry"],
+        )
+    return entry
+
+
+# --------------------------------------------------------------------------
+# Preferences and projections
+# --------------------------------------------------------------------------
+
+
+async def preference_criteria(session: AsyncSession, user_id: UUID) -> list[dict[str, Any]]:
+    """The member's own indexed criteria, never exposed to another member."""
+    row = (
         await session.execute(
             text(
-                "INSERT INTO recommendation_directional_scores "
-                "(candidate_pair_id,source_user_id,target_user_id,total_score_bps,confidence_bps,"
-                "feature_scores,missing_information,unknown_feature_count,scoring_policy_version) "
-                "VALUES (:pair,:source,:target,:total,:confidence,CAST(:features AS jsonb),"
-                "CAST(:missing AS jsonb),:unknown,:policy) "
-                "ON CONFLICT (candidate_pair_id,source_user_id) DO UPDATE SET "
-                "total_score_bps=EXCLUDED.total_score_bps,confidence_bps=EXCLUDED.confidence_bps,"
-                "feature_scores=EXCLUDED.feature_scores,missing_information=EXCLUDED.missing_information,"
-                "unknown_feature_count=EXCLUDED.unknown_feature_count,created_at=now()"
+                "SELECT indexed_preference_criteria FROM dating_profile_recommendation_projections "
+                "WHERE user_id=:user_id"
             ),
-            {
-                "pair": pair_id,
-                "source": source_id,
-                "target": target_id,
-                "total": result["total_score_bps"],
-                "confidence": result["confidence_bps"],
-                "features": json_value(result["feature_scores"]),
-                "missing": json_value(result["missing_information"]),
-                "unknown": result["unknown_feature_count"],
-                "policy": result["scoring_policy_version"],
-            },
+            {"user_id": user_id},
         )
-    combined = bidirectional.combine(a_to_b=viewer_to_candidate, b_to_a=candidate_to_viewer)
-    await session.execute(
-        text(
-            "UPDATE recommendation_candidate_pairs SET score_snapshot=CAST(:snapshot AS jsonb) WHERE id=:id"
-        ),
-        {
-            "id": pair_id,
-            "snapshot": json_value(
-                {
-                    "combined_score_bps": combined["combined_score_bps"],
-                    "minimum_directional_score_bps": combined["minimum_directional_score_bps"],
-                    "balance_score_bps": combined["balance_score_bps"],
-                    "confidence_bps": combined["confidence_bps"],
-                    "policy_version": combined["policy_version"],
-                }
-            ),
-        },
-    )
-    return combined
+    ).mappings()
+    found = row.first()
+    if found is None:
+        return []
+    return list(_jsonb(found["indexed_preference_criteria"]) or [])
 
 
-async def invalidate_candidates_for(
-    session: AsyncSession, user_id: UUID, reason: str, *, commit: bool = True
-) -> dict[str, Any]:
-    """Mark a member's candidates invalid and drop their unexposed items.
+async def projection_for(session: AsyncSession, user_id: UUID) -> dict[str, Any] | None:
+    row = (
+        await session.execute(
+            text("SELECT * FROM dating_profile_recommendation_projections WHERE user_id=:user_id"),
+            {"user_id": user_id},
+        )
+    ).mappings()
+    found = row.first()
+    if found is None:
+        return None
+    return dict(found)
 
-    Historical scores and audit records are preserved; only future exposure is
-    prevented.
-    """
+
+# --------------------------------------------------------------------------
+# Candidate generation
+# --------------------------------------------------------------------------
+
+
+async def invalidate_candidates(session: AsyncSession, user_id: UUID, *, reason: str) -> int:
+    """Invalidate a member's pairs and every recommendation item not yet shown."""
     result = await session.execute(
         text(
-            "UPDATE recommendation_candidate_pairs SET status='invalidated',invalidated_at=now(),"
-            "invalidation_reason=:reason WHERE (user_low_id=:id OR user_high_id=:id) AND invalidated_at IS NULL"
+            "UPDATE recommendation_candidate_pairs SET status='invalidated', invalidated_at=now(), "
+            "invalidation_reason=:reason WHERE (user_low_id=:user_id OR user_high_id=:user_id) "
+            "AND status <> 'invalidated'"
         ),
-        {"id": user_id, "reason": reason[:128]},
+        {"user_id": user_id, "reason": reason[:128]},
     )
-    items = await session.execute(
+    await session.execute(
         text(
-            "UPDATE recommendation_items SET status='invalidated',invalidation_reason=:reason "
-            "WHERE (viewer_user_id=:id OR recommended_user_id=:id) AND status IN ('ready','exposed')"
+            "UPDATE recommendation_items SET status='invalidated', invalidated_at=now(), "
+            "invalidation_reason=:reason WHERE (viewer_user_id=:user_id OR recommended_user_id=:user_id) "
+            "AND status IN ('ready','exposed')"
         ),
-        {"id": user_id, "reason": reason[:128]},
+        {"user_id": user_id, "reason": reason[:128]},
     )
     await audit(
         session,
@@ -719,751 +660,431 @@ async def invalidate_candidates_for(
         "user",
         user_id,
         reason=reason,
-        context={
-            "pairs": int(getattr(result, "rowcount", 0) or 0),
-            "items": int(getattr(items, "rowcount", 0) or 0),
-        },
+        context={"invalidated_pairs": int(getattr(result, "rowcount", 0) or 0)},
     )
-    if commit:
-        await session.commit()
-    return {
-        "invalidated_pairs": int(getattr(result, "rowcount", 0) or 0),
-        "invalidated_items": int(getattr(items, "rowcount", 0) or 0),
-    }
+    return int(getattr(result, "rowcount", 0) or 0)
 
 
-# --------------------------------------------------------------------------
-# Tuning profile
-# --------------------------------------------------------------------------
-
-
-async def tuning_profile(session: AsyncSession, user_id: UUID) -> dict[str, Any]:
-    settings = get_settings()
-    row = (
-        (
-            await session.execute(
-                text("SELECT * FROM recommendation_user_tuning_profiles WHERE user_id=:id"),
-                {"id": user_id},
-            )
-        )
-        .mappings()
-        .first()
-    )
-    if row is None:
-        await session.execute(
-            text(
-                "INSERT INTO recommendation_user_tuning_profiles (user_id,feedback_personalization_enabled) "
-                "VALUES (:id,:enabled) ON CONFLICT (user_id) DO NOTHING"
-            ),
-            {"id": user_id, "enabled": settings.recommendation_feedback_personalization_default},
-        )
-        row = (
-            (
-                await session.execute(
-                    text("SELECT * FROM recommendation_user_tuning_profiles WHERE user_id=:id"),
-                    {"id": user_id},
-                )
-            )
-            .mappings()
-            .first()
-        )
-    assert row is not None
-    return dict(row)
-
-
-# --------------------------------------------------------------------------
-# Exposure budget
-# --------------------------------------------------------------------------
-
-
-async def _budget(session: AsyncSession, user_id: UUID, budget_date: date) -> dict[str, Any]:
-    settings = get_settings()
-    tuning = await tuning_profile(session, user_id)
-    received_limit = int(
-        tuning["daily_received_limit"] or settings.recommendation_max_daily_received
-    )
-    await session.execute(
-        text(
-            "INSERT INTO recommendation_exposure_budgets "
-            "(user_id,budget_date,daily_received_limit,daily_shown_limit) "
-            "VALUES (:id,:day,:received,:shown) ON CONFLICT (user_id,budget_date) DO NOTHING"
-        ),
-        {
-            "id": user_id,
-            "day": budget_date,
-            "received": received_limit,
-            "shown": settings.recommendation_max_daily_shown_per_profile,
-        },
-    )
-    row = (
-        (
-            await session.execute(
-                text(
-                    "SELECT * FROM recommendation_exposure_budgets WHERE user_id=:id AND budget_date=:day"
-                ),
-                {"id": user_id, "day": budget_date},
-            )
-        )
-        .mappings()
-        .first()
-    )
-    assert row is not None
-    return dict(row)
-
-
-# --------------------------------------------------------------------------
-# Batch generation
-# --------------------------------------------------------------------------
-
-
-async def generate_batch(
+async def generate_candidates(
     session: AsyncSession,
-    viewer_user_id: UUID,
+    user_id: UUID,
     *,
-    batch_type: str = "daily",
-    requested_size: int | None = None,
+    strategy: dict[str, Any] | None = None,
+    limit: int | None = None,
 ) -> dict[str, Any]:
-    """Generate, validate and atomically activate one recommendation batch."""
+    """Generate canonical candidate pairs for one member.
+
+    Stages run in order and each one is counted, so an operator can see where
+    candidates were lost without ever learning who excluded whom.
+    """
     enabled()
     settings = get_settings()
-    strategy = await active_strategy(session)
-    viewer_entry = await require_pool_entry(session, viewer_user_id)
-    viewer_projection = await projection_for(session, viewer_user_id)
-    viewer_criteria = list(viewer_projection["indexed_preference_criteria"])
-    tuning = await tuning_profile(session, viewer_user_id)
-
-    if tuning["recommendations_paused"]:
+    active = strategy or await active_strategy(session)
+    viewer_entry = await require_eligible_pool_entry(session, user_id)
+    viewer_projection_row = await projection_for(session, user_id)
+    if viewer_projection_row is None:
         raise VavError(
-            "RECOMMENDATION_PAUSED",
-            "You paused recommendations. Resume them to receive a new batch.",
+            "RECOMMENDATION_PROJECTION_MISSING",
+            "The approved profile projection is not available.",
             status_code=409,
         )
+    viewer_projection = projection_payload(viewer_projection_row)
+    viewer_criteria = await preference_criteria(session, user_id)
+    viewer_settings = await user_settings(session, user_id)
+    max_candidates = limit or settings.recommendation_max_candidates_per_user
 
-    today = utcnow().date()
-    budget = await _budget(session, viewer_user_id, today)
-    remaining = exposure_rules.remaining_received(budget, int(budget["daily_received_limit"]))
-    size = min(
-        requested_size or settings.recommendation_daily_batch_size,
-        settings.recommendation_daily_batch_size if batch_type == "daily" else remaining,
-        remaining,
-    )
-    if size <= 0:
-        raise VavError(
-            "RECOMMENDATION_DAILY_LIMIT_REACHED",
-            "You have reached today's recommendation limit.",
-            status_code=429,
-        )
-    if batch_type == "supplemental" and not settings.recommendation_supplemental_batch_enabled:
-        raise VavError(
-            "RECOMMENDATION_SUPPLEMENTAL_DISABLED",
-            "Supplemental batches are disabled.",
-            status_code=409,
-        )
-
-    batch_number = int(
-        await session.scalar(
-            text(
-                "SELECT COALESCE(MAX(batch_number),0)+1 FROM recommendation_batches WHERE user_id=:id"
-            ),
-            {"id": viewer_user_id},
-        )
-        or 1
-    )
-    seed = hashlib.sha256(
-        f"{viewer_user_id}:{batch_number}:{strategy['semantic_version']}".encode()
-    ).hexdigest()[:32]
-
-    batch_id = await session.scalar(
-        text(
-            "INSERT INTO recommendation_batches "
-            "(user_id,batch_number,batch_type,strategy_id,profile_projection_version,preference_version,"
-            "privacy_settings_version,status,requested_size,random_seed,expires_at) "
-            "VALUES (:user_id,:number,:type,:strategy,:projection,:preference,:privacy,'building',:size,:seed,"
-            "now() + make_interval(days => :ttl)) RETURNING id"
-        ),
-        {
-            "user_id": viewer_user_id,
-            "number": batch_number,
-            "type": batch_type,
-            "strategy": strategy["id"],
-            "projection": viewer_projection["projection_version"],
-            "preference": viewer_projection["preference_version"],
-            "privacy": viewer_projection["privacy_settings_version"],
-            "size": size,
-            "seed": seed,
-            "ttl": settings.recommendation_batch_ttl_days,
-        },
-    )
-    batch_uuid = UUID(str(batch_id))
-
-    candidates = await _collect_scored_candidates(session, viewer_user_id, tuning)
-    qualified: list[dict[str, Any]] = []
-    rejected_reasons: dict[str, int] = {}
-    for candidate in candidates:
-        ok, reasons = bidirectional.meets_thresholds(
-            candidate["bidirectional"],
-            minimum_directional_bps=settings.recommendation_min_directional_score_bps,
-            minimum_bidirectional_bps=settings.recommendation_min_bidirectional_score_bps,
-            minimum_confidence_bps=settings.recommendation_min_confidence_bps,
-        )
-        if not ok:
-            for reason in reasons:
-                rejected_reasons[reason] = rejected_reasons.get(reason, 0) + 1
-            continue
-        # Respect the other member's daily show budget before selecting them.
-        candidate_budget = await _budget(session, candidate["candidate_user_id"], today)
-        if not exposure_rules.can_show_profile(
-            candidate_budget, int(candidate_budget["daily_shown_limit"])
-        ):
-            rejected_reasons["candidate_show_budget_exhausted"] = (
-                rejected_reasons.get("candidate_show_budget_exhausted", 0) + 1
-            )
-            continue
-        qualified.append(candidate)
-
-    cold_start_types = coldstart.classify(
-        account_created_at=await _account_created_at(session, viewer_user_id),
-        profile_approved_at=await _profile_approved_at(session, viewer_user_id),
-        criteria_count=len(viewer_criteria),
-        pool_size_in_region=len(candidates),
-        interaction_count=await _interaction_count(session, viewer_user_id),
-    )
-    exploration_slots = coldstart.exploration_slot_count(
-        cold_start_types, str(tuning["exploration_level"]), strategy["cold_start_policy"]
-    )
-
-    adjusted = ranking.apply_adjustments(qualified, seed=seed, policy=strategy["ranking_policy"])
-    main_size = max(0, size - min(exploration_slots, max(0, size - 1)))
-    selected = ranking.diversify(
-        adjusted, size=main_size, policy=strategy["diversification_policy"]
-    )
-    selected_ids = {str(item["candidate_pair_id"]) for item in selected}
-    exploration = coldstart.select_exploration_candidates(
-        adjusted,
-        already_selected_ids=selected_ids,
-        slots=size - len(selected),
-        minimum_bidirectional_bps=settings.recommendation_min_bidirectional_score_bps,
-    )
-    for position, candidate in enumerate(exploration, start=len(selected) + 1):
-        candidate["final_rank"] = position
-    final = selected + exploration
-
-    for candidate in final:
-        explanation = explanations.build(
-            viewer_score=candidate["viewer_score"],
-            bidirectional=candidate["bidirectional"],
-            viewer_criteria=viewer_criteria,
-            relaxations_applied=candidate.get("relaxations_applied", []),
-        )
-        explanations.assert_safe(explanation)
-        await session.execute(
-            text(
-                "INSERT INTO recommendation_items "
-                "(recommendation_batch_id,viewer_user_id,recommended_user_id,candidate_pair_id,rank_position,"
-                "viewer_to_candidate_score_bps,candidate_to_viewer_score_bps,bidirectional_score_bps,confidence_bps,"
-                "is_exploration_slot,relaxation_applied,explanation_snapshot,visible_profile_snapshot,expires_at) "
-                "VALUES (:batch,:viewer,:candidate,:pair,:rank,:v2c,:c2v,:bi,:confidence,:exploration,"
-                "CAST(:relaxation AS jsonb),CAST(:explanation AS jsonb),CAST(:snapshot AS jsonb),"
-                "now() + make_interval(days => :ttl))"
-            ),
-            {
-                "batch": batch_uuid,
-                "viewer": viewer_user_id,
-                "candidate": candidate["candidate_user_id"],
-                "pair": candidate["candidate_pair_id"],
-                "rank": candidate["final_rank"],
-                "v2c": candidate["bidirectional"]["user_a_to_b_score_bps"],
-                "c2v": candidate["bidirectional"]["user_b_to_a_score_bps"],
-                "bi": candidate["bidirectional"]["combined_score_bps"],
-                "confidence": candidate["bidirectional"]["confidence_bps"],
-                "exploration": bool(candidate.get("is_exploration_slot")),
-                "relaxation": json_value(candidate.get("relaxations_applied", [])),
-                "explanation": json_value(explanation),
-                "snapshot": json_value(candidate["visible_snapshot"]),
-                "ttl": settings.recommendation_batch_ttl_days,
-            },
-        )
-        await session.execute(
-            text(
-                "INSERT INTO recommendation_rank_results "
-                "(recommendation_batch_id,candidate_pair_id,base_score_bps,adjusted_score_bps,"
-                "novelty_adjustment_bps,diversity_adjustment_bps,exposure_adjustment_bps,"
-                "exploration_adjustment_bps,final_rank,adjustment_snapshot) "
-                "VALUES (:batch,:pair,:base,:adjusted,:novelty,:diversity,:exposure,:exploration,:rank,"
-                "CAST(:snapshot AS jsonb)) ON CONFLICT (recommendation_batch_id,candidate_pair_id) DO NOTHING"
-            ),
-            {
-                "batch": batch_uuid,
-                "pair": candidate["candidate_pair_id"],
-                "base": candidate["base_score_bps"],
-                "adjusted": candidate["adjusted_score_bps"],
-                "novelty": candidate["novelty_adjustment_bps"],
-                "diversity": candidate.get("diversity_adjustment_bps", 0),
-                "exposure": candidate["exposure_adjustment_bps"],
-                "exploration": candidate["exploration_adjustment_bps"],
-                "rank": candidate["final_rank"],
-                "snapshot": json_value(candidate["adjustment_snapshot"]),
-            },
-        )
-
-    report = {
-        "recalled_candidates": len(candidates),
-        "qualified_candidates": len(qualified),
-        "selected": len(final),
-        "exploration_slots": len(exploration),
-        "cold_start_types": cold_start_types,
-        "rejection_reasons": rejected_reasons,
-        "intra_list_diversity_bps": ranking.intra_list_diversity(final),
-        "strategy_version": strategy["semantic_version"],
-        "seed": seed,
-    }
-
-    # Only one batch may be active; the previous one is exhausted first.
-    await session.execute(
-        text(
-            "UPDATE recommendation_batches SET status='exhausted' WHERE user_id=:id AND status='active'"
-        ),
-        {"id": viewer_user_id},
-    )
-    await session.execute(
-        text(
-            "UPDATE recommendation_batches SET status='active',generated_size=:size,generated_at=now(),"
-            "activated_at=now(),generation_report=CAST(:report AS jsonb) WHERE id=:id"
-        ),
-        {"id": batch_uuid, "size": len(final), "report": json_value(report)},
-    )
-    await session.execute(
-        text(
-            "UPDATE recommendation_exposure_budgets SET current_received_count=current_received_count+:count,"
-            "updated_at=now() WHERE user_id=:id AND budget_date=:day"
-        ),
-        {"count": len(final), "id": viewer_user_id, "day": today},
-    )
-    await audit(
+    recalled = await _recall(
         session,
-        "recommendation.batch.activated",
-        "recommendation_batch",
-        batch_uuid,
-        actor_id=viewer_user_id,
-        context={"size": len(final), "strategy_version": strategy["semantic_version"]},
+        user_id=user_id,
+        viewer_entry=viewer_entry,
+        limit=max_candidates,
     )
-    await emit_event(session, "recommendation.batch.generated", batch_uuid, {"size": len(final)})
-    await session.commit()
-    return {
-        "batch_id": str(batch_uuid),
-        "batch_number": batch_number,
-        "status": RecommendationBatchStatus.ACTIVE.value,
-        "size": len(final),
-        "report": report,
-        "pool_entry_version": viewer_entry["pool_version"],
+
+    interaction_gateway = InteractionGateway(session)
+    moderation_gateway = ModerationGateway(session)
+    now = utcnow()
+    excluded = await interaction_gateway.excluded_partners(user_id, now=now)
+
+    report: dict[str, Any] = {
+        "pool_size": await _eligible_pool_size(session),
+        "recalled": len(recalled),
+        "excluded_by_interaction": 0,
+        "excluded_by_safety": 0,
+        "hard_constraint_failed": 0,
+        "below_minimum_score": 0,
+        "eligible": 0,
+        "hard_constraint_failures": {},
     }
+    failure_evaluations: list[constraints.HardConstraintEvaluation] = []
+    generated: list[dict[str, Any]] = []
 
-
-async def _collect_scored_candidates(
-    session: AsyncSession, viewer_user_id: UUID, tuning: dict[str, Any]
-) -> list[dict[str, Any]]:
-    """Load eligible pairs plus both directional scores and exposure history."""
-    rows = (
-        (
-            await session.execute(
-                text(
-                    "SELECT c.id AS candidate_pair_id, c.hard_constraint_snapshot, "
-                    "CASE WHEN c.user_low_id=:viewer THEN c.user_high_id ELSE c.user_low_id END AS candidate_user_id "
-                    "FROM recommendation_candidate_pairs c "
-                    "WHERE (c.user_low_id=:viewer OR c.user_high_id=:viewer) "
-                    "AND c.status='eligible' AND c.invalidated_at IS NULL "
-                    "AND (c.valid_until IS NULL OR c.valid_until > now())"
-                ),
-                {"viewer": viewer_user_id},
-            )
-        )
-        .mappings()
-        .all()
+    allow_viewer_relaxation = bool(
+        settings.recommendation_allow_user_relaxation
+        and viewer_settings.get("extended_recommendations_enabled")
     )
-    settings = get_settings()
-    candidates: list[dict[str, Any]] = []
-    for row in rows:
-        scores = (
-            (
-                await session.execute(
-                    text(
-                        "SELECT source_user_id,total_score_bps,confidence_bps,feature_scores,missing_information "
-                        "FROM recommendation_directional_scores WHERE candidate_pair_id=:pair"
-                    ),
-                    {"pair": row["candidate_pair_id"]},
-                )
-            )
-            .mappings()
-            .all()
+    minimum_directional = int(
+        _jsonb(active["bidirectional_policy"]).get(
+            "minimum_directional_score_bps", settings.recommendation_min_directional_score_bps
         )
-        by_source = {score["source_user_id"]: dict(score) for score in scores}
-        viewer_score = by_source.get(viewer_user_id)
-        candidate_score = by_source.get(row["candidate_user_id"])
-        if viewer_score is None or candidate_score is None:
+    )
+    minimum_bidirectional = int(
+        _jsonb(active["bidirectional_policy"]).get(
+            "minimum_bidirectional_score_bps", settings.recommendation_min_bidirectional_score_bps
+        )
+    )
+    scoring_policy = _jsonb(active["scoring_policy"])
+    viewer_tuning = await tuning_profile(session, user_id)
+
+    for candidate in recalled:
+        candidate_id: UUID = candidate["user_id"]
+        if str(candidate_id) in excluded:
+            report["excluded_by_interaction"] += 1
             continue
 
-        viewer_result = {
-            "total_score_bps": viewer_score["total_score_bps"],
-            "confidence_bps": viewer_score["confidence_bps"],
-            "feature_scores": viewer_score["feature_scores"],
-            "missing_information": viewer_score["missing_information"],
-        }
-        candidate_result = {
-            "total_score_bps": candidate_score["total_score_bps"],
-            "confidence_bps": candidate_score["confidence_bps"],
-            "feature_scores": candidate_score["feature_scores"],
-            "missing_information": candidate_score["missing_information"],
-        }
-        combined = bidirectional.combine(a_to_b=viewer_result, b_to_a=candidate_result)
-
-        exposure_row = (
-            (
-                await session.execute(
-                    text(
-                        "SELECT count(*) FILTER (WHERE viewer_user_id=:viewer) AS viewer_seen, "
-                        "count(*) AS total_recent FROM recommendation_exposures "
-                        "WHERE exposed_user_id=:candidate AND exposed_at > now() - interval '7 days'"
-                    ),
-                    {"viewer": viewer_user_id, "candidate": row["candidate_user_id"]},
-                )
-            )
-            .mappings()
-            .first()
+        decision = await moderation_gateway.evaluate_recommendation_pair(
+            viewer_user_id=user_id, candidate_user_id=candidate_id
         )
-        if exposure_row is None:
+        if not decision.allowed:
+            report["excluded_by_safety"] += 1
             continue
-        projection = await projection_for(session, row["candidate_user_id"])
-        snapshot = _visible_snapshot(projection)
-        approved_at = await _profile_approved_at(session, row["candidate_user_id"])
-        recency = 0
-        if approved_at is not None:
-            age_days = (utcnow() - approved_at).days
-            recency = max(0, 30 - age_days)
 
-        candidates.append(
+        candidate_projection_row = await projection_for(session, candidate_id)
+        if candidate_projection_row is None or not candidate_projection_row["eligible"]:
+            report["excluded_by_interaction"] += 1
+            continue
+        candidate_projection = projection_payload(candidate_projection_row)
+        candidate_criteria = list(
+            _jsonb(candidate_projection_row["indexed_preference_criteria"]) or []
+        )
+        candidate_settings = await user_settings(session, candidate_id)
+
+        evaluation = constraints.evaluate_pair(
+            viewer_projection=viewer_projection,
+            candidate_projection=candidate_projection,
+            viewer_criteria=viewer_criteria,
+            candidate_criteria=candidate_criteria,
+            viewer_preference_version=int(viewer_projection_row["preference_version"]),
+            candidate_preference_version=int(candidate_projection_row["preference_version"]),
+            minimum_age=settings.dating_minimum_age,
+            allow_viewer_relaxation=allow_viewer_relaxation,
+            allow_candidate_relaxation=bool(
+                settings.recommendation_allow_user_relaxation
+                and candidate_settings.get("extended_recommendations_enabled")
+            ),
+            unknown_value_policy=settings.recommendation_unknown_value_policy,
+        )
+        if not evaluation.passed:
+            report["hard_constraint_failed"] += 1
+            failure_evaluations.append(evaluation)
+            continue
+
+        candidate_tuning = await tuning_profile(session, candidate_id)
+        viewer_score = scoring_engine.score_direction(
+            source_user_id=user_id,
+            target_user_id=candidate_id,
+            viewer_projection=viewer_projection,
+            candidate_projection=candidate_projection,
+            viewer_criteria=viewer_criteria,
+            tuning_adjustments=(
+                viewer_tuning["feature_weight_adjustments"]
+                if viewer_tuning["feedback_personalization_enabled"]
+                else None
+            ),
+            missingness_policy=str(scoring_policy.get("missingness_policy")),
+            missing_penalty_bps=int(scoring_policy.get("missing_penalty_bps", 0)),
+        )
+        candidate_score = scoring_engine.score_direction(
+            source_user_id=candidate_id,
+            target_user_id=user_id,
+            viewer_projection=candidate_projection,
+            candidate_projection=viewer_projection,
+            viewer_criteria=candidate_criteria,
+            tuning_adjustments=(
+                candidate_tuning["feature_weight_adjustments"]
+                if candidate_tuning["feedback_personalization_enabled"]
+                else None
+            ),
+            missingness_policy=str(scoring_policy.get("missingness_policy")),
+            missing_penalty_bps=int(scoring_policy.get("missing_penalty_bps", 0)),
+        )
+        composed = bidirectional_engine.combine(
+            viewer_score,
+            candidate_score,
+            minimum_directional_bps=minimum_directional,
+            minimum_bidirectional_bps=minimum_bidirectional,
+        )
+        if not composed.meets_minimum_directional or not composed.meets_minimum_bidirectional:
+            report["below_minimum_score"] += 1
+            continue
+
+        pair = await upsert_candidate_pair(
+            session,
+            viewer_user_id=user_id,
+            candidate_user_id=candidate_id,
+            strategy_id=active["id"],
+            viewer_projection_row=viewer_projection_row,
+            candidate_projection_row=candidate_projection_row,
+            evaluation=evaluation,
+            composed=composed,
+        )
+        await _store_directional_scores(
+            session, pair_id=pair["id"], scores=(viewer_score, candidate_score)
+        )
+        report["eligible"] += 1
+        generated.append(
             {
-                "candidate_pair_id": row["candidate_pair_id"],
-                "candidate_user_id": row["candidate_user_id"],
-                "viewer_score": viewer_result,
-                "candidate_score": candidate_result,
-                "bidirectional": combined,
-                "bidirectional_score_bps": combined["combined_score_bps"],
-                "confidence_bps": combined["confidence_bps"],
-                "city_code": projection["city_code"],
-                "faith_codes": projection["faith_codes"],
-                "lifestyle_codes": projection["lifestyle_codes"],
-                "never_exposed": int(exposure_row["total_recent"] or 0) == 0,
-                "recently_exposed": int(exposure_row["viewer_seen"] or 0) > 0,
-                "recent_exposure_count": int(exposure_row["total_recent"] or 0),
-                "profile_recency_score": recency,
-                "hard_constraints_passed": True,
-                "safety_allowed": True,
-                "relaxations_applied": list(
-                    (row["hard_constraint_snapshot"] or {}).get("relaxations_applied", [])
-                ),
-                "visible_snapshot": snapshot,
-                "exploration_adjustment_bps": 0,
+                "candidate_pair_id": pair["id"],
+                "candidate_user_id": candidate_id,
+                "bidirectional_score_bps": composed.combined_score_bps,
+                "minimum_directional_score_bps": composed.minimum_directional_score_bps,
+                "confidence_bps": composed.confidence_bps,
+                "relaxed_codes": evaluation.relaxed_codes,
             }
         )
-    _ = settings
-    _ = tuning
-    return candidates
 
-
-def _visible_snapshot(projection: dict[str, Any]) -> dict[str, Any]:
-    """Freeze only the coarse, already-approved values a card may show.
-
-    Contact details, exact birth dates, narratives and preference criteria are
-    structurally absent — the projection never carried them.
-    """
-    return {
-        "age_bucket": projection["age_bucket"],
-        "city_code": projection["city_code"],
-        "region_code": projection["region_code"],
-        "country_code": projection["country_code"],
-        "relationship_intent": projection["relationship_intent"],
-        "approved_profile_version": projection["approved_profile_version"],
-        "privacy_settings_version": projection["privacy_settings_version"],
-        "projection_checksum": projection["projection_checksum"],
-    }
-
-
-async def _account_created_at(session: AsyncSession, user_id: UUID) -> datetime:
-    value = await session.scalar(text("SELECT created_at FROM users WHERE id=:id"), {"id": user_id})
-    return value or utcnow()
-
-
-async def _profile_approved_at(session: AsyncSession, user_id: UUID) -> datetime | None:
-    value = await session.scalar(
-        text("SELECT approved_at FROM dating_profiles WHERE user_id=:id"), {"id": user_id}
-    )
-    return value if isinstance(value, datetime) else None
-
-
-async def _interaction_count(session: AsyncSession, user_id: UUID) -> int:
-    value = await session.scalar(
-        text(
-            "SELECT count(*) FROM recommendation_feedback_events WHERE viewer_user_id=:id "
-            "AND feedback_type IN ('liked','skipped','not_relevant')"
-        ),
-        {"id": user_id},
-    )
-    return int(value or 0)
-
-
-# --------------------------------------------------------------------------
-# Reading a batch
-# --------------------------------------------------------------------------
-
-
-async def current_batch(session: AsyncSession, viewer: User) -> dict[str, Any]:
-    """Return the active batch, re-checking every item's current eligibility."""
-    enabled()
-    batch = (
-        (
-            await session.execute(
-                text(
-                    "SELECT * FROM recommendation_batches WHERE user_id=:id AND status='active' "
-                    "ORDER BY created_at DESC LIMIT 1"
-                ),
-                {"id": viewer.id},
-            )
-        )
-        .mappings()
-        .first()
-    )
-    if batch is None:
-        return {"has_batch": False, "items": [], "guidance": await empty_guidance(session, viewer)}
-
-    if batch["expires_at"] and batch["expires_at"] < utcnow():
-        await session.execute(
-            text("UPDATE recommendation_batches SET status='expired' WHERE id=:id"),
-            {"id": batch["id"]},
-        )
-        await session.commit()
-        return {"has_batch": False, "items": [], "guidance": await empty_guidance(session, viewer)}
-
-    rows = (
-        (
-            await session.execute(
-                text(
-                    "SELECT i.*, d.status AS profile_status, d.approved_version_number "
-                    "FROM recommendation_items i "
-                    "JOIN dating_profiles d ON d.user_id=i.recommended_user_id "
-                    "WHERE i.recommendation_batch_id=:batch AND i.status IN ('ready','exposed','viewed') "
-                    "ORDER BY i.rank_position"
-                ),
-                {"batch": batch["id"]},
-            )
-        )
-        .mappings()
-        .all()
-    )
-
-    items: list[dict[str, Any]] = []
-    for row in rows:
-        # A frozen snapshot is not a licence: re-check the live state.
-        if row["profile_status"] != "active" or row["approved_version_number"] is None:
-            await _invalidate_item(session, row["id"], "profile_no_longer_active")
-            continue
-        safety = await evaluate_recommendation_pair_safety(
-            session, viewer.id, row["recommended_user_id"]
-        )
-        if not safety["allowed"]:
-            await _invalidate_item(session, row["id"], safety["reason_code"] or "safety_blocked")
-            continue
-        visible = await session.scalar(
-            text("SELECT visible_in_matchmaking FROM user_privacy_settings WHERE user_id=:id"),
-            {"id": row["recommended_user_id"]},
-        )
-        if not visible:
-            await _invalidate_item(session, row["id"], "privacy_withdrawn")
-            continue
-        items.append(_item_dto(dict(row)))
-
-    await session.commit()
-    return {
-        "has_batch": bool(items),
-        "batch_id": str(batch["id"]),
-        "batch_number": batch["batch_number"],
-        "batch_type": batch["batch_type"],
-        "expires_at": batch["expires_at"],
-        "items": items,
-        "guidance": None if items else await empty_guidance(session, viewer),
-    }
-
-
-def _item_dto(row: dict[str, Any]) -> dict[str, Any]:
-    """The member-facing shape. No percentages, no directional scores."""
-    return {
-        "recommendation_item_id": str(row["id"]),
-        "recommended_user_id": str(row["recommended_user_id"]),
-        "rank_position": row["rank_position"],
-        "status": row["status"],
-        "is_exploration_slot": row["is_exploration_slot"],
-        "relaxation_applied": list(row["relaxation_applied"] or []),
-        "explanation": row["explanation_snapshot"],
-        "profile_summary": row["visible_profile_snapshot"],
-        "available_from": row["available_from"],
-        "expires_at": row["expires_at"],
-    }
-
-
-async def _invalidate_item(session: AsyncSession, item_id: UUID, reason: str) -> None:
-    await session.execute(
-        text(
-            "UPDATE recommendation_items SET status='invalidated',invalidation_reason=:reason WHERE id=:id"
-        ),
-        {"id": item_id, "reason": reason[:128]},
-    )
+    report["hard_constraint_failures"] = constraints.aggregate_failure_reasons(failure_evaluations)
     await audit(
         session,
-        "recommendation.item.invalidated",
-        "recommendation_item",
-        item_id,
-        reason=reason,
+        "recommendation.candidates.generated",
+        "user",
+        user_id,
+        context={key: value for key, value in report.items() if key != "hard_constraint_failures"},
     )
+    return {"report": report, "candidates": generated}
 
 
-async def empty_guidance(session: AsyncSession, viewer: User) -> dict[str, Any]:
-    """Explain an empty result honestly, with aggregate reasons only."""
-    pairs = (
+async def _eligible_pool_size(session: AsyncSession) -> int:
+    return int(
         (
             await session.execute(
-                text(
-                    "SELECT hard_constraint_snapshot FROM recommendation_candidate_pairs "
-                    "WHERE (user_low_id=:id OR user_high_id=:id) AND invalidated_at IS NULL "
-                    "ORDER BY generated_at DESC LIMIT 500"
-                ),
-                {"id": viewer.id},
+                text("SELECT count(*) FROM recommendation_pool_entries WHERE eligible = true")
             )
-        )
-        .scalars()
-        .all()
+        ).scalar_one()
+        or 0
     )
-    evaluations = [
-        {
-            "passed": bool((snapshot or {}).get("passed")),
-            "blocking_codes": list((snapshot or {}).get("blocking_codes", [])),
-            "unknown_codes": list((snapshot or {}).get("unknown_codes", [])),
-        }
-        for snapshot in pairs
-    ]
-    diagnostics = constraints.diagnostic_summary(evaluations)
-    return coldstart.empty_result_guidance(diagnostics)
 
 
-# --------------------------------------------------------------------------
-# Exposure recording
-# --------------------------------------------------------------------------
-
-
-async def record_exposure(
+async def _recall(
     session: AsyncSession,
-    viewer: User,
-    item_id: UUID,
     *,
-    exposure_type: str,
-    duration_ms: int | None,
-    idempotency_key: str,
-    source: str = "user_web",
-) -> dict[str, Any]:
-    """Record an exposure idempotently and count it only when truly visible."""
-    enabled()
-    settings = get_settings()
-    row = (
-        (
-            await session.execute(
-                text(
-                    "SELECT id,viewer_user_id,recommended_user_id,status FROM recommendation_items WHERE id=:id"
-                ),
-                {"id": item_id},
-            )
-        )
-        .mappings()
-        .first()
-    )
-    if row is None or row["viewer_user_id"] != viewer.id:
-        raise VavError(
-            "RECOMMENDATION_ITEM_NOT_FOUND", "Recommendation not found.", status_code=404
-        )
+    user_id: UUID,
+    viewer_entry: dict[str, Any],
+    limit: int,
+) -> list[dict[str, Any]]:
+    """Coarse recall over normalised, automatically usable columns only.
 
-    visible = exposure_rules.counts_as_visible(
-        exposure_type,
-        duration_ms,
-        minimum_visible_ms=settings.recommendation_exposure_visible_min_ms,
-    )
-    inserted = await session.scalar(
-        text(
-            "INSERT INTO recommendation_exposures "
-            "(recommendation_item_id,viewer_user_id,exposed_user_id,exposure_type,source,duration_ms,"
-            "counted_as_visible,idempotency_key) "
-            "VALUES (:item,:viewer,:exposed,:type,:source,:duration,:visible,:key) "
-            "ON CONFLICT (viewer_user_id,idempotency_key) DO NOTHING RETURNING id"
-        ),
-        {
-            "item": item_id,
-            "viewer": viewer.id,
-            "exposed": row["recommended_user_id"],
-            "type": exposure_type,
-            "source": source,
-            "duration": duration_ms,
-            "visible": visible,
-            "key": idempotency_key[:128],
-        },
-    )
-    if inserted is None:
-        await session.commit()
-        return {"recorded": False, "duplicate": True, "counted_as_visible": visible}
-
-    if visible:
+    Mutual relationship eligibility and the platform's adult rule are applied in
+    SQL so the application never loads the whole pool into memory.
+    """
+    accepted_genders = viewer_entry.get("eligible_partner_gender_codes") or []
+    rows = (
         await session.execute(
             text(
-                "UPDATE recommendation_items SET status=CASE WHEN status='ready' THEN 'exposed' ELSE status END,"
-                "exposed_at=COALESCE(exposed_at, now()) WHERE id=:id"
-            ),
-            {"id": item_id},
-        )
-        await session.execute(
-            text(
-                "INSERT INTO recommendation_exposure_budgets (user_id,budget_date,daily_received_limit,daily_shown_limit,current_shown_count) "
-                "VALUES (:id,CURRENT_DATE,:received,:shown,1) "
-                "ON CONFLICT (user_id,budget_date) DO UPDATE SET current_shown_count="
-                "recommendation_exposure_budgets.current_shown_count+1,updated_at=now()"
+                "SELECT * FROM recommendation_pool_entries "
+                "WHERE eligible = true AND user_id <> :user_id "
+                "AND (:accepted_empty OR CAST(:accepted AS jsonb) @> to_jsonb(gender_code)) "
+                "AND (eligible_partner_gender_codes @> CAST(:viewer_gender AS jsonb) OR :viewer_gender_null) "
+                "AND age_years >= :minimum_age "
+                "ORDER BY updated_at DESC LIMIT :limit"
             ),
             {
-                "id": row["recommended_user_id"],
-                "received": settings.recommendation_max_daily_received,
-                "shown": settings.recommendation_max_daily_shown_per_profile,
+                "user_id": user_id,
+                "accepted": json_value([str(code) for code in accepted_genders]),
+                "accepted_empty": not accepted_genders,
+                "viewer_gender": json_value([viewer_entry.get("gender_code")])
+                if viewer_entry.get("gender_code")
+                else "[]",
+                "viewer_gender_null": viewer_entry.get("gender_code") is None,
+                "minimum_age": get_settings().dating_minimum_age,
+                "limit": limit,
             },
         )
-    if exposure_type in {"profile_opened", "photo_viewed"}:
+    ).mappings()
+    return [dict(row) for row in rows]
+
+
+async def upsert_candidate_pair(
+    session: AsyncSession,
+    *,
+    viewer_user_id: UUID,
+    candidate_user_id: UUID,
+    strategy_id: UUID,
+    viewer_projection_row: dict[str, Any],
+    candidate_projection_row: dict[str, Any],
+    evaluation: constraints.HardConstraintEvaluation,
+    composed: bidirectional_engine.BidirectionalCompatibilityResult,
+) -> dict[str, Any]:
+    """Insert or refresh the single canonical pair record for two members."""
+    low, high = canonical_pair(viewer_user_id, candidate_user_id)
+    low_row = viewer_projection_row if low == viewer_user_id else candidate_projection_row
+    high_row = candidate_projection_row if low == viewer_user_id else viewer_projection_row
+    settings = get_settings()
+    valid_until = utcnow() + timedelta(days=settings.recommendation_candidate_validity_days)
+
+    params = {
+        "low": low,
+        "high": high,
+        "low_projection": int(low_row["projection_version"]),
+        "high_projection": int(high_row["projection_version"]),
+        "low_preference": int(low_row["preference_version"]),
+        "high_preference": int(high_row["preference_version"]),
+        "strategy_id": strategy_id,
+        "status": CandidatePairStatus.ELIGIBLE.value,
+        "eligibility": json_value(
+            {
+                "generated_at": utcnow().isoformat(),
+                "low_privacy_version": int(low_row["privacy_settings_version"]),
+                "high_privacy_version": int(high_row["privacy_settings_version"]),
+            }
+        ),
+        "hard": json_value(evaluation.as_dict()),
+        "score": json_value(composed.as_dict()),
+        "valid_until": valid_until,
+    }
+    row = (
         await session.execute(
             text(
-                "UPDATE recommendation_items SET status=CASE WHEN status IN ('ready','exposed') THEN 'viewed' ELSE status END,"
-                "viewed_at=COALESCE(viewed_at, now()) WHERE id=:id"
+                "INSERT INTO recommendation_candidate_pairs "
+                "(user_low_id,user_high_id,low_profile_projection_version,high_profile_projection_version,"
+                "low_preference_version,high_preference_version,strategy_id,status,eligibility_snapshot,"
+                "hard_constraint_snapshot,score_snapshot,valid_until) "
+                "VALUES (:low,:high,:low_projection,:high_projection,:low_preference,:high_preference,"
+                ":strategy_id,:status,CAST(:eligibility AS jsonb),CAST(:hard AS jsonb),CAST(:score AS jsonb),:valid_until) "
+                "ON CONFLICT (user_low_id,user_high_id,strategy_id,low_profile_projection_version,"
+                "high_profile_projection_version,low_preference_version,high_preference_version) "
+                "DO UPDATE SET status=EXCLUDED.status, hard_constraint_snapshot=EXCLUDED.hard_constraint_snapshot, "
+                "score_snapshot=EXCLUDED.score_snapshot, valid_until=EXCLUDED.valid_until, "
+                "invalidated_at=NULL, invalidation_reason=NULL RETURNING *"
             ),
-            {"id": item_id},
+            params,
         )
-    await audit(
-        session,
-        "recommendation.item.exposed" if visible else "recommendation.item.viewed",
-        "recommendation_item",
-        item_id,
-        actor_id=viewer.id,
-        context={"exposure_type": exposure_type, "counted_as_visible": visible},
+    ).mappings()
+    pair = row.first()
+    if pair is None:
+        raise VavError(
+            "RECOMMENDATION_PAIR_CONFLICT", "Candidate pair could not be stored.", status_code=409
+        )
+    return dict(pair)
+
+
+async def _store_directional_scores(
+    session: AsyncSession,
+    *,
+    pair_id: UUID,
+    scores: tuple[scoring_engine.DirectionalCompatibilityScore, ...],
+) -> None:
+    for score in scores:
+        await session.execute(
+            text(
+                "INSERT INTO recommendation_directional_scores "
+                "(candidate_pair_id,source_user_id,target_user_id,total_score_bps,confidence_bps,"
+                "unknown_feature_count,feature_scores,missing_information,satisfied_preferences,"
+                "scoring_policy_version,feature_registry_version) "
+                "VALUES (:pair_id,:source,:target,:total,:confidence,:unknown,CAST(:features AS jsonb),"
+                "CAST(:missing AS jsonb),CAST(:satisfied AS jsonb),:policy,:registry) "
+                "ON CONFLICT (candidate_pair_id,source_user_id,scoring_policy_version,feature_registry_version) "
+                "DO UPDATE SET total_score_bps=EXCLUDED.total_score_bps, confidence_bps=EXCLUDED.confidence_bps, "
+                "unknown_feature_count=EXCLUDED.unknown_feature_count, feature_scores=EXCLUDED.feature_scores, "
+                "missing_information=EXCLUDED.missing_information, satisfied_preferences=EXCLUDED.satisfied_preferences"
+            ),
+            {
+                "pair_id": pair_id,
+                "source": score.source_user_id,
+                "target": score.target_user_id,
+                "total": score.total_score_bps,
+                "confidence": score.confidence_bps,
+                "unknown": score.unknown_feature_count,
+                "features": json_value([item.as_dict() for item in score.feature_scores]),
+                "missing": json_value(score.missing_information),
+                "satisfied": json_value(score.satisfied_preferences),
+                "policy": score.scoring_policy_version,
+                "registry": score.feature_registry_version,
+            },
+        )
+
+
+async def directional_score_row(
+    session: AsyncSession, *, pair_id: UUID, source_user_id: UUID
+) -> dict[str, Any] | None:
+    row = (
+        await session.execute(
+            text(
+                "SELECT * FROM recommendation_directional_scores "
+                "WHERE candidate_pair_id=:pair_id AND source_user_id=:source "
+                "ORDER BY created_at DESC LIMIT 1"
+            ),
+            {"pair_id": pair_id, "source": source_user_id},
+        )
+    ).mappings()
+    found = row.first()
+    if found is None:
+        return None
+    record = dict(found)
+    for key in ("feature_scores", "missing_information", "satisfied_preferences"):
+        record[key] = _jsonb(record.get(key))
+    return record
+
+
+# --------------------------------------------------------------------------
+# Diagnostics
+# --------------------------------------------------------------------------
+
+
+async def candidate_diagnostics(session: AsyncSession, user_id: UUID) -> dict[str, Any]:
+    """Aggregate diagnostics for one member; never names another member."""
+    entry = await pool_entry(session, user_id)
+    generation = (
+        await generate_candidates(session, user_id) if entry and entry["eligible"] else None
     )
-    await session.commit()
-    return {"recorded": True, "duplicate": False, "counted_as_visible": visible}
+    report = generation["report"] if generation else {}
+    interaction_count = int(
+        (
+            await session.execute(
+                text(
+                    "SELECT count(*) FROM recommendation_feedback_events WHERE viewer_user_id=:user_id"
+                ),
+                {"user_id": user_id},
+            )
+        ).scalar_one()
+        or 0
+    )
+    region_size = int(
+        (
+            await session.execute(
+                text(
+                    "SELECT count(*) FROM recommendation_pool_entries WHERE eligible = true "
+                    "AND region_code IS NOT DISTINCT FROM :region AND user_id <> :user_id"
+                ),
+                {"region": entry["region_code"] if entry else None, "user_id": user_id},
+            )
+        ).scalar_one()
+        or 0
+    )
+    assessment = cold_start.assess(
+        account_age_days=_days_since(entry.get("approved_at") if entry else None),
+        profile_approved_days=_days_since(entry.get("approved_at") if entry else None),
+        stated_criteria_count=int(entry["stated_criteria_count"]) if entry else 0,
+        eligible_profiles_in_region=region_size,
+        interaction_count=interaction_count,
+        base_exploration_slots=get_settings().recommendation_exploration_slot_count,
+    )
+    return {
+        "pool_entry": entry,
+        "generation_report": report,
+        "cold_start": assessment.as_dict(),
+        "empty_result_report": cold_start.empty_result_report(
+            pool_size=int(report.get("pool_size", 0)),
+            recalled=int(report.get("recalled", 0)),
+            hard_constraint_failures=dict(report.get("hard_constraint_failures", {})),
+            safety_excluded=int(report.get("excluded_by_safety", 0)),
+            cooldown_excluded=int(report.get("excluded_by_interaction", 0)),
+        ),
+    }
 
 
-def generate_idempotency_key() -> str:
-    return secrets.token_urlsafe(24)
-
-
-def can_activate(current: str) -> bool:
-    return can_transition_batch(current, RecommendationBatchStatus.ACTIVE.value)
-
-
-def item_status_ready() -> str:
-    return RecommendationItemStatus.READY.value
+def _days_since(moment: datetime | None) -> int:
+    if moment is None:
+        return 0
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=UTC)
+    return max(0, (utcnow() - moment).days)

@@ -23,9 +23,6 @@
 	dating-profile-migrate dating-profile-seed dating-profile-seed-taxonomies dating-profile-test \
 	dating-profile-concurrency-test dating-profile-security-test dating-profile-user-e2e \
 	dating-profile-admin-e2e dating-profile-verify \
-	recommendation-migrate recommendation-seed recommendation-seed-fixtures recommendation-test \
-	recommendation-concurrency-test recommendation-security-test recommendation-fairness-test \
-	recommendation-eval recommendation-user-e2e recommendation-admin-e2e recommendation-verify \
 	privacy-migrate privacy-seed privacy-seed-inventory privacy-test privacy-security-test \
 	privacy-concurrency-test privacy-retention-test privacy-user-e2e privacy-admin-e2e privacy-verify
 
@@ -399,11 +396,15 @@ recommendation-migrate:
 recommendation-seed:
 	docker compose exec -T api python -m vav.cli.seed_permissions
 	docker compose exec -T api python -m vav.cli.seed_recommendations
+
+recommendation-seed-evaluations:
 	docker compose exec -T api python -m vav.cli.seed_recommendation_evaluations
 
-recommendation-seed-fixtures:
+recommendation-build-pool:
 	docker compose exec -T api python -m vav.cli.seed_recommendation_fixtures
 	docker compose exec -T api python -m vav.cli.build_recommendation_pool
+
+recommendation-generate-fixtures:
 	docker compose exec -T api python -m vav.cli.generate_recommendation_fixture_batches
 
 recommendation-test:
@@ -430,7 +431,9 @@ recommendation-admin-e2e:
 recommendation-verify:
 	$(MAKE) recommendation-migrate
 	$(MAKE) recommendation-seed
-	$(MAKE) recommendation-seed-fixtures
+	$(MAKE) recommendation-seed-evaluations
+	$(MAKE) recommendation-build-pool
+	$(MAKE) recommendation-generate-fixtures
 	$(MAKE) recommendation-test
 	$(MAKE) recommendation-concurrency-test
 	$(MAKE) recommendation-security-test

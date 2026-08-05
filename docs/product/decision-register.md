@@ -59,12 +59,21 @@
 | `dating_profile_default_visibility` | trust_and_safety | undecided | 新档案一律 Strict，字段默认可见性只能收紧不能放宽 |
 | `dating_photo_moderation_provider` | platform_and_trust | undecided | 自动检测仅作审核辅助；人脸识别与跨站搜索默认禁用且不得自动判定冒用 |
 | `dating_profile_review_staffing` | operations | undecided | 审核员默认无敏感字段、原图与暂停权限；双人复核门槛待运营确认 |
-| `recommendation_faith_weighting_policy` | product_and_ministry | undecided | 信仰相关特征的默认权重来自版本化策略记录；信仰重要性只作软性对齐，不得被解释为属灵评分或排序资格 |
-| `recommendation_membership_benefit_scope` | business_and_trust | undecided | 会员等级只能影响自己的每日数量、筛选器与批次频率；不得影响对方的硬性条件、安全限制或隐私设置 |
-| `recommendation_experiment_governance` | product_and_privacy | undecided | 实验默认关闭且需审批；任何实验不得绕过硬性条件、安全护栏或解释规则 |
-| `recommendation_daily_batch_size_policy` | product | undecided | 每日推荐数量与补充批次为可配置项，默认保守；不得以提高曝光为由突破对方的展示预算 |
-| `recommendation_cross_region_matching_policy` | product_and_legal | undecided | 跨地区与跨境推荐范围未定；地理兼容性只使用粗粒度代码，不读取精确位置 |
 
 ## 决策记录格式
 
 每次决策需记录：键、结论、负责人、批准人、依据、影响模块、生效日期、回退方式。更改 `project-manifest.yaml` 时必须同步更新本表和相关 ADR。
+
+## Batch 14 — recommendation engine
+
+| Decision | Owner | Status | Interim behaviour |
+| --- | --- | --- | --- |
+| `recommendation_default_feature_weights` | product_and_matchmaking | undecided | The transparent baseline in `features.py` is used and versioned in the active strategy. |
+| `recommendation_minimum_score_thresholds` | product_and_matchmaking | undecided | Directional 4000 bps, bidirectional 5000 bps as an engineering default, not a compatibility claim. |
+| `recommendation_daily_exposure_limits` | operations_and_product | undecided | 10 per batch, 20 received per day, 50 shown per profile per day. |
+| `recommendation_repeat_exposure_cooldown` | product | undecided | 30 days. |
+| `recommendation_exploration_policy` | product_and_matchmaking | undecided | 2 exploration slots, +1 in a sparse region, all still fully qualified. |
+| `recommendation_cold_start_minimum_exposure` | product | undecided | 5 qualified exposures for a new approved profile. |
+| `recommendation_fairness_thresholds` | trust_and_product | undecided | Measured and reported; no automatic rebalancing that would violate a member's stated conditions. |
+| `recommendation_experiments_in_production` | product_and_legal | undecided | Disabled; approval required before any treatment can start. |
+| `recommendation_ai_explanation_rewrite` | product_and_legal | undecided | Disabled; deterministic templates only. |

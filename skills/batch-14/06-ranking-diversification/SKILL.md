@@ -1,9 +1,10 @@
-# Ranking, adjustments and diversification
+# Ranking and diversification
 
-Ranking is deterministic for a fixed (strategy, candidate snapshot, seed), so refreshing a page
-never reshuffles a batch. Novelty, repeat-exposure and popularity adjustments are reported
-separately from the raw compatibility score — an exposure penalty must never masquerade as a
-lower match. Diversification is maximal marginal relevance over candidates that already passed
-eligibility, hard constraints and the score floors: it reorders, it never admits. A policy that
-claims it may bypass hard constraints is refused outright. A per-city cap must never produce an
-under-filled batch.
+Rank deterministically from a fixed seed, candidate snapshot and versioned
+policy, so refreshing a batch cannot reshuffle it. Keep novelty, diversity,
+exposure and exploration adjustments separate from the compatibility score, and
+store the snapshot that produced each position. Diversify on city, region,
+interests, lifestyle and profile novelty within the already-qualified set only —
+no adjustment can create a recommendation that failed a hard constraint, a
+safety check or the minimum scores. Final ranks are unique and contiguous, and
+no operator can force a pair into a position.

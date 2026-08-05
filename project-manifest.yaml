@@ -82,6 +82,34 @@ phases:
       - moderation
 
 pending_decisions:
+  recommendation_default_feature_weights:
+    owner: product_and_matchmaking
+    status: undecided
+    value: null
+  recommendation_minimum_score_thresholds:
+    owner: product_and_matchmaking
+    status: undecided
+    value: null
+  recommendation_daily_exposure_limits:
+    owner: operations_and_product
+    status: undecided
+    value: null
+  recommendation_exploration_policy:
+    owner: product_and_matchmaking
+    status: undecided
+    value: null
+  recommendation_fairness_thresholds:
+    owner: trust_and_product
+    status: undecided
+    value: null
+  recommendation_experiments_in_production:
+    owner: product_and_legal
+    status: undecided
+    value: null
+  recommendation_ai_explanation_rewrite:
+    owner: product_and_legal
+    status: undecided
+    value: null
   payment_legal_entity:
     owner: business
     status: undecided
@@ -278,33 +306,9 @@ pending_decisions:
     owner: privacy_legal_and_ai
     status: undecided
     value: null
-  recommendation_faith_weighting_policy:
-    owner: product_and_ministry
-    status: undecided
-    value: null
-  recommendation_membership_benefit_scope:
-    owner: business_and_trust
-    status: undecided
-    value: null
-  recommendation_experiment_governance:
-    owner: product_and_privacy
-    status: undecided
-    value: null
-  recommendation_daily_batch_size_policy:
-    owner: product
-    status: undecided
-    value: null
-  recommendation_cross_region_matching_policy:
-    owner: product_and_legal
-    status: undecided
-    value: null
 
 quality:
   credentials_committed: false
-  recommendation_hard_constraints_never_auto_relaxed: true
-  recommendation_moderation_gateway_fails_closed: true
-  recommendation_explanations_template_only: true
-  recommendation_release_gated_by_safety_guardrails: true
   database_changes_via_migrations: true
   backend_authoritative_for_permissions: true
   backend_authoritative_for_payments: true

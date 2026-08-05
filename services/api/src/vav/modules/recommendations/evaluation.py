@@ -1,354 +1,165 @@
-"""Offline evaluation of a recommendation strategy.
+"""Offline recommendation evaluation metrics and release guardrails.
 
-Evaluation runs against synthetic or explicitly authorised de-identified
-fixtures. A strategy cannot be activated until an evaluation passes, and a
-guardrail failure blocks the release regardless of engagement metrics.
+Correctness metrics (hard-constraint violations, blocked-pair leakage, privacy
+leakage) are release blocking and must be exactly zero. Ranking-quality metrics
+are informative only: a better NDCG can never unlock a strategy that violates a
+member's stated conditions.
 """
 
 # ruff: noqa: E501
+
 from __future__ import annotations
 
-import math
+from dataclasses import dataclass, field
+from math import log2
 from typing import Any
-from uuid import UUID
 
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession
+EVALUATION_POLICY_VERSION = "1.0.0"
 
-from vav.common.exceptions import VavError
-from vav.models.identity import User
-from vav.modules.recommendations import service
-from vav.modules.recommendations.domain import GUARDRAIL_METRICS
+#: Metrics that must be zero for a strategy to be activated.
+RELEASE_BLOCKING_METRICS: tuple[str, ...] = (
+    "hard_constraint_violation_rate_bps",
+    "eligibility_violation_rate_bps",
+    "blocked_pair_leakage_rate_bps",
+    "privacy_violation_rate_bps",
+    "safety_restriction_violation_rate_bps",
+    "contact_information_leakage_rate_bps",
+    "unapproved_profile_exposure_rate_bps",
+)
 
-#: A release is blocked when any of these ceilings is exceeded.
-GUARDRAIL_THRESHOLDS: dict[str, int] = {
-    "hard_constraint_violation_rate_bps": 0,
-    "eligibility_violation_rate_bps": 0,
-    "blocked_pair_leakage_rate_bps": 0,
-    "privacy_violation_rate_bps": 0,
-    "safety_restriction_violation_rate_bps": 0,
-    "empty_result_rate_bps": 5000,
-    "exposure_gini_bps": 7000,
-}
+#: Guardrails compared against configured thresholds instead of zero.
+GUARDRAIL_METRICS: tuple[str, ...] = (
+    "report_rate_bps",
+    "block_rate_bps",
+    "severe_negative_feedback_rate_bps",
+    "empty_result_rate_bps",
+    "pool_opt_out_rate_bps",
+    "exposure_gini_bps",
+)
+
+
+@dataclass(frozen=True)
+class EvaluationResult:
+    dataset_code: str
+    strategy_code: str
+    strategy_version: str
+    metrics: dict[str, int]
+    passed: bool
+    blocking_failures: list[str] = field(default_factory=list)
+    guardrail_failures: list[str] = field(default_factory=list)
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "dataset_code": self.dataset_code,
+            "strategy_code": self.strategy_code,
+            "strategy_version": self.strategy_version,
+            "metrics": self.metrics,
+            "passed": self.passed,
+            "blocking_failures": self.blocking_failures,
+            "guardrail_failures": self.guardrail_failures,
+            "policy_version": EVALUATION_POLICY_VERSION,
+        }
+
+
+def rate_bps(numerator: int, denominator: int) -> int:
+    if denominator <= 0:
+        return 0
+    return int(round(min(1.0, numerator / denominator) * 10_000))
 
 
 def ndcg_at_k(relevances: list[int], k: int) -> int:
-    """Ranking quality in basis points; a flat list scores 10000."""
-    if not relevances:
+    """NDCG in basis points for a ranked relevance list."""
+    if k <= 0 or not relevances:
         return 0
     top = relevances[:k]
-    gain = sum(value / math.log2(index + 2) for index, value in enumerate(top))
-    ideal_list = sorted(relevances, reverse=True)[:k]
-    ideal = sum(value / math.log2(index + 2) for index, value in enumerate(ideal_list))
-    return round(gain / ideal * 10000) if ideal else 0
+    gain = sum((2**value - 1) / log2(index + 2) for index, value in enumerate(top))
+    ideal_order = sorted(relevances, reverse=True)[:k]
+    ideal = sum((2**value - 1) / log2(index + 2) for index, value in enumerate(ideal_order))
+    if ideal == 0:
+        return 0
+    return int(round(min(1.0, gain / ideal) * 10_000))
 
 
 def precision_at_k(relevances: list[int], k: int, *, threshold: int = 1) -> int:
     if k <= 0 or not relevances:
         return 0
     top = relevances[:k]
-    hits = len([value for value in top if value >= threshold])
-    return round(hits * 10000 / len(top))
+    hits = sum(1 for value in top if value >= threshold)
+    return rate_bps(hits, len(top))
 
 
-async def run(
-    session: AsyncSession,
-    actor: User,
+def pairwise_agreement(predicted: list[int], observed: list[int]) -> int:
+    """Share of candidate pairs ordered the same way by score and by outcome."""
+    if len(predicted) != len(observed) or len(predicted) < 2:
+        return 0
+    agree = 0
+    total = 0
+    for i in range(len(predicted)):
+        for j in range(i + 1, len(predicted)):
+            if observed[i] == observed[j]:
+                continue
+            total += 1
+            if (predicted[i] - predicted[j]) * (observed[i] - observed[j]) > 0:
+                agree += 1
+    return rate_bps(agree, total)
+
+
+def catalog_coverage(exposed_profiles: set[str], eligible_profiles: set[str]) -> int:
+    return rate_bps(len(exposed_profiles & eligible_profiles), len(eligible_profiles))
+
+
+def gini_bps(values: list[int]) -> int:
+    """Exposure concentration; 0 means perfectly even, 10000 fully concentrated."""
+    if not values:
+        return 0
+    ordered = sorted(values)
+    total = sum(ordered)
+    if total == 0:
+        return 0
+    count = len(ordered)
+    weighted = sum((index + 1) * value for index, value in enumerate(ordered))
+    gini = (2 * weighted) / (count * total) - (count + 1) / count
+    return int(round(max(0.0, min(1.0, gini)) * 10_000))
+
+
+def qualified_exposure_gap_bps(group_exposure: dict[str, tuple[int, int]]) -> int:
+    """Largest exposure-rate gap between equally qualified groups.
+
+    Each entry is ``(exposed_count, qualified_count)``; comparing anything but
+    equally qualified populations would justify pushing unsuitable profiles.
+    """
+    rates = [
+        rate_bps(exposed, qualified)
+        for exposed, qualified in group_exposure.values()
+        if qualified > 0
+    ]
+    if len(rates) < 2:
+        return 0
+    return max(rates) - min(rates)
+
+
+def evaluate(
     *,
-    dataset_id: UUID,
-    strategy_id: UUID,
-) -> dict[str, Any]:
-    """Evaluate a strategy over a dataset and record a pass/fail run."""
-    service.enabled()
-    dataset = (
-        (
-            await session.execute(
-                text("SELECT * FROM recommendation_evaluation_datasets WHERE id=:id"),
-                {"id": dataset_id},
-            )
-        )
-        .mappings()
-        .first()
+    dataset_code: str,
+    strategy_code: str,
+    strategy_version: str,
+    metrics: dict[str, int],
+    guardrail_thresholds: dict[str, int] | None = None,
+) -> EvaluationResult:
+    """Apply release rules to a computed metric set."""
+    blocking = [name for name in RELEASE_BLOCKING_METRICS if int(metrics.get(name, 0)) > 0]
+    thresholds = guardrail_thresholds or {}
+    guardrails = [
+        name
+        for name in GUARDRAIL_METRICS
+        if name in thresholds and int(metrics.get(name, 0)) > int(thresholds[name])
+    ]
+    return EvaluationResult(
+        dataset_code=dataset_code,
+        strategy_code=strategy_code,
+        strategy_version=strategy_version,
+        metrics=metrics,
+        passed=not blocking and not guardrails,
+        blocking_failures=blocking,
+        guardrail_failures=guardrails,
     )
-    if dataset is None:
-        raise VavError(
-            "RECOMMENDATION_DATASET_NOT_FOUND", "Evaluation dataset not found.", status_code=404
-        )
-    if not dataset["synthetic_only"] and dataset["privacy_review_status"] != "approved":
-        raise VavError(
-            "RECOMMENDATION_DATASET_NOT_APPROVED",
-            "A non-synthetic evaluation dataset requires privacy approval.",
-            status_code=409,
-        )
-
-    run_id = await session.scalar(
-        text(
-            "INSERT INTO recommendation_evaluation_runs (dataset_id,strategy_id,status) "
-            "VALUES (:dataset,:strategy,'running') RETURNING id"
-        ),
-        {"dataset": dataset_id, "strategy": strategy_id},
-    )
-
-    correctness = await _correctness_metrics(session, strategy_id)
-    ranking_metrics = await _ranking_metrics(session)
-    coverage = await _coverage_metrics(session)
-    fairness = await _fairness_metrics(session)
-
-    failures: list[dict[str, Any]] = []
-    combined = {**correctness, **coverage, **fairness}
-    for metric, ceiling in GUARDRAIL_THRESHOLDS.items():
-        value = combined.get(metric)
-        if value is not None and int(value) > ceiling:
-            failures.append({"metric": metric, "value": value, "ceiling": ceiling})
-
-    passed = not failures
-    await session.execute(
-        text(
-            "UPDATE recommendation_evaluation_runs SET status='completed',correctness_metrics=CAST(:correctness AS jsonb),"
-            "ranking_metrics=CAST(:ranking AS jsonb),coverage_metrics=CAST(:coverage AS jsonb),"
-            "fairness_metrics=CAST(:fairness AS jsonb),guardrail_failures=CAST(:failures AS jsonb),"
-            "passed=:passed,completed_at=now() WHERE id=:id"
-        ),
-        {
-            "id": run_id,
-            "correctness": service.json_value(correctness),
-            "ranking": service.json_value(ranking_metrics),
-            "coverage": service.json_value(coverage),
-            "fairness": service.json_value(fairness),
-            "failures": service.json_value(failures),
-            "passed": passed,
-        },
-    )
-    if passed:
-        await session.execute(
-            text("UPDATE recommendation_strategies SET evaluation_passed=true WHERE id=:id"),
-            {"id": strategy_id},
-        )
-    await service.audit(
-        session,
-        "recommendation.evaluation.completed" if passed else "recommendation.release.blocked",
-        "recommendation_strategy",
-        strategy_id,
-        actor_id=actor.id,
-        context={"passed": passed, "guardrail_failures": [item["metric"] for item in failures]},
-    )
-    await session.commit()
-    return {
-        "run_id": str(run_id),
-        "passed": passed,
-        "correctness_metrics": correctness,
-        "ranking_metrics": ranking_metrics,
-        "coverage_metrics": coverage,
-        "fairness_metrics": fairness,
-        "guardrail_failures": failures,
-        "guardrail_metrics_considered": list(GUARDRAIL_METRICS),
-        "engagement_alone_cannot_pass_a_release": True,
-    }
-
-
-async def _correctness_metrics(session: AsyncSession, strategy_id: UUID) -> dict[str, Any]:
-    total_items = int(await session.scalar(text("SELECT count(*) FROM recommendation_items")) or 0)
-    violations = int(
-        await session.scalar(
-            text(
-                "SELECT count(*) FROM recommendation_items i "
-                "JOIN recommendation_candidate_pairs c ON c.id=i.candidate_pair_id "
-                "WHERE COALESCE((c.hard_constraint_snapshot->>'passed')::boolean, false) = false"
-            )
-        )
-        or 0
-    )
-    stale_version = int(
-        await session.scalar(
-            text(
-                "SELECT count(*) FROM recommendation_items i "
-                "JOIN dating_profile_recommendation_projections p ON p.user_id=i.recommended_user_id "
-                "WHERE (i.visible_profile_snapshot->>'approved_profile_version')::int "
-                "IS DISTINCT FROM p.approved_profile_version"
-            )
-        )
-        or 0
-    )
-    self_recommendations = int(
-        await session.scalar(
-            text(
-                "SELECT count(*) FROM recommendation_items WHERE viewer_user_id = recommended_user_id"
-            )
-        )
-        or 0
-    )
-    blocked_leaks = 0
-    blocks_exist = await session.scalar(
-        text("SELECT to_regclass('public.user_blocks') IS NOT NULL")
-    )
-    if blocks_exist:
-        blocked_leaks = int(
-            await session.scalar(
-                text(
-                    "SELECT count(*) FROM recommendation_items i JOIN user_blocks b "
-                    "ON (b.blocker_user_id=i.viewer_user_id AND b.blocked_user_id=i.recommended_user_id) "
-                    "OR (b.blocker_user_id=i.recommended_user_id AND b.blocked_user_id=i.viewer_user_id) "
-                    "WHERE i.status <> 'invalidated'"
-                )
-            )
-            or 0
-        )
-    ineligible = int(
-        await session.scalar(
-            text(
-                "SELECT count(*) FROM recommendation_items i "
-                "LEFT JOIN recommendation_pool_entries p ON p.user_id=i.recommended_user_id "
-                "WHERE i.status IN ('ready','exposed','viewed') AND COALESCE(p.eligible, false) = false"
-            )
-        )
-        or 0
-    )
-
-    def rate(value: int) -> int:
-        return round(value * 10000 / total_items) if total_items else 0
-
-    _ = strategy_id
-    return {
-        "evaluated_items": total_items,
-        "hard_constraint_violation_rate_bps": rate(violations),
-        "eligibility_violation_rate_bps": rate(ineligible),
-        "blocked_pair_leakage_rate_bps": rate(blocked_leaks),
-        "profile_version_accuracy_bps": 10000 - rate(stale_version),
-        "self_recommendation_count": self_recommendations,
-        "privacy_violation_rate_bps": 0,
-        "safety_restriction_violation_rate_bps": rate(blocked_leaks),
-        "explanation_consistency_bps": 10000,
-    }
-
-
-async def _ranking_metrics(session: AsyncSession) -> dict[str, Any]:
-    rows = (
-        (
-            await session.execute(
-                text(
-                    "SELECT i.recommendation_batch_id, i.rank_position, i.bidirectional_score_bps, "
-                    "i.viewer_to_candidate_score_bps, i.candidate_to_viewer_score_bps "
-                    "FROM recommendation_items i ORDER BY i.recommendation_batch_id, i.rank_position"
-                )
-            )
-        )
-        .mappings()
-        .all()
-    )
-    if not rows:
-        return {
-            "ndcg_at_10_bps": 0,
-            "precision_at_5_bps": 0,
-            "pairwise_agreement_bps": 0,
-            "minimum_directional_bps": 0,
-        }
-
-    batches: dict[Any, list[int]] = {}
-    minimums: list[int] = []
-    for row in rows:
-        batches.setdefault(row["recommendation_batch_id"], []).append(
-            int(row["bidirectional_score_bps"])
-        )
-        minimums.append(
-            min(
-                int(row["viewer_to_candidate_score_bps"]), int(row["candidate_to_viewer_score_bps"])
-            )
-        )
-
-    ndcg_values: list[int] = []
-    precision_values: list[int] = []
-    agreements = 0
-    comparisons = 0
-    for scores in batches.values():
-        relevances = [round(score / 1000) for score in scores]
-        ndcg_values.append(ndcg_at_k(relevances, 10))
-        precision_values.append(precision_at_k(relevances, 5, threshold=5))
-        for index, left in enumerate(scores):
-            for right in scores[index + 1 :]:
-                comparisons += 1
-                if left >= right:
-                    agreements += 1
-
-    return {
-        "ndcg_at_10_bps": round(sum(ndcg_values) / len(ndcg_values)),
-        "precision_at_5_bps": round(sum(precision_values) / len(precision_values)),
-        # Ranking must agree with the compatibility score it claims to reflect.
-        "pairwise_agreement_bps": round(agreements * 10000 / comparisons) if comparisons else 10000,
-        "minimum_directional_bps": min(minimums),
-    }
-
-
-async def _coverage_metrics(session: AsyncSession) -> dict[str, Any]:
-    eligible = int(
-        await session.scalar(
-            text("SELECT count(*) FROM recommendation_pool_entries WHERE eligible=true")
-        )
-        or 0
-    )
-    exposed_profiles = int(
-        await session.scalar(
-            text("SELECT count(DISTINCT recommended_user_id) FROM recommendation_items")
-        )
-        or 0
-    )
-    viewers_with_batch = int(
-        await session.scalar(
-            text(
-                "SELECT count(DISTINCT user_id) FROM recommendation_batches WHERE generated_size > 0"
-            )
-        )
-        or 0
-    )
-    repeat = int(
-        await session.scalar(
-            text(
-                "SELECT count(*) FROM (SELECT viewer_user_id,exposed_user_id FROM recommendation_exposures "
-                "GROUP BY viewer_user_id,exposed_user_id HAVING count(*) > 1) repeats"
-            )
-        )
-        or 0
-    )
-    total_exposures = int(
-        await session.scalar(text("SELECT count(*) FROM recommendation_exposures")) or 0
-    )
-    return {
-        "eligible_profiles": eligible,
-        "profile_exposure_coverage_bps": round(exposed_profiles * 10000 / eligible)
-        if eligible
-        else 0,
-        "viewers_with_recommendations": viewers_with_batch,
-        "empty_result_rate_bps": (
-            round((eligible - viewers_with_batch) * 10000 / eligible) if eligible else 0
-        ),
-        "repeat_exposure_rate_bps": (
-            round(repeat * 10000 / total_exposures) if total_exposures else 0
-        ),
-    }
-
-
-async def _fairness_metrics(session: AsyncSession) -> dict[str, Any]:
-    from vav.modules.recommendations import exposure as exposure_rules
-
-    rows = (
-        (
-            await session.execute(
-                text(
-                    "SELECT p.user_id, count(e.id) AS exposures FROM recommendation_pool_entries p "
-                    "LEFT JOIN recommendation_exposures e ON e.exposed_user_id=p.user_id "
-                    "WHERE p.eligible=true GROUP BY p.user_id"
-                )
-            )
-        )
-        .mappings()
-        .all()
-    )
-    counts = {str(row["user_id"]): int(row["exposures"]) for row in rows}
-    fairness = exposure_rules.exposure_fairness(counts, len(counts))
-    return {
-        "exposure_gini_bps": fairness["gini_bps"],
-        "qualified_long_tail_never_exposed": fairness["never_exposed_count"],
-        "exposure_coverage_bps": fairness["coverage_bps"],
-        "max_exposure_share_bps": fairness["max_exposure_share_bps"],
-        # Fairness is only ever compared inside the qualified candidate set.
-        "measured_within_qualified_candidates_only": True,
-    }
