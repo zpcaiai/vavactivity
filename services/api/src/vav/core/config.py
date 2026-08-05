@@ -1045,6 +1045,87 @@ class Settings(BaseSettings):
         default=True, validation_alias="RECOMMENDATION_REQUIRE_ZERO_BLOCKED_PAIR_LEAKAGE"
     )
 
+    matchmaking_interactions_enabled: bool = Field(
+        default=True, validation_alias="MATCHMAKING_INTERACTIONS_ENABLED"
+    )
+    matchmaking_allow_direct_profile_like: bool = Field(
+        default=False, validation_alias="MATCHMAKING_ALLOW_DIRECT_PROFILE_LIKE"
+    )
+    matchmaking_require_valid_recommendation_item: bool = Field(
+        default=True, validation_alias="MATCHMAKING_REQUIRE_VALID_RECOMMENDATION_ITEM"
+    )
+    matchmaking_like_ttl_days: int = Field(
+        default=180, ge=1, validation_alias="MATCHMAKING_LIKE_TTL_DAYS"
+    )
+    matchmaking_skip_not_now_cooldown_days: int = Field(
+        default=30, ge=1, validation_alias="MATCHMAKING_SKIP_NOT_NOW_COOLDOWN_DAYS"
+    )
+    matchmaking_skip_not_interested_cooldown_days: int = Field(
+        default=180, ge=1, validation_alias="MATCHMAKING_SKIP_NOT_INTERESTED_COOLDOWN_DAYS"
+    )
+    matchmaking_allow_skip_undo: bool = Field(
+        default=True, validation_alias="MATCHMAKING_ALLOW_SKIP_UNDO"
+    )
+    matchmaking_skip_undo_window_seconds: int = Field(
+        default=300, ge=0, validation_alias="MATCHMAKING_SKIP_UNDO_WINDOW_SECONDS"
+    )
+    matchmaking_mutual_match_enabled: bool = Field(
+        default=True, validation_alias="MATCHMAKING_MUTUAL_MATCH_ENABLED"
+    )
+    matchmaking_single_like_notification_enabled: bool = Field(
+        default=False, validation_alias="MATCHMAKING_SINGLE_LIKE_NOTIFICATION_ENABLED"
+    )
+    matchmaking_mutual_match_notification_enabled: bool = Field(
+        default=True, validation_alias="MATCHMAKING_MUTUAL_MATCH_NOTIFICATION_ENABLED"
+    )
+    matchmaking_invitation_enabled: bool = Field(
+        default=True, validation_alias="MATCHMAKING_INVITATION_ENABLED"
+    )
+    matchmaking_invitation_ttl_days: int = Field(
+        default=7, ge=1, validation_alias="MATCHMAKING_INVITATION_TTL_DAYS"
+    )
+    matchmaking_declined_pair_cooldown_days: int = Field(
+        default=180, ge=1, validation_alias="MATCHMAKING_DECLINED_PAIR_COOLDOWN_DAYS"
+    )
+    matchmaking_expired_invitation_cooldown_days: int = Field(
+        default=30, ge=1, validation_alias="MATCHMAKING_EXPIRED_INVITATION_COOLDOWN_DAYS"
+    )
+    matchmaking_invitation_message_max_chars: int = Field(
+        default=500, ge=1, validation_alias="MATCHMAKING_INVITATION_MESSAGE_MAX_CHARS"
+    )
+    matchmaking_invitation_contact_info_blocking: bool = Field(
+        default=True, validation_alias="MATCHMAKING_INVITATION_CONTACT_INFO_BLOCKING"
+    )
+    matchmaking_expired_invitation_reopens_match: bool = Field(
+        default=True, validation_alias="MATCHMAKING_EXPIRED_INVITATION_REOPENS_MATCH"
+    )
+    matchmaking_contact_exchange_policy: Literal[
+        "platform_only",
+        "mutual_confirmation_required",
+        "automatic_after_invitation_accepted",
+    ] = Field(
+        default="mutual_confirmation_required",
+        validation_alias="MATCHMAKING_CONTACT_EXCHANGE_POLICY",
+    )
+    matchmaking_contact_exchange_require_verified_contact: bool = Field(
+        default=True, validation_alias="MATCHMAKING_CONTACT_EXCHANGE_REQUIRE_VERIFIED_CONTACT"
+    )
+    matchmaking_contact_reveal_token_ttl_seconds: int = Field(
+        default=300, ge=30, validation_alias="MATCHMAKING_CONTACT_REVEAL_TOKEN_TTL_SECONDS"
+    )
+    matchmaking_contact_grant_default_ttl_days: int = Field(
+        default=0, ge=0, validation_alias="MATCHMAKING_CONTACT_GRANT_DEFAULT_TTL_DAYS"
+    )
+    matchmaking_fail_closed_on_moderation_error: bool = Field(
+        default=True, validation_alias="MATCHMAKING_FAIL_CLOSED_ON_MODERATION_ERROR"
+    )
+    matchmaking_block_invalidates_contact_grants: bool = Field(
+        default=True, validation_alias="MATCHMAKING_BLOCK_INVALIDATES_CONTACT_GRANTS"
+    )
+    matchmaking_idempotency_ttl_hours: int = Field(
+        default=24, ge=1, validation_alias="MATCHMAKING_IDEMPOTENCY_TTL_HOURS"
+    )
+
     @property
     def dating_photo_allowed_type_set(self) -> frozenset[str]:
         return frozenset(
@@ -1120,6 +1201,26 @@ class Settings(BaseSettings):
             raise ValueError("recommendation safety checks must fail closed")
         if not self.recommendation_require_zero_blocked_pair_leakage:
             raise ValueError("blocked pairs can never be recommended")
+        if not self.matchmaking_fail_closed_on_moderation_error:
+            raise ValueError("interaction safety checks must fail closed")
+        if not self.matchmaking_block_invalidates_contact_grants:
+            raise ValueError("a block must revoke contact access")
+        if self.matchmaking_single_like_notification_enabled:
+            raise ValueError("a one-sided like can never notify its target")
+        if (
+            self.environment == "production"
+            and self.matchmaking_contact_exchange_policy
+            == "automatic_after_invitation_accepted"
+        ):
+            raise ValueError(
+                "automatic contact exchange requires an approved product and privacy decision"
+            )
+        if self.environment == "production" and (
+            not self.matchmaking_contact_exchange_require_verified_contact
+        ):
+            raise ValueError("only verified contact points can be exchanged")
+        if self.environment == "production" and self.matchmaking_allow_direct_profile_like:
+            raise ValueError("liking an arbitrary profile requires an approved product decision")
         if (
             self.environment == "production"
             and self.recommendation_experiments_enabled
