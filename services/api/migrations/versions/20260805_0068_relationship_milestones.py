@@ -34,9 +34,12 @@ def upgrade() -> None:
       deleted_at TIMESTAMPTZ,
       CHECK (visibility IN ('private','shared')),
       CHECK (status IN ('active','deleted'))
-    );
-    CREATE INDEX ix_relationship_milestones_journey ON relationship_milestones(journey_id, created_at DESC)
+    )
     """)
+    op.execute(
+        "CREATE INDEX ix_relationship_milestones_journey "
+        "ON relationship_milestones(journey_id, created_at DESC)"
+    )
 
 
 def downgrade() -> None:
