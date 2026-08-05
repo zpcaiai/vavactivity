@@ -401,6 +401,32 @@ RECOMMENDATION_PERMISSIONS = {
     "recommendations.audit.read",
 }
 
+#: Batch 15. The ``.sensitive.`` and ``.content.`` permissions are separated
+#: from ordinary reads because a one-sided like, an invitation body and a
+#: contact detail are things an operator should not see while doing routine
+#: work — only during a named investigation, with a recorded purpose.
+MATCHMAKING_INTERACTION_PERMISSIONS = {
+    "matchmaking.interactions.read",
+    "matchmaking.interactions.sensitive.read",
+    "matchmaking.matches.read",
+    "matchmaking.matches.invalidate",
+    "matchmaking.matches.freeze",
+    "matchmaking.matches.restore",
+    "matchmaking.invitations.read",
+    "matchmaking.invitations.content.read",
+    "matchmaking.invitations.invalidate",
+    "matchmaking.contact_exchange.read",
+    "matchmaking.contact_exchange.sensitive.read",
+    "matchmaking.contact_exchange.revoke",
+    "matchmaking.diagnostics.run",
+    "matchmaking.events.replay",
+    "matchmaking.dead_letters.resolve",
+    "matchmaking.analytics.read",
+    "matchmaking.incidents.read",
+    "matchmaking.incidents.manage",
+    "matchmaking.audit.read",
+}
+
 ALL_PERMISSIONS = (
     IDENTITY_PERMISSIONS
     | CMS_PERMISSIONS
@@ -415,6 +441,7 @@ ALL_PERMISSIONS = (
     | PRIVACY_PERMISSIONS
     | MATCHMAKING_PROFILE_PERMISSIONS
     | RECOMMENDATION_PERMISSIONS
+    | MATCHMAKING_INTERACTION_PERMISSIONS
 )
 
 ROLE_PERMISSIONS: dict[str, set[str]] = {
@@ -735,6 +762,34 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "recommendations.evaluations.read",
         "recommendations.evaluations.approve",
         "recommendations.audit.read",
+    },
+    # Day-to-day interaction operations. Deliberately without the sensitive
+    # reads, the invitation body, contact revocation and the freeze control:
+    # routine work never requires seeing who liked whom.
+    "interaction_operator": {
+        "matchmaking.interactions.read",
+        "matchmaking.matches.read",
+        "matchmaking.invitations.read",
+        "matchmaking.contact_exchange.read",
+        "matchmaking.diagnostics.run",
+        "matchmaking.analytics.read",
+        "matchmaking.audit.read",
+    },
+    # Investigations. Sensitive reads are unlocked here, and every one of them
+    # requires a stated purpose and writes a sensitive-access audit row.
+    "interaction_safety_reviewer": {
+        permission
+        for permission in MATCHMAKING_INTERACTION_PERMISSIONS
+        if not permission.startswith(("matchmaking.events.", "matchmaking.dead_letters."))
+    },
+    # Support can diagnose and clear stuck events, and can see nothing
+    # sensitive at all.
+    "interaction_support": {
+        "matchmaking.interactions.read",
+        "matchmaking.matches.read",
+        "matchmaking.invitations.read",
+        "matchmaking.diagnostics.run",
+        "matchmaking.dead_letters.resolve",
     },
     "analyst": {"audit.read", "catalog.audit.read"},
     "support_agent": {"users.read", "catalog.products.read"},

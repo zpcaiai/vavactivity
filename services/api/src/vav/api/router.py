@@ -11,6 +11,12 @@ from vav.modules.courses.router import router as courses_router
 from vav.modules.health.router import router as health_router
 from vav.modules.identity.router import router as identity_router
 from vav.modules.knowledge.router import router as knowledge_router
+from vav.modules.matchmaking_interactions.admin_router import (
+    router as matchmaking_interactions_admin_router,
+)
+from vav.modules.matchmaking_interactions.router import (
+    router as matchmaking_interactions_router,
+)
 from vav.modules.matchmaking_profiles.admin_router import (
     router as matchmaking_profiles_admin_router,
 )
@@ -44,3 +50,7 @@ api_router.include_router(matchmaking_profiles_router, tags=["matchmaking-profil
 api_router.include_router(matchmaking_profiles_admin_router, tags=["matchmaking-profiles-admin"])
 api_router.include_router(recommendations_router, tags=["recommendations"])
 api_router.include_router(recommendations_admin_router, tags=["recommendations-admin"])
+api_router.include_router(matchmaking_interactions_router, tags=["matchmaking-interactions"])
+api_router.include_router(
+    matchmaking_interactions_admin_router, tags=["matchmaking-interactions-admin"]
+)
