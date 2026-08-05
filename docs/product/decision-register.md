@@ -77,3 +77,15 @@
 | `recommendation_fairness_thresholds` | trust_and_product | undecided | Measured and reported; no automatic rebalancing that would violate a member's stated conditions. |
 | `recommendation_experiments_in_production` | product_and_legal | undecided | Disabled; approval required before any treatment can start. |
 | `recommendation_ai_explanation_rewrite` | product_and_legal | undecided | Disabled; deterministic templates only. |
+
+## Batch 15 — matchmaking interactions
+
+| Decision | Owner | Status | Interim behaviour |
+| --- | --- | --- | --- |
+| `matchmaking_direct_profile_like` | product_and_trust | undecided | Disabled. A like requires a valid recommendation item or an approved activity source; liking an arbitrary profile is not reachable. |
+| `matchmaking_contact_exchange_policy` | product_privacy_and_legal | undecided | `mutual_confirmation_required`. Automatic exchange after acceptance is implemented but switched off and needs explicit approval. |
+| `matchmaking_invitation_expiry_policy` | product | undecided | 7-day TTL; expiry returns the match to `active` and starts a 30-day cooldown. |
+| `matchmaking_repeat_invitation_policy` | product | undecided | Resend only after expiry plus cooldown. A decline never permits an automatic resend. |
+| `matchmaking_declined_pair_cooldown` | product_and_matchmaking | undecided | 180 days before the pair returns to the recommendation pool. |
+| `matchmaking_contact_grant_ttl` | privacy_and_product | undecided | No automatic date expiry; grants end on withdrawal, block, restriction, contact change or relationship end. |
+| `matchmaking_skip_cooldowns` | product_and_matchmaking | undecided | `not_now` 30 days, `not_interested` 180 days. Neither becomes a block or a hidden hard preference. |
