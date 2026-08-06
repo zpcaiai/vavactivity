@@ -1,0 +1,1 @@
+import { coreThresholds, get } from "./common.js"; export const options={vus:3,duration:"20s",thresholds:coreThresholds}; export default function(){get("/api/v1/recommendations","recommendations-auth-boundary");}

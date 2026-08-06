@@ -1,0 +1,7 @@
+module: {code: counseling, owner: counseling, version: "1.0.0"}
+dependencies: {required: [identity, catalog, commerce, notifications, privacy]}
+database: {revisions: [27]}
+events: {publishes: [counseling.appointment.confirmed.v1], consumes: [commerce.entitlement.activated.v1]}
+permissions: {prefixes: [counseling.]}
+configuration: {prefixes: [COUNSELING_]}
+health: {checks: [meeting_provider]}

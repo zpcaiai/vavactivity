@@ -1,0 +1,24 @@
+schema_version: "1.0.0"
+environment: dr
+application:
+  debug: false
+  public_api_base_url: https://api.dr.vav.example
+  user_web_url: https://dr.vav.example
+  admin_web_url: https://admin.dr.vav.example
+  cookie_secure: true
+  cors_origins: [https://dr.vav.example, https://admin.dr.vav.example]
+providers: {payment: live, email: transactional, ai: approved}
+data: {database_tls: true, redis_tls: true, object_storage_public: false, field_encryption: true, backup_encryption: true}
+observability: {otel_endpoint: http://otel-collector:4318, trace_sample_ratio: 0.25, structured_logs: true}
+secrets:
+  database: cloud://dr/database-url
+  redis: cloud://dr/redis-url
+  jwt_private_key: cloud://dr/jwt-private-key
+  jwt_public_key: cloud://dr/jwt-public-key
+  field_encryption_master_key: cloud://dr/field-encryption-key
+  privacy_search_hmac_pepper: cloud://dr/privacy-hmac-pepper
+  backup_encryption_key: cloud://dr/backup-encryption-key
+  payment_webhook_secret: cloud://dr/payment-webhook-secret
+  email_provider_secret: cloud://dr/email-provider-secret
+  ai_provider_api_key: cloud://dr/ai-provider-key
+feature_flags: {version: dr-approved}

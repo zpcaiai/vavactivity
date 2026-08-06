@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vav
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: 25m
+spec:
+  tls: [{hosts: [www.vav.example, admin.vav.example, api.vav.example], secretName: vav-tls}]
+  rules:
+    - host: api.vav.example
+      http: {paths: [{path: /, pathType: Prefix, backend: {service: {name: api, port: {name: http}}}}]}
+    - host: admin.vav.example
+      http: {paths: [{path: /, pathType: Prefix, backend: {service: {name: admin-web, port: {name: http}}}}]}
+    - host: www.vav.example
+      http: {paths: [{path: /, pathType: Prefix, backend: {service: {name: user-web, port: {name: http}}}}]}

@@ -399,3 +399,34 @@ quality:
   backend_authoritative_for_permissions: true
   backend_authoritative_for_payments: true
   ai_failure_must_not_block_core_services: true
+
+production_assembly:
+  architecture_version: "1.0.0"
+  minimum_supported_schema_version: 83
+  migration_head: "20260806_0083"
+  module_manifest_root: services/api/src/vav/modules
+  event_manifest: config/events/manifest.yaml
+  feature_manifest: config/features/manifest.yaml
+  seed_manifest: config/seeds/manifest.yaml
+  environment_schema: config/env/env.schema.json
+  release_manifest: release-manifest.yaml
+  applications:
+    user-web: {path: apps/user-web, framework: vue-spa}
+    admin-web: {path: apps/admin-web, framework: vue-spa}
+  services:
+    api: {path: services/api, framework: fastapi, health: /api/v1/health/ready}
+    worker: {path: services/worker, framework: celery}
+  infrastructure:
+    postgres: {extensions: [pgcrypto, vector, pg_trgm], authoritative: true}
+    redis: {authoritative: false, rebuildable: true}
+    object_storage: {s3_compatible: true, public_admin: false}
+  acceptance_commands:
+    - make manifest-check
+    - make migration-check
+    - make contract-test
+    - make system-test
+    - make complete-e2e
+    - make performance-smoke
+    - make backup-verify
+    - make restore-drill
+    - make production-readiness

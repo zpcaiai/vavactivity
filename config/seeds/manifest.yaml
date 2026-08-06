@@ -1,0 +1,23 @@
+schema_version: "1.0.0"
+production_allowed_groups: [system, reference]
+groups:
+  system:
+    - vav.cli.seed_permissions
+    - vav.cli.seed_notification_templates
+    - vav.cli.seed_privacy_inventory
+    - vav.cli.seed_trust_safety
+  reference:
+    - vav.cli.seed_catalog
+    - vav.cli.seed_courses
+    - vav.cli.seed_counseling
+    - vav.cli.seed_dating_taxonomies
+    - vav.cli.seed_relationships
+    - vav.cli.seed_memberships
+  demo:
+    - vav.cli.seed_cms
+    - vav.cli.seed_activities
+    - vav.cli.seed_knowledge
+    - vav.cli.seed_recommendation_fixtures
+  test:
+    - vav.cli.seed_test_user
+    - vav.cli.seed_recommendation_evaluations

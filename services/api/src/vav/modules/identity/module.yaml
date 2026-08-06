@@ -1,0 +1,7 @@
+module: {code: identity, owner: identity, version: "1.0.0"}
+dependencies: {required: [system]}
+database: {revisions: [2, 3, 4, 5]}
+events: {publishes: [identity.user.registered.v1], consumes: []}
+permissions: {prefixes: [users., roles., admins., audit.]}
+configuration: {prefixes: [AUTH_]}
+health: {checks: [signing_keys, session_store]}

@@ -11,6 +11,7 @@ async function signIn(page: Page) {
   await page.getByLabel("邮箱或账号").fill(memberEmail);
   await page.getByLabel("密码").fill(recommendationFixturePassword);
   await page.getByRole("button", { name: "欢迎回来" }).click();
+  await expect(page).toHaveURL(/\/zh-CN\/account\/security$/u);
 }
 
 test("member sees a consent-preserving relationship journey", async ({ page }) => {

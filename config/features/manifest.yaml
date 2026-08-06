@@ -1,0 +1,11 @@
+schema_version: "1.0.0"
+protected_controls:
+  - authorization
+  - payment_confirmation
+  - privacy_consent
+  - field_encryption
+  - trust_safety_gateway
+flags:
+  modules.ai_assistant: {default: false, owner: ai, safety_critical: false}
+  recommendations.strategy_next: {default: false, owner: matchmaking, safety_critical: false}
+  operations.maintenance_banner: {default: false, owner: platform, safety_critical: false}

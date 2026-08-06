@@ -1,0 +1,7 @@
+module: {code: commerce, owner: commerce, version: "1.0.0"}
+dependencies: {required: [identity, catalog, notifications]}
+database: {revisions: [16]}
+events: {publishes: [commerce.entitlement.activated.v1], consumes: []}
+permissions: {prefixes: [commerce.]}
+configuration: {prefixes: [COMMERCE_, PAYMENT_, STRIPE_, PAYPAL_, SUBSCRIPTION_, REFUND_, ENTITLEMENT_, RECONCILIATION_]}
+health: {checks: [payment_webhook_inbox]}

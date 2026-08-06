@@ -1,0 +1,7 @@
+module: {code: relationships, owner: matchmaking, version: "1.0.0"}
+dependencies: {required: [identity, matchmaking_interactions, notifications, privacy, trust_safety]}
+database: {revisions: [65, 66, 67, 68, 69, 70]}
+events: {publishes: [relationship.journey.created.v1], consumes: [matchmaking.mutual_match.created.v1, safety.block.created.v1]}
+permissions: {prefixes: [relationships.]}
+configuration: {prefixes: [RELATIONSHIP_]}
+health: {checks: [mutual_confirmation, safety_gateway]}

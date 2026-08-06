@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: worker-default}
+spec:
+  replicas: 2
+  selector: {matchLabels: {app.kubernetes.io/name: worker-default}}
+  template:
+    metadata: {labels: {app.kubernetes.io/name: worker-default, vav.network/tier: backend}}
+    spec:
+      automountServiceAccountToken: false
+      securityContext: {runAsNonRoot: true, runAsUser: 10001, seccompProfile: {type: RuntimeDefault}}
+      containers:
+        - name: worker
+          image: ghcr.io/vav-platform/api@sha256:0000000000000000000000000000000000000000000000000000000000000000
+          args: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, "--queues=default,commerce,activities,courses,counseling"]
+          envFrom: [{configMapRef: {name: vav-runtime}}, {secretRef: {name: vav-runtime-secrets}}]
+          resources: {requests: {cpu: 250m, memory: 512Mi}, limits: {cpu: "2", memory: 2Gi}}
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+          volumeMounts: [{name: tmp, mountPath: /tmp}]
+      volumes: [{name: tmp, emptyDir: {sizeLimit: 256Mi}}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: worker-ai}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app.kubernetes.io/name: worker-ai}}
+  template:
+    metadata: {labels: {app.kubernetes.io/name: worker-ai, vav.network/tier: backend}}
+    spec:
+      automountServiceAccountToken: false
+      securityContext: {runAsNonRoot: true, runAsUser: 10001, seccompProfile: {type: RuntimeDefault}}
+      containers:
+        - name: worker
+          image: ghcr.io/vav-platform/api@sha256:0000000000000000000000000000000000000000000000000000000000000000
+          args: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, "--queues=ai,knowledge,recommendations"]
+          envFrom: [{configMapRef: {name: vav-runtime}}, {secretRef: {name: vav-runtime-secrets}}]
+          resources: {requests: {cpu: 500m, memory: 1Gi}, limits: {cpu: "4", memory: 4Gi}}
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+          volumeMounts: [{name: tmp, mountPath: /tmp}]
+      volumes: [{name: tmp, emptyDir: {sizeLimit: 512Mi}}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: worker-notifications}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app.kubernetes.io/name: worker-notifications}}
+  template:
+    metadata: {labels: {app.kubernetes.io/name: worker-notifications, vav.network/tier: backend}}
+    spec:
+      automountServiceAccountToken: false
+      securityContext: {runAsNonRoot: true, runAsUser: 10001, seccompProfile: {type: RuntimeDefault}}
+      containers:
+        - name: worker
+          image: ghcr.io/vav-platform/api@sha256:0000000000000000000000000000000000000000000000000000000000000000
+          args: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, --queues=notifications]
+          envFrom: [{configMapRef: {name: vav-runtime}}, {secretRef: {name: vav-runtime-secrets}}]
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+          volumeMounts: [{name: tmp, mountPath: /tmp}]
+      volumes: [{name: tmp, emptyDir: {}}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: worker-privacy}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app.kubernetes.io/name: worker-privacy}}
+  template:
+    metadata: {labels: {app.kubernetes.io/name: worker-privacy, vav.network/tier: backend}}
+    spec:
+      automountServiceAccountToken: false
+      securityContext: {runAsNonRoot: true, runAsUser: 10001, seccompProfile: {type: RuntimeDefault}}
+      containers:
+        - name: worker
+          image: ghcr.io/vav-platform/api@sha256:0000000000000000000000000000000000000000000000000000000000000000
+          args: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, --queues=privacy]
+          envFrom: [{configMapRef: {name: vav-runtime}}, {secretRef: {name: vav-runtime-secrets}}]
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+          volumeMounts: [{name: tmp, mountPath: /tmp}]
+      volumes: [{name: tmp, emptyDir: {}}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: worker-safety}
+spec:
+  replicas: 2
+  selector: {matchLabels: {app.kubernetes.io/name: worker-safety}}
+  template:
+    metadata: {labels: {app.kubernetes.io/name: worker-safety, vav.network/tier: backend}}
+    spec:
+      automountServiceAccountToken: false
+      securityContext: {runAsNonRoot: true, runAsUser: 10001, seccompProfile: {type: RuntimeDefault}}
+      containers:
+        - name: worker
+          image: ghcr.io/vav-platform/api@sha256:0000000000000000000000000000000000000000000000000000000000000000
+          args: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, --queues=safety]
+          envFrom: [{configMapRef: {name: vav-runtime}}, {secretRef: {name: vav-runtime-secrets}}]
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+          volumeMounts: [{name: tmp, mountPath: /tmp}]
+      volumes: [{name: tmp, emptyDir: {}}]

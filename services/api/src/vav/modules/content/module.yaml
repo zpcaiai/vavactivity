@@ -1,0 +1,7 @@
+module: {code: content, owner: content, version: "1.0.0"}
+dependencies: {required: [identity, system]}
+database: {revisions: [6, 7, 8, 9, 10]}
+events: {publishes: [content.published.v1], consumes: []}
+permissions: {prefixes: [content., contact.]}
+configuration: {prefixes: [CMS_, MEDIA_, PUBLIC_SITE_, CONTACT_]}
+health: {checks: [object_storage]}

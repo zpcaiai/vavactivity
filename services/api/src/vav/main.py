@@ -11,6 +11,7 @@ from vav.api.router import api_router
 from vav.core.config import get_settings
 from vav.core.database import close_resources
 from vav.core.logging import configure_logging
+from vav.core.metrics import MetricsMiddleware
 from vav.core.request_context import RequestContextMiddleware
 from vav.core.security_headers import SecurityHeadersMiddleware
 from vav.core.telemetry import configure_telemetry
@@ -44,6 +45,7 @@ def create_app() -> FastAPI:
         expose_headers=["X-Request-ID"],
     )
     application.add_middleware(RequestContextMiddleware)
+    application.add_middleware(MetricsMiddleware)
     application.add_middleware(SecurityHeadersMiddleware)
     install_exception_handlers(application)
     application.include_router(api_router, prefix="/api/v1")

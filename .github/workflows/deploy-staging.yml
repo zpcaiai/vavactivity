@@ -1,0 +1,60 @@
+name: Deploy Staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_manifest_artifact:
+        description: Immutable release manifest artifact name
+        required: true
+        type: string
+      artifact_run_id:
+        description: Build workflow run containing the release manifest
+        required: true
+        type: string
+      release_commit:
+        description: Full Git commit recorded in the release manifest
+        required: true
+        type: string
+
+permissions: {contents: read, actions: read}
+
+jobs:
+  deploy:
+    environment: staging
+    runs-on: ubuntu-latest
+    concurrency: {group: vav-staging, cancel-in-progress: false}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: "${{ inputs.release_commit }}"}
+      - uses: actions/download-artifact@v4
+        with:
+          name: "${{ inputs.release_manifest_artifact }}"
+          path: release
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          run-id: "${{ inputs.artifact_run_id }}"
+      - uses: astral-sh/setup-uv@v6
+        with: {version: "0.8.3", python-version: "3.12"}
+      - uses: azure/setup-kubectl@v4
+      - name: Require staging credentials
+        env: {KUBE_CONFIG: "${{ secrets.STAGING_KUBECONFIG }}"}
+        run: test -n "$KUBE_CONFIG" && printf '%s' "$KUBE_CONFIG" | base64 -d > "$RUNNER_TEMP/kubeconfig"
+      - name: Render immutable staging resources
+        run: |
+          kubectl kustomize deploy/kubernetes/overlays/staging > "$RUNNER_TEMP/staging-base.yaml"
+          for phase in migration application; do
+            uv run --with pyyaml python scripts/release/render_deployment.py \
+              --manifest release/release-manifest.yaml \
+              --checksum release/release-manifest.yaml.sha256 \
+              --input "$RUNNER_TEMP/staging-base.yaml" \
+              --output "$RUNNER_TEMP/staging-$phase.yaml" \
+              --expected-commit "${{ inputs.release_commit }}" \
+              --phase "$phase"
+          done
+      - name: Run migration before application rollout
+        run: |
+          kubectl --kubeconfig "$RUNNER_TEMP/kubeconfig" -n vav-staging delete job database-migration --ignore-not-found
+          kubectl --kubeconfig "$RUNNER_TEMP/kubeconfig" apply -f "$RUNNER_TEMP/staging-migration.yaml"
+          kubectl --kubeconfig "$RUNNER_TEMP/kubeconfig" -n vav-staging wait --for=condition=complete job/database-migration --timeout=10m
+          kubectl --kubeconfig "$RUNNER_TEMP/kubeconfig" apply -f "$RUNNER_TEMP/staging-application.yaml"
+      - run: kubectl --kubeconfig "$RUNNER_TEMP/kubeconfig" -n vav-staging rollout status deployment/api --timeout=10m
+      - run: curl --fail --retry 12 --retry-delay 10 "${{ vars.STAGING_API_URL }}/api/v1/health/ready"

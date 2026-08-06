@@ -1,0 +1,13 @@
+schema_version: "1.0.0"
+policy:
+  legacy_revisions: {from: 1, to: 82, review_status: accepted_existing_chain, rollback: forward-fix-preferred}
+  current_revisions:
+    83:
+      module: system
+      risk: low
+      estimated_lock: under-5-seconds
+      backfill_required: false
+      rollback: forward-fix-preferred
+  destructive_changes_require: [verified-backup, restore-drill, migration-dry-run, human-approval]
+  expand_migrate_contract: true
+  production_snapshot_floor: "20260805_0082"

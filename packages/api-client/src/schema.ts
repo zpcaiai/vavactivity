@@ -9236,6 +9236,385 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/system/backups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List-System-Backups */
+        get: operations["list_system_backups_api_v1_admin_system_backups_get"];
+        put?: never;
+        /** Record Backup */
+        post: operations["record_backup_api_v1_admin_system_backups_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/system/capacity-baselines": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List-System-Capacity-Baselines */
+        get: operations["list_system_capacity_baselines_api_v1_admin_system_capacity_baselines_get"];
+        put?: never;
+        /** Record Capacity Baseline */
+        post: operations["record_capacity_baseline_api_v1_admin_system_capacity_baselines_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/system/configuration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Configuration */
+        get: operations["configuration_api_v1_admin_system_configuration_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/system/configuration/diff/{target_environment}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Configuration Diff */
+        get: operations["configuration_diff_api_v1_admin_system_configuration_diff__target_environment__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/system/dead-letters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Dead Letters */
+        get: operations["dead_letters_api_v1_admin_system_dead_letters_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/system/dead-letters/{dead_letter_id}/replay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Replay Dead Letter */
+        post: operations["replay_dead_letter_api_v1_admin_system_dead_letters__dead_letter_id__replay_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/system/feature-flags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List-System-Feature-Flags */
+        get: operations["list_system_feature_flags_api_v1_admin_system_feature_flags_get"];
+        put?: never;
+        /** Create Flag */
+        post: operations["create_flag_api_v1_admin_system_feature_flags_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/system/feature-flags/{flag_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Flag */
+        patch: operations["update_flag_api_v1_admin_system_feature_flags__flag_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/admin/system/feature-flags/{flag_id}/activate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Activate Flag */
+        post: operations["activate_flag_api_v1_admin_system_feature_flags__flag_id__activate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/system/feature-flags/{flag_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve Flag */
+        post: operations["approve_flag_api_v1_admin_system_feature_flags__flag_id__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/system/integrations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Integrations */
+        get: operations["integrations_api_v1_admin_system_integrations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/system/jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List-System-Jobs */
+        get: operations["list_system_jobs_api_v1_admin_system_jobs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/system/jobs/{job_id}/{operation}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Transition Job */
+        post: operations["transition_job_api_v1_admin_system_jobs__job_id___operation__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/system/maintenance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List-System-Maintenance */
+        get: operations["list_system_maintenance_api_v1_admin_system_maintenance_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/system/maintenance/disable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Disable Maintenance */
+        post: operations["disable_maintenance_api_v1_admin_system_maintenance_disable_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/system/maintenance/enable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enable Maintenance */
+        post: operations["enable_maintenance_api_v1_admin_system_maintenance_enable_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/system/releases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List-System-Releases */
+        get: operations["list_system_releases_api_v1_admin_system_releases_get"];
+        put?: never;
+        /** Create Release */
+        post: operations["create_release_api_v1_admin_system_releases_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/system/releases/{release_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve Release */
+        post: operations["approve_release_api_v1_admin_system_releases__release_id__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/system/releases/{release_id}/deploy/{environment}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record Release Deployment */
+        post: operations["record_release_deployment_api_v1_admin_system_releases__release_id__deploy__environment__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/system/releases/{release_id}/rollback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rollback Release */
+        post: operations["rollback_release_api_v1_admin_system_releases__release_id__rollback_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/system/restore-drills": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List-System-Restore-Drills */
+        get: operations["list_system_restore_drills_api_v1_admin_system_restore_drills_get"];
+        put?: never;
+        /** Record Restore Drill */
+        post: operations["record_restore_drill_api_v1_admin_system_restore_drills_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/system/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Status */
+        get: operations["status_api_v1_admin_system_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/trust-safety/appeals": {
         parameters: {
             query?: never;
@@ -10410,6 +10789,23 @@ export interface paths {
         };
         /** Dependency readiness */
         get: operations["readiness_api_v1_health_ready_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/health/startup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Startup configuration status */
+        get: operations["startup_api_v1_health_startup_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -12101,6 +12497,45 @@ export interface components {
             /** Weekly Limit */
             weekly_limit?: number | null;
         };
+        /** BackupRecordRequest */
+        BackupRecordRequest: {
+            /** Backup Reference Encrypted */
+            backup_reference_encrypted?: string | null;
+            /**
+             * Backup Type
+             * @enum {string}
+             */
+            backup_type: "postgres_full" | "postgres_wal" | "object_storage" | "configuration" | "complete";
+            /** Checksum Manifest */
+            checksum_manifest?: {
+                [key: string]: unknown;
+            };
+            /** Completed At */
+            completed_at?: string | null;
+            /**
+             * Environment
+             * @enum {string}
+             */
+            environment: "development" | "test" | "ci" | "staging" | "production" | "dr";
+            /** Expires At */
+            expires_at?: string | null;
+            /** Source Database Revision */
+            source_database_revision?: string | null;
+            /** Source Release Version */
+            source_release_version?: string | null;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "started" | "completed" | "failed" | "verified" | "expired";
+            /** Verified At */
+            verified_at?: string | null;
+        };
         /** BatchInvalidateRequest */
         BatchInvalidateRequest: {
             /** Reason */
@@ -12290,6 +12725,40 @@ export interface components {
             scheduled_at?: string | null;
             /** Template Code */
             template_code: string;
+        };
+        /** CapacityBaselineRecordRequest */
+        CapacityBaselineRecordRequest: {
+            /**
+             * Environment
+             * @enum {string}
+             */
+            environment: "development" | "test" | "ci" | "staging" | "production" | "dr";
+            /** Infrastructure Snapshot */
+            infrastructure_snapshot: {
+                [key: string]: unknown;
+            };
+            /** Load Snapshot */
+            load_snapshot: {
+                [key: string]: unknown;
+            };
+            /** Release Version */
+            release_version: string;
+            /** Result Metrics */
+            result_metrics: {
+                [key: string]: unknown;
+            };
+            /** Scenario Code */
+            scenario_code: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "passed" | "failed" | "not_certified";
+            /**
+             * Tested At
+             * Format: date-time
+             */
+            tested_at: string;
         };
         /** CartItemCreateRequest */
         CartItemCreateRequest: {
@@ -12923,6 +13392,20 @@ export interface components {
             /** Reason Code */
             reason_code?: string | null;
         };
+        /** DeploymentEvidenceRequest */
+        DeploymentEvidenceRequest: {
+            /** Artifact Sha256 */
+            artifact_sha256: string;
+            /**
+             * Completed At
+             * Format: date-time
+             */
+            completed_at: string;
+            /** Evidence */
+            evidence?: {
+                [key: string]: unknown;
+            };
+        };
         /** DocumentRequest */
         DocumentRequest: {
             /** Allowed Roles */
@@ -13161,6 +13644,36 @@ export interface components {
              * @default recommendation_list
              */
             source: string;
+        };
+        /** FeatureFlagCreateRequest */
+        FeatureFlagCreateRequest: {
+            /** Default Value */
+            default_value: {
+                [key: string]: unknown;
+            };
+            /** Description */
+            description?: string | null;
+            /** Flag Code */
+            flag_code: string;
+            /** Targeting Policy */
+            targeting_policy?: {
+                [key: string]: unknown;
+            };
+        };
+        /** FeatureFlagUpdateRequest */
+        FeatureFlagUpdateRequest: {
+            /** Default Value */
+            default_value: {
+                [key: string]: unknown;
+            };
+            /** Description */
+            description?: string | null;
+            /** Expected Version */
+            expected_version: number;
+            /** Targeting Policy */
+            targeting_policy?: {
+                [key: string]: unknown;
+            };
         };
         /**
          * FieldVisibility
@@ -13753,6 +14266,19 @@ export interface components {
             /** Password */
             password: string;
         };
+        /** MaintenanceChangeRequest */
+        MaintenanceChangeRequest: {
+            /** Approval Actor Id */
+            approval_actor_id?: string | null;
+            /** Public Message */
+            public_message?: string | null;
+            /** Reason Code */
+            reason_code: string;
+            /** Write Scope */
+            write_scope?: {
+                [key: string]: boolean;
+            };
+        };
         /** ManualGradeRequest */
         ManualGradeRequest: {
             /** Feedback */
@@ -14093,6 +14619,11 @@ export interface components {
             quiet_hours_start?: string | null;
             /** Quiet Hours Timezone */
             quiet_hours_timezone?: string | null;
+        };
+        /** OperationalReasonRequest */
+        OperationalReasonRequest: {
+            /** Reason Code */
+            reason_code: string;
         };
         /** OrderCancelRequest */
         OrderCancelRequest: {
@@ -15089,6 +15620,31 @@ export interface components {
              */
             ticket_type_id: string;
         };
+        /** ReleaseRecordCreateRequest */
+        ReleaseRecordCreateRequest: {
+            /** Configuration Fingerprint */
+            configuration_fingerprint: {
+                [key: string]: unknown;
+            };
+            /** Contract Checksums */
+            contract_checksums: {
+                [key: string]: string;
+            };
+            /** Database Revision */
+            database_revision: string;
+            /** Evidence Manifest */
+            evidence_manifest?: {
+                [key: string]: unknown;
+            };
+            /** Git Commit */
+            git_commit: string;
+            /** Image Digests */
+            image_digests: {
+                [key: string]: string;
+            };
+            /** Release Version */
+            release_version: string;
+        };
         /** ReminderPlanRequest */
         ReminderPlanRequest: {
             /**
@@ -15161,6 +15717,40 @@ export interface components {
             target_reference_id?: string | null;
             /** Target Type */
             target_type: string;
+        };
+        /** RestoreDrillRecordRequest */
+        RestoreDrillRecordRequest: {
+            /** Backup Record Id */
+            backup_record_id?: string | null;
+            /** Completed At */
+            completed_at?: string | null;
+            /** Drill Code */
+            drill_code: string;
+            /**
+             * Environment
+             * @enum {string}
+             */
+            environment: "development" | "test" | "ci" | "staging" | "production" | "dr";
+            /** Failure Summary */
+            failure_summary?: string | null;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "started" | "passed" | "failed" | "cancelled";
+            /** Target Database Revision */
+            target_database_revision?: string | null;
+            /** Target Release Version */
+            target_release_version?: string | null;
+            /** Verification Manifest */
+            verification_manifest?: {
+                [key: string]: unknown;
+            };
         };
         /** RestoreRequest */
         RestoreRequest: {
@@ -35719,6 +36309,812 @@ export interface operations {
             };
         };
     };
+    list_system_backups_api_v1_admin_system_backups_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    record_backup_api_v1_admin_system_backups_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BackupRecordRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_system_capacity_baselines_api_v1_admin_system_capacity_baselines_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    record_capacity_baseline_api_v1_admin_system_capacity_baselines_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CapacityBaselineRecordRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    configuration_api_v1_admin_system_configuration_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    configuration_diff_api_v1_admin_system_configuration_diff__target_environment__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                target_environment: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dead_letters_api_v1_admin_system_dead_letters_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    replay_dead_letter_api_v1_admin_system_dead_letters__dead_letter_id__replay_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dead_letter_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OperationalReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_system_feature_flags_api_v1_admin_system_feature_flags_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_flag_api_v1_admin_system_feature_flags_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FeatureFlagCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_flag_api_v1_admin_system_feature_flags__flag_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                flag_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FeatureFlagUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    activate_flag_api_v1_admin_system_feature_flags__flag_id__activate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                flag_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    approve_flag_api_v1_admin_system_feature_flags__flag_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                flag_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    integrations_api_v1_admin_system_integrations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    list_system_jobs_api_v1_admin_system_jobs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    transition_job_api_v1_admin_system_jobs__job_id___operation__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+                operation: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OperationalReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_system_maintenance_api_v1_admin_system_maintenance_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    disable_maintenance_api_v1_admin_system_maintenance_disable_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MaintenanceChangeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    enable_maintenance_api_v1_admin_system_maintenance_enable_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MaintenanceChangeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_system_releases_api_v1_admin_system_releases_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_release_api_v1_admin_system_releases_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReleaseRecordCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    approve_release_api_v1_admin_system_releases__release_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                release_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    record_release_deployment_api_v1_admin_system_releases__release_id__deploy__environment__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                release_id: string;
+                environment: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeploymentEvidenceRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rollback_release_api_v1_admin_system_releases__release_id__rollback_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                release_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OperationalReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_system_restore_drills_api_v1_admin_system_restore_drills_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    record_restore_drill_api_v1_admin_system_restore_drills_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RestoreDrillRecordRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    status_api_v1_admin_system_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
     appeal_queue_api_v1_admin_trust_safety_appeals_get: {
         parameters: {
             query?: never;
@@ -38096,6 +39492,28 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+        };
+    };
+    startup_api_v1_health_startup_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
         };

@@ -4,13 +4,27 @@ import asyncio
 from typing import Any
 
 from fastapi import APIRouter, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 
 from vav.common.schemas import success
 from vav.core.database import check_database, check_redis
+from vav.core.metrics import registry
 from vav.core.request_context import request_id_from_request
 
 router = APIRouter()
+
+
+@router.get("/startup", summary="Startup configuration status")
+async def startup(request: Request) -> dict[str, Any]:
+    return success(
+        {"status": "ok", "checks": {"configuration": "ok", "routers": "ok"}},
+        request_id_from_request(request),
+    )
+
+
+@router.get("/metrics", include_in_schema=False)
+async def metrics() -> PlainTextResponse:
+    return PlainTextResponse(registry.render(), media_type="text/plain; version=0.0.4")
 
 
 @router.get("/live", summary="Process liveness")

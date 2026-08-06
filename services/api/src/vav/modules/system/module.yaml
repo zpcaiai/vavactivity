@@ -1,0 +1,9 @@
+module: {code: system, owner: platform, version: "1.0.0"}
+dependencies: {required: []}
+database: {revisions: [1, 83]}
+events:
+  publishes: [system.release.created.v1, system.feature_flag.activated.v1, system.maintenance.changed.v1]
+  consumes: []
+permissions: {prefixes: [system.]}
+configuration: {prefixes: [APP_, DATABASE_, REDIS_, OTEL_, BACKUP_]}
+health: {checks: [configuration, release_identity, migration_revision]}

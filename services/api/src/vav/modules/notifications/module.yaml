@@ -1,0 +1,7 @@
+module: {code: notifications, owner: platform, version: "1.0.0"}
+dependencies: {required: [identity, privacy]}
+database: {revisions: [35, 36, 37, 38, 39, 40]}
+events: {publishes: [notification.delivery.failed.v1], consumes: [identity.user.registered.v1]}
+permissions: {prefixes: [notifications.]}
+configuration: {prefixes: [NOTIFICATION_]}
+health: {checks: [provider_routes, dead_letters]}

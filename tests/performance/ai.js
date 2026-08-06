@@ -1,0 +1,1 @@
+import { coreThresholds, get } from "./common.js"; export const options={vus:2,duration:"20s",thresholds:{...coreThresholds,http_req_duration:["p(95)<45000"]}}; export default function(){get("/api/v1/ai/conversations","ai-auth-boundary");}

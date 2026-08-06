@@ -1,0 +1,65 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources: [../../base]
+namespace: vav-staging
+patches:
+  - target: {kind: Namespace, name: vav}
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: vav-staging
+  - target: {kind: ConfigMap, name: vav-runtime}
+    patch: |-
+      - op: replace
+        path: /data/APP_ENV
+        value: staging
+  - target: {kind: ExternalSecret, name: vav-runtime-secrets}
+    patch: |-
+      - op: replace
+        path: /spec/secretStoreRef/name
+        value: staging-secret-store
+      - op: replace
+        path: /spec/data/0/remoteRef/key
+        value: vav/staging/database-url
+      - op: replace
+        path: /spec/data/1/remoteRef/key
+        value: vav/staging/redis-url
+      - op: replace
+        path: /spec/data/2/remoteRef/key
+        value: vav/staging/auth-pepper
+      - op: replace
+        path: /spec/data/3/remoteRef/key
+        value: vav/staging/privacy-pepper
+      - op: replace
+        path: /spec/data/4/remoteRef/key
+        value: vav/staging/backup-key
+      - op: replace
+        path: /spec/data/5/remoteRef/key
+        value: vav/staging/auth-private-key
+      - op: replace
+        path: /spec/data/6/remoteRef/key
+        value: vav/staging/auth-public-key
+      - op: replace
+        path: /spec/data/7/remoteRef/key
+        value: vav/staging/media-access-key
+      - op: replace
+        path: /spec/data/8/remoteRef/key
+        value: vav/staging/media-secret-key
+      - op: replace
+        path: /spec/data/9/remoteRef/key
+        value: vav/staging/stripe-secret-key
+      - op: replace
+        path: /spec/data/10/remoteRef/key
+        value: vav/staging/stripe-webhook-secret
+      - op: replace
+        path: /spec/data/11/remoteRef/key
+        value: vav/staging/paypal-client-id
+      - op: replace
+        path: /spec/data/12/remoteRef/key
+        value: vav/staging/paypal-client-secret
+      - op: replace
+        path: /spec/data/13/remoteRef/key
+        value: vav/staging/paypal-webhook-id
+      - op: replace
+        path: /spec/data/14/remoteRef/key
+        value: vav/staging/email-webhook-secret

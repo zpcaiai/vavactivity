@@ -1,0 +1,7 @@
+module: {code: activities, owner: activities, version: "1.0.0"}
+dependencies: {required: [identity, catalog, commerce, notifications, trust_safety]}
+database: {revisions: [17, 18, 19, 20, 21]}
+events: {publishes: [activity.registration.confirmed.v1], consumes: [commerce.entitlement.activated.v1, safety.block.created.v1]}
+permissions: {prefixes: [activities.]}
+configuration: {prefixes: [ACTIVITY_]}
+health: {checks: [waitlist_scheduler, safety_gateway]}

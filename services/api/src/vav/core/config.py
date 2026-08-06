@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import AnyHttpUrl, Field, SecretStr, model_validator
+from pydantic import AliasChoices, AnyHttpUrl, Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,9 +15,10 @@ class Settings(BaseSettings):
         case_sensitive=False,
     )
 
-    environment: Literal["development", "test", "staging", "production"] = Field(
-        default="development", validation_alias="APP_ENV"
+    environment: Literal["development", "test", "ci", "staging", "production", "dr"] = Field(
+        default="development", validation_alias=AliasChoices("APP_ENV", "APP_ENVIRONMENT")
     )
+    debug: bool = Field(default=False, validation_alias="APP_DEBUG")
     version: str = Field(default="0.1.0", validation_alias="APP_VERSION")
     log_level: str = Field(default="INFO", validation_alias="APP_LOG_LEVEL")
     display_timezone: str = Field(default="Asia/Shanghai", validation_alias="APP_DISPLAY_TIMEZONE")
@@ -40,6 +41,10 @@ class Settings(BaseSettings):
     )
     otel_endpoint: str | None = Field(default=None, validation_alias="OTEL_EXPORTER_OTLP_ENDPOINT")
     ai_enabled: bool = Field(default=False, validation_alias="AI_ENABLED")
+    backup_encryption_key: SecretStr = Field(
+        default=SecretStr("local-backup-key-change-me"),
+        validation_alias="BACKUP_ENCRYPTION_KEY",
+    )
 
     auth_issuer: str = Field(default="vav-platform", validation_alias="AUTH_ISSUER")
     auth_user_audience: str = Field(default="vav-user", validation_alias="AUTH_USER_AUDIENCE")
@@ -1332,28 +1337,43 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def reject_development_credentials_in_production(self) -> Settings:
-        if self.environment == "production" and (
+        production_like = self.environment in {"production", "dr"}
+        if production_like and (
             "local_development_only" in self.database_url or "localhost" in self.database_url
         ):
             raise ValueError("production cannot use development database credentials")
-        if self.environment == "production" and (
+        if production_like and self.debug:
+            raise ValueError("production cannot enable debug mode")
+        if production_like and "sslmode=require" not in self.database_url:
+            raise ValueError("production database connections require TLS")
+        if production_like and not self.redis_url.startswith("rediss://"):
+            raise ValueError("production Redis connections require TLS")
+        if production_like and any(
+            str(origin).startswith("http://") for origin in self.cors_origins
+        ):
+            raise ValueError("production CORS origins require HTTPS")
+        if production_like and not self.media_s3_endpoint.startswith("https://"):
+            raise ValueError("production object storage requires HTTPS")
+        if production_like and "change-me" in self.backup_encryption_key.get_secret_value():
+            raise ValueError("production requires a dedicated backup encryption key")
+        if production_like and (
             "change-me" in self.auth_refresh_token_pepper.get_secret_value()
             or not self.auth_cookie_secure
         ):
             raise ValueError("production requires a strong token pepper and secure cookies")
-        if self.environment == "production" and self.payment_test_fake_enabled:
+        if production_like and self.payment_test_fake_enabled:
             raise ValueError("production cannot enable the local payment fake")
         if self.payment_environment == "live" and self.environment != "production":
             raise ValueError("live payments require the production application environment")
-        if self.environment == "production" and self.course_video_provider == "fake_private":
+        if production_like and self.course_video_provider == "fake_private":
             raise ValueError("production must configure a real private course video provider")
-        if self.environment == "production" and self.counseling_meeting_provider == "fake":
+        if production_like and self.counseling_meeting_provider == "fake":
             raise ValueError("production must configure a real counseling meeting provider")
-        if self.environment == "production" and self.knowledge_embedding_provider == "fake":
+        if production_like and self.knowledge_embedding_provider == "fake":
             raise ValueError("production must configure a real knowledge embedding provider")
-        if self.environment == "production" and self.ai_model_provider == "deterministic_local":
+        if production_like and self.ai_model_provider == "deterministic_local":
             raise ValueError("production must configure an approved AI model provider")
-        if self.environment == "production" and not self.ai_conversation_encryption_enabled:
+        if production_like and not self.ai_conversation_encryption_enabled:
             raise ValueError("production must encrypt AI conversation content")
         if self.ai_external_training_default:
             raise ValueError("external AI training cannot be enabled by default")
@@ -1361,12 +1381,12 @@ class Settings(BaseSettings):
             raise ValueError("marketing notifications cannot be enabled by default")
         if self.notification_email_max_recipients_per_request != 1:
             raise ValueError("notification email delivery must use one recipient per request")
-        if self.environment == "production" and self.notification_email_provider in {
+        if production_like and self.notification_email_provider in {
             "mailpit",
             "fake",
         }:
             raise ValueError("production must configure an approved notification email provider")
-        if self.environment == "production" and (
+        if production_like and (
             "change-me" in self.notification_email_provider_webhook_secret.get_secret_value()
             or not self.notification_email_provider_webhook_secret.get_secret_value()
         ):
@@ -1383,7 +1403,7 @@ class Settings(BaseSettings):
             raise ValueError("biometric identification cannot be enabled for dating photos")
         if self.dating_allow_automatic_relaxation_default:
             raise ValueError("hard partner criteria cannot be relaxed by default")
-        if self.dating_review_auto_approve_enabled and self.environment == "production":
+        if self.dating_review_auto_approve_enabled and production_like:
             raise ValueError("production dating profiles require human review")
         if self.dating_profile_recommendation_min_completeness_bps < (
             self.dating_profile_submission_min_completeness_bps
@@ -1404,17 +1424,15 @@ class Settings(BaseSettings):
         if self.matchmaking_single_like_notification_enabled:
             raise ValueError("a one-sided like can never notify its target")
         if (
-            self.environment == "production"
+            production_like
             and self.matchmaking_contact_exchange_policy == "automatic_after_invitation_accepted"
         ):
             raise ValueError(
                 "automatic contact exchange requires an approved product and privacy decision"
             )
-        if self.environment == "production" and (
-            not self.matchmaking_contact_exchange_require_verified_contact
-        ):
+        if production_like and (not self.matchmaking_contact_exchange_require_verified_contact):
             raise ValueError("only verified contact points can be exchanged")
-        if self.environment == "production" and self.matchmaking_allow_direct_profile_like:
+        if production_like and self.matchmaking_allow_direct_profile_like:
             raise ValueError("liking an arbitrary profile requires an approved product decision")
         if not self.relationship_require_mutual_stage_confirmation:
             raise ValueError("formal relationship stages require mutual confirmation")
@@ -1467,7 +1485,7 @@ class Settings(BaseSettings):
         if not self.safety_red_team_require_zero_contact_leakage:
             raise ValueError("release requires zero contact leakage")
         if (
-            self.environment == "production"
+            production_like
             and self.recommendation_experiments_enabled
             and (not self.recommendation_experiment_approval_required)
         ):
@@ -1476,7 +1494,7 @@ class Settings(BaseSettings):
             self.recommendation_min_bidirectional_score_bps > 10_000
         ):
             raise ValueError("bidirectional score thresholds are basis points between 0 and 10000")
-        if self.environment == "production" and (
+        if production_like and (
             not self.privacy_field_encryption_enabled
             or not self.privacy_export_encryption_enabled
             or "change-me" in self.privacy_search_hmac_pepper.get_secret_value()

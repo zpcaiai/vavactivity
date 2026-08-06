@@ -1,0 +1,7 @@
+module: {code: ai_assistant, owner: ai, version: "1.0.0"}
+dependencies: {required: [identity, knowledge, privacy, trust_safety]}
+database: {revisions: [31, 32, 33, 34]}
+events: {publishes: [ai.human_referral.created.v1], consumes: [knowledge.index.published.v1]}
+permissions: {prefixes: [ai.]}
+configuration: {prefixes: [AI_]}
+health: {checks: [model_routes, safety_policy]}

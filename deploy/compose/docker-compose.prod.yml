@@ -1,0 +1,101 @@
+name: vav-platform-production
+
+x-security: &security
+  read_only: true
+  tmpfs: [/tmp]
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+
+x-backend: &backend
+  <<: *security
+  image: ${BACKEND_IMAGE:?set BACKEND_IMAGE to a signed image@sha256:digest}
+  env_file: [../../config/runtime/production.env.template]
+  environment:
+    DATABASE_URL: ${DATABASE_URL:?inject DATABASE_URL from the deployment secret manager}
+    REDIS_URL: ${REDIS_URL:?inject REDIS_URL from the deployment secret manager}
+    AUTH_REFRESH_TOKEN_PEPPER: ${AUTH_REFRESH_TOKEN_PEPPER:?inject AUTH_REFRESH_TOKEN_PEPPER}
+    BACKUP_ENCRYPTION_KEY: ${BACKUP_ENCRYPTION_KEY:?inject BACKUP_ENCRYPTION_KEY}
+    PRIVACY_SEARCH_HMAC_PEPPER: ${PRIVACY_SEARCH_HMAC_PEPPER:?inject PRIVACY_SEARCH_HMAC_PEPPER}
+    MEDIA_S3_ACCESS_KEY: ${MEDIA_S3_ACCESS_KEY:?inject MEDIA_S3_ACCESS_KEY}
+    MEDIA_S3_SECRET_KEY: ${MEDIA_S3_SECRET_KEY:?inject MEDIA_S3_SECRET_KEY}
+    STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:?inject STRIPE_SECRET_KEY}
+    STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:?inject STRIPE_WEBHOOK_SECRET}
+    PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:?inject PAYPAL_CLIENT_ID}
+    PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET:?inject PAYPAL_CLIENT_SECRET}
+    PAYPAL_WEBHOOK_ID: ${PAYPAL_WEBHOOK_ID:?inject PAYPAL_WEBHOOK_ID}
+    NOTIFICATION_EMAIL_PROVIDER_WEBHOOK_SECRET: ${NOTIFICATION_EMAIL_PROVIDER_WEBHOOK_SECRET:?inject notification webhook secret}
+  secrets: [auth-private-key, auth-public-key]
+  networks: [edge, internal]
+  restart: unless-stopped
+
+services:
+  migration:
+    <<: *backend
+    command: [alembic, upgrade, head]
+    networks: [internal]
+    restart: "no"
+
+  api:
+    <<: *backend
+    command: [uvicorn, vav.main:app, --host, 0.0.0.0, --port, "8000", --workers, "2"]
+    depends_on: {migration: {condition: service_completed_successfully}}
+    deploy: {replicas: 2, update_config: {order: start-first, failure_action: rollback}}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/ready', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  worker-default:
+    <<: *backend
+    networks: [internal]
+    command: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, "--queues=default,commerce,activities,courses,counseling"]
+  worker-ai:
+    <<: *backend
+    networks: [internal]
+    command: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, "--queues=ai,knowledge,recommendations"]
+  worker-notifications:
+    <<: *backend
+    networks: [internal]
+    command: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, --queues=notifications]
+  worker-privacy:
+    <<: *backend
+    networks: [internal]
+    command: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, --queues=privacy]
+  worker-safety:
+    <<: *backend
+    networks: [internal]
+    command: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, --queues=safety]
+  scheduler:
+    <<: *backend
+    networks: [internal]
+    command: [celery, --app, vav_worker.celery_app:celery_app, beat, --loglevel=INFO, --pidfile=/tmp/celerybeat.pid]
+    deploy: {replicas: 1}
+
+  user-web:
+    <<: *security
+    image: ${USER_WEB_IMAGE:?set USER_WEB_IMAGE to a signed image@sha256:digest}
+    networks: [edge]
+  admin-web:
+    <<: *security
+    image: ${ADMIN_WEB_IMAGE:?set ADMIN_WEB_IMAGE to a signed image@sha256:digest}
+    networks: [edge]
+
+  reverse-proxy:
+    <<: *security
+    image: ${REVERSE_PROXY_IMAGE:?set REVERSE_PROXY_IMAGE to an image@sha256:digest}
+    depends_on: [api, user-web, admin-web]
+    ports: ["443:8443"]
+    secrets: [tls-certificate, tls-private-key]
+    volumes: [../reverse-proxy/production.conf:/etc/nginx/conf.d/default.conf:ro]
+    networks: [edge]
+
+networks:
+  edge: {}
+  internal: {internal: true}
+
+secrets:
+  auth-private-key: {external: true}
+  auth-public-key: {external: true}
+  tls-certificate: {external: true}
+  tls-private-key: {external: true}

@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources: [../../base]
+namespace: vav-production
+labels:
+  - pairs: {vav.release/environment: production}
+patches:
+  - target: {kind: Namespace, name: vav}
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: vav-production
+# Release automation must replace every all-zero digest and fail before apply if any remains.

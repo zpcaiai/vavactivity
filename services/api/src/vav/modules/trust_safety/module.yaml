@@ -1,0 +1,7 @@
+module: {code: trust_safety, owner: trust_and_safety, version: "1.0.0"}
+dependencies: {required: [identity, privacy, notifications]}
+database: {revisions: [77, 78, 79, 80, 81, 82]}
+events: {publishes: [safety.block.created.v1, safety.restriction.changed.v1], consumes: []}
+permissions: {prefixes: [safety.]}
+configuration: {prefixes: [SAFETY_]}
+health: {checks: [block_propagation, decision_gateway, red_team_gate]}

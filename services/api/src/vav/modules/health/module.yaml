@@ -1,0 +1,7 @@
+module: {code: health, owner: platform, version: "1.0.0"}
+dependencies: {required: [system]}
+database: {revisions: []}
+events: {publishes: [], consumes: []}
+permissions: {prefixes: []}
+configuration: {prefixes: [APP_, DATABASE_, REDIS_, MEDIA_S3_]}
+health: {checks: [liveness, readiness, startup]}

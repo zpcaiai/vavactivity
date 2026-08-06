@@ -1,0 +1,23 @@
+name: vav-platform-test
+
+services:
+  api:
+    environment:
+      APP_ENV: test
+      PAYMENT_TEST_FAKE_ENABLED: "true"
+      AI_MODEL_PROVIDER: deterministic_local
+      NOTIFICATION_EMAIL_PROVIDER: fake
+
+  test-runner:
+    build:
+      context: ../..
+      dockerfile: infra/docker/backend.Dockerfile
+      target: development
+    profiles: [test]
+    environment:
+      APP_ENV: test
+      DATABASE_URL: postgresql+asyncpg://vav:${POSTGRES_PASSWORD:-vav_local_development_only}@postgres:5432/vav
+      REDIS_URL: redis://redis:6379/0
+    command: [pytest, tests, -q]
+    depends_on: {api: {condition: service_healthy}}
+    networks: [vav-internal]

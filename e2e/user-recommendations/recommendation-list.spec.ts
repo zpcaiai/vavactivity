@@ -90,11 +90,14 @@ test("requesting the batch again returns the same batch instead of buying more",
     page.getByText("重复获取只会返回同一批推荐，不会超出你设置的每日数量上限。")
   ).toBeVisible();
 
-  const before = await page.getByRole("article").count();
+  const cards = page.getByRole("article");
+  await expect(cards.first()).toBeVisible();
+  const before = await cards.count();
+  expect(before).toBeGreaterThan(0);
   await page.getByRole("button", { name: "获取今日推荐" }).click();
   await expect(page.getByRole("status")).toContainText(
     "重复请求不会超出每日数量上限。"
   );
   await expect(page.getByRole("status")).toContainText(/已获取每日推荐，共 \d+ 位。/);
-  await expect(page.getByRole("article")).toHaveCount(before);
+  await expect(cards).toHaveCount(before);
 });

@@ -32,6 +32,9 @@ test-results/
 *.log
 tmp/
 .minio/
+backups/
+restore-reports/
+performance-results/
 
 # local delivery / transfer artifacts
 _to_delete/

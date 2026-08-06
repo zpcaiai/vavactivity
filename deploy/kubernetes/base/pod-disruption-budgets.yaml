@@ -1,0 +1,14 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: {name: api}
+spec: {minAvailable: 1, selector: {matchLabels: {app.kubernetes.io/name: vav-api}}}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: {name: user-web}
+spec: {minAvailable: 1, selector: {matchLabels: {app.kubernetes.io/name: user-web}}}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: {name: admin-web}
+spec: {minAvailable: 1, selector: {matchLabels: {app.kubernetes.io/name: admin-web}}}

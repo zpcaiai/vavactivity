@@ -1,0 +1,1 @@
+import { coreThresholds, get } from "./common.js"; export const options={vus:10,duration:"30s",thresholds:coreThresholds}; export default function(){get("/api/v1/public/catalog/products","catalog-list");}

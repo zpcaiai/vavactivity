@@ -1,0 +1,29 @@
+name: PR Production Gates
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  assembly-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with: {version: "0.8.3", python-version: "3.12", enable-cache: true}
+      - run: uv sync --frozen --all-packages --all-groups
+      - run: PYTHONPATH=services/api/src uv run python scripts/diagnostics/validate_project_manifest.py
+      - run: PYTHONPATH=services/api/src uv run python scripts/diagnostics/validate_environment_config.py
+      - run: uv run pytest tests/contract tests/disaster-recovery -q
+      - run: ./scripts/release/production-readiness.sh
+
+  migration-compatibility:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with: {version: "0.8.3", python-version: "3.12", enable-cache: true}
+      - run: uv sync --frozen --all-packages --all-groups
+      - run: ./scripts/database/check-migrations.sh

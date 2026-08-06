@@ -24,6 +24,7 @@
     "privacy": "Privacy operations",
     "interactions": "Interaction operations",
     "relationships": "Relationship operations",
+    "system": "System operations",
     "settings": "Site settings",
     "admins": "Administrators",
     "audit": "Audit log"

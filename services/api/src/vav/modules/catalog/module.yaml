@@ -1,0 +1,7 @@
+module: {code: catalog, owner: commerce, version: "1.0.0"}
+dependencies: {required: [identity, content]}
+database: {revisions: [11, 12, 13, 14, 15]}
+events: {publishes: [catalog.product.published.v1], consumes: []}
+permissions: {prefixes: [catalog.]}
+configuration: {prefixes: [CATALOG_, PRICING_, INVENTORY_, PROMOTION_, EXCHANGE_]}
+health: {checks: [pricing_configuration]}

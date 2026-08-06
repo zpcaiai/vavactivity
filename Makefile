@@ -1,4 +1,4 @@
-.PHONY: bootstrap dev stop reset migrate seed lint test verify openapi \
+.PHONY: doctor bootstrap up down dev stop reset reset-local migrate seed smoke lint test verify openapi \
 	auth-migrate auth-seed create-super-admin auth-test auth-security-test auth-e2e auth-verify \
 	cms-migrate cms-seed cms-test cms-security-test cms-user-e2e cms-admin-e2e i18n-check cms-verify \
 	catalog-migrate catalog-seed catalog-test catalog-concurrency-test catalog-security-test \
@@ -43,22 +43,37 @@
 	safety-admin-e2e safety-verify
 
 bootstrap:
-	./scripts/bootstrap.sh
+	./scripts/vavctl bootstrap
+
+doctor:
+	./scripts/vavctl doctor
+
+up:
+	./scripts/vavctl up
+
+down:
+	./scripts/vavctl down
 
 dev:
-	docker compose up --build
+	./scripts/vavctl up
 
 stop:
-	docker compose down
+	./scripts/vavctl down
 
 reset:
-	docker compose down -v
+	./scripts/vavctl reset-local
+
+reset-local:
+	./scripts/vavctl reset-local
 
 migrate:
 	docker compose exec api alembic upgrade head
 
 seed:
-	docker compose exec api python -m vav.cli.seed
+	./scripts/vavctl seed
+
+smoke:
+	./scripts/vavctl smoke
 
 lint:
 	./scripts/lint.sh
@@ -610,3 +625,53 @@ safety-verify:
 	$(MAKE) safety-red-team
 	$(MAKE) safety-user-e2e
 	$(MAKE) safety-admin-e2e
+
+.PHONY: manifest-check config-check config-diff migration-check contract-test system-test \
+	complete-e2e performance-smoke performance-baseline backup backup-verify restore-drill \
+	restore-smoke production-readiness verify-all acceptance
+
+manifest-check:
+	PYTHONPATH=services/api/src .venv/bin/python scripts/diagnostics/validate_project_manifest.py
+
+config-check:
+	PYTHONPATH=services/api/src .venv/bin/python scripts/diagnostics/validate_environment_config.py
+
+config-diff:
+	PYTHONPATH=services/api/src .venv/bin/python scripts/diagnostics/config_diff.py $(or $(ENVIRONMENT),staging)
+
+migration-check:
+	./scripts/database/check-migrations.sh
+
+contract-test:
+	.venv/bin/pytest tests/contract -q
+
+system-test:
+	.venv/bin/pytest services/api/tests/system -q
+
+complete-e2e:
+	corepack pnpm exec playwright test --config playwright.complete.config.ts
+
+performance-smoke:
+	./scripts/performance/run-k6.sh tests/performance/smoke.js
+
+performance-baseline:
+	./scripts/performance/run-k6.sh tests/performance/baseline.js
+
+backup:
+	./scripts/vavctl backup
+
+backup-verify:
+	./scripts/vavctl backup-verify
+
+restore-drill:
+	./scripts/vavctl restore-drill
+
+restore-smoke:
+	./scripts/restore/restore-smoke.sh
+
+production-readiness:
+	./scripts/release/production-readiness.sh
+
+verify-all: manifest-check config-check migration-check verify safety-verify contract-test system-test complete-e2e performance-smoke
+
+acceptance: bootstrap smoke verify-all production-readiness

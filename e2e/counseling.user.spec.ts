@@ -16,10 +16,12 @@ test("a verified user can hold a slot and create a private counseling appointmen
   await page.getByLabel("我已阅读并同意服务条款与隐私说明").check();
   await page.getByRole("button", { name: "建立 VAV 账户" }).click();
   await page.goto(await verificationLinkFor(request, email));
+  await expect(page.getByRole("status")).toContainText("邮箱已验证");
   await page.goto("/zh-CN/auth/login");
   await page.getByLabel("邮箱").fill(email);
   await page.getByLabel("密码").fill(password);
   await page.getByRole("button", { name: "欢迎回来" }).click();
+  await expect(page).toHaveURL(/\/zh-CN\/account\/security$/);
 
   await page.goto("/zh-CN/counseling/growth-support-session");
   await expect(page.getByRole("heading", { name: "关系成长支持会谈", level: 1 })).toBeVisible();

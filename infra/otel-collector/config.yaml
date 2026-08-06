@@ -1,0 +1,22 @@
+receivers:
+  otlp:
+    protocols:
+      grpc: {endpoint: 0.0.0.0:4317}
+      http: {endpoint: 0.0.0.0:4318}
+processors:
+  memory_limiter: {check_interval: 1s, limit_mib: 256}
+  batch: {}
+  attributes/privacy:
+    actions:
+      - {key: enduser.id, action: delete}
+      - {key: user.email, action: delete}
+      - {key: http.request.header.authorization, action: delete}
+exporters:
+  otlphttp/tempo: {endpoint: http://tempo:4318}
+  debug: {verbosity: basic}
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, attributes/privacy, batch]
+      exporters: [otlphttp/tempo]

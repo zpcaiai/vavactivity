@@ -1,0 +1,7 @@
+module: {code: matchmaking_profiles, owner: matchmaking, version: "1.0.0"}
+dependencies: {required: [identity, privacy, trust_safety]}
+database: {revisions: [47, 48, 49, 50, 51, 52, 53]}
+events: {publishes: [dating_profile.approved.v1], consumes: [safety.block.created.v1]}
+permissions: {prefixes: [matchmaking.profiles., matchmaking.preferences., matchmaking.reviews., matchmaking.photos., matchmaking.schemas., matchmaking.taxonomies., matchmaking.completeness., matchmaking.projections.]}
+configuration: {prefixes: [DATING_]}
+health: {checks: [photo_storage, moderation_gateway]}

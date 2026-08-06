@@ -1,0 +1,7 @@
+module: {code: knowledge, owner: knowledge, version: "1.0.0"}
+dependencies: {required: [identity, content, privacy]}
+database: {revisions: [28, 29, 30]}
+events: {publishes: [knowledge.index.published.v1], consumes: []}
+permissions: {prefixes: [knowledge.]}
+configuration: {prefixes: [KNOWLEDGE_]}
+health: {checks: [embedding_provider, index_version]}

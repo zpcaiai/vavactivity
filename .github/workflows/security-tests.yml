@@ -1,0 +1,49 @@
+name: Security Tests
+
+on:
+  pull_request:
+    paths: ["services/**", "apps/**", "config/**", "deploy/**", "infra/**"]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sensitive-domains:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.0-pg16
+        env: {POSTGRES_DB: vav, POSTGRES_USER: vav, POSTGRES_PASSWORD: vav_ci_only}
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U vav -d vav" --health-interval 5s --health-timeout 5s --health-retries 20
+      redis:
+        image: redis:7.4.2-alpine3.21
+        ports: ["6379:6379"]
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      APP_ENV: test
+      DATABASE_URL: postgresql+asyncpg://vav:vav_ci_only@localhost:5432/vav
+      REDIS_URL: redis://localhost:6379/0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with: {version: "0.8.3", python-version: "3.12", enable-cache: true}
+      - run: uv sync --frozen --all-packages --all-groups
+      - run: ./scripts/generate-dev-auth-keys.sh
+      - run: uv run --package vav-platform-api alembic -c services/api/alembic.ini upgrade head
+      - run: uv run --package vav-platform-api python -m vav.cli.seed_permissions
+      - name: Security, privacy and red-team suites
+        run: >-
+          uv run --package vav-platform-api pytest
+          services/api/tests/commerce/security
+          services/api/tests/privacy/security
+          services/api/tests/recommendations/security
+          services/api/tests/matchmaking_interactions/security
+          services/api/tests/relationships/security
+          services/api/tests/memberships/security
+          services/api/tests/trust_safety/security
+          services/api/tests/trust_safety/privacy
+          services/api/tests/trust_safety/red_team -q

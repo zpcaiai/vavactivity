@@ -1,0 +1,24 @@
+schema_version: "1.0.0"
+environment: staging
+application:
+  debug: false
+  public_api_base_url: https://api.staging.vav.example
+  user_web_url: https://staging.vav.example
+  admin_web_url: https://admin.staging.vav.example
+  cookie_secure: true
+  cors_origins: [https://staging.vav.example, https://admin.staging.vav.example]
+providers: {payment: test, email: transactional, ai: sandbox}
+data: {database_tls: true, redis_tls: true, object_storage_public: false, field_encryption: true, backup_encryption: true}
+observability: {otel_endpoint: http://otel-collector:4318, trace_sample_ratio: 0.25, structured_logs: true}
+secrets:
+  database: cloud://staging/database-url
+  redis: cloud://staging/redis-url
+  jwt_private_key: cloud://staging/jwt-private-key
+  jwt_public_key: cloud://staging/jwt-public-key
+  field_encryption_master_key: cloud://staging/field-encryption-key
+  privacy_search_hmac_pepper: cloud://staging/privacy-hmac-pepper
+  backup_encryption_key: cloud://staging/backup-encryption-key
+  payment_webhook_secret: cloud://staging/payment-webhook-secret
+  email_provider_secret: cloud://staging/email-provider-secret
+  ai_provider_api_key: cloud://staging/ai-provider-key
+feature_flags: {version: staging-approved}

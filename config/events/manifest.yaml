@@ -1,0 +1,23 @@
+schema_version: "1.0.0"
+events:
+  ai.human_referral.created.v1: {owner: ai_assistant, sensitivity: restricted}
+  activity.registration.confirmed.v1: {owner: activities, sensitivity: internal}
+  catalog.product.published.v1: {owner: catalog, sensitivity: public}
+  commerce.entitlement.activated.v1: {owner: commerce, sensitivity: internal}
+  content.published.v1: {owner: content, sensitivity: public}
+  counseling.appointment.confirmed.v1: {owner: counseling, sensitivity: restricted}
+  course.completed.v1: {owner: courses, sensitivity: internal}
+  dating_profile.approved.v1: {owner: matchmaking_profiles, sensitivity: restricted}
+  identity.user.registered.v1: {owner: identity, sensitivity: restricted}
+  knowledge.index.published.v1: {owner: knowledge, sensitivity: internal}
+  matchmaking.mutual_match.created.v1: {owner: matchmaking_interactions, sensitivity: restricted}
+  membership.subscription.activated.v1: {owner: memberships, sensitivity: internal}
+  notification.delivery.failed.v1: {owner: notifications, sensitivity: internal}
+  privacy.erasure.completed.v1: {owner: privacy, sensitivity: highly_restricted}
+  recommendation.batch.generated.v1: {owner: recommendations, sensitivity: restricted}
+  relationship.journey.created.v1: {owner: relationships, sensitivity: restricted}
+  safety.block.created.v1: {owner: trust_safety, sensitivity: restricted}
+  safety.restriction.changed.v1: {owner: trust_safety, sensitivity: restricted}
+  system.feature_flag.activated.v1: {owner: system, sensitivity: internal}
+  system.maintenance.changed.v1: {owner: system, sensitivity: internal}
+  system.release.created.v1: {owner: system, sensitivity: internal}

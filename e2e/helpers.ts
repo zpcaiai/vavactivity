@@ -91,7 +91,8 @@ export function seedAiFixture() {
   if (process.env.VAV_E2E_SKIP_AI_SEED === "1") return;
   for (const moduleName of [
     "vav.cli.seed_permissions",
-    "vav.cli.seed_ai_assistant"
+    "vav.cli.seed_ai_assistant",
+    "vav.cli.run_ai_evaluation"
   ]) {
     execFileSync(
       "docker",

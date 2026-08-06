@@ -1,0 +1,12 @@
+{
+  "title": "VAV Platform Overview",
+  "uid": "vav-platform-overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {"type": "stat", "title": "API request rate", "targets": [{"expr": "sum(rate(http_requests_total[5m]))"}], "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0}},
+    {"type": "timeseries", "title": "API P95", "targets": [{"expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket[5m])))"}], "gridPos": {"h": 8, "w": 8, "x": 8, "y": 0}},
+    {"type": "stat", "title": "API error rate", "targets": [{"expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m]))"}], "gridPos": {"h": 8, "w": 8, "x": 16, "y": 0}}
+  ]
+}

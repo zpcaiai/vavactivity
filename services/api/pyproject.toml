@@ -23,6 +23,7 @@ dependencies = [
   "pydantic-settings==2.10.1",
   "pyjwt==2.10.1",
   "python-multipart==0.0.20",
+  "pyyaml==6.0.2",
   "redis==5.2.1",
   "sqlalchemy==2.0.42",
   "structlog==25.4.0",
@@ -62,5 +63,5 @@ plugins = ["pydantic.mypy"]
 packages = ["vav"]
 
 [[tool.mypy.overrides]]
-module = ["alembic.*", "boto3.*", "botocore.*", "celery.*"]
+module = ["alembic.*", "boto3.*", "botocore.*", "celery.*", "yaml.*"]
 ignore_missing_imports = true

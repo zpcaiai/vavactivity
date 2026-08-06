@@ -1,0 +1,7 @@
+module: {code: courses, owner: learning, version: "1.0.0"}
+dependencies: {required: [identity, catalog, commerce, notifications]}
+database: {revisions: [22, 23, 24, 25, 26]}
+events: {publishes: [course.completed.v1], consumes: [commerce.entitlement.activated.v1]}
+permissions: {prefixes: [courses.]}
+configuration: {prefixes: [COURSE_]}
+health: {checks: [private_video_provider]}

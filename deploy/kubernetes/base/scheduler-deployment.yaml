@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: scheduler}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector: {matchLabels: {app.kubernetes.io/name: scheduler}}
+  template:
+    metadata: {labels: {app.kubernetes.io/name: scheduler, vav.network/tier: backend}}
+    spec:
+      automountServiceAccountToken: false
+      securityContext: {runAsNonRoot: true, runAsUser: 10001, seccompProfile: {type: RuntimeDefault}}
+      containers:
+        - name: scheduler
+          image: ghcr.io/vav-platform/api@sha256:0000000000000000000000000000000000000000000000000000000000000000
+          args: [celery, --app, vav_worker.celery_app:celery_app, beat, --loglevel=INFO, --pidfile=/tmp/celerybeat.pid]
+          envFrom: [{configMapRef: {name: vav-runtime}}, {secretRef: {name: vav-runtime-secrets}}]
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+          volumeMounts:
+            - {name: tmp, mountPath: /tmp}
+            - {name: runtime-auth, mountPath: /run/secrets, readOnly: true}
+      volumes:
+        - {name: tmp, emptyDir: {}}
+        - name: runtime-auth
+          secret:
+            secretName: vav-runtime-secrets
+            items:
+              - {key: auth-private.pem, path: auth-private.pem}
+              - {key: auth-public.pem, path: auth-public.pem}

@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$repo_root"
+
+pass() { printf 'PASS    %s\n' "$1"; }
+warn() { printf 'WARNING %s\n' "$1"; }
+fail() { printf 'FAIL    %s\n' "$1"; return 1; }
+
+doctor() {
+  failures=0
+  for command_name in git docker node corepack python3 uv openssl curl; do
+    if command -v "$command_name" >/dev/null 2>&1; then pass "$command_name available"; else fail "$command_name is required" || failures=$((failures+1)); fi
+  done
+  if docker info >/dev/null 2>&1; then pass "Docker daemon reachable"; else fail "Docker daemon is not reachable" || failures=$((failures+1)); fi
+  if docker compose version >/dev/null 2>&1; then pass "Docker Compose v2 available"; else fail "Docker Compose v2 is required" || failures=$((failures+1)); fi
+  architecture="$(uname -m)"
+  case "$architecture" in arm64|aarch64|x86_64|amd64) pass "supported CPU architecture: $architecture" ;; *) warn "untested CPU architecture: $architecture" ;; esac
+  available_kb="$(df -Pk . | awk 'NR==2 {print $4}')"
+  if [[ "$available_kb" -ge 10485760 ]]; then pass "at least 10 GiB disk available"; else fail "at least 10 GiB free disk is required" || failures=$((failures+1)); fi
+  if [[ "$(uname -s)" == "Darwin" ]]; then memory_bytes="$(sysctl -n hw.memsize)"; else memory_bytes="$(awk '/MemTotal/ {print $2 * 1024}' /proc/meminfo)"; fi
+  if [[ "$memory_bytes" -ge 4294967296 ]]; then pass "at least 4 GiB system memory"; else fail "at least 4 GiB system memory is required" || failures=$((failures+1)); fi
+  for port in 5432 6379 8000 5173 5174 9000 9001 8025; do
+    if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1; then warn "port $port is already in use (acceptable for an existing VAV runtime)"; fi
+  done
+  if curl --silent --head --max-time 5 https://github.com >/dev/null 2>&1; then pass "outbound HTTPS available"; else warn "outbound HTTPS unavailable; cached dependencies are required"; fi
+  [[ "$failures" -eq 0 ]] || exit 1
+}
+
+prepare_secrets() {
+  mkdir -p .dev-secrets backups restore-reports performance-results
+  chmod 700 .dev-secrets
+  ./scripts/generate-dev-auth-keys.sh
+  if [[ ! -s .dev-secrets/backup-encryption-key ]]; then openssl rand -base64 48 > .dev-secrets/backup-encryption-key; fi
+  if [[ ! -s .dev-secrets/grafana-admin-password ]]; then openssl rand -base64 24 > .dev-secrets/grafana-admin-password; fi
+  chmod 600 .dev-secrets/backup-encryption-key .dev-secrets/grafana-admin-password
+}
+
+bootstrap() {
+  doctor
+  [[ -f .env ]] || cp .env.example .env
+  prepare_secrets
+  corepack pnpm install --frozen-lockfile
+  uv sync --frozen --all-packages --all-groups
+  docker compose build api worker user-web admin-web
+  docker compose up -d postgres redis minio minio-init mailpit api
+  for attempt in $(seq 1 90); do
+    if curl --noproxy '*' --silent --fail http://localhost:8000/api/v1/health/ready >/dev/null 2>&1; then break; fi
+    if [[ "$attempt" == 90 ]]; then docker compose logs api; exit 1; fi
+    sleep 2
+  done
+  docker compose exec -T api alembic upgrade head
+  seed
+  ./scripts/generate-openapi-client.sh
+  PYTHONPATH=services/api/src .venv/bin/python scripts/diagnostics/validate_project_manifest.py
+  pass "bootstrap complete"
+}
+
+up() {
+  prepare_secrets
+  compose=(docker compose --profile full)
+  if [[ "${VAV_OBSERVABILITY:-false}" == "true" ]]; then compose+=(-f docker-compose.yml -f deploy/compose/docker-compose.observability.yml); fi
+  "${compose[@]}" up -d --build
+  ./scripts/wait-for-services.sh
+}
+
+down() { docker compose -f docker-compose.yml -f deploy/compose/docker-compose.observability.yml --profile full down; }
+
+seed() {
+  environment="$(docker compose exec -T api python -c 'from vav.core.config import get_settings; print(get_settings().environment)')"
+  system_seeds=(seed_permissions seed_notification_templates seed_privacy_inventory seed_trust_safety)
+  reference_seeds=(seed_catalog seed_courses seed_counseling seed_dating_taxonomies seed_relationships seed_memberships)
+  for module in "${system_seeds[@]}" "${reference_seeds[@]}"; do docker compose exec -T api python -m "vav.cli.$module"; done
+  if [[ "${VAV_INCLUDE_DEMO:-false}" == "true" ]]; then
+    [[ "$environment" != "production" && "$environment" != "dr" ]] || { echo "Demo seeds are forbidden in $environment" >&2; exit 2; }
+    for module in seed_cms seed_activities seed_knowledge seed_recommendation_fixtures; do docker compose exec -T api python -m "vav.cli.$module"; done
+  fi
+}
+
+smoke() {
+  checks=(
+    "API live|http://localhost:8000/api/v1/health/live|api"
+    "API ready|http://localhost:8000/api/v1/health/ready|api"
+    "API startup|http://localhost:8000/api/v1/health/startup|api"
+    "User web|http://localhost:5173|user-web"
+    "Admin web|http://localhost:5174/admin/login|admin-web"
+    "MinIO|http://localhost:9000/minio/health/live|minio"
+    "Mailpit|http://localhost:8025/readyz|mailpit"
+  )
+  for check in "${checks[@]}"; do
+    name="${check%%|*}"
+    remainder="${check#*|}"
+    url="${remainder%%|*}"
+    service="${remainder##*|}"
+    if ! curl --noproxy '*' --silent --show-error --fail --max-time 10 "$url" >/dev/null 2>&1; then
+      [[ "$service" == "minio" ]] || { echo "$name HTTP check failed: $url" >&2; exit 1; }
+      container_id="$(docker compose ps -q "$service")"
+      [[ -n "$container_id" ]] || { echo "$name container is missing" >&2; exit 1; }
+      [[ "$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$container_id")" == "healthy" ]] || {
+        echo "$name is neither HTTP reachable nor container healthy" >&2
+        exit 1
+      }
+    fi
+    pass "$name"
+  done
+  revision="$(docker compose exec -T api alembic current)"
+  [[ "$revision" == *"(head)"* ]] || { echo "Database is not at migration head: $revision" >&2; exit 1; }
+  docker compose exec -T redis redis-cli ping | grep -q PONG
+  pass "database revision and Redis"
+}
+
+reset_local() {
+  [[ "${VAV_CONFIRM_RESET:-}" == "delete-local-vav-data" ]] || {
+    echo "Set VAV_CONFIRM_RESET=delete-local-vav-data to delete local VAV volumes" >&2; exit 2;
+  }
+  docker compose down -v
+}
+
+command="${1:-help}"
+shift || true
+case "$command" in
+  doctor) doctor "$@" ;;
+  bootstrap) bootstrap "$@" ;;
+  up) up "$@" ;;
+  down) down "$@" ;;
+  seed) seed "$@" ;;
+  smoke) smoke "$@" ;;
+  verify) ./scripts/verify.sh "$@" ;;
+  backup) ./scripts/backup/backup-all.sh "$@" ;;
+  backup-verify) ./scripts/backup/verify-backups.sh "$@" ;;
+  restore-drill) ./scripts/restore/run-restore-drill.sh "$@" ;;
+  reset-local) reset_local "$@" ;;
+  *) echo "Usage: $0 {doctor|bootstrap|up|down|seed|smoke|verify|backup|backup-verify|restore-drill|reset-local}" >&2; exit 2 ;;
+esac

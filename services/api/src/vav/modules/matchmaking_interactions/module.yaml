@@ -1,0 +1,7 @@
+module: {code: matchmaking_interactions, owner: matchmaking, version: "1.0.0"}
+dependencies: {required: [identity, recommendations, privacy, trust_safety]}
+database: {revisions: [60, 61, 62, 63, 64]}
+events: {publishes: [matchmaking.mutual_match.created.v1], consumes: [recommendation.batch.generated.v1, safety.block.created.v1]}
+permissions: {prefixes: [matchmaking.interactions., matchmaking.matches., matchmaking.invitations., matchmaking.contact_exchange., matchmaking.events., matchmaking.dead_letters., matchmaking.diagnostics., matchmaking.analytics., matchmaking.audit., matchmaking.incidents.]}
+configuration: {prefixes: [MATCHMAKING_]}
+health: {checks: [consent_gateway, safety_gateway]}

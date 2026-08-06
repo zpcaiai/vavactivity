@@ -1,0 +1,24 @@
+schema_version: "1.0.0"
+environment: production
+application:
+  debug: false
+  public_api_base_url: https://api.vav.example
+  user_web_url: https://www.vav.example
+  admin_web_url: https://admin.vav.example
+  cookie_secure: true
+  cors_origins: [https://www.vav.example, https://admin.vav.example]
+providers: {payment: live, email: transactional, ai: approved}
+data: {database_tls: true, redis_tls: true, object_storage_public: false, field_encryption: true, backup_encryption: true}
+observability: {otel_endpoint: http://otel-collector:4318, trace_sample_ratio: 0.1, structured_logs: true}
+secrets:
+  database: cloud://production/database-url
+  redis: cloud://production/redis-url
+  jwt_private_key: cloud://production/jwt-private-key
+  jwt_public_key: cloud://production/jwt-public-key
+  field_encryption_master_key: cloud://production/field-encryption-key
+  privacy_search_hmac_pepper: cloud://production/privacy-hmac-pepper
+  backup_encryption_key: cloud://production/backup-encryption-key
+  payment_webhook_secret: cloud://production/payment-webhook-secret
+  email_provider_secret: cloud://production/email-provider-secret
+  ai_provider_api_key: cloud://production/ai-provider-key
+feature_flags: {version: production-approved}

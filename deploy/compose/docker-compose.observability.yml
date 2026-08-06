@@ -1,0 +1,51 @@
+name: vav-platform
+
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.120.0
+    profiles: [observability, full]
+    command: [--config=/etc/otelcol/config.yaml]
+    volumes: [../../infra/otel-collector/config.yaml:/etc/otelcol/config.yaml:ro]
+    networks: [vav-internal]
+
+  prometheus:
+    image: prom/prometheus:v3.1.0
+    profiles: [observability, full]
+    command: [--config.file=/etc/prometheus/prometheus.yml, --storage.tsdb.retention.time=15d]
+    volumes:
+      - ../../infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../../config/alerts/platform.rules.yml:/etc/prometheus/platform.rules.yml:ro
+    ports: ["127.0.0.1:9090:9090"]
+    networks: [vav-internal, vav-public]
+
+  grafana:
+    image: grafana/grafana:11.5.1
+    profiles: [observability, full]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana-admin-password
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - vav-grafana-data:/var/lib/grafana
+      - ../../infra/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ../../infra/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ../../.dev-secrets/grafana-admin-password:/run/secrets/grafana-admin-password:ro
+    ports: ["127.0.0.1:3000:3000"]
+    networks: [vav-internal, vav-public]
+
+  loki:
+    image: grafana/loki:3.4.2
+    profiles: [observability, full]
+    command: [-config.file=/etc/loki/config.yaml]
+    volumes:
+      - ../../infra/loki/config.yaml:/etc/loki/config.yaml:ro
+      - vav-loki-data:/loki
+    networks: [vav-internal]
+
+  tempo:
+    image: grafana/tempo:2.7.1
+    profiles: [observability, full]
+    command: [-config.file=/etc/tempo/config.yaml]
+    volumes:
+      - ../../infra/tempo/config.yaml:/etc/tempo/config.yaml:ro
+      - vav-tempo-data:/var/tempo
+    networks: [vav-internal]

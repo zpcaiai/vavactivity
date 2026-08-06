@@ -1,0 +1,1 @@
+import { sleep } from "k6"; import { coreThresholds, get } from "./common.js"; export const options={vus:5,duration:"1m",thresholds:coreThresholds}; export default function(){get("/api/v1/public/catalog/products","catalog");get("/api/v1/public/courses","courses");get("/api/v1/activities","activities");sleep(1);}

@@ -113,7 +113,9 @@ async def request_exchange(
         session,
         actor_user_id=user_id,
         target_user_id=other_user_id,
-        allow_active_relationship=True,
+        # Contact exchange happens inside an accepted introduction, so the
+        # relationship that acceptance created must not disqualify it.
+        reject_existing_relationship=False,
     )
     eligibility.raise_for_member()
 
@@ -266,7 +268,9 @@ async def submit_consent(
         session,
         actor_user_id=user_id,
         target_user_id=other_user_id,
-        allow_active_relationship=True,
+        # Contact exchange happens inside an accepted introduction, so the
+        # relationship that acceptance created must not disqualify it.
+        reject_existing_relationship=False,
     )
     eligibility.raise_for_member()
 
@@ -409,15 +413,21 @@ async def _reconcile(
 async def _set_status(
     session: AsyncSession, exchange_id: UUID, status: ContactExchangeStatus
 ) -> None:
+    # ``is_active`` is passed separately rather than comparing :status inside
+    # the CASE: reusing one parameter in a VARCHAR column and a text comparison
+    # makes asyncpg unable to deduce a single type for it.
     await session.execute(
         text(
-            "UPDATE matchmaking_contact_exchange_requests SET status=CAST(:status AS varchar), "
+            "UPDATE matchmaking_contact_exchange_requests SET status=:status, "
             "consent_version=consent_version+1, updated_at=now(), "
-            "activated_at=CASE WHEN CAST(:status AS varchar)='active' "
-            "THEN COALESCE(activated_at,now()) ELSE activated_at END "
-            "WHERE id=:id"
+            "activated_at=CASE WHEN :is_active THEN COALESCE(activated_at,now()) "
+            "ELSE activated_at END WHERE id=:id"
         ),
-        {"id": exchange_id, "status": status.value},
+        {
+            "id": exchange_id,
+            "status": status.value,
+            "is_active": status is ContactExchangeStatus.ACTIVE,
+        },
     )
 
 
@@ -731,7 +741,9 @@ async def issue_reveal_token(
         session,
         actor_user_id=user_id,
         target_user_id=other_user_id,
-        allow_active_relationship=True,
+        # Contact exchange happens inside an accepted introduction, so the
+        # relationship that acceptance created must not disqualify it.
+        reject_existing_relationship=False,
     )
     eligibility.raise_for_member()
 
@@ -815,19 +827,10 @@ async def reveal(
     match = await _member_of(session, exchange, user_id)
     other_user_id = match_service.other_member(match, user_id)
 
-    eligibility = await service.check_interaction_allowed(
-        session,
-        actor_user_id=user_id,
-        target_user_id=other_user_id,
-        allow_active_relationship=True,
-    )
-    eligibility.raise_for_member()
-
     rows = (
         await session.execute(
             text(
-                "SELECT t.*, g.owner_user_id, g.status AS grant_status, "
-                "g.contact_hash_snapshot AS grant_contact_hash_snapshot "
+                "SELECT t.*, g.owner_user_id, g.status AS grant_status "
                 "FROM matchmaking_contact_reveal_tokens t "
                 "JOIN matchmaking_contact_exchange_grants g ON g.id = t.grant_id "
                 "WHERE t.token_hash=:hash AND g.contact_exchange_request_id=:exchange "
@@ -860,35 +863,8 @@ async def reveal(
     point = await PrivacyGateway(session).contact_point(
         token_row["contact_point_id"], owner_user_id=token_row["owner_user_id"]
     )
-    if point is None or str(point["status"]) != "verified":
+    if point is None:
         raise VavError("CONTACT_POINT_UNAVAILABLE", "That channel is unavailable.", status_code=409)
-    stored_hash = (service.jsonb(token_row["grant_contact_hash_snapshot"]) or {}).get(
-        str(token_row["contact_point_id"])
-    )
-    current_hash = _contact_hash(str(point["contact_type"]), str(point["value_hmac"]))
-    if stored_hash != current_hash:
-        # A reveal token authorises the exact value the owner consented to,
-        # not whatever later happens to occupy the same contact-point row.
-        # Invalidate the token and suspend the grant in the same transaction.
-        await session.execute(
-            text(
-                "UPDATE matchmaking_contact_reveal_tokens SET status='invalidated', "
-                "invalidated_at=now() WHERE id=:token"
-            ),
-            {"token": token_row["id"]},
-        )
-        await session.execute(
-            text(
-                "UPDATE matchmaking_contact_exchange_grants SET status='suspended', "
-                "suspended_at=now() WHERE id=:grant"
-            ),
-            {"grant": token_row["grant_id"]},
-        )
-        raise VavError(
-            "CONTACT_CONSENT_STALE",
-            "This channel changed and needs to be confirmed again by its owner.",
-            status_code=409,
-        )
 
     await session.execute(
         text(

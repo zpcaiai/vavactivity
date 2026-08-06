@@ -1,0 +1,38 @@
+groups:
+  - name: vav-critical
+    rules:
+      - alert: VavApiUnavailable
+        expr: up{job="vav-api"} == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: VAV API is unavailable
+          runbook_url: docs/runbooks/database-unavailable.md
+      - alert: VavApiErrorRateHigh
+        expr: sum(rate(http_requests_total{status=~"5.."}[5m])) / clamp_min(sum(rate(http_requests_total[5m])), 1) > 0.05
+        for: 10m
+        labels: {severity: high}
+        annotations:
+          summary: API error rate exceeds five percent
+          runbook_url: docs/runbooks/bad-release.md
+      - alert: VavPaymentWebhookFailure
+        expr: increase(http_requests_total{route=~".*webhook.*",status=~"5.."}[5m]) > 5
+        for: 5m
+        labels: {severity: critical}
+        annotations:
+          summary: Payment webhook intake is failing
+          runbook_url: docs/runbooks/failed-payment-webhooks.md
+      - alert: VavBlockPropagationFailure
+        expr: increase(safety_block_propagation_failures_total[5m]) > 0
+        for: 0m
+        labels: {severity: critical}
+        annotations:
+          summary: Safety block propagation failed
+          runbook_url: docs/runbooks/block-propagation-failure.md
+      - alert: VavBackupStale
+        expr: time() - system_backup_last_verified_timestamp_seconds > 90000
+        for: 15m
+        labels: {severity: critical}
+        annotations:
+          summary: No verified backup within policy window
+          runbook_url: docs/runbooks/backup-failure.md

@@ -10,7 +10,7 @@ if [[ ! -f .env ]]; then
 fi
 
 ./scripts/generate-dev-auth-keys.sh
-python3 scripts/validate_manifest.py
+uv run python scripts/validate_manifest.py
 docker compose config --quiet
 if [[ "${VAV_VERIFY_REUSE_BUILT_IMAGES:-false}" == "true" ]]; then
   echo "Reusing locally built images for verification"

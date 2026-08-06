@@ -1,0 +1,87 @@
+name: Build Scan Sign Images
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  attestations: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {name: api, dockerfile: infra/docker/backend.Dockerfile, target: production}
+          - {name: worker, dockerfile: infra/docker/backend.Dockerfile, target: production}
+          - {name: user-web, dockerfile: infra/docker/frontend.Dockerfile, target: user-production}
+          - {name: admin-web, dockerfile: infra/docker/frontend.Dockerfile, target: admin-production}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with: {registry: ghcr.io, username: "${{ github.actor }}", password: "${{ secrets.GITHUB_TOKEN }}"}
+      - id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target }}
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/vav-${{ matrix.name }}:${{ github.sha }}
+          platforms: linux/amd64
+          provenance: mode=max
+          sbom: true
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+      - name: Record immutable image identity
+        run: printf '%s\n' "ghcr.io/${{ github.repository_owner }}/vav-${{ matrix.name }}@${{ steps.build.outputs.digest }}" > "${{ matrix.name }}.image"
+      - uses: anchore/sbom-action@v0
+        with: {image: "ghcr.io/${{ github.repository_owner }}/vav-${{ matrix.name }}@${{ steps.build.outputs.digest }}", format: cyclonedx-json, output-file: "${{ matrix.name }}.sbom.json"}
+      - uses: aquasecurity/trivy-action@0.30.0
+        with: {image-ref: "ghcr.io/${{ github.repository_owner }}/vav-${{ matrix.name }}@${{ steps.build.outputs.digest }}", severity: CRITICAL,HIGH, exit-code: "1", ignore-unfixed: true}
+      - uses: sigstore/cosign-installer@v3.9.2
+      - run: cosign sign --yes "ghcr.io/${{ github.repository_owner }}/vav-${{ matrix.name }}@${{ steps.build.outputs.digest }}"
+      - uses: actions/upload-artifact@v4
+        with: {name: "${{ matrix.name }}-sbom", path: "${{ matrix.name }}.sbom.json"}
+      - uses: actions/upload-artifact@v4
+        with: {name: "${{ matrix.name }}-image", path: "${{ matrix.name }}.image", retention-days: 30}
+
+  release-manifest:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: {pattern: "*-image", path: image-identities, merge-multiple: true}
+      - uses: astral-sh/setup-uv@v6
+        with: {version: "0.8.3", python-version: "3.12"}
+      - name: Build checksummed release manifest
+        shell: bash
+        run: |
+          release_version="$GITHUB_SHA"
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then release_version="$GITHUB_REF_NAME"; fi
+          configuration_fingerprint="$(sha256sum config/env/production.template.yaml | cut -d' ' -f1)"
+          uv run --with pyyaml python scripts/release/build_release_manifest.py \
+            --version "$release_version" \
+            --commit "$GITHUB_SHA" \
+            --api "$(<image-identities/api.image)" \
+            --worker "$(<image-identities/worker.image)" \
+            --user-web "$(<image-identities/user-web.image)" \
+            --admin-web "$(<image-identities/admin-web.image)" \
+            --configuration-fingerprint "$configuration_fingerprint" \
+            --output release-manifest.yaml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-manifest-${{ github.sha }}
+          path: |
+            release-manifest.yaml
+            release-manifest.yaml.sha256
+          retention-days: 30

@@ -28,6 +28,7 @@ import MatchmakingInteractionManagementPage from "@/pages/MatchmakingInteraction
 import RelationshipManagementPage from "@/pages/RelationshipManagementPage.vue";
 import MembershipManagementPage from "@/pages/MembershipManagementPage.vue";
 import TrustSafetyManagementPage from "@/pages/TrustSafetyManagementPage.vue";
+import SystemOperationsPage from "@/pages/SystemOperationsPage.vue";
 import { useAccessStore } from "@/stores/access";
 
 const modules = [
@@ -144,6 +145,19 @@ export const safetySectionPermissions: Record<string, string> = {
   rules: "safety.rules.read",
   "red-team": "safety.red_team.read",
   audit: "safety.audit.read"
+};
+
+export const systemSectionPermissions: Record<string, string> = {
+  status: "system.status.read",
+  releases: "system.releases.read",
+  jobs: "system.jobs.read",
+  integrations: "system.status.read",
+  "dead-letters": "system.dead_letters.read",
+  "feature-flags": "system.feature_flags.read",
+  maintenance: "system.maintenance.read",
+  backups: "system.backups.read",
+  "restore-drills": "system.restore_drills.read",
+  capacity: "system.capacity.read"
 };
 
 const privacySectionPermissions: Record<string, string> = {
@@ -505,6 +519,12 @@ export const router = createRouter({
           name: `admin-trust-safety-${section}`,
           component: TrustSafetyManagementPage,
           meta: { title: "信任与安全中心", permission: safetySectionPermissions[section], safetySection: section }
+        })),
+        ...Object.keys(systemSectionPermissions).map((section) => ({
+          path: `system/${section}`,
+          name: `admin-system-${section}`,
+          component: SystemOperationsPage,
+          meta: { title: "系统运维中心", permission: systemSectionPermissions[section], systemSection: section }
         })),
         ...Object.keys(privacySectionPermissions).map((section) => ({
           path: `privacy/${section}`,

@@ -1,0 +1,25 @@
+schema_version: "1.0.0"
+release:
+  version: ${RELEASE_VERSION}
+  git_commit: ${GIT_COMMIT}
+  built_at: ${BUILD_TIME}
+images:
+  api: ${API_IMAGE}
+  worker: ${WORKER_IMAGE}
+  user_web: ${USER_WEB_IMAGE}
+  admin_web: ${ADMIN_WEB_IMAGE}
+database: {target_revision: head, minimum_revision: "20260731_0001", maximum_revision: "20260806_0083"}
+contracts:
+  openapi_sha256: ${OPENAPI_CHECKSUM}
+  events_sha256: ${EVENT_MANIFEST_CHECKSUM}
+configuration: {schema_version: "1.0.0", non_secret_fingerprint: ${CONFIG_FINGERPRINT}}
+quality:
+  unit_tests_passed: ${UNIT_TESTS_PASSED}
+  integration_tests_passed: ${INTEGRATION_TESTS_PASSED}
+  security_tests_passed: ${SECURITY_TESTS_PASSED}
+  complete_e2e_passed: ${COMPLETE_E2E_PASSED}
+  red_team_passed: ${RED_TEAM_PASSED}
+approval:
+  production_approved_by: ${PRODUCTION_APPROVED_BY}
+  production_approved_at: ${PRODUCTION_APPROVED_AT}
+production_certification: NOT_CERTIFIED

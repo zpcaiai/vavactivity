@@ -16,6 +16,7 @@ test("a verified user registers for a free activity through the entitlement pipe
   await page.getByLabel("我已阅读并同意服务条款与隐私说明").check();
   await page.getByRole("button", { name: "建立 VAV 账户" }).click();
   await page.goto(await verificationLinkFor(request, email));
+  await expect(page.getByRole("status")).toContainText("邮箱已验证");
   await page.goto("/zh-CN/auth/login");
   await page.getByLabel("邮箱").fill(email);
   await page.getByLabel("密码").fill(password);

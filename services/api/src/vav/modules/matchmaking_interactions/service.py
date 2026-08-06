@@ -286,13 +286,20 @@ async def check_interaction_allowed(
     actor_user_id: UUID,
     target_user_id: UUID,
     require_target_profile: bool = True,
-    allow_active_relationship: bool = False,
+    reject_existing_relationship: bool = True,
 ) -> EligibilityResult:
     """The recheck every write and every display runs.
 
     A snapshot taken when a batch was generated is not evidence about now, so
     profile, privacy, safety and relationship state are re-read every time
     rather than trusted from the card the member is looking at.
+
+    ``reject_existing_relationship`` distinguishes two different questions.
+    Starting something new — a like, a match, an invitation — must be refused
+    once the pair already has a relationship. Acting *inside* that relationship,
+    which is what contact exchange is, must not be: refusing there would make
+    acceptance the last thing a pair could ever do together. Safety, privacy
+    and profile checks apply either way.
     """
     if actor_user_id == target_user_id:
         return EligibilityResult(False, "self_interaction")
@@ -318,7 +325,7 @@ async def check_interaction_allowed(
     if not moderation.allowed:
         return EligibilityResult(False, moderation.reason_code)
 
-    if not allow_active_relationship and await RelationshipGateway(session).has_active_relationship(
+    if reject_existing_relationship and await RelationshipGateway(session).has_active_relationship(
         user_a_id=actor_user_id, user_b_id=target_user_id
     ):
         return EligibilityResult(False, "relationship_started")

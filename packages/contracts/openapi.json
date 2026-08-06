@@ -1424,6 +1424,134 @@
         "title": "AvailabilityRuleRequest",
         "type": "object"
       },
+      "BackupRecordRequest": {
+        "properties": {
+          "backup_reference_encrypted": {
+            "anyOf": [
+              {
+                "maxLength": 8192,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Backup Reference Encrypted"
+          },
+          "backup_type": {
+            "enum": [
+              "postgres_full",
+              "postgres_wal",
+              "object_storage",
+              "configuration",
+              "complete"
+            ],
+            "title": "Backup Type",
+            "type": "string"
+          },
+          "checksum_manifest": {
+            "additionalProperties": true,
+            "title": "Checksum Manifest",
+            "type": "object"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "environment": {
+            "enum": [
+              "development",
+              "test",
+              "ci",
+              "staging",
+              "production",
+              "dr"
+            ],
+            "title": "Environment",
+            "type": "string"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "source_database_revision": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Database Revision"
+          },
+          "source_release_version": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Release Version"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "started",
+              "completed",
+              "failed",
+              "verified",
+              "expired"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "verified_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verified At"
+          }
+        },
+        "required": [
+          "backup_type",
+          "environment",
+          "status",
+          "started_at"
+        ],
+        "title": "BackupRecordRequest",
+        "type": "object"
+      },
       "BatchInvalidateRequest": {
         "properties": {
           "reason": {
@@ -1873,6 +2001,74 @@
           "channel_policy"
         ],
         "title": "CampaignRequest",
+        "type": "object"
+      },
+      "CapacityBaselineRecordRequest": {
+        "properties": {
+          "environment": {
+            "enum": [
+              "development",
+              "test",
+              "ci",
+              "staging",
+              "production",
+              "dr"
+            ],
+            "title": "Environment",
+            "type": "string"
+          },
+          "infrastructure_snapshot": {
+            "additionalProperties": true,
+            "title": "Infrastructure Snapshot",
+            "type": "object"
+          },
+          "load_snapshot": {
+            "additionalProperties": true,
+            "title": "Load Snapshot",
+            "type": "object"
+          },
+          "release_version": {
+            "maxLength": 64,
+            "minLength": 3,
+            "title": "Release Version",
+            "type": "string"
+          },
+          "result_metrics": {
+            "additionalProperties": true,
+            "title": "Result Metrics",
+            "type": "object"
+          },
+          "scenario_code": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{2,127}$",
+            "title": "Scenario Code",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "passed",
+              "failed",
+              "not_certified"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "tested_at": {
+            "format": "date-time",
+            "title": "Tested At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "release_version",
+          "environment",
+          "scenario_code",
+          "infrastructure_snapshot",
+          "load_snapshot",
+          "result_metrics",
+          "status",
+          "tested_at"
+        ],
+        "title": "CapacityBaselineRecordRequest",
         "type": "object"
       },
       "CartItemCreateRequest": {
@@ -3736,6 +3932,31 @@
         "title": "DeclineInvitationRequest",
         "type": "object"
       },
+      "DeploymentEvidenceRequest": {
+        "properties": {
+          "artifact_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Artifact Sha256",
+            "type": "string"
+          },
+          "completed_at": {
+            "format": "date-time",
+            "title": "Completed At",
+            "type": "string"
+          },
+          "evidence": {
+            "additionalProperties": true,
+            "title": "Evidence",
+            "type": "object"
+          }
+        },
+        "required": [
+          "artifact_sha256",
+          "completed_at"
+        ],
+        "title": "DeploymentEvidenceRequest",
+        "type": "object"
+      },
       "DocumentRequest": {
         "properties": {
           "allowed_roles": {
@@ -4317,6 +4538,80 @@
           "exposure_type"
         ],
         "title": "ExposureRequest",
+        "type": "object"
+      },
+      "FeatureFlagCreateRequest": {
+        "properties": {
+          "default_value": {
+            "additionalProperties": true,
+            "title": "Default Value",
+            "type": "object"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "flag_code": {
+            "pattern": "^[a-z][a-z0-9_.-]{2,127}$",
+            "title": "Flag Code",
+            "type": "string"
+          },
+          "targeting_policy": {
+            "additionalProperties": true,
+            "title": "Targeting Policy",
+            "type": "object"
+          }
+        },
+        "required": [
+          "flag_code",
+          "default_value"
+        ],
+        "title": "FeatureFlagCreateRequest",
+        "type": "object"
+      },
+      "FeatureFlagUpdateRequest": {
+        "properties": {
+          "default_value": {
+            "additionalProperties": true,
+            "title": "Default Value",
+            "type": "object"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "targeting_policy": {
+            "additionalProperties": true,
+            "title": "Targeting Policy",
+            "type": "object"
+          }
+        },
+        "required": [
+          "default_value",
+          "expected_version"
+        ],
+        "title": "FeatureFlagUpdateRequest",
         "type": "object"
       },
       "FieldVisibility": {
@@ -6050,6 +6345,51 @@
         "title": "LoginRequest",
         "type": "object"
       },
+      "MaintenanceChangeRequest": {
+        "properties": {
+          "approval_actor_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approval Actor Id"
+          },
+          "public_message": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Public Message"
+          },
+          "reason_code": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "write_scope": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "title": "Write Scope",
+            "type": "object"
+          }
+        },
+        "required": [
+          "reason_code"
+        ],
+        "title": "MaintenanceChangeRequest",
+        "type": "object"
+      },
       "ManualGradeRequest": {
         "properties": {
           "feedback": {
@@ -7040,6 +7380,21 @@
           "enabled"
         ],
         "title": "NotificationPreferenceItem",
+        "type": "object"
+      },
+      "OperationalReasonRequest": {
+        "properties": {
+          "reason_code": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Reason Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason_code"
+        ],
+        "title": "OperationalReasonRequest",
         "type": "object"
       },
       "OrderCancelRequest": {
@@ -9893,6 +10248,59 @@
         "title": "RegistrationCreateRequest",
         "type": "object"
       },
+      "ReleaseRecordCreateRequest": {
+        "properties": {
+          "configuration_fingerprint": {
+            "additionalProperties": true,
+            "title": "Configuration Fingerprint",
+            "type": "object"
+          },
+          "contract_checksums": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Contract Checksums",
+            "type": "object"
+          },
+          "database_revision": {
+            "pattern": "^[A-Za-z0-9_]+$",
+            "title": "Database Revision",
+            "type": "string"
+          },
+          "evidence_manifest": {
+            "additionalProperties": true,
+            "title": "Evidence Manifest",
+            "type": "object"
+          },
+          "git_commit": {
+            "pattern": "^[0-9a-f]{7,64}$",
+            "title": "Git Commit",
+            "type": "string"
+          },
+          "image_digests": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Image Digests",
+            "type": "object"
+          },
+          "release_version": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{2,63}$",
+            "title": "Release Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "release_version",
+          "git_commit",
+          "image_digests",
+          "database_revision",
+          "contract_checksums",
+          "configuration_fingerprint"
+        ],
+        "title": "ReleaseRecordCreateRequest",
+        "type": "object"
+      },
       "ReminderPlanRequest": {
         "properties": {
           "cadence_days": {
@@ -10077,6 +10485,115 @@
           "idempotency_key"
         ],
         "title": "ReportCreateRequest",
+        "type": "object"
+      },
+      "RestoreDrillRecordRequest": {
+        "properties": {
+          "backup_record_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Backup Record Id"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "drill_code": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{2,127}$",
+            "title": "Drill Code",
+            "type": "string"
+          },
+          "environment": {
+            "enum": [
+              "development",
+              "test",
+              "ci",
+              "staging",
+              "production",
+              "dr"
+            ],
+            "title": "Environment",
+            "type": "string"
+          },
+          "failure_summary": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failure Summary"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "started",
+              "passed",
+              "failed",
+              "cancelled"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "target_database_revision": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Database Revision"
+          },
+          "target_release_version": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Release Version"
+          },
+          "verification_manifest": {
+            "additionalProperties": true,
+            "title": "Verification Manifest",
+            "type": "object"
+          }
+        },
+        "required": [
+          "drill_code",
+          "environment",
+          "status",
+          "started_at"
+        ],
+        "title": "RestoreDrillRecordRequest",
         "type": "object"
       },
       "RestoreRequest": {
@@ -42807,6 +43324,1157 @@
         ]
       }
     },
+    "/api/v1/admin/system/backups": {
+      "get": {
+        "operationId": "list_system_backups_api_v1_admin_system_backups_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List System Backups Api V1 Admin System Backups Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List-System-Backups",
+        "tags": [
+          "system-admin"
+        ]
+      },
+      "post": {
+        "operationId": "record_backup_api_v1_admin_system_backups_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackupRecordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Record Backup Api V1 Admin System Backups Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Record Backup",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/system/capacity-baselines": {
+      "get": {
+        "operationId": "list_system_capacity_baselines_api_v1_admin_system_capacity_baselines_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List System Capacity Baselines Api V1 Admin System Capacity Baselines Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List-System-Capacity-Baselines",
+        "tags": [
+          "system-admin"
+        ]
+      },
+      "post": {
+        "operationId": "record_capacity_baseline_api_v1_admin_system_capacity_baselines_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CapacityBaselineRecordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Record Capacity Baseline Api V1 Admin System Capacity Baselines Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Record Capacity Baseline",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/system/configuration": {
+      "get": {
+        "operationId": "configuration_api_v1_admin_system_configuration_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Configuration Api V1 Admin System Configuration Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Configuration",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/system/configuration/diff/{target_environment}": {
+      "get": {
+        "operationId": "configuration_diff_api_v1_admin_system_configuration_diff__target_environment__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "target_environment",
+            "required": true,
+            "schema": {
+              "title": "Target Environment",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Configuration Diff Api V1 Admin System Configuration Diff  Target Environment  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Configuration Diff",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/system/dead-letters": {
+      "get": {
+        "operationId": "dead_letters_api_v1_admin_system_dead_letters_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Dead Letters Api V1 Admin System Dead Letters Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dead Letters",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/system/dead-letters/{dead_letter_id}/replay": {
+      "post": {
+        "operationId": "replay_dead_letter_api_v1_admin_system_dead_letters__dead_letter_id__replay_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dead_letter_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Dead Letter Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OperationalReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Replay Dead Letter Api V1 Admin System Dead Letters  Dead Letter Id  Replay Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Replay Dead Letter",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/system/feature-flags": {
+      "get": {
+        "operationId": "list_system_feature_flags_api_v1_admin_system_feature_flags_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List System Feature Flags Api V1 Admin System Feature Flags Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List-System-Feature-Flags",
+        "tags": [
+          "system-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_flag_api_v1_admin_system_feature_flags_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeatureFlagCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Flag Api V1 Admin System Feature Flags Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Flag",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/system/feature-flags/{flag_id}": {
+      "patch": {
+        "operationId": "update_flag_api_v1_admin_system_feature_flags__flag_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flag_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Flag Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeatureFlagUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Flag Api V1 Admin System Feature Flags  Flag Id  Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Flag",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/system/feature-flags/{flag_id}/activate": {
+      "post": {
+        "operationId": "activate_flag_api_v1_admin_system_feature_flags__flag_id__activate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flag_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Flag Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Activate Flag Api V1 Admin System Feature Flags  Flag Id  Activate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Activate Flag",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/system/feature-flags/{flag_id}/approve": {
+      "post": {
+        "operationId": "approve_flag_api_v1_admin_system_feature_flags__flag_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flag_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Flag Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Flag Api V1 Admin System Feature Flags  Flag Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Flag",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/system/integrations": {
+      "get": {
+        "operationId": "integrations_api_v1_admin_system_integrations_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Integrations Api V1 Admin System Integrations Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Integrations",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/system/jobs": {
+      "get": {
+        "operationId": "list_system_jobs_api_v1_admin_system_jobs_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List System Jobs Api V1 Admin System Jobs Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List-System-Jobs",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/system/jobs/{job_id}/{operation}": {
+      "post": {
+        "operationId": "transition_job_api_v1_admin_system_jobs__job_id___operation__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Job Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "operation",
+            "required": true,
+            "schema": {
+              "title": "Operation",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OperationalReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Transition Job Api V1 Admin System Jobs  Job Id   Operation  Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Transition Job",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/system/maintenance": {
+      "get": {
+        "operationId": "list_system_maintenance_api_v1_admin_system_maintenance_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List System Maintenance Api V1 Admin System Maintenance Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List-System-Maintenance",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/system/maintenance/disable": {
+      "post": {
+        "operationId": "disable_maintenance_api_v1_admin_system_maintenance_disable_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MaintenanceChangeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Disable Maintenance Api V1 Admin System Maintenance Disable Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Disable Maintenance",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/system/maintenance/enable": {
+      "post": {
+        "operationId": "enable_maintenance_api_v1_admin_system_maintenance_enable_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MaintenanceChangeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Enable Maintenance Api V1 Admin System Maintenance Enable Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Enable Maintenance",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/system/releases": {
+      "get": {
+        "operationId": "list_system_releases_api_v1_admin_system_releases_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List System Releases Api V1 Admin System Releases Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List-System-Releases",
+        "tags": [
+          "system-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_release_api_v1_admin_system_releases_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReleaseRecordCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Release Api V1 Admin System Releases Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Release",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/system/releases/{release_id}/approve": {
+      "post": {
+        "operationId": "approve_release_api_v1_admin_system_releases__release_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "release_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Release Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Release Api V1 Admin System Releases  Release Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Release",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/system/releases/{release_id}/deploy/{environment}": {
+      "post": {
+        "operationId": "record_release_deployment_api_v1_admin_system_releases__release_id__deploy__environment__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "release_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Release Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "environment",
+            "required": true,
+            "schema": {
+              "title": "Environment",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeploymentEvidenceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Record Release Deployment Api V1 Admin System Releases  Release Id  Deploy  Environment  Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Record Release Deployment",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/system/releases/{release_id}/rollback": {
+      "post": {
+        "operationId": "rollback_release_api_v1_admin_system_releases__release_id__rollback_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "release_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Release Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OperationalReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Rollback Release Api V1 Admin System Releases  Release Id  Rollback Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rollback Release",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/system/restore-drills": {
+      "get": {
+        "operationId": "list_system_restore_drills_api_v1_admin_system_restore_drills_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List System Restore Drills Api V1 Admin System Restore Drills Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List-System-Restore-Drills",
+        "tags": [
+          "system-admin"
+        ]
+      },
+      "post": {
+        "operationId": "record_restore_drill_api_v1_admin_system_restore_drills_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RestoreDrillRecordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Record Restore Drill Api V1 Admin System Restore Drills Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Record Restore Drill",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/system/status": {
+      "get": {
+        "operationId": "status_api_v1_admin_system_status_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Status Api V1 Admin System Status Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Status",
+        "tags": [
+          "system-admin"
+        ]
+      }
+    },
     "/api/v1/admin/trust-safety/appeals": {
       "get": {
         "operationId": "appeal_queue_api_v1_admin_trust_safety_appeals_get",
@@ -46345,6 +48013,29 @@
           }
         },
         "summary": "Dependency readiness",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/health/startup": {
+      "get": {
+        "operationId": "startup_api_v1_health_startup_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Startup Api V1 Health Startup Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Startup configuration status",
         "tags": [
           "health"
         ]

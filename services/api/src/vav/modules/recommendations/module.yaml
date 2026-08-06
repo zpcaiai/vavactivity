@@ -1,0 +1,7 @@
+module: {code: recommendations, owner: matchmaking, version: "1.0.0"}
+dependencies: {required: [identity, privacy, matchmaking_profiles, trust_safety]}
+database: {revisions: [54, 55, 56, 57, 58, 59]}
+events: {publishes: [recommendation.batch.generated.v1], consumes: [dating_profile.approved.v1, safety.block.created.v1]}
+permissions: {prefixes: [recommendations.]}
+configuration: {prefixes: [RECOMMENDATION_]}
+health: {checks: [recommendation_pool, trust_safety_gateway]}

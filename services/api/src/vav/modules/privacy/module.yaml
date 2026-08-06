@@ -1,0 +1,7 @@
+module: {code: privacy, owner: privacy, version: "1.0.0"}
+dependencies: {required: [identity, system]}
+database: {revisions: [41, 42, 43, 44, 45, 46]}
+events: {publishes: [privacy.erasure.completed.v1], consumes: []}
+permissions: {prefixes: [privacy.]}
+configuration: {prefixes: [PRIVACY_]}
+health: {checks: [encryption, retention_policy]}

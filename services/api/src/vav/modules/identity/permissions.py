@@ -531,6 +531,31 @@ SAFETY_PERMISSIONS = {
     "safety.audit.read",
 }
 
+SYSTEM_PERMISSIONS = {
+    "system.status.read",
+    "system.releases.read",
+    "system.releases.deploy",
+    "system.releases.approve",
+    "system.releases.rollback",
+    "system.jobs.read",
+    "system.jobs.retry",
+    "system.jobs.cancel",
+    "system.dead_letters.read",
+    "system.dead_letters.replay",
+    "system.feature_flags.read",
+    "system.feature_flags.manage",
+    "system.feature_flags.approve",
+    "system.maintenance.read",
+    "system.maintenance.enable",
+    "system.maintenance.disable",
+    "system.backups.read",
+    "system.restore_drills.read",
+    "system.capacity.read",
+    "system.configuration.read",
+    "system.configuration.diff",
+    "system.audit.read",
+}
+
 ALL_PERMISSIONS = (
     IDENTITY_PERMISSIONS
     | CMS_PERMISSIONS
@@ -549,6 +574,7 @@ ALL_PERMISSIONS = (
     | RELATIONSHIP_PERMISSIONS
     | MEMBERSHIP_PERMISSIONS
     | SAFETY_PERMISSIONS
+    | SYSTEM_PERMISSIONS
 )
 
 ROLE_PERMISSIONS: dict[str, set[str]] = {
@@ -1014,6 +1040,24 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "safety.red_team.approve",
         "safety.audit.read",
     },
+    "system_operator": {
+        "system.status.read",
+        "system.releases.read",
+        "system.jobs.read",
+        "system.jobs.retry",
+        "system.jobs.cancel",
+        "system.dead_letters.read",
+        "system.dead_letters.replay",
+        "system.feature_flags.read",
+        "system.maintenance.read",
+        "system.backups.read",
+        "system.restore_drills.read",
+        "system.capacity.read",
+        "system.configuration.read",
+        "system.configuration.diff",
+        "system.audit.read",
+    },
+    "system_release_manager": SYSTEM_PERMISSIONS,
     "analyst": {"audit.read", "catalog.audit.read"},
     "support_agent": {"users.read", "catalog.products.read"},
     "member": set(),

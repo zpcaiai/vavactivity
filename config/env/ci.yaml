@@ -1,0 +1,24 @@
+schema_version: "1.0.0"
+environment: ci
+application:
+  debug: false
+  public_api_base_url: http://api:8000
+  user_web_url: http://user-web:4173
+  admin_web_url: http://admin-web:4174
+  cookie_secure: false
+  cors_origins: [http://user-web:4173, http://admin-web:4174]
+providers: {payment: fake, email: fake, ai: deterministic_local}
+data: {database_tls: false, redis_tls: false, object_storage_public: false, field_encryption: true, backup_encryption: true}
+observability: {otel_endpoint: null, trace_sample_ratio: 1.0, structured_logs: true}
+secrets:
+  database: env://DATABASE_URL
+  redis: env://REDIS_URL
+  jwt_private_key: file://auth-private.pem
+  jwt_public_key: file://auth-public.pem
+  field_encryption_master_key: env://FIELD_ENCRYPTION_MASTER_KEY
+  privacy_search_hmac_pepper: env://PRIVACY_SEARCH_HMAC_PEPPER
+  backup_encryption_key: env://BACKUP_ENCRYPTION_KEY
+  payment_webhook_secret: env://PAYMENT_TEST_WEBHOOK_SECRET
+  email_provider_secret: env://NOTIFICATION_EMAIL_PROVIDER_WEBHOOK_SECRET
+  ai_provider_api_key: env://AI_PROVIDER_API_KEY
+feature_flags: {version: ci}

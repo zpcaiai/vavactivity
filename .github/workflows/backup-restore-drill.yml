@@ -1,0 +1,23 @@
+name: Backup Restore Drill
+
+on:
+  schedule: [{cron: "17 2 * * 1"}]
+  workflow_dispatch:
+
+permissions: {contents: read}
+
+jobs:
+  restore-drill:
+    if: vars.BACKUP_DRILL_ENABLED == 'true'
+    runs-on: [self-hosted, vav-backup-drill]
+    environment: backup-drill
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run encrypted backup and isolated restore
+        env:
+          BACKUP_ENCRYPTION_KEY_FILE: ${{ secrets.BACKUP_ENCRYPTION_KEY_FILE }}
+          BACKUP_DESTINATION: ${{ vars.BACKUP_DESTINATION }}
+        run: make backup backup-verify restore-drill restore-smoke
+      - uses: actions/upload-artifact@v4
+        with: {name: restore-drill-report, path: restore-reports/*.json, if-no-files-found: error}
