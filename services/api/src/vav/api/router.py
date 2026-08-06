@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from vav.modules.activities.router import router as activities_router
+from vav.modules.admin_platform.admin_router import router as admin_platform_router
 from vav.modules.ai_assistant.admin_router import router as ai_assistant_admin_router
 from vav.modules.ai_assistant.router import router as ai_assistant_router
 from vav.modules.catalog.router import router as catalog_router
@@ -57,6 +58,7 @@ api_router.include_router(content_router, tags=["content"])
 api_router.include_router(catalog_router, tags=["catalog"])
 api_router.include_router(commerce_router, tags=["commerce"])
 api_router.include_router(activities_router, tags=["activities"])
+api_router.include_router(admin_platform_router, tags=["admin-platform"])
 api_router.include_router(ai_assistant_router, tags=["ai-assistant"])
 api_router.include_router(ai_assistant_admin_router, tags=["ai-assistant-admin"])
 api_router.include_router(courses_router, tags=["courses"])

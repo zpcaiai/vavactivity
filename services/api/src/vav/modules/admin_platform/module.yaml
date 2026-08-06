@@ -1,0 +1,16 @@
+module: {code: admin_platform, owner: platform_operations, version: "1.0.0"}
+dependencies: {required: [identity, privacy, quality, process_governance, data_governance, experience]}
+database: {revisions: [92]}
+events:
+  publishes:
+    - admin.work_item.changed.v1
+    - admin.approval.changed.v1
+    - admin.configuration.changed.v1
+    - admin.certification.changed.v1
+  consumes:
+    - process.stuck.detected.v1
+    - data.integrity.gap.detected.v1
+permissions: {prefixes: [admin.]}
+configuration: {prefixes: [ADMIN_]}
+health: {checks: [capability_coverage, work_item_sla, approval_separation, masking, domain_certification]}
+schema_version: "1.0"

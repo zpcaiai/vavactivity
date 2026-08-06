@@ -8832,6 +8832,261 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/platform/approvals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Approval */
+        post: operations["create_approval_api_v1_admin_platform_approvals_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/platform/approvals/{approval_id}/decide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decide Approval */
+        post: operations["decide_approval_api_v1_admin_platform_approvals__approval_id__decide_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/platform/bulk-jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Plan Bulk */
+        post: operations["plan_bulk_api_v1_admin_platform_bulk_jobs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/platform/certifications/evaluate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Evaluate Certification */
+        post: operations["evaluate_certification_api_v1_admin_platform_certifications_evaluate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/platform/certifications/{certification_id}/decide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decide Certification */
+        post: operations["decide_certification_api_v1_admin_platform_certifications__certification_id__decide_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/platform/configurations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Configuration */
+        post: operations["create_configuration_api_v1_admin_platform_configurations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/platform/configurations/{version_id}/action": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Act Configuration */
+        post: operations["act_configuration_api_v1_admin_platform_configurations__version_id__action_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/platform/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Dashboard */
+        get: operations["dashboard_api_v1_admin_platform_dashboard_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/platform/entities/{entity_type}/{entity_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Entity View */
+        get: operations["entity_view_api_v1_admin_platform_entities__entity_type___entity_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/platform/field-access/mask": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Apply Masking */
+        post: operations["apply_masking_api_v1_admin_platform_field_access_mask_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/platform/field-access/reveal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Reveal */
+        post: operations["create_reveal_api_v1_admin_platform_field_access_reveal_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/platform/saved-views": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Saved View */
+        post: operations["create_saved_view_api_v1_admin_platform_saved_views_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/platform/workbench/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sync Workbench */
+        post: operations["sync_workbench_api_v1_admin_platform_workbench_sync_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/platform/workbench/{item_id}/assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Assign Work Item */
+        post: operations["assign_work_item_api_v1_admin_platform_workbench__item_id__assign_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/platform/{section}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Section */
+        get: operations["section_api_v1_admin_platform__section__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/privacy/access-events": {
         parameters: {
             query?: never;
@@ -14730,6 +14985,37 @@ export interface components {
             /** User Timezone */
             user_timezone: string;
         };
+        /** ApprovalCreate */
+        ApprovalCreate: {
+            /** Business State Snapshot */
+            business_state_snapshot: {
+                [key: string]: unknown;
+            };
+            /** Capability Code */
+            capability_code: string;
+            /** Payload */
+            payload: {
+                [key: string]: unknown;
+            };
+            /** Policy Code */
+            policy_code: string;
+            /** Target Entity Id */
+            target_entity_id?: string | null;
+            /** Target Entity Type */
+            target_entity_type?: string | null;
+        };
+        /** ApprovalDecision */
+        ApprovalDecision: {
+            /**
+             * Decision
+             * @enum {string}
+             */
+            decision: "approved" | "rejected";
+            /** Rationale */
+            rationale: string;
+            /** Reason Code */
+            reason_code: string;
+        };
         /** ArticleCreateRequest */
         ArticleCreateRequest: {
             /** Canonical Slug */
@@ -14764,6 +15050,11 @@ export interface components {
             reading_time_minutes?: number | null;
             /** Source Reference */
             source_reference?: string | null;
+        };
+        /** Assignment */
+        Assignment: {
+            /** Assigned To */
+            assigned_to?: string | null;
         };
         /** AttemptSaveRequest */
         AttemptSaveRequest: {
@@ -15181,6 +15472,28 @@ export interface components {
              */
             subject_user_id: string;
         };
+        /** BulkPlan */
+        BulkPlan: {
+            /**
+             * Dry Run
+             * @default true
+             */
+            dry_run: boolean;
+            /** Expected Versions */
+            expected_versions?: {
+                [key: string]: number;
+            };
+            /** Idempotency Key */
+            idempotency_key: string;
+            /** Operation Code */
+            operation_code: string;
+            /** Parameters */
+            parameters?: {
+                [key: string]: unknown;
+            };
+            /** Target Ids */
+            target_ids: string[];
+        };
         /** BusinessFlowCreate */
         BusinessFlowCreate: {
             /** Business Domain */
@@ -15476,34 +15789,6 @@ export interface components {
             /** Slug */
             slug: string;
         };
-        /** CertificationDecision */
-        CertificationDecision: {
-            /**
-             * Decision
-             * @enum {string}
-             */
-            decision: "certified" | "rejected";
-            /** Reason */
-            reason: string;
-        };
-        /** CertificationEvaluate */
-        CertificationEvaluate: {
-            /** Business Domain */
-            business_domain: string;
-            /**
-             * Environment
-             * @enum {string}
-             */
-            environment: "local" | "ci" | "staging" | "production";
-            /** Evidence Checksum Sha256 */
-            evidence_checksum_sha256: string;
-            /** Git Commit */
-            git_commit: string;
-            /** Path Results */
-            path_results: {
-                [key: string]: "pass" | "fail" | "not_run";
-            };
-        };
         /** ChangeCreateRequest */
         ChangeCreateRequest: {
             /** Change Type */
@@ -15674,6 +15959,30 @@ export interface components {
             status: "active" | "experimental";
             /** Supported States */
             supported_states: string[];
+        };
+        /** ConfigurationAction */
+        ConfigurationAction: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "approve" | "activate" | "rollback" | "reject";
+        };
+        /** ConfigurationCreate */
+        ConfigurationCreate: {
+            /** Configuration */
+            configuration: {
+                [key: string]: unknown;
+            };
+            /**
+             * Environment
+             * @enum {string}
+             */
+            environment: "local" | "ci" | "staging" | "production";
+            /** Namespace Code */
+            namespace_code: string;
+            /** Semantic Version */
+            semantic_version: string;
         };
         /** ConsentActionRequest */
         ConsentActionRequest: {
@@ -17499,6 +17808,19 @@ export interface components {
              */
             version_id: string;
         };
+        /** MaskRequest */
+        MaskRequest: {
+            /** Permission Codes */
+            permission_codes: string[];
+            /** Policy Code */
+            policy_code: string;
+            /** Purpose Code */
+            purpose_code: string;
+            /** Reveal Grant Id */
+            reveal_grant_id?: string | null;
+            /** Value */
+            value: unknown;
+        };
         /** MediaCompleteRequest */
         MediaCompleteRequest: {
             /** Checksum Sha256 */
@@ -19281,6 +19603,24 @@ export interface components {
              */
             top_k: number;
         };
+        /** RevealCreate */
+        RevealCreate: {
+            /**
+             * Entity Id
+             * Format: uuid
+             */
+            entity_id: string;
+            /** Entity Type */
+            entity_type: string;
+            /** Policy Code */
+            policy_code: string;
+            /** Purpose Code */
+            purpose_code: string;
+            /** Reason */
+            reason: string;
+            /** Step Up Authenticated At */
+            step_up_authenticated_at?: string | null;
+        };
         /** ReviewApproveRequest */
         ReviewApproveRequest: {
             /** Expected Version */
@@ -19476,6 +19816,29 @@ export interface components {
          * @enum {string}
          */
         SafetyReportCategory: "harassment" | "threat" | "abuse" | "coercive_control" | "stalking" | "hate_or_degrading_content" | "sexual_content" | "impersonation" | "fraud_or_scam" | "money_request" | "off_platform_payment" | "spam" | "false_profile" | "underage_concern" | "privacy_violation" | "safety_concern" | "other";
+        /** SavedViewCreate */
+        SavedViewCreate: {
+            /** Columns */
+            columns: string[];
+            /** Filters */
+            filters?: {
+                [key: string]: unknown;
+            };
+            /** Name */
+            name: string;
+            /** Query Code */
+            query_code: string;
+            /** Shared Team */
+            shared_team?: string | null;
+            /** Sort */
+            sort: string;
+            /**
+             * Visibility
+             * @default private
+             * @enum {string}
+             */
+            visibility: "private" | "team" | "organization_template";
+        };
         /** ScheduleRequest */
         ScheduleRequest: {
             /** Reason */
@@ -20418,6 +20781,30 @@ export interface components {
             /** User Message */
             user_message?: string | null;
         };
+        /** CertificationDecision */
+        vav__modules__admin_platform__schemas__CertificationDecision: {
+            /**
+             * Decision
+             * @enum {string}
+             */
+            decision: "certified" | "rejected";
+        };
+        /** CertificationEvaluate */
+        vav__modules__admin_platform__schemas__CertificationEvaluate: {
+            /** Business Domain */
+            business_domain: string;
+            /**
+             * Environment
+             * @enum {string}
+             */
+            environment: "local" | "ci" | "staging" | "production";
+            /** Evidence Ids */
+            evidence_ids?: string[];
+            /** Release Version */
+            release_version: string;
+            /** Verified Capability Codes */
+            verified_capability_codes: string[];
+        };
         /** RegistryStatusRequest */
         vav__modules__ai_assistant__admin_router__RegistryStatusRequest: {
             /**
@@ -20554,6 +20941,34 @@ export interface components {
         vav__modules__privacy__schemas__StatusReasonRequest: {
             /** Reason */
             reason: string;
+        };
+        /** CertificationDecision */
+        vav__modules__process_governance__schemas__CertificationDecision: {
+            /**
+             * Decision
+             * @enum {string}
+             */
+            decision: "certified" | "rejected";
+            /** Reason */
+            reason: string;
+        };
+        /** CertificationEvaluate */
+        vav__modules__process_governance__schemas__CertificationEvaluate: {
+            /** Business Domain */
+            business_domain: string;
+            /**
+             * Environment
+             * @enum {string}
+             */
+            environment: "local" | "ci" | "staging" | "production";
+            /** Evidence Checksum Sha256 */
+            evidence_checksum_sha256: string;
+            /** Git Commit */
+            git_commit: string;
+            /** Path Results */
+            path_results: {
+                [key: string]: "pass" | "fail" | "not_run";
+            };
         };
         /** FeedbackRequest */
         vav__modules__recommendations__schemas__FeedbackRequest: {
@@ -39416,6 +39831,510 @@ export interface operations {
             };
         };
     };
+    create_approval_api_v1_admin_platform_approvals_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApprovalCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    decide_approval_api_v1_admin_platform_approvals__approval_id__decide_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                approval_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApprovalDecision"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    plan_bulk_api_v1_admin_platform_bulk_jobs_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkPlan"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    evaluate_certification_api_v1_admin_platform_certifications_evaluate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__admin_platform__schemas__CertificationEvaluate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    decide_certification_api_v1_admin_platform_certifications__certification_id__decide_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                certification_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["vav__modules__admin_platform__schemas__CertificationDecision"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_configuration_api_v1_admin_platform_configurations_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfigurationCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    act_configuration_api_v1_admin_platform_configurations__version_id__action_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfigurationAction"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dashboard_api_v1_admin_platform_dashboard_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    entity_view_api_v1_admin_platform_entities__entity_type___entity_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entity_type: string;
+                entity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    apply_masking_api_v1_admin_platform_field_access_mask_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MaskRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_reveal_api_v1_admin_platform_field_access_reveal_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RevealCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_saved_view_api_v1_admin_platform_saved_views_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SavedViewCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sync_workbench_api_v1_admin_platform_workbench_sync_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    assign_work_item_api_v1_admin_platform_workbench__item_id__assign_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Assignment"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    section_api_v1_admin_platform__section__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                section: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     access_events_api_v1_admin_privacy_access_events_get: {
         parameters: {
             query?: never;
@@ -40496,7 +41415,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CertificationEvaluate"];
+                "application/json": components["schemas"]["vav__modules__process_governance__schemas__CertificationEvaluate"];
             };
         };
         responses: {
@@ -40533,7 +41452,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CertificationDecision"];
+                "application/json": components["schemas"]["vav__modules__process_governance__schemas__CertificationDecision"];
             };
         };
         responses: {

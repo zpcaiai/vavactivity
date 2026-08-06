@@ -39,3 +39,7 @@ events:
   data.integrity.gap.detected.v1: {owner: data_governance, sensitivity: restricted}
   data.erasure.verified.v1: {owner: data_governance, sensitivity: highly_restricted}
   data.certification.changed.v1: {owner: data_governance, sensitivity: internal}
+  admin.work_item.changed.v1: {owner: admin_platform, sensitivity: internal}
+  admin.approval.changed.v1: {owner: admin_platform, sensitivity: restricted}
+  admin.configuration.changed.v1: {owner: admin_platform, sensitivity: internal}
+  admin.certification.changed.v1: {owner: admin_platform, sensitivity: internal}

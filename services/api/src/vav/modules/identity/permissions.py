@@ -760,6 +760,19 @@ DATA_GOVERNANCE_PERMISSIONS = {
     "data.audit.read",
 }
 
+ADMIN_PLATFORM_PERMISSIONS = {
+    "admin.capabilities.read", "admin.capabilities.manage", "admin.capabilities.approve",
+    "admin.workbench.read", "admin.workbench.assign", "admin.workbench.resolve",
+    "admin.entities.read", "admin.entities.sensitive.read",
+    "admin.saved_views.read", "admin.saved_views.manage", "admin.saved_views.share",
+    "admin.bulk.read", "admin.bulk.plan", "admin.bulk.execute", "admin.bulk.approve", "admin.bulk.cancel",
+    "admin.approvals.read", "admin.approvals.review", "admin.approvals.approve", "admin.approvals.reject",
+    "admin.exceptions.read", "admin.exceptions.assign", "admin.exceptions.diagnose", "admin.exceptions.repair", "admin.exceptions.resolve",
+    "admin.configurations.read", "admin.configurations.manage", "admin.configurations.approve", "admin.configurations.activate", "admin.configurations.rollback", "admin.configurations.reject",
+    "admin.fields.policies.read", "admin.fields.policies.manage", "admin.fields.reveal", "admin.fields.export",
+    "admin.certifications.read", "admin.certifications.certify", "admin.analytics.read", "admin.audit.read",
+}
+
 ALL_PERMISSIONS = (
     IDENTITY_PERMISSIONS
     | CMS_PERMISSIONS
@@ -785,6 +798,7 @@ ALL_PERMISSIONS = (
     | EXPERIENCE_PERMISSIONS
     | PROCESS_PERMISSIONS
     | DATA_GOVERNANCE_PERMISSIONS
+    | ADMIN_PLATFORM_PERMISSIONS
 )
 
 ROLE_PERMISSIONS: dict[str, set[str]] = {
@@ -1538,6 +1552,30 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "data.certifications.certify",
         "data.release.read",
         "data.audit.read",
+    },
+    "admin_operations_agent": {
+        "admin.workbench.read", "admin.workbench.assign", "admin.entities.read",
+        "admin.saved_views.read", "admin.saved_views.manage", "admin.saved_views.share",
+        "admin.exceptions.read", "admin.analytics.read",
+    },
+    "admin_operations_manager": {
+        "admin.workbench.read", "admin.workbench.assign", "admin.workbench.resolve",
+        "admin.entities.read", "admin.saved_views.read", "admin.saved_views.manage", "admin.saved_views.share",
+        "admin.bulk.read", "admin.bulk.plan", "admin.approvals.read",
+        "admin.exceptions.read", "admin.exceptions.assign", "admin.exceptions.diagnose", "admin.exceptions.repair", "admin.exceptions.resolve",
+        "admin.analytics.read", "admin.audit.read",
+    },
+    "admin_configuration_manager": {
+        "admin.configurations.read", "admin.configurations.manage", "admin.configurations.activate", "admin.configurations.rollback", "admin.configurations.reject",
+        "admin.capabilities.read", "admin.audit.read",
+    },
+    "admin_sensitive_access_reviewer": {
+        "admin.entities.read", "admin.entities.sensitive.read", "admin.fields.policies.read",
+        "admin.fields.policies.manage", "admin.fields.reveal", "admin.fields.export", "admin.audit.read",
+    },
+    "admin_release_reviewer": {
+        "admin.capabilities.read", "admin.capabilities.approve", "admin.bulk.read", "admin.bulk.approve",
+        "admin.configurations.read", "admin.configurations.approve", "admin.certifications.read", "admin.certifications.certify", "admin.audit.read",
     },
     "analyst": {"audit.read", "catalog.audit.read"},
     "support_agent": {"users.read", "catalog.products.read"},

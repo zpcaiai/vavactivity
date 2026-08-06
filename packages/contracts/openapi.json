@@ -1054,6 +1054,90 @@
         "title": "AppointmentRequest",
         "type": "object"
       },
+      "ApprovalCreate": {
+        "properties": {
+          "business_state_snapshot": {
+            "additionalProperties": true,
+            "title": "Business State Snapshot",
+            "type": "object"
+          },
+          "capability_code": {
+            "title": "Capability Code",
+            "type": "string"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "title": "Payload",
+            "type": "object"
+          },
+          "policy_code": {
+            "title": "Policy Code",
+            "type": "string"
+          },
+          "target_entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Entity Id"
+          },
+          "target_entity_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Entity Type"
+          }
+        },
+        "required": [
+          "policy_code",
+          "capability_code",
+          "payload",
+          "business_state_snapshot"
+        ],
+        "title": "ApprovalCreate",
+        "type": "object"
+      },
+      "ApprovalDecision": {
+        "properties": {
+          "decision": {
+            "enum": [
+              "approved",
+              "rejected"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "rationale": {
+            "maxLength": 1000,
+            "minLength": 10,
+            "title": "Rationale",
+            "type": "string"
+          },
+          "reason_code": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Reason Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "reason_code",
+          "rationale"
+        ],
+        "title": "ApprovalDecision",
+        "type": "object"
+      },
       "ArticleCreateRequest": {
         "properties": {
           "canonical_slug": {
@@ -1152,6 +1236,24 @@
           }
         },
         "title": "ArticleMetadataInput",
+        "type": "object"
+      },
+      "Assignment": {
+        "properties": {
+          "assigned_to": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned To"
+          }
+        },
+        "title": "Assignment",
         "type": "object"
       },
       "AttemptSaveRequest": {
@@ -2205,6 +2307,54 @@
         "title": "BreakGlassRequest",
         "type": "object"
       },
+      "BulkPlan": {
+        "properties": {
+          "dry_run": {
+            "default": true,
+            "title": "Dry Run",
+            "type": "boolean"
+          },
+          "expected_versions": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Expected Versions",
+            "type": "object"
+          },
+          "idempotency_key": {
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "operation_code": {
+            "title": "Operation Code",
+            "type": "string"
+          },
+          "parameters": {
+            "additionalProperties": true,
+            "title": "Parameters",
+            "type": "object"
+          },
+          "target_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 10000,
+            "minItems": 1,
+            "title": "Target Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "operation_code",
+          "target_ids",
+          "idempotency_key"
+        ],
+        "title": "BulkPlan",
+        "type": "object"
+      },
       "BusinessFlowCreate": {
         "properties": {
           "business_domain": {
@@ -3010,81 +3160,6 @@
         "title": "CategoryLocalizationInput",
         "type": "object"
       },
-      "CertificationDecision": {
-        "properties": {
-          "decision": {
-            "enum": [
-              "certified",
-              "rejected"
-            ],
-            "title": "Decision",
-            "type": "string"
-          },
-          "reason": {
-            "maxLength": 1000,
-            "minLength": 10,
-            "title": "Reason",
-            "type": "string"
-          }
-        },
-        "required": [
-          "decision",
-          "reason"
-        ],
-        "title": "CertificationDecision",
-        "type": "object"
-      },
-      "CertificationEvaluate": {
-        "properties": {
-          "business_domain": {
-            "maxLength": 64,
-            "minLength": 2,
-            "title": "Business Domain",
-            "type": "string"
-          },
-          "environment": {
-            "enum": [
-              "local",
-              "ci",
-              "staging",
-              "production"
-            ],
-            "title": "Environment",
-            "type": "string"
-          },
-          "evidence_checksum_sha256": {
-            "pattern": "^[0-9a-f]{64}$",
-            "title": "Evidence Checksum Sha256",
-            "type": "string"
-          },
-          "git_commit": {
-            "pattern": "^[0-9a-f]{7,64}$",
-            "title": "Git Commit",
-            "type": "string"
-          },
-          "path_results": {
-            "additionalProperties": {
-              "enum": [
-                "pass",
-                "fail",
-                "not_run"
-              ],
-              "type": "string"
-            },
-            "title": "Path Results",
-            "type": "object"
-          }
-        },
-        "required": [
-          "business_domain",
-          "git_commit",
-          "environment",
-          "path_results",
-          "evidence_checksum_sha256"
-        ],
-        "title": "CertificationEvaluate",
-        "type": "object"
-      },
       "ChangeCreateRequest": {
         "properties": {
           "change_type": {
@@ -3547,6 +3622,60 @@
           "supported_states"
         ],
         "title": "ComponentUpsert",
+        "type": "object"
+      },
+      "ConfigurationAction": {
+        "properties": {
+          "action": {
+            "enum": [
+              "approve",
+              "activate",
+              "rollback",
+              "reject"
+            ],
+            "title": "Action",
+            "type": "string"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "title": "ConfigurationAction",
+        "type": "object"
+      },
+      "ConfigurationCreate": {
+        "properties": {
+          "configuration": {
+            "additionalProperties": true,
+            "title": "Configuration",
+            "type": "object"
+          },
+          "environment": {
+            "enum": [
+              "local",
+              "ci",
+              "staging",
+              "production"
+            ],
+            "title": "Environment",
+            "type": "string"
+          },
+          "namespace_code": {
+            "title": "Namespace Code",
+            "type": "string"
+          },
+          "semantic_version": {
+            "title": "Semantic Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "namespace_code",
+          "environment",
+          "semantic_version",
+          "configuration"
+        ],
+        "title": "ConfigurationCreate",
         "type": "object"
       },
       "ConsentActionRequest": {
@@ -8648,6 +8777,48 @@
         "title": "MarketplaceListingRequest",
         "type": "object"
       },
+      "MaskRequest": {
+        "properties": {
+          "permission_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Permission Codes",
+            "type": "array"
+          },
+          "policy_code": {
+            "title": "Policy Code",
+            "type": "string"
+          },
+          "purpose_code": {
+            "title": "Purpose Code",
+            "type": "string"
+          },
+          "reveal_grant_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reveal Grant Id"
+          },
+          "value": {
+            "title": "Value"
+          }
+        },
+        "required": [
+          "policy_code",
+          "value",
+          "purpose_code",
+          "permission_codes"
+        ],
+        "title": "MaskRequest",
+        "type": "object"
+      },
       "MediaCompleteRequest": {
         "properties": {
           "checksum_sha256": {
@@ -13693,6 +13864,54 @@
         "title": "RetrievalRequest",
         "type": "object"
       },
+      "RevealCreate": {
+        "properties": {
+          "entity_id": {
+            "format": "uuid",
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "entity_type": {
+            "title": "Entity Type",
+            "type": "string"
+          },
+          "policy_code": {
+            "title": "Policy Code",
+            "type": "string"
+          },
+          "purpose_code": {
+            "title": "Purpose Code",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 10,
+            "title": "Reason",
+            "type": "string"
+          },
+          "step_up_authenticated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Step Up Authenticated At"
+          }
+        },
+        "required": [
+          "policy_code",
+          "entity_type",
+          "entity_id",
+          "purpose_code",
+          "reason"
+        ],
+        "title": "RevealCreate",
+        "type": "object"
+      },
       "ReviewApproveRequest": {
         "properties": {
           "expected_version": {
@@ -14324,6 +14543,65 @@
         ],
         "title": "SafetyReportCategory",
         "type": "string"
+      },
+      "SavedViewCreate": {
+        "properties": {
+          "columns": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Columns",
+            "type": "array"
+          },
+          "filters": {
+            "additionalProperties": true,
+            "title": "Filters",
+            "type": "object"
+          },
+          "name": {
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "query_code": {
+            "title": "Query Code",
+            "type": "string"
+          },
+          "shared_team": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shared Team"
+          },
+          "sort": {
+            "title": "Sort",
+            "type": "string"
+          },
+          "visibility": {
+            "default": "private",
+            "enum": [
+              "private",
+              "team",
+              "organization_template"
+            ],
+            "title": "Visibility",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query_code",
+          "name",
+          "sort",
+          "columns"
+        ],
+        "title": "SavedViewCreate",
+        "type": "object"
       },
       "ScheduleRequest": {
         "properties": {
@@ -16836,6 +17114,68 @@
         "title": "ReviewRequest",
         "type": "object"
       },
+      "vav__modules__admin_platform__schemas__CertificationDecision": {
+        "properties": {
+          "decision": {
+            "enum": [
+              "certified",
+              "rejected"
+            ],
+            "title": "Decision",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision"
+        ],
+        "title": "CertificationDecision",
+        "type": "object"
+      },
+      "vav__modules__admin_platform__schemas__CertificationEvaluate": {
+        "properties": {
+          "business_domain": {
+            "title": "Business Domain",
+            "type": "string"
+          },
+          "environment": {
+            "enum": [
+              "local",
+              "ci",
+              "staging",
+              "production"
+            ],
+            "title": "Environment",
+            "type": "string"
+          },
+          "evidence_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Evidence Ids",
+            "type": "array"
+          },
+          "release_version": {
+            "title": "Release Version",
+            "type": "string"
+          },
+          "verified_capability_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Verified Capability Codes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "business_domain",
+          "release_version",
+          "environment",
+          "verified_capability_codes"
+        ],
+        "title": "CertificationEvaluate",
+        "type": "object"
+      },
       "vav__modules__ai_assistant__admin_router__RegistryStatusRequest": {
         "properties": {
           "status": {
@@ -17169,6 +17509,81 @@
           "reason"
         ],
         "title": "StatusReasonRequest",
+        "type": "object"
+      },
+      "vav__modules__process_governance__schemas__CertificationDecision": {
+        "properties": {
+          "decision": {
+            "enum": [
+              "certified",
+              "rejected"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 10,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "reason"
+        ],
+        "title": "CertificationDecision",
+        "type": "object"
+      },
+      "vav__modules__process_governance__schemas__CertificationEvaluate": {
+        "properties": {
+          "business_domain": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Business Domain",
+            "type": "string"
+          },
+          "environment": {
+            "enum": [
+              "local",
+              "ci",
+              "staging",
+              "production"
+            ],
+            "title": "Environment",
+            "type": "string"
+          },
+          "evidence_checksum_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Evidence Checksum Sha256",
+            "type": "string"
+          },
+          "git_commit": {
+            "pattern": "^[0-9a-f]{7,64}$",
+            "title": "Git Commit",
+            "type": "string"
+          },
+          "path_results": {
+            "additionalProperties": {
+              "enum": [
+                "pass",
+                "fail",
+                "not_run"
+              ],
+              "type": "string"
+            },
+            "title": "Path Results",
+            "type": "object"
+          }
+        },
+        "required": [
+          "business_domain",
+          "git_commit",
+          "environment",
+          "path_results",
+          "evidence_checksum_sha256"
+        ],
+        "title": "CertificationEvaluate",
         "type": "object"
       },
       "vav__modules__recommendations__schemas__FeedbackRequest": {
@@ -45941,6 +46356,746 @@
         ]
       }
     },
+    "/api/v1/admin/platform/approvals": {
+      "post": {
+        "operationId": "create_approval_api_v1_admin_platform_approvals_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprovalCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Approval Api V1 Admin Platform Approvals Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Approval",
+        "tags": [
+          "admin-platform"
+        ]
+      }
+    },
+    "/api/v1/admin/platform/approvals/{approval_id}/decide": {
+      "post": {
+        "operationId": "decide_approval_api_v1_admin_platform_approvals__approval_id__decide_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "approval_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Approval Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprovalDecision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Decide Approval Api V1 Admin Platform Approvals  Approval Id  Decide Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Decide Approval",
+        "tags": [
+          "admin-platform"
+        ]
+      }
+    },
+    "/api/v1/admin/platform/bulk-jobs": {
+      "post": {
+        "operationId": "plan_bulk_api_v1_admin_platform_bulk_jobs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkPlan"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Plan Bulk Api V1 Admin Platform Bulk Jobs Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Plan Bulk",
+        "tags": [
+          "admin-platform"
+        ]
+      }
+    },
+    "/api/v1/admin/platform/certifications/evaluate": {
+      "post": {
+        "operationId": "evaluate_certification_api_v1_admin_platform_certifications_evaluate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/vav__modules__admin_platform__schemas__CertificationEvaluate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Evaluate Certification Api V1 Admin Platform Certifications Evaluate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Evaluate Certification",
+        "tags": [
+          "admin-platform"
+        ]
+      }
+    },
+    "/api/v1/admin/platform/certifications/{certification_id}/decide": {
+      "post": {
+        "operationId": "decide_certification_api_v1_admin_platform_certifications__certification_id__decide_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "certification_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Certification Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/vav__modules__admin_platform__schemas__CertificationDecision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Decide Certification Api V1 Admin Platform Certifications  Certification Id  Decide Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Decide Certification",
+        "tags": [
+          "admin-platform"
+        ]
+      }
+    },
+    "/api/v1/admin/platform/configurations": {
+      "post": {
+        "operationId": "create_configuration_api_v1_admin_platform_configurations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigurationCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Configuration Api V1 Admin Platform Configurations Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Configuration",
+        "tags": [
+          "admin-platform"
+        ]
+      }
+    },
+    "/api/v1/admin/platform/configurations/{version_id}/action": {
+      "post": {
+        "operationId": "act_configuration_api_v1_admin_platform_configurations__version_id__action_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigurationAction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Act Configuration Api V1 Admin Platform Configurations  Version Id  Action Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Act Configuration",
+        "tags": [
+          "admin-platform"
+        ]
+      }
+    },
+    "/api/v1/admin/platform/dashboard": {
+      "get": {
+        "operationId": "dashboard_api_v1_admin_platform_dashboard_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Dashboard Api V1 Admin Platform Dashboard Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dashboard",
+        "tags": [
+          "admin-platform"
+        ]
+      }
+    },
+    "/api/v1/admin/platform/entities/{entity_type}/{entity_id}": {
+      "get": {
+        "operationId": "entity_view_api_v1_admin_platform_entities__entity_type___entity_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_type",
+            "required": true,
+            "schema": {
+              "title": "Entity Type",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Entity View Api V1 Admin Platform Entities  Entity Type   Entity Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Entity View",
+        "tags": [
+          "admin-platform"
+        ]
+      }
+    },
+    "/api/v1/admin/platform/field-access/mask": {
+      "post": {
+        "operationId": "apply_masking_api_v1_admin_platform_field_access_mask_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MaskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Apply Masking Api V1 Admin Platform Field Access Mask Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Apply Masking",
+        "tags": [
+          "admin-platform"
+        ]
+      }
+    },
+    "/api/v1/admin/platform/field-access/reveal": {
+      "post": {
+        "operationId": "create_reveal_api_v1_admin_platform_field_access_reveal_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevealCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Reveal Api V1 Admin Platform Field Access Reveal Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Reveal",
+        "tags": [
+          "admin-platform"
+        ]
+      }
+    },
+    "/api/v1/admin/platform/saved-views": {
+      "post": {
+        "operationId": "create_saved_view_api_v1_admin_platform_saved_views_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavedViewCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Saved View Api V1 Admin Platform Saved Views Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Saved View",
+        "tags": [
+          "admin-platform"
+        ]
+      }
+    },
+    "/api/v1/admin/platform/workbench/sync": {
+      "post": {
+        "operationId": "sync_workbench_api_v1_admin_platform_workbench_sync_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Sync Workbench Api V1 Admin Platform Workbench Sync Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Sync Workbench",
+        "tags": [
+          "admin-platform"
+        ]
+      }
+    },
+    "/api/v1/admin/platform/workbench/{item_id}/assign": {
+      "post": {
+        "operationId": "assign_work_item_api_v1_admin_platform_workbench__item_id__assign_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Assignment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Assign Work Item Api V1 Admin Platform Workbench  Item Id  Assign Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Assign Work Item",
+        "tags": [
+          "admin-platform"
+        ]
+      }
+    },
+    "/api/v1/admin/platform/{section}": {
+      "get": {
+        "operationId": "section_api_v1_admin_platform__section__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "section",
+            "required": true,
+            "schema": {
+              "title": "Section",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Section Api V1 Admin Platform  Section  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Section",
+        "tags": [
+          "admin-platform"
+        ]
+      }
+    },
     "/api/v1/admin/privacy/access-events": {
       "get": {
         "operationId": "access_events_api_v1_admin_privacy_access_events_get",
@@ -47486,7 +48641,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CertificationEvaluate"
+                "$ref": "#/components/schemas/vav__modules__process_governance__schemas__CertificationEvaluate"
               }
             }
           },
@@ -47546,7 +48701,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CertificationDecision"
+                "$ref": "#/components/schemas/vav__modules__process_governance__schemas__CertificationDecision"
               }
             }
           },

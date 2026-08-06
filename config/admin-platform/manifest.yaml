@@ -1,0 +1,60 @@
+schema_version: "1.0"
+domains:
+  - identity
+  - cms
+  - catalog
+  - commerce
+  - activities
+  - courses
+  - counseling
+  - knowledge_ai
+  - notifications
+  - privacy
+  - matchmaking_profiles
+  - recommendations
+  - interactions
+  - relationships
+  - memberships
+  - safety
+  - skills
+  - quality
+  - process
+  - data_governance
+  - experience
+capabilities:
+  - {code: ADMIN-IDENTITY-USER-VIEW, owner: identity, entity: user, type: view, risk: moderate, permission: users.read, route: ROUTE-ADMIN-USER-OVERVIEW}
+  - {code: ADMIN-CMS-CONTENT-REVIEW, owner: cms, entity: content, type: review, risk: moderate, permission: cms.entries.review, command: cms.review_content, route: ROUTE-ADMIN-CMS}
+  - {code: ADMIN-CATALOG-PRODUCT-VIEW, owner: catalog, entity: product, type: view, risk: low, permission: catalog.products.read, route: ROUTE-ADMIN-CATALOG}
+  - {code: ADMIN-COMMERCE-PAYMENT-DIAGNOSE, owner: commerce, entity: payment, type: view, risk: high, permission: commerce.payments.read, route: ROUTE-ADMIN-ORDER-DETAIL}
+  - {code: ADMIN-ACTIVITY-REGISTRATION-REVIEW, owner: activities, entity: registration, type: review, risk: moderate, permission: activities.registrations.manage, command: activities.review_registration, route: ROUTE-ADMIN-ACTIVITIES}
+  - {code: ADMIN-COURSE-ENROLLMENT-VIEW, owner: courses, entity: enrollment, type: view, risk: low, permission: courses.enrollments.read, route: ROUTE-ADMIN-COURSES}
+  - {code: ADMIN-COUNSELING-APPOINTMENT-VIEW, owner: counseling, entity: appointment, type: view, risk: high, permission: counseling.appointments.read, route: ROUTE-ADMIN-COUNSELING}
+  - {code: ADMIN-AI-FAILED-TURN-DIAGNOSE, owner: knowledge_ai, entity: ai_turn, type: view, risk: high, permission: ai.sessions.read, route: ROUTE-ADMIN-AI}
+  - {code: ADMIN-NOTIFICATION-DELIVERY-RETRY, owner: notifications, entity: delivery, type: retry, risk: moderate, permission: notifications.deliveries.retry, command: notifications.retry_delivery, route: ROUTE-ADMIN-NOTIFICATIONS}
+  - {code: ADMIN-PRIVACY-ERASURE-VERIFY, owner: privacy, entity: privacy_request, type: review, risk: critical, permission: privacy.erasure.verify, command: privacy.verify_erasure, approval: APPROVAL-CRITICAL-TWO-PERSON, route: ROUTE-ADMIN-PRIVACY}
+  - {code: ADMIN-DATING-PROFILE-REVIEW, owner: matchmaking_profiles, entity: dating_profile, type: review, risk: high, permission: matchmaking.profiles.review, command: matchmaking.review_profile, approval: APPROVAL-HIGH-RISK, route: ROUTE-ADMIN-DATING}
+  - {code: ADMIN-RECOMMENDATION-DIAGNOSE, owner: recommendations, entity: recommendation_batch, type: view, risk: high, permission: recommendations.admin.read, route: ROUTE-ADMIN-RECOMMENDATIONS}
+  - {code: ADMIN-INTERACTION-DIAGNOSE, owner: interactions, entity: interaction, type: view, risk: high, permission: interactions.admin.read, route: ROUTE-ADMIN-INTERACTIONS}
+  - {code: ADMIN-RELATIONSHIP-DIAGNOSE, owner: relationships, entity: relationship_journey, type: view, risk: critical, permission: relationships.admin.read, route: ROUTE-ADMIN-RELATIONSHIPS}
+  - {code: ADMIN-MEMBERSHIP-RECONCILE, owner: memberships, entity: membership_account, type: repair, risk: high, permission: memberships.reconcile, command: memberships.reconcile_entitlement, approval: APPROVAL-HIGH-RISK, route: ROUTE-ADMIN-MEMBERSHIPS}
+  - {code: ADMIN-SAFETY-CASE-REVIEW, owner: safety, entity: safety_case, type: review, risk: critical, permission: trust_safety.cases.review, command: safety.review_case, approval: APPROVAL-CRITICAL-TWO-PERSON, route: ROUTE-ADMIN-SAFETY}
+  - {code: ADMIN-SKILL-INSTALL-RECOVER, owner: skills, entity: skill_installation, type: repair, risk: high, permission: skills.installations.manage, command: skills.rollback_installation, approval: APPROVAL-HIGH-RISK, route: ROUTE-ADMIN-SKILLS}
+  - {code: ADMIN-QUALITY-GAP-VIEW, owner: quality, entity: quality_gap, type: view, risk: moderate, permission: quality.gaps.read, route: ROUTE-ADMIN-QUALITY}
+  - {code: ADMIN-PROCESS-STUCK-REPAIR, owner: process, entity: process_instance, type: repair, risk: high, permission: process.interventions.execute, command: process.execute_intervention, approval: APPROVAL-HIGH-RISK, route: ROUTE-ADMIN-PROCESS}
+  - {code: ADMIN-DATA-DIFFERENCE-REPAIR, owner: data_governance, entity: reconciliation_difference, type: repair, risk: critical, permission: data.repairs.execute, command: data.execute_registered_repair, approval: APPROVAL-CRITICAL-TWO-PERSON, route: ROUTE-ADMIN-DATA}
+  - {code: ADMIN-EXPERIENCE-ROUTE-DIAGNOSE, owner: experience, entity: route, type: view, risk: low, permission: experience.routes.read, route: ROUTE-ADMIN-EXPERIENCE}
+  - {code: ADMIN-CONFIGURATION-ACTIVATE, owner: admin_platform, entity: configuration, type: configure, risk: critical, permission: admin.configurations.activate, command: admin.activate_configuration, approval: APPROVAL-CRITICAL-TWO-PERSON, route: ROUTE-ADMIN-CONFIGURATION}
+queries:
+  - {code: admin.work-items, owner: admin_platform, entity: work_item, filters: [status, priority, assigned_to, sla_state], sorts: [due_at, created_at, priority], columns: [work_item_code, title_snapshot, status, priority, assigned_team, due_at], maximum_page_size: 200, permission: admin.workbench.read}
+  - {code: admin.capabilities, owner: admin_platform, entity: capability, filters: [owning_module, capability_type, risk_level, lifecycle_status], sorts: [capability_code, owning_module, risk_level], columns: [capability_code, display_name, owning_module, capability_type, risk_level, lifecycle_status], maximum_page_size: 200, permission: admin.capabilities.read}
+bulk_operations:
+  - {code: ADMIN-BULK-DATA-PROJECTION-REBUILD, owner: data_governance, entity: projection, command: data.rebuild_projection, maximum: 1000, risk: high, approval: APPROVAL-HIGH-RISK}
+  - {code: ADMIN-BULK-NOTIFICATION-CANCEL, owner: notifications, entity: delivery, command: notifications.cancel_pending, maximum: 1000, risk: moderate}
+approval_policies:
+  - {code: APPROVAL-HIGH-RISK, steps: 1, validity_seconds: 86400, step_up: true}
+  - {code: APPROVAL-CRITICAL-TWO-PERSON, steps: 2, validity_seconds: 3600, step_up: true}
+field_policies:
+  - {code: ADMIN-FIELD-USER-EMAIL, asset: identity.users, field: email, classification: restricted, permission: admin.entities.sensitive.read, purpose: customer_support, masking: partial_email, reveal: true, step_up: true, ttl: 300}
+  - {code: ADMIN-FIELD-USER-PHONE, asset: identity.users, field: phone, classification: restricted, permission: admin.entities.sensitive.read, purpose: customer_support, masking: partial_phone, reveal: true, step_up: true, ttl: 300}
+  - {code: ADMIN-FIELD-COUNSELING-NOTES, asset: counseling.appointments, field: notes, classification: highly_restricted, permission: counseling.sensitive.read, purpose: counseling_safety_review, masking: redacted_text, reveal: false, step_up: true, ttl: 0}
+  - {code: ADMIN-FIELD-RELATIONSHIP-REFLECTION, asset: relationships.journeys, field: private_reflection, classification: highly_restricted, permission: relationships.sensitive.read, purpose: safety_investigation, masking: redacted_text, reveal: false, step_up: true, ttl: 0}

@@ -35,6 +35,7 @@ import DesignSystemManagementPage from "@/pages/DesignSystemManagementPage.vue";
 import ExperienceManagementPage from "@/pages/ExperienceManagementPage.vue";
 import ProcessGovernancePage from "@/pages/ProcessGovernancePage.vue";
 import DataGovernancePage from "@/pages/DataGovernancePage.vue";
+import AdminPlatformPage from "@/pages/AdminPlatformPage.vue";
 import { useAccessStore } from "@/stores/access";
 
 const modules = [
@@ -249,6 +250,10 @@ export const processSectionPermissions: Record<string, string> = {
 
 export const dataGovernanceSectionPermissions: Record<string, string> = {
   dashboard: "data.dashboard.read", assets: "data.assets.read", contracts: "data.contracts.read", lineage: "data.lineage.read", events: "data.events.read", "event-gaps": "data.events.read", "dead-letters": "data.dead_letters.read", quality: "data.quality.read", reconciliations: "data.reconciliations.read", differences: "data.reconciliations.read", backfills: "data.backfills.read", repairs: "data.repairs.read", projections: "data.projections.read", erasures: "data.erasures.read", certifications: "data.certifications.read", release: "data.release.read"
+};
+
+export const adminPlatformSectionPermissions: Record<string, string> = {
+  dashboard: "admin.workbench.read", capabilities: "admin.capabilities.read", "work-items": "admin.workbench.read", "saved-views": "admin.saved_views.read", "bulk-jobs": "admin.bulk.read", approvals: "admin.approvals.read", exceptions: "admin.exceptions.read", configurations: "admin.configurations.read", "field-access": "admin.fields.policies.read", "reveal-history": "admin.fields.policies.read", certifications: "admin.certifications.read", releases: "admin.certifications.read", audit: "admin.audit.read"
 };
 
 const privacySectionPermissions: Record<string, string> = {
@@ -652,6 +657,12 @@ export const router = createRouter({
           name: `admin-data-governance-${section}`,
           component: DataGovernancePage,
           meta: { title: "数据治理", permission: dataGovernanceSectionPermissions[section], dataGovernanceSection: section }
+        })),
+        ...Object.keys(adminPlatformSectionPermissions).map((section) => ({
+          path: `platform/${section}`,
+          name: `admin-platform-${section}`,
+          component: AdminPlatformPage,
+          meta: { title: "统一管理平台", permission: adminPlatformSectionPermissions[section], adminPlatformSection: section }
         })),
         ...Object.keys(privacySectionPermissions).map((section) => ({
           path: `privacy/${section}`,
