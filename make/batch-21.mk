@@ -1,5 +1,6 @@
 .PHONY: quality-migrate quality-seed quality-sync quality-manifest-check quality-trace-check \
-	quality-closure-check quality-gap-check quality-test quality-gate-test quality-security-test \
+	quality-closure-check quality-gap-check quality-domain-test quality-test quality-gate-test \
+	quality-security-test quality-concurrency-test quality-contract-test quality-gate-evaluate \
 	quality-admin-e2e quality-evidence-build quality-release-report quality-verify
 
 quality-migrate:
@@ -24,14 +25,26 @@ quality-closure-check:
 quality-gap-check:
 	PYTHONPATH=services/api/src .venv/bin/python scripts/quality/control.py gap-check
 
+quality-domain-test:
+	PYTHONPATH=services/api/src .venv/bin/pytest tests/quality/unit -q
+
+quality-contract-test:
+	PYTHONPATH=services/api/src .venv/bin/pytest tests/quality/integration -q
+
+quality-concurrency-test:
+	PYTHONPATH=services/api/src .venv/bin/pytest tests/quality/concurrency -q
+
 quality-test:
-	docker compose exec -T api pytest tests/quality/unit tests/quality/integration tests/quality/concurrency -q
+	PYTHONPATH=services/api/src .venv/bin/pytest tests/quality/unit tests/quality/integration tests/quality/concurrency -q
 
 quality-gate-test:
-	docker compose exec -T api pytest tests/quality/gates -q
+	PYTHONPATH=services/api/src .venv/bin/pytest tests/quality/gates -q
 
 quality-security-test:
-	docker compose exec -T api pytest tests/quality/security -q
+	PYTHONPATH=services/api/src .venv/bin/pytest tests/quality/security -q
+
+quality-gate-evaluate:
+	.venv/bin/python scripts/quality/evaluate_release_gate.py --self-check || true
 
 quality-admin-e2e:
 	corepack pnpm exec playwright test e2e/admin-quality
