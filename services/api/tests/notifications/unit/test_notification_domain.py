@@ -6,6 +6,7 @@ import pytest
 
 from vav.common.exceptions import VavError
 from vav.modules.notifications.rendering import render_template, route_from_reference
+from vav.modules.notifications.schemas import NotificationPreferenceItem
 from vav.modules.notifications.service import (
     quiet_hours_end,
     retry_delay,
@@ -87,6 +88,27 @@ def test_cross_midnight_quiet_hours_use_iana_timezone() -> None:
         timezone_name="Asia/Shanghai",
     )
     assert delayed_until == datetime(2026, 8, 2, 0, 0, tzinfo=UTC)
+
+
+@pytest.mark.parametrize("timezone_name", ["UTC", "Etc/UTC", "Asia/Shanghai"])
+def test_notification_preference_accepts_real_iana_timezones(timezone_name: str) -> None:
+    preference = NotificationPreferenceItem(
+        category="activity",
+        channel="email",
+        enabled=True,
+        quiet_hours_timezone=timezone_name,
+    )
+    assert preference.quiet_hours_timezone == timezone_name
+
+
+def test_notification_preference_rejects_unknown_timezone() -> None:
+    with pytest.raises(ValueError, match="must be an IANA timezone"):
+        NotificationPreferenceItem(
+            category="activity",
+            channel="email",
+            enabled=True,
+            quiet_hours_timezone="Mars/Olympus_Mons",
+        )
 
 
 def test_retry_policy_is_bounded_and_deterministic_for_test_jitter() -> None:

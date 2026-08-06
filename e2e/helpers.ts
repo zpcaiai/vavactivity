@@ -227,10 +227,10 @@ export function seedMatchmakingInteractionFixture(): string {
     "        row = (await session.execute(text(\"SELECT i.id AS first_item,j.id AS second_item,i.viewer_user_id AS first_user,i.recommended_user_id AS second_user,u.email FROM recommendation_items i JOIN recommendation_items j ON j.viewer_user_id=i.recommended_user_id AND j.recommended_user_id=i.viewer_user_id JOIN users u ON u.id=i.viewer_user_id WHERE i.status IN ('ready','exposed','viewed') AND j.status IN ('ready','exposed','viewed') AND u.email LIKE 'recommendation-fixture-%@example.com' ORDER BY i.created_at DESC LIMIT 1\"))).mappings().first()",
     "        if row is None:",
     "            raise SystemExit('no reciprocal actionable recommendation fixture')",
-    "        await likes.create_like(session, viewer_user_id=row['first_user'], recommendation_item_id=row['first_item'], idempotency_key='e2e-first-like')",
-    "        matched = await likes.create_like(session, viewer_user_id=row['second_user'], recommendation_item_id=row['second_item'], idempotency_key='e2e-second-like')",
+    "        await likes.create_like(session, viewer_user_id=row['first_user'], recommendation_item_id=row['first_item'], idempotency_key=f\"e2e-first-like-{row['first_item']}\")",
+    "        matched = await likes.create_like(session, viewer_user_id=row['second_user'], recommendation_item_id=row['second_item'], idempotency_key=f\"e2e-second-like-{row['second_item']}\")",
     "        match_id = UUID(matched['mutual_match_id'])",
-    "        await invitations.send_invitation(session, sender_user_id=row['first_user'], match_id=match_id, message='愿意在平台内进一步认识吗？', idempotency_key='e2e-introduction')",
+    "        await invitations.send_invitation(session, sender_user_id=row['first_user'], match_id=match_id, message='愿意在平台内进一步认识吗？', idempotency_key=f'e2e-introduction-{match_id}')",
     "        await session.commit()",
     "        print(row['email'])",
     "asyncio.run(main())"

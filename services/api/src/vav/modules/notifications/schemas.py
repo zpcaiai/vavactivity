@@ -4,6 +4,7 @@ from datetime import datetime, time
 from enum import StrEnum
 from typing import Any, Literal
 from uuid import UUID
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -83,8 +84,14 @@ class NotificationPreferenceItem(BaseModel):
     @field_validator("quiet_hours_timezone")
     @classmethod
     def valid_timezone(cls, value: str | None) -> str | None:
-        if value is not None and ("/" not in value or len(value) > 64):
+        if value is None:
+            return None
+        if len(value) > 64:
             raise ValueError("quiet_hours_timezone must be an IANA timezone")
+        try:
+            ZoneInfo(value)
+        except (ValueError, ZoneInfoNotFoundError) as error:
+            raise ValueError("quiet_hours_timezone must be an IANA timezone") from error
         return value
 
 
