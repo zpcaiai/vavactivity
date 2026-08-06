@@ -62,6 +62,23 @@ def test_no_production_secret_values_are_committed() -> None:
         assert "cloud://" in raw
 
 
+def test_image_security_gate_scans_high_and_critical_findings() -> None:
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows/build-images.yml").read_text(encoding="utf-8")
+    )
+    build_steps = workflow["jobs"]["build"]["steps"]
+    trivy = next(
+        step
+        for step in build_steps
+        if step.get("uses", "").startswith("aquasecurity/trivy-action@")
+    )
+    assert trivy["uses"].startswith("aquasecurity/trivy-action@v")
+    assert trivy["with"]["severity"] == "CRITICAL,HIGH"
+    assert trivy["with"]["exit-code"] == "1"
+    assert trivy["with"]["ignore-unfixed"] is True
+    assert "HIGH" not in trivy["with"]
+
+
 def test_release_manifest_renders_every_workload_with_immutable_images(
     tmp_path: Path,
 ) -> None:
