@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.vav.io/skills/error-contract.v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["code", "category", "message_safe", "retryable", "correlation_id"],
+  "properties": {
+    "code": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,127}$"},
+    "category": {"enum": ["validation", "authorization", "dependency", "conflict", "rate_limit", "timeout", "provider", "business", "internal"]},
+    "message_safe": {"type": "string", "minLength": 1, "maxLength": 1000},
+    "retryable": {"type": "boolean"},
+    "correlation_id": {"type": "string", "format": "uuid"},
+    "field_errors": {"type": "array", "maxItems": 100, "items": {"type": "object"}}
+  }
+}

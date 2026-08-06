@@ -15,7 +15,7 @@ dev = [
 package = false
 
 [tool.uv.workspace]
-members = ["services/api", "services/worker"]
+members = ["services/api", "services/worker", "packages/skill-sdk-python"]
 
 [tool.mypy]
 python_version = "3.12"

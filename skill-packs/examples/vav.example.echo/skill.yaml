@@ -1,0 +1,53 @@
+apiVersion: skills.vav.io/v1
+kind: Skill
+metadata:
+  name: vav.example.echo
+  displayName: Governed Echo
+  version: 1.0.0
+  publisher: vav-official
+  description: Return a validated message without network, file, secret, or database access.
+  license: Proprietary
+  categories: [examples]
+spec:
+  type: query
+  runtime: python
+  entrypoint: vav_example_echo.main:EchoSkill
+  runtimeApiVersion: "1.0"
+  manifestVersion: "1.0"
+  inputs:
+    schema: schemas/input.schema.json
+  outputs:
+    schema: schemas/output.schema.json
+  errors:
+    schema: schemas/error.schema.json
+  permissions: []
+  capabilities:
+    provides: [example.echo.v1]
+    requires: []
+  dependencies:
+    skills: []
+    modules: []
+    providers: []
+  execution:
+    timeoutSeconds: 5
+    retryPolicy: read_safe
+    idempotency: not_required
+    concurrencyLimit: 10
+  data:
+    reads: []
+    writes: []
+  security:
+    networkAccess: none
+    filesystemAccess: none
+    secretAccess: []
+    riskLevel: low
+    userConfirmationRequired: false
+  compatibility:
+    minimumPlatformVersion: ">=1.0.0"
+    maximumPlatformVersion: "<2.0.0"
+  observability:
+    tracing: true
+    metrics: true
+    auditLevel: metadata
+  tests:
+    command: pytest -q

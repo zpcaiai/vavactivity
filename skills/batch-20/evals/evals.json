@@ -1,0 +1,23 @@
+{
+  "skill_name": "vav-batch-20-skill-platform",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Add a third-party Skill that calls a payment provider and reads a secret. Implement its manifest and install path.",
+      "expected_output": "Explicit high-risk permissions, Secret Broker reference, allowlisted egress, isolated runtime, human approval, signing, idempotency, and fail-closed tests.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Upgrade an installed Skill from 1.4.0 to 2.0.0 after its input schema narrows an enum and adds a permission.",
+      "expected_output": "Dry-run compatibility and permission diff, blocked automatic activation, renewed approval, migration/canary plan, and preserved old version.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "A Marketplace publisher appeals a suspension after its signing key was revoked. Restore the listing.",
+      "expected_output": "Independent appeal review that preserves suspension and execution block until a new verified key, clean package, scans, and human review pass.",
+      "files": []
+    }
+  ]
+}

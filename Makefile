@@ -675,3 +675,11 @@ production-readiness:
 verify-all: manifest-check config-check migration-check verify safety-verify contract-test system-test complete-e2e performance-smoke
 
 acceptance: bootstrap smoke verify-all production-readiness
+
+.PHONY: skill-sdk-test skill-schema-test
+
+skill-sdk-test:
+	.venv/bin/pytest tests/skill-sdk -q
+
+skill-schema-test:
+	.venv/bin/python scripts/skill/validate_all_schemas.py
