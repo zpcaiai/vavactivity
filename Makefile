@@ -701,4 +701,4 @@ skill-marketplace-test:
 skill-complete-e2e:
 	corepack pnpm exec playwright test e2e/skills.admin.spec.ts
 
-skill-verify: skill-sdk-test skill-schema-test skill-runtime-test skill-registry-test skill-security-test skill-marketplace-test
+skill-verify: skill-sdk-test skill-schema-test skill-runtime-test skill-registry-test skill-security-test skill-marketplace-test skill-complete-e2e
