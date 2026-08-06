@@ -21,7 +21,7 @@ def test_every_backend_module_declares_a_production_contract() -> None:
         assert contract["health"]
         revisions.extend(contract["database"]["revisions"])
     assert len(codes) == 21
-    assert sorted(revisions) == list(range(1, 88))
+    assert sorted(revisions) == list(range(1, 89))
 
 
 def test_openapi_operation_ids_and_routes_are_unique() -> None:

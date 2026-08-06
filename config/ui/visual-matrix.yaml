@@ -1,0 +1,16 @@
+schema_version: "1.0.0"
+applications: [design-system, user-web, admin-web]
+required_viewports:
+  - {code: mobile-360, width: 360, height: 800}
+  - {code: tablet-768, width: 768, height: 1024}
+  - {code: desktop-1440, width: 1440, height: 1000}
+  - {code: wide-1920, width: 1920, height: 1080}
+themes: [light, dark, high-contrast]
+densities: [comfortable, compact]
+locales: [zh-CN, zh-TW, en]
+fixture_policy: synthetic-only
+baseline_policy:
+  automatic_approval: false
+  independent_reviewer_required: true
+  max_diff_pixel_ratio: 0.001
+  production_status_without_review: NOT_CERTIFIED

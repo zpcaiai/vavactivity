@@ -31,6 +31,7 @@ import TrustSafetyManagementPage from "@/pages/TrustSafetyManagementPage.vue";
 import SystemOperationsPage from "@/pages/SystemOperationsPage.vue";
 import SkillManagementPage from "@/pages/SkillManagementPage.vue";
 import QualityManagementPage from "@/pages/QualityManagementPage.vue";
+import DesignSystemManagementPage from "@/pages/DesignSystemManagementPage.vue";
 import { useAccessStore } from "@/stores/access";
 
 const modules = [
@@ -192,6 +193,21 @@ export const qualitySectionPermissions: Record<string, string> = {
   releases: "quality.releases.read",
   certifications: "quality.releases.read",
   audit: "quality.audit.read"
+};
+
+export const designSystemSectionPermissions: Record<string, string> = {
+  dashboard: "design.analytics.read",
+  tokens: "design.tokens.read",
+  components: "design.components.read",
+  patterns: "design.patterns.read",
+  pages: "design.audits.read",
+  accessibility: "design.accessibility.read",
+  "responsive-audits": "design.audits.read",
+  "visual-regression": "design.audits.read",
+  baselines: "design.baselines.read",
+  evidence: "design.evidence.read",
+  releases: "design.tokens.read",
+  audit: "design.audit.read"
 };
 
 const privacySectionPermissions: Record<string, string> = {
@@ -571,6 +587,12 @@ export const router = createRouter({
           name: `admin-quality-${section}`,
           component: QualityManagementPage,
           meta: { title: "质量治理", permission: qualitySectionPermissions[section], qualitySection: section }
+        })),
+        ...Object.keys(designSystemSectionPermissions).map((section) => ({
+          path: `design-system/${section}`,
+          name: `admin-design-system-${section}`,
+          component: DesignSystemManagementPage,
+          meta: { title: "设计系统治理", permission: designSystemSectionPermissions[section], designSystemSection: section }
         })),
         ...Object.keys(privacySectionPermissions).map((section) => ({
           path: `privacy/${section}`,

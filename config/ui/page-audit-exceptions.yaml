@@ -1,0 +1,10 @@
+schema_version: "1.0.0"
+exceptions:
+  - component: AuthTokenPage
+    reason: heading is selected by token flow child state
+  - component: CmsPage
+    reason: heading is sourced from governed CMS content
+  - component: ContentCollectionPage
+    reason: collection component owns the visible heading
+  - component: NotFoundPage
+    reason: not-found route is outside the localized application shell

@@ -1,11 +1,16 @@
 {
   "name": "@vav/design-tokens",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "exports": {
-    "./tokens.css": "./src/tokens.css",
-    "./tokens.json": "./src/tokens.json"
+    "./tokens.css": "./generated/tokens.css",
+    "./tokens.json": "./generated/tokens.json",
+    "./tokens": "./generated/tokens.ts"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "diff": "node scripts/diff.mjs"
   }
 }
-

@@ -1,9 +1,11 @@
 import "@vav/design-tokens/tokens.css";
+import "@vav/ui-core/styles.css";
 import "./assets/main.css";
 
 import { VueQueryPlugin } from "@tanstack/vue-query";
 import { createPinia } from "pinia";
 import { createApp } from "vue";
+import { applyUiPreferences } from "@vav/ui-core";
 
 import App from "./App.vue";
 import { apiPlugin } from "./api/plugin";
@@ -11,6 +13,11 @@ import { i18n } from "./i18n";
 import { router } from "./router";
 
 const app = createApp(App);
+applyUiPreferences(
+  document.documentElement,
+  window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light",
+  "comfortable"
+);
 
 app.use(createPinia());
 app.use(i18n);
@@ -28,4 +35,3 @@ app.use(VueQueryPlugin, {
 });
 app.use(apiPlugin);
 app.mount("#app");
-

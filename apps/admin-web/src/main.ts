@@ -1,4 +1,5 @@
 import "@vav/design-tokens/tokens.css";
+import "@vav/ui-core/styles.css";
 import "element-plus/dist/index.css";
 import "./assets/main.css";
 
@@ -29,12 +30,14 @@ import {
 } from "element-plus";
 import { createPinia } from "pinia";
 import { createApp } from "vue";
+import { applyUiPreferences } from "@vav/ui-core";
 
 import App from "./App.vue";
 import { permission } from "./directives/permission";
 import { router } from "./router";
 
 const app = createApp(App);
+applyUiPreferences(document.documentElement, "light", "compact");
 app.use(createPinia());
 app.use(router);
 [

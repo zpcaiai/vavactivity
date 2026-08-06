@@ -8,8 +8,9 @@ import {
   Setting,
   User
 } from "@element-plus/icons-vue";
-import { computed, ref, watchEffect } from "vue";
+import { computed, nextTick, ref, watch, watchEffect } from "vue";
 import { useRoute } from "vue-router";
+import { VSkipLink } from "@vav/ui-core";
 
 import { adminLocales, type AdminLocale, useAdminLocale } from "@/i18n";
 import { useAdminAuthStore } from "@/stores/admin-auth";
@@ -40,6 +41,7 @@ const menu = [
   { path: "/admin/system/status", labelKey: "menu.system", icon: Setting },
   { path: "/admin/skills/dashboard", labelKey: "menu.skills", icon: DataAnalysis },
   { path: "/admin/quality/dashboard", labelKey: "menu.quality", icon: DataAnalysis },
+  { path: "/admin/design-system/dashboard", labelKey: "menu.designSystem", icon: DataAnalysis },
   { path: "/admin/content/settings", labelKey: "menu.settings", icon: Setting },
   { path: "/admin/access/admins", labelKey: "menu.admins", icon: Lock },
   { path: "/admin/audit/auth", labelKey: "menu.audit", icon: DataAnalysis }
@@ -76,6 +78,7 @@ const visibleMenu = computed(() => {
       "/admin/system/status": "system.status.read",
       "/admin/skills/dashboard": "skills.analytics.read",
       "/admin/quality/dashboard": "quality.analytics.read",
+      "/admin/design-system/dashboard": "design.analytics.read",
       "/admin/content/settings": "content.settings.read",
       "/admin/access/admins": "admins.read",
       "/admin/audit/auth": "audit.read"
@@ -97,10 +100,19 @@ function changeLocale(value: string) {
 watchEffect(() => {
   document.documentElement.lang = locale.value;
 });
+watch(() => route.fullPath, async () => {
+  await nextTick();
+  const heading = document.querySelector<HTMLElement>("#admin-main h1");
+  if (heading) {
+    heading.tabIndex = -1;
+    heading.focus({ preventScroll: true });
+  }
+});
 </script>
 
 <template>
   <div class="admin-shell">
+    <VSkipLink target="admin-main" />
     <aside :class="['admin-sidebar', { collapsed }]">
       <div class="admin-brand">
         <span
@@ -177,7 +189,10 @@ watchEffect(() => {
           </div>
         </div>
       </header>
-      <main class="admin-main">
+      <main
+        id="admin-main"
+        class="admin-main"
+      >
         <RouterView />
       </main>
     </section>

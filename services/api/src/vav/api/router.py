@@ -29,6 +29,7 @@ from vav.modules.notifications.router import router as notifications_router
 from vav.modules.privacy.admin_router import router as privacy_admin_router
 from vav.modules.privacy.router import router as privacy_router
 from vav.modules.quality.admin_router import router as quality_admin_router
+from vav.modules.quality.design_router import router as design_system_admin_router
 from vav.modules.recommendations.admin_router import router as recommendations_admin_router
 from vav.modules.recommendations.router import router as recommendations_router
 from vav.modules.relationships.admin_router import router as relationships_admin_router
@@ -61,6 +62,7 @@ api_router.include_router(notifications_admin_router, tags=["notifications-admin
 api_router.include_router(privacy_router, tags=["privacy"])
 api_router.include_router(privacy_admin_router, tags=["privacy-admin"])
 api_router.include_router(quality_admin_router, tags=["quality-admin"])
+api_router.include_router(design_system_admin_router, tags=["design-system-admin"])
 api_router.include_router(matchmaking_profiles_router, tags=["matchmaking-profiles"])
 api_router.include_router(matchmaking_profiles_admin_router, tags=["matchmaking-profiles-admin"])
 api_router.include_router(recommendations_router, tags=["recommendations"])

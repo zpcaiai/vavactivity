@@ -32,6 +32,12 @@ policy:
       estimated_lock: under-5-seconds
       backfill_required: false
       rollback: forward-fix-preferred
+    88:
+      module: quality
+      risk: low
+      estimated_lock: under-5-seconds
+      backfill_required: false
+      rollback: forward-fix-preferred
   destructive_changes_require: [verified-backup, restore-drill, migration-dry-run, human-approval]
   expand_migrate_contract: true
   production_snapshot_floor: "20260805_0082"

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
+import { VSkipLink } from "@vav/ui-core";
 
 import {
   getNavigation,
@@ -59,10 +60,20 @@ async function loadNavigation() {
 
 onMounted(() => void loadNavigation());
 watch(locale, () => void loadNavigation());
+watch(() => route.fullPath, async () => {
+  menuOpen.value = false;
+  await nextTick();
+  const heading = document.querySelector<HTMLElement>("#main-content h1");
+  if (heading) {
+    heading.tabIndex = -1;
+    heading.focus({ preventScroll: true });
+  }
+});
 </script>
 
 <template>
   <div :class="['site-shell', { 'home-route': route.name === 'home' }]">
+    <VSkipLink />
     <header class="site-header">
       <RouterLink
         class="brand"

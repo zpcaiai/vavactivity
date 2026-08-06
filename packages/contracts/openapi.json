@@ -1182,6 +1182,207 @@
         "title": "AttemptSubmitRequest",
         "type": "object"
       },
+      "AuditReview": {
+        "properties": {
+          "decision": {
+            "enum": [
+              "approve",
+              "reject"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 5000,
+            "minLength": 10,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "reason"
+        ],
+        "title": "AuditReview",
+        "type": "object"
+      },
+      "AuditRunCreate": {
+        "properties": {
+          "application_code": {
+            "enum": [
+              "user-web",
+              "admin-web",
+              "design-system"
+            ],
+            "title": "Application Code",
+            "type": "string"
+          },
+          "artifact_reference": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artifact Reference"
+          },
+          "audit_code": {
+            "pattern": "^[A-Z0-9][A-Z0-9._-]{2,127}$",
+            "title": "Audit Code",
+            "type": "string"
+          },
+          "audit_type": {
+            "enum": [
+              "accessibility",
+              "responsive",
+              "visual",
+              "page",
+              "storybook"
+            ],
+            "title": "Audit Type",
+            "type": "string"
+          },
+          "density": {
+            "anyOf": [
+              {
+                "enum": [
+                  "comfortable",
+                  "compact"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Density"
+          },
+          "environment": {
+            "enum": [
+              "test",
+              "ci",
+              "staging",
+              "production"
+            ],
+            "title": "Environment",
+            "type": "string"
+          },
+          "evidence_checksum_sha256": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Checksum Sha256"
+          },
+          "findings": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Findings",
+            "type": "array"
+          },
+          "git_commit": {
+            "pattern": "^[0-9a-f]{7,64}$",
+            "title": "Git Commit",
+            "type": "string"
+          },
+          "locale": {
+            "anyOf": [
+              {
+                "enum": [
+                  "zh-CN",
+                  "zh-TW",
+                  "en"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locale"
+          },
+          "manual_review_required": {
+            "default": false,
+            "title": "Manual Review Required",
+            "type": "boolean"
+          },
+          "metrics": {
+            "additionalProperties": true,
+            "title": "Metrics",
+            "type": "object"
+          },
+          "route_path": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Route Path"
+          },
+          "status": {
+            "enum": [
+              "not_run",
+              "technical_pass",
+              "needs_review",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "theme": {
+            "anyOf": [
+              {
+                "enum": [
+                  "light",
+                  "dark",
+                  "high-contrast"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Theme"
+          },
+          "viewport": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Viewport"
+          }
+        },
+        "required": [
+          "audit_code",
+          "audit_type",
+          "application_code",
+          "git_commit",
+          "environment",
+          "status"
+        ],
+        "title": "AuditRunCreate",
+        "type": "object"
+      },
       "AuthorizationDecisionRequest": {
         "properties": {
           "reason": {
@@ -1520,6 +1721,110 @@
           "started_at"
         ],
         "title": "BackupRecordRequest",
+        "type": "object"
+      },
+      "BaselineCreate": {
+        "properties": {
+          "application_code": {
+            "enum": [
+              "user-web",
+              "admin-web",
+              "design-system"
+            ],
+            "title": "Application Code",
+            "type": "string"
+          },
+          "artifact_reference": {
+            "maxLength": 2000,
+            "minLength": 3,
+            "title": "Artifact Reference",
+            "type": "string"
+          },
+          "baseline_code": {
+            "pattern": "^[a-z0-9][a-z0-9._-]{2,254}$",
+            "title": "Baseline Code",
+            "type": "string"
+          },
+          "checksum_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Checksum Sha256",
+            "type": "string"
+          },
+          "density": {
+            "enum": [
+              "comfortable",
+              "compact"
+            ],
+            "title": "Density",
+            "type": "string"
+          },
+          "locale": {
+            "enum": [
+              "zh-CN",
+              "zh-TW",
+              "en"
+            ],
+            "title": "Locale",
+            "type": "string"
+          },
+          "route_path": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Route Path",
+            "type": "string"
+          },
+          "theme": {
+            "enum": [
+              "light",
+              "dark",
+              "high-contrast"
+            ],
+            "title": "Theme",
+            "type": "string"
+          },
+          "viewport": {
+            "maxLength": 64,
+            "minLength": 3,
+            "title": "Viewport",
+            "type": "string"
+          }
+        },
+        "required": [
+          "baseline_code",
+          "application_code",
+          "route_path",
+          "viewport",
+          "theme",
+          "locale",
+          "density",
+          "artifact_reference",
+          "checksum_sha256"
+        ],
+        "title": "BaselineCreate",
+        "type": "object"
+      },
+      "BaselineDecision": {
+        "properties": {
+          "decision": {
+            "enum": [
+              "approve",
+              "reject"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 5000,
+            "minLength": 10,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "reason"
+        ],
+        "title": "BaselineDecision",
         "type": "object"
       },
       "BatchInvalidateRequest": {
@@ -2847,6 +3152,91 @@
           }
         },
         "title": "CollectionData",
+        "type": "object"
+      },
+      "ComponentDeprecate": {
+        "properties": {
+          "reason": {
+            "maxLength": 5000,
+            "minLength": 10,
+            "title": "Reason",
+            "type": "string"
+          },
+          "replacement_component_code": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Replacement Component Code"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "ComponentDeprecate",
+        "type": "object"
+      },
+      "ComponentUpsert": {
+        "properties": {
+          "accessibility_contract": {
+            "additionalProperties": true,
+            "title": "Accessibility Contract",
+            "type": "object"
+          },
+          "component_code": {
+            "pattern": "^[A-Z][A-Za-z0-9]{1,127}$",
+            "title": "Component Code",
+            "type": "string"
+          },
+          "owner_team": {
+            "maxLength": 128,
+            "minLength": 2,
+            "title": "Owner Team",
+            "type": "string"
+          },
+          "package_name": {
+            "pattern": "^@vav/ui-(?:core|user|admin)$",
+            "title": "Package Name",
+            "type": "string"
+          },
+          "source_location": {
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "Source Location",
+            "type": "string"
+          },
+          "status": {
+            "default": "active",
+            "enum": [
+              "active",
+              "experimental"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "supported_states": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Supported States",
+            "type": "array"
+          }
+        },
+        "required": [
+          "component_code",
+          "package_name",
+          "source_location",
+          "owner_team",
+          "accessibility_contract",
+          "supported_states"
+        ],
+        "title": "ComponentUpsert",
         "type": "object"
       },
       "ConsentActionRequest": {
@@ -8279,6 +8669,78 @@
         "title": "PasswordResetRequest",
         "type": "object"
       },
+      "PatternUpsert": {
+        "properties": {
+          "accessibility_notes": {
+            "maxLength": 5000,
+            "minLength": 10,
+            "title": "Accessibility Notes",
+            "type": "string"
+          },
+          "audience": {
+            "enum": [
+              "user",
+              "admin",
+              "shared"
+            ],
+            "title": "Audience",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 300,
+            "minLength": 3,
+            "title": "Name",
+            "type": "string"
+          },
+          "pattern_code": {
+            "pattern": "^[a-z][a-z0-9-]{2,127}$",
+            "title": "Pattern Code",
+            "type": "string"
+          },
+          "required_components": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Required Components",
+            "type": "array"
+          },
+          "required_states": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Required States",
+            "type": "array"
+          },
+          "source_location": {
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "Source Location",
+            "type": "string"
+          },
+          "status": {
+            "default": "active",
+            "enum": [
+              "active",
+              "experimental"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pattern_code",
+          "name",
+          "audience",
+          "source_location",
+          "required_components",
+          "required_states",
+          "accessibility_notes"
+        ],
+        "title": "PatternUpsert",
+        "type": "object"
+      },
       "PauseRequest": {
         "properties": {
           "private_reason": {
@@ -11234,6 +11696,20 @@
           "environment"
         ],
         "title": "ReleaseEvaluationRequest",
+        "type": "object"
+      },
+      "ReleaseEvidence": {
+        "properties": {
+          "evidence_manifest": {
+            "additionalProperties": true,
+            "title": "Evidence Manifest",
+            "type": "object"
+          }
+        },
+        "required": [
+          "evidence_manifest"
+        ],
+        "title": "ReleaseEvidence",
         "type": "object"
       },
       "ReleaseRecordCreateRequest": {
@@ -14205,6 +14681,47 @@
           "token"
         ],
         "title": "TokenConfirmRequest",
+        "type": "object"
+      },
+      "TokenReleaseCreate": {
+        "properties": {
+          "breaking_changes": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Breaking Changes",
+            "type": "array"
+          },
+          "change_summary": {
+            "maxLength": 5000,
+            "minLength": 10,
+            "title": "Change Summary",
+            "type": "string"
+          },
+          "generated_checksum_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Generated Checksum Sha256",
+            "type": "string"
+          },
+          "manifest_checksum_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Manifest Checksum Sha256",
+            "type": "string"
+          },
+          "token_version": {
+            "pattern": "^\\d+\\.\\d+\\.\\d+$",
+            "title": "Token Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token_version",
+          "manifest_checksum_sha256",
+          "generated_checksum_sha256",
+          "change_summary"
+        ],
+        "title": "TokenReleaseCreate",
         "type": "object"
       },
       "ToolConfirmationRequest": {
@@ -35538,6 +36055,1064 @@
         "summary": "Taxonomies",
         "tags": [
           "matchmaking-profiles-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/design-system/accessibility": {
+      "get": {
+        "operationId": "accessibility_api_v1_admin_design_system_accessibility_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Accessibility Api V1 Admin Design System Accessibility Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Accessibility",
+        "tags": [
+          "design-system-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_accessibility_audit_api_v1_admin_design_system_accessibility_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuditRunCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Accessibility Audit Api V1 Admin Design System Accessibility Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Accessibility Audit",
+        "tags": [
+          "design-system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/design-system/accessibility/{audit_id}/review": {
+      "post": {
+        "operationId": "review_accessibility_api_v1_admin_design_system_accessibility__audit_id__review_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "audit_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Audit Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuditReview"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Review Accessibility Api V1 Admin Design System Accessibility  Audit Id  Review Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Review Accessibility",
+        "tags": [
+          "design-system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/design-system/audit": {
+      "get": {
+        "operationId": "audit_api_v1_admin_design_system_audit_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Audit Api V1 Admin Design System Audit Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Audit",
+        "tags": [
+          "design-system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/design-system/audits/{audit_id}/review": {
+      "post": {
+        "operationId": "review_audit_api_v1_admin_design_system_audits__audit_id__review_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "audit_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Audit Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuditReview"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Review Audit Api V1 Admin Design System Audits  Audit Id  Review Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Review Audit",
+        "tags": [
+          "design-system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/design-system/baselines": {
+      "get": {
+        "operationId": "baselines_api_v1_admin_design_system_baselines_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Baselines Api V1 Admin Design System Baselines Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Baselines",
+        "tags": [
+          "design-system-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_baseline_api_v1_admin_design_system_baselines_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BaselineCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Baseline Api V1 Admin Design System Baselines Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Baseline",
+        "tags": [
+          "design-system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/design-system/baselines/{baseline_id}/decision": {
+      "post": {
+        "operationId": "decide_baseline_api_v1_admin_design_system_baselines__baseline_id__decision_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "baseline_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Baseline Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BaselineDecision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Decide Baseline Api V1 Admin Design System Baselines  Baseline Id  Decision Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Decide Baseline",
+        "tags": [
+          "design-system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/design-system/components": {
+      "get": {
+        "operationId": "components_api_v1_admin_design_system_components_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Components Api V1 Admin Design System Components Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Components",
+        "tags": [
+          "design-system-admin"
+        ]
+      },
+      "post": {
+        "operationId": "upsert_component_api_v1_admin_design_system_components_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComponentUpsert"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Upsert Component Api V1 Admin Design System Components Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Upsert Component",
+        "tags": [
+          "design-system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/design-system/components/{component_id}/deprecate": {
+      "post": {
+        "operationId": "deprecate_component_api_v1_admin_design_system_components__component_id__deprecate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "component_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Component Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComponentDeprecate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Deprecate Component Api V1 Admin Design System Components  Component Id  Deprecate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Deprecate Component",
+        "tags": [
+          "design-system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/design-system/dashboard": {
+      "get": {
+        "operationId": "dashboard_api_v1_admin_design_system_dashboard_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Dashboard Api V1 Admin Design System Dashboard Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dashboard",
+        "tags": [
+          "design-system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/design-system/evidence": {
+      "get": {
+        "operationId": "evidence_api_v1_admin_design_system_evidence_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Evidence Api V1 Admin Design System Evidence Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Evidence",
+        "tags": [
+          "design-system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/design-system/evidence/{evidence_id}/accept": {
+      "post": {
+        "operationId": "accept_evidence_api_v1_admin_design_system_evidence__evidence_id__accept_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "evidence_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Evidence Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Accept Evidence Api V1 Admin Design System Evidence  Evidence Id  Accept Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Accept Evidence",
+        "tags": [
+          "design-system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/design-system/pages": {
+      "get": {
+        "operationId": "pages_api_v1_admin_design_system_pages_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Pages Api V1 Admin Design System Pages Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Pages",
+        "tags": [
+          "design-system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/design-system/patterns": {
+      "get": {
+        "operationId": "patterns_api_v1_admin_design_system_patterns_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Patterns Api V1 Admin Design System Patterns Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Patterns",
+        "tags": [
+          "design-system-admin"
+        ]
+      },
+      "post": {
+        "operationId": "upsert_pattern_api_v1_admin_design_system_patterns_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatternUpsert"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Upsert Pattern Api V1 Admin Design System Patterns Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Upsert Pattern",
+        "tags": [
+          "design-system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/design-system/releases": {
+      "get": {
+        "operationId": "releases_api_v1_admin_design_system_releases_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Releases Api V1 Admin Design System Releases Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Releases",
+        "tags": [
+          "design-system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/design-system/responsive-audits": {
+      "get": {
+        "operationId": "responsive_audits_api_v1_admin_design_system_responsive_audits_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Responsive Audits Api V1 Admin Design System Responsive Audits Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Responsive Audits",
+        "tags": [
+          "design-system-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_responsive_audit_api_v1_admin_design_system_responsive_audits_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuditRunCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Responsive Audit Api V1 Admin Design System Responsive Audits Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Responsive Audit",
+        "tags": [
+          "design-system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/design-system/tokens": {
+      "get": {
+        "operationId": "tokens_api_v1_admin_design_system_tokens_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Tokens Api V1 Admin Design System Tokens Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Tokens",
+        "tags": [
+          "design-system-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_tokens_api_v1_admin_design_system_tokens_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TokenReleaseCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Tokens Api V1 Admin Design System Tokens Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Tokens",
+        "tags": [
+          "design-system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/design-system/tokens/{release_id}/approve": {
+      "post": {
+        "operationId": "approve_tokens_api_v1_admin_design_system_tokens__release_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "release_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Release Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Tokens Api V1 Admin Design System Tokens  Release Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Tokens",
+        "tags": [
+          "design-system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/design-system/tokens/{release_id}/release": {
+      "post": {
+        "operationId": "release_tokens_api_v1_admin_design_system_tokens__release_id__release_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "release_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Release Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReleaseEvidence"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Release Tokens Api V1 Admin Design System Tokens  Release Id  Release Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Release Tokens",
+        "tags": [
+          "design-system-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/design-system/visual-regression": {
+      "get": {
+        "operationId": "visual_regression_api_v1_admin_design_system_visual_regression_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Visual Regression Api V1 Admin Design System Visual Regression Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Visual Regression",
+        "tags": [
+          "design-system-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_visual_audit_api_v1_admin_design_system_visual_regression_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuditRunCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Visual Audit Api V1 Admin Design System Visual Regression Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Visual Audit",
+        "tags": [
+          "design-system-admin"
         ]
       }
     },

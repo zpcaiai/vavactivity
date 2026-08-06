@@ -1,0 +1,17 @@
+schema_version: "1.0.0"
+policy: new governed UI must use design tokens
+governed_paths:
+  - packages/ui-core/src
+  - packages/ui-user/src
+  - packages/ui-admin/src
+  - apps/design-system/src
+legacy_paths:
+  - path: apps/user-web/src/assets/main.css
+    disposition: accepted_existing_debt
+    expires_on: "2026-11-01"
+  - path: apps/admin-web/src/assets/main.css
+    disposition: accepted_existing_debt
+    expires_on: "2026-11-01"
+allowed_literals:
+  - transparent
+  - currentcolor

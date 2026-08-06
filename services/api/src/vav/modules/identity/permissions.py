@@ -629,6 +629,30 @@ QUALITY_PERMISSIONS = {
     "quality.audit.read",
 }
 
+DESIGN_SYSTEM_PERMISSIONS = {
+    "design.tokens.read",
+    "design.tokens.manage",
+    "design.tokens.approve",
+    "design.tokens.release",
+    "design.components.read",
+    "design.components.manage",
+    "design.components.deprecate",
+    "design.patterns.read",
+    "design.patterns.manage",
+    "design.baselines.read",
+    "design.baselines.review",
+    "design.baselines.approve",
+    "design.audits.read",
+    "design.audits.run",
+    "design.audits.review",
+    "design.accessibility.read",
+    "design.accessibility.review",
+    "design.evidence.read",
+    "design.evidence.accept",
+    "design.analytics.read",
+    "design.audit.read",
+}
+
 ALL_PERMISSIONS = (
     IDENTITY_PERMISSIONS
     | CMS_PERMISSIONS
@@ -650,6 +674,7 @@ ALL_PERMISSIONS = (
     | SYSTEM_PERMISSIONS
     | SKILL_PLATFORM_PERMISSIONS
     | QUALITY_PERMISSIONS
+    | DESIGN_SYSTEM_PERMISSIONS
 )
 
 ROLE_PERMISSIONS: dict[str, set[str]] = {
@@ -1204,6 +1229,52 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "quality.evidence.accept",
         "quality.releases.certify",
         "quality.audit.read",
+    },
+    "design_system_developer": {
+        "design.tokens.read",
+        "design.tokens.manage",
+        "design.components.read",
+        "design.components.manage",
+        "design.components.deprecate",
+        "design.patterns.read",
+        "design.patterns.manage",
+        "design.baselines.read",
+        "design.audits.read",
+        "design.audits.run",
+        "design.accessibility.read",
+        "design.evidence.read",
+        "design.analytics.read",
+        "design.audit.read",
+    },
+    "ui_quality_reviewer": {
+        "design.tokens.read",
+        "design.components.read",
+        "design.patterns.read",
+        "design.baselines.read",
+        "design.baselines.review",
+        "design.baselines.approve",
+        "design.audits.read",
+        "design.audits.review",
+        "design.accessibility.read",
+        "design.accessibility.review",
+        "design.evidence.read",
+        "design.evidence.accept",
+        "design.analytics.read",
+        "design.audit.read",
+    },
+    "design_release_manager": {
+        "design.tokens.read",
+        "design.tokens.approve",
+        "design.tokens.release",
+        "design.components.read",
+        "design.patterns.read",
+        "design.baselines.read",
+        "design.audits.read",
+        "design.accessibility.read",
+        "design.evidence.read",
+        "design.evidence.accept",
+        "design.analytics.read",
+        "design.audit.read",
     },
     "analyst": {"audit.read", "catalog.audit.read"},
     "support_agent": {"users.read", "catalog.products.read"},
