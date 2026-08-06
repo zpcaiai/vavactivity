@@ -19,11 +19,17 @@ members = [
   "services/api",
   "services/worker",
   "services/skill-runtime",
+  "packages/skill-cli",
+  "packages/skill-contracts",
   "packages/skill-sdk-python",
+  "packages/skill-testkit",
 ]
 
 [tool.uv.sources]
 vav-skill-sdk = { workspace = true }
+vav-skill-runtime = { workspace = true }
+vav-skill-contracts = { workspace = true }
+vav-skill-testkit = { workspace = true }
 
 [tool.mypy]
 python_version = "3.12"

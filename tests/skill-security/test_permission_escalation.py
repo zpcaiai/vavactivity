@@ -30,7 +30,7 @@ async def test_skill_cannot_elevate_caller_or_installation_permissions() -> None
         invoked = True
         return data
 
-    runtime.register_adapter("vav.example.echo", "1.0.0", adapter)  # type: ignore[arg-type]
+    runtime.register_adapter("vav.example.echo", "1.0.0", adapter)
     with pytest.raises(RuntimeFailure) as error:
         await runtime.execute(
             installation_id=uuid4(),

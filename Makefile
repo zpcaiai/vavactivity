@@ -676,7 +676,8 @@ verify-all: manifest-check config-check migration-check verify safety-verify con
 
 acceptance: bootstrap smoke verify-all production-readiness
 
-.PHONY: skill-sdk-test skill-schema-test skill-runtime-test skill-registry-test skill-security-test
+.PHONY: skill-sdk-test skill-schema-test skill-runtime-test skill-registry-test skill-security-test \
+	skill-marketplace-test skill-complete-e2e skill-verify
 
 skill-sdk-test:
 	.venv/bin/pytest tests/skill-sdk -q
@@ -692,3 +693,11 @@ skill-registry-test:
 
 skill-security-test:
 	.venv/bin/pytest tests/skill-security -q
+
+skill-marketplace-test:
+	.venv/bin/pytest services/api/tests/skills_platform tests/skill-marketplace -q
+
+skill-complete-e2e:
+	corepack pnpm exec playwright test e2e/skills.admin.spec.ts
+
+skill-verify: skill-sdk-test skill-schema-test skill-runtime-test skill-registry-test skill-security-test skill-marketplace-test

@@ -34,7 +34,10 @@ def _repository_schema(manifest_path: Path) -> Path:
         candidate = parent / "schemas" / "skill-manifest.schema.json"
         if candidate.is_file():
             return candidate
-    raise ManifestValidationError("schemas/skill-manifest.schema.json was not found")
+    packaged = Path(__file__).with_name("schemas") / "skill-manifest.schema.json"
+    if packaged.is_file():
+        return packaged
+    raise ManifestValidationError("canonical skill-manifest.schema.json was not found")
 
 
 def _load_yaml_mapping(path: Path) -> dict[str, Any]:

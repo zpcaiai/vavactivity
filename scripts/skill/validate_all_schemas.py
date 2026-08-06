@@ -20,6 +20,14 @@ def main() -> int:
         )
     for path in schema_paths:
         Draft202012Validator.check_schema(json.loads(path.read_text(encoding="utf-8")))
+    packaged_manifest_schema = (
+        root
+        / "packages/skill-sdk-python/src/vav_skill_sdk/schemas/skill-manifest.schema.json"
+    )
+    if json.loads(packaged_manifest_schema.read_text(encoding="utf-8")) != json.loads(
+        (root / "schemas/skill-manifest.schema.json").read_text(encoding="utf-8")
+    ):
+        raise SystemExit("packaged and repository Skill manifest schemas have drifted")
 
     manifests = sorted((root / "skill-packs").glob("*/*/skill.yaml"))
     if not manifests:
@@ -29,7 +37,7 @@ def main() -> int:
             manifest, schema_path=root / "schemas/skill-manifest.schema.json"
         )
     print(
-        f"Skill schema validation PASS: {len(schema_paths)} schemas, {len(manifests)} packages"
+        f"Skill schema validation PASS: {len(schema_paths)} schemas, {len(manifests)} packages, packaged manifest synchronized"
     )
     return 0
 
