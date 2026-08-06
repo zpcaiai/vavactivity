@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from vav.common.exceptions import VavError
 from vav.modules.privacy.crypto import decrypt_private, encrypt_private
+from vav.modules.skills_platform.marketplace_review import automated_review
 from vav.modules.skills_platform.schemas import (
     AppealRequest,
     ExecuteSkillRequest,
@@ -723,15 +724,17 @@ async def submit_listing(
             "Reviewed version does not belong to the Skill.",
             status_code=422,
         )
-    gates = {
-        "signature": version["signature_status"] == "verified",
-        "security": version["security_status"] in {"passed", "passed_with_warnings"},
-        "compatibility": version["compatibility_status"] == "compatible",
-        "sbom": bool(version.get("sbom_present")),
-        "provenance": bool(version.get("provenance_present")),
-        "data_disclosure": True,
-    }
-    if not all(gates.values()):
+    report = automated_review(
+        manifest=version["manifest"],
+        signature_verified=version["signature_status"] == "verified",
+        security_passed=version["security_status"] in {"passed", "passed_with_warnings"},
+        compatible=version["compatibility_status"] == "compatible",
+        sbom_present=bool(version.get("sbom_present")),
+        provenance_present=bool(version.get("provenance_present")),
+        privacy_disclosure=payload.privacy_disclosure,
+        support_policy=payload.support_policy,
+    )
+    if not report.passed:
         raise VavError(
             "MARKETPLACE_AUTOMATED_REVIEW_FAILED",
             "Listing failed automated review gates.",
@@ -773,7 +776,7 @@ async def submit_listing(
         {
             "listing": row.id,
             "version": payload.version_id,
-            "report": _json(gates),
+            "report": _json(report.canonical()),
             "checksum": version["package_checksum"],
         },
     )

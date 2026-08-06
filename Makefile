@@ -695,7 +695,8 @@ skill-security-test:
 	.venv/bin/pytest tests/skill-security -q
 
 skill-marketplace-test:
-	.venv/bin/pytest services/api/tests/skills_platform tests/skill-marketplace -q
+	docker compose exec -T api pytest tests/skills_platform -q
+	.venv/bin/pytest tests/skill-marketplace -q
 
 skill-complete-e2e:
 	corepack pnpm exec playwright test e2e/skills.admin.spec.ts
