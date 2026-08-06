@@ -28,8 +28,8 @@ matching test count is wrong.
 
 Batches 1–17 are committed. Batch 17 passed the full fresh-PostgreSQL suite (580 tests),
 single-head migration gate and dependent Neon migration in run `31025708244`. Batch 18 is
-implemented locally with 605 full-backend tests, 25 Trust & Safety tests, both frontend builds and
-6 live browser scenarios passing; its remote Backend/Neon gate is pending push. Batches 19–32
+committed and passed 605 full-backend tests, 25 Trust & Safety tests, both frontend builds,
+6 live browser scenarios and the dependent Neon migration in run `31060765232`. Batches 19–32
 remain pending.
 
 ## The roadmap is 32 batches, not 33

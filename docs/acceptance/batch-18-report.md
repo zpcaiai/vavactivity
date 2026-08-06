@@ -2,8 +2,7 @@
 
 Date: 2026-08-06
 
-Status: **IMPLEMENTED LOCALLY — production code, fresh PostgreSQL, full regression and browser
-gates pass; remote Backend/Neon CI is pending the Batch 18 push.**
+Status: **IMPLEMENTED — local production gates and remote Backend/Neon migration gates pass.**
 
 ## Measured local evidence
 
@@ -21,10 +20,16 @@ gates pass; remote Backend/Neon CI is pending the Batch 18 push.**
 | OpenAPI and generated TypeScript contract | PASS — 758 routes, 671 paths; deterministic regeneration |
 | Browser E2E | PASS — 6 Batch 18 scenarios against live API, user web and admin web |
 | Manifest and migration-head validators | PASS — 22 modules, 2 phases, 77 fail-closed decisions; one head |
-| Remote Backend/Neon migration | PENDING push |
+| Remote Backend CI | PASS — run `31060765232`, backend job `92488047065` |
+| Remote Neon migration | PASS — job `92489324658`; live schema verified at `20260805_0082` |
 | External red-team/security certification | NOT_CERTIFIED |
 
 Local browser evidence used the repository's real FastAPI service, PostgreSQL, Redis and both Vite
 applications. The technical run does not certify classifier accuracy, jurisdiction-specific policy,
 penetration testing or production deployment. Those gates remain fail closed and `NOT_CERTIFIED`
 until their named human/external owners approve versioned evidence.
+
+Remote evidence: Backend and Neon
+`https://github.com/zpcaiai/vavactivity/actions/runs/31060765232`; Frontend
+`https://github.com/zpcaiai/vavactivity/actions/runs/31060765113`; Secret Scan
+`https://github.com/zpcaiai/vavactivity/actions/runs/31060765144`.
