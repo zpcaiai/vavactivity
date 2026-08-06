@@ -676,10 +676,19 @@ verify-all: manifest-check config-check migration-check verify safety-verify con
 
 acceptance: bootstrap smoke verify-all production-readiness
 
-.PHONY: skill-sdk-test skill-schema-test
+.PHONY: skill-sdk-test skill-schema-test skill-runtime-test skill-registry-test skill-security-test
 
 skill-sdk-test:
 	.venv/bin/pytest tests/skill-sdk -q
 
 skill-schema-test:
 	.venv/bin/python scripts/skill/validate_all_schemas.py
+
+skill-runtime-test:
+	.venv/bin/pytest tests/skill-runtime -q
+
+skill-registry-test:
+	.venv/bin/pytest tests/skill-registry -q
+
+skill-security-test:
+	.venv/bin/pytest tests/skill-security -q

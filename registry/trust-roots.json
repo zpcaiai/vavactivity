@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.0",
+  "keys": [],
+  "policy": {
+    "algorithm": "ed25519",
+    "productionRequiresSignature": true,
+    "allowUnverified": false
+  }
+}

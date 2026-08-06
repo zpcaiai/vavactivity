@@ -15,6 +15,8 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 COPY services/api/pyproject.toml ./services/api/pyproject.toml
 COPY services/worker/pyproject.toml ./services/worker/pyproject.toml
+COPY services/skill-runtime/pyproject.toml ./services/skill-runtime/pyproject.toml
+COPY packages/skill-sdk-python/pyproject.toml ./packages/skill-sdk-python/pyproject.toml
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --all-packages --all-groups --no-install-workspace
@@ -22,6 +24,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 FROM base AS development
 
 COPY services ./services
+COPY packages ./packages
 COPY config ./config
 # Repository-level validation modules are imported by the API acceptance tests.
 # Keep them in the runtime image so `docker compose exec api pytest` exercises
@@ -41,6 +44,7 @@ RUN groupadd --system --gid 10001 vav \
     && useradd --system --uid 10001 --gid vav --home-dir /app --shell /usr/sbin/nologin vav
 
 COPY services ./services
+COPY packages ./packages
 COPY scripts ./scripts
 COPY config ./config
 

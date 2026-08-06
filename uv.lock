@@ -6,6 +6,7 @@ requires-python = "==3.12.*"
 members = [
     "vav-platform-api",
     "vav-platform-workspace",
+    "vav-skill-runtime",
     "vav-skill-sdk",
     "vav-worker",
 ]
@@ -1659,6 +1660,27 @@ dev = [
     { name = "pip-licenses", specifier = "==5.0.0" },
     { name = "pre-commit", specifier = "==4.2.0" },
     { name = "pyyaml", specifier = "==6.0.2" },
+]
+
+[[package]]
+name = "vav-skill-runtime"
+version = "1.0.0"
+source = { editable = "services/skill-runtime" }
+dependencies = [
+    { name = "cryptography" },
+    { name = "jsonschema" },
+    { name = "packaging" },
+    { name = "pydantic" },
+    { name = "vav-skill-sdk" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "cryptography", specifier = "==50.0.0" },
+    { name = "jsonschema", specifier = "==4.25.1" },
+    { name = "packaging", specifier = "==26.2" },
+    { name = "pydantic", specifier = "==2.11.7" },
+    { name = "vav-skill-sdk", editable = "packages/skill-sdk-python" },
 ]
 
 [[package]]
