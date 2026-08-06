@@ -1,0 +1,26 @@
+schema_version: "1.0"
+release_version: "25.0.0"
+edges:
+  - {source: identity.users, target: experience.home_projection, transform: event_projection, mode: outbox_event, lag: 60, erasure: true}
+  - {source: identity.users, target: platform.user_cache, transform: cache, mode: outbox_event, lag: 5, erasure: true}
+  - {source: identity.users, target: privacy.export_archives, transform: export, mode: on_demand, lag: 3600, erasure: true}
+  - {source: commerce.orders, target: experience.home_projection, transform: aggregate, mode: outbox_event, lag: 60, erasure: true}
+  - {source: commerce.entitlements, target: memberships.accounts, transform: event_projection, mode: outbox_event, lag: 60, erasure: true}
+  - {source: commerce.payments, target: privacy.export_archives, transform: export, mode: on_demand, lag: 3600, erasure: true}
+  - {source: memberships.accounts, target: experience.home_projection, transform: aggregate, mode: outbox_event, lag: 60, erasure: true}
+  - {source: activities.registrations, target: activities.tickets, transform: derive, mode: synchronous, lag: 0, erasure: true}
+  - {source: activities.tickets, target: experience.home_projection, transform: aggregate, mode: outbox_event, lag: 60, erasure: true}
+  - {source: activities.registrations, target: experience.home_projection, transform: aggregate, mode: outbox_event, lag: 60, erasure: true}
+  - {source: courses.enrollments, target: experience.home_projection, transform: aggregate, mode: outbox_event, lag: 60, erasure: true}
+  - {source: counseling.appointments, target: experience.home_projection, transform: mask, mode: outbox_event, lag: 60, erasure: true}
+  - {source: matchmaking.profiles, target: recommendations.cards, transform: event_projection, mode: outbox_event, lag: 300, erasure: true}
+  - {source: matchmaking.profiles, target: experience.search_index, transform: index, mode: outbox_event, lag: 300, erasure: true}
+  - {source: matchmaking.profiles, target: knowledge.vector_index, transform: embed, mode: scheduled, lag: 1800, erasure: true}
+  - {source: interactions.likes, target: interactions.matches, transform: derive, mode: outbox_event, lag: 5, erasure: true}
+  - {source: interactions.matches, target: experience.home_projection, transform: aggregate, mode: outbox_event, lag: 60, erasure: true}
+  - {source: memberships.quotas, target: experience.home_projection, transform: aggregate, mode: outbox_event, lag: 60, erasure: true}
+  - {source: safety.blocks, target: recommendations.cards, transform: filter, mode: outbox_event, lag: 5, erasure: true}
+  - {source: safety.blocks, target: experience.search_index, transform: filter, mode: outbox_event, lag: 5, erasure: true}
+  - {source: relationships.journeys, target: experience.home_projection, transform: aggregate, mode: outbox_event, lag: 60, erasure: true}
+  - {source: privacy.requests, target: quality.analytics, transform: anonymize, mode: scheduled, lag: 86400, erasure: false}
+  - {source: skills.installations, target: quality.analytics, transform: anonymize, mode: scheduled, lag: 86400, erasure: false}

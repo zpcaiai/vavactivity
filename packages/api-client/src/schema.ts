@@ -5606,6 +5606,278 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/data-governance/backfills": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start Backfill */
+        post: operations["start_backfill_api_v1_admin_data_governance_backfills_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/data-governance/backfills/{run_id}/action": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Act Backfill */
+        post: operations["act_backfill_api_v1_admin_data_governance_backfills__run_id__action_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/data-governance/certifications/evaluate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Evaluate Integrity */
+        post: operations["evaluate_integrity_api_v1_admin_data_governance_certifications_evaluate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/data-governance/certifications/{certification_id}/decide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decide Integrity */
+        post: operations["decide_integrity_api_v1_admin_data_governance_certifications__certification_id__decide_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/data-governance/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Dashboard */
+        get: operations["dashboard_api_v1_admin_data_governance_dashboard_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/data-governance/erasures/plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Erasure Plan */
+        post: operations["create_erasure_plan_api_v1_admin_data_governance_erasures_plans_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/data-governance/erasures/plans/{plan_id}/certificate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Issue Erasure Certificate */
+        post: operations["issue_erasure_certificate_api_v1_admin_data_governance_erasures_plans__plan_id__certificate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/data-governance/erasures/tasks/{task_id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Complete Erasure Task */
+        post: operations["complete_erasure_task_api_v1_admin_data_governance_erasures_tasks__task_id__complete_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/data-governance/events/inbox": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Apply Event */
+        post: operations["apply_event_api_v1_admin_data_governance_events_inbox_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/data-governance/events/outbox": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enqueue Event */
+        post: operations["enqueue_event_api_v1_admin_data_governance_events_outbox_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/data-governance/external-identifiers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register External Identifier */
+        post: operations["register_external_identifier_api_v1_admin_data_governance_external_identifiers_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/data-governance/projections/rebuild": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rebuild Projection */
+        post: operations["rebuild_projection_api_v1_admin_data_governance_projections_rebuild_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/data-governance/quality/evaluate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Evaluate Quality */
+        post: operations["evaluate_quality_api_v1_admin_data_governance_quality_evaluate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/data-governance/reconciliations/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Run Reconciliation */
+        post: operations["run_reconciliation_api_v1_admin_data_governance_reconciliations_run_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/data-governance/repairs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request Repair */
+        post: operations["request_repair_api_v1_admin_data_governance_repairs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/data-governance/{section}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Section */
+        get: operations["section_api_v1_admin_data_governance__section__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/dating-profile-audit": {
         parameters: {
             query?: never;
@@ -14662,6 +14934,50 @@ export interface components {
             /** Weekly Limit */
             weekly_limit?: number | null;
         };
+        /** BackfillAction */
+        BackfillAction: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "approve" | "start" | "pause" | "resume" | "complete" | "fail" | "cancel";
+            /** Cursor Value */
+            cursor_value?: string | null;
+            /**
+             * Failure Delta
+             * @default 0
+             */
+            failure_delta: number;
+            /**
+             * Processed Delta
+             * @default 0
+             */
+            processed_delta: number;
+            /**
+             * Success Delta
+             * @default 0
+             */
+            success_delta: number;
+        };
+        /** BackfillStart */
+        BackfillStart: {
+            /** Backfill Code */
+            backfill_code: string;
+            /**
+             * Dry Run
+             * @default true
+             */
+            dry_run: boolean;
+            /**
+             * Environment
+             * @enum {string}
+             */
+            environment: "local" | "ci" | "staging" | "production";
+            /** Idempotency Key */
+            idempotency_key: string;
+            /** Stable Candidate Hash */
+            stable_candidate_hash: string;
+        };
         /** BackupRecordRequest */
         BackupRecordRequest: {
             /** Backup Reference Encrypted */
@@ -15949,6 +16265,21 @@ export interface components {
             /** Password */
             password: string;
         };
+        /** ErasurePlanCreate */
+        ErasurePlanCreate: {
+            /** Lineage Release Version */
+            lineage_release_version: string;
+            /**
+             * Privacy Request Id
+             * Format: uuid
+             */
+            privacy_request_id: string;
+            /**
+             * Subject User Id
+             * Format: uuid
+             */
+            subject_user_id: string;
+        };
         /** ErasureRequest */
         ErasureRequest: {
             /**
@@ -15960,6 +16291,22 @@ export interface components {
             password: string;
             /** Requested Scope */
             requested_scope?: string[];
+        };
+        /** ErasureTaskComplete */
+        ErasureTaskComplete: {
+            /** Execution Receipt */
+            execution_receipt: {
+                [key: string]: unknown;
+            };
+            /** Legal Hold Reference */
+            legal_hold_reference?: string | null;
+            /** Residual Count */
+            residual_count?: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "completed" | "failed" | "retained_legal_hold";
         };
         /** EvaluationRunRequest */
         EvaluationRunRequest: {
@@ -15978,6 +16325,45 @@ export interface components {
              * Format: uuid
              */
             strategy_id: string;
+        };
+        /** EventEnvelope */
+        EventEnvelope: {
+            /**
+             * Aggregate Id
+             * Format: uuid
+             */
+            aggregate_id: string;
+            /** Aggregate Type */
+            aggregate_type: string;
+            /** Aggregate Version */
+            aggregate_version: number;
+            /** Causation Id */
+            causation_id?: string | null;
+            /** Correlation Id */
+            correlation_id?: string | null;
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Event Type */
+            event_type: string;
+            /** Event Version */
+            event_version: number;
+            /** Metadata */
+            metadata?: {
+                [key: string]: unknown;
+            };
+            /** Payload */
+            payload: {
+                [key: string]: unknown;
+            };
+            /** Producer Module */
+            producer_module: string;
+            /** Sequence Number */
+            sequence_number: number;
+            /** Subject User Id */
+            subject_user_id?: string | null;
         };
         /** EventReceive */
         EventReceive: {
@@ -16226,6 +16612,20 @@ export interface components {
              * @default recommendation_list
              */
             source: string;
+        };
+        /** ExternalIdentifierCreate */
+        ExternalIdentifierCreate: {
+            /**
+             * Canonical Entity Id
+             * Format: uuid
+             */
+            canonical_entity_id: string;
+            /** Entity Type */
+            entity_type: string;
+            /** External Identifier */
+            external_identifier: string;
+            /** Provider Code */
+            provider_code: string;
         };
         /** FeatureFlagCreateRequest */
         FeatureFlagCreateRequest: {
@@ -16538,6 +16938,16 @@ export interface components {
              */
             media_id: string;
         };
+        /** InboxApply */
+        InboxApply: {
+            /** Consumer Code */
+            consumer_code: string;
+            /** Effect Receipt */
+            effect_receipt?: {
+                [key: string]: unknown;
+            };
+            envelope: components["schemas"]["EventEnvelope"];
+        };
         /** IndexActionRequest */
         IndexActionRequest: {
             /** Reason */
@@ -16626,6 +17036,34 @@ export interface components {
              * @enum {string}
              */
             status: "active" | "inactive";
+        };
+        /** IntegrityDecision */
+        IntegrityDecision: {
+            /**
+             * Decision
+             * @enum {string}
+             */
+            decision: "certified" | "rejected";
+            /** Reason */
+            reason: string;
+        };
+        /** IntegrityEvaluate */
+        IntegrityEvaluate: {
+            /** Business Domain */
+            business_domain: string;
+            /**
+             * Environment
+             * @enum {string}
+             */
+            environment: "local" | "ci" | "staging" | "production";
+            /** Evidence Checksum Sha256 */
+            evidence_checksum_sha256: string;
+            /** Evidence Results */
+            evidence_results: {
+                [key: string]: "pass" | "fail" | "not_run";
+            };
+            /** Git Commit */
+            git_commit: string;
         };
         /** InterventionResolve */
         InterventionResolve: {
@@ -18011,6 +18449,27 @@ export interface components {
             /** Source Module */
             source_module: string;
         };
+        /** ProjectionRebuild */
+        ProjectionRebuild: {
+            /** Asset Code */
+            asset_code: string;
+            /**
+             * Scope
+             * @enum {string}
+             */
+            scope: "entity" | "partition" | "full";
+            /** Scope Key */
+            scope_key?: string | null;
+            /**
+             * Shadow Build
+             * @default false
+             */
+            shadow_build: boolean;
+            /** Source Checkpoint */
+            source_checkpoint: {
+                [key: string]: unknown;
+            };
+        };
         /**
          * PromotionApplicationMode
          * @enum {string}
@@ -18214,6 +18673,19 @@ export interface components {
          * @enum {string}
          */
         QualityCriticality: "blocker" | "critical" | "major" | "normal" | "minor";
+        /** QualityEvaluationCreate */
+        QualityEvaluationCreate: {
+            /** Evaluated Records */
+            evaluated_records: number;
+            /** Failed Records */
+            failed_records: number;
+            /** Rule Code */
+            rule_code: string;
+            /** Sample */
+            sample?: {
+                [key: string]: unknown;
+            };
+        };
         /**
          * QualityEvidenceType
          * @enum {string}
@@ -18346,6 +18818,15 @@ export interface components {
             recommendations_paused?: boolean | null;
             /** Relaxable Criteria */
             relaxable_criteria?: string[] | null;
+        };
+        /** ReconciliationRun */
+        ReconciliationRun: {
+            /** Comparisons */
+            comparisons: {
+                [key: string]: unknown;
+            }[];
+            /** Reconciliation Code */
+            reconciliation_code: string;
         };
         /** RecordCreateRequest */
         RecordCreateRequest: {
@@ -18573,6 +19054,19 @@ export interface components {
             trigger_at: string;
             /** Trigger Reference Version */
             trigger_reference_version: number;
+        };
+        /** RepairRequest */
+        RepairRequest: {
+            /** Idempotency Key */
+            idempotency_key: string;
+            /** Input Mapping */
+            input_mapping: {
+                [key: string]: unknown;
+            };
+            /** Reconciliation Difference Id */
+            reconciliation_difference_id?: string | null;
+            /** Repair Code */
+            repair_code: string;
         };
         /** ReportCreateRequest */
         ReportCreateRequest: {
@@ -32399,6 +32893,555 @@ export interface operations {
                 "application/json": components["schemas"]["EnrollmentActionRequest"];
             };
         };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_backfill_api_v1_admin_data_governance_backfills_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BackfillStart"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    act_backfill_api_v1_admin_data_governance_backfills__run_id__action_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BackfillAction"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    evaluate_integrity_api_v1_admin_data_governance_certifications_evaluate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IntegrityEvaluate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    decide_integrity_api_v1_admin_data_governance_certifications__certification_id__decide_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                certification_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IntegrityDecision"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dashboard_api_v1_admin_data_governance_dashboard_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_erasure_plan_api_v1_admin_data_governance_erasures_plans_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ErasurePlanCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    issue_erasure_certificate_api_v1_admin_data_governance_erasures_plans__plan_id__certificate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    complete_erasure_task_api_v1_admin_data_governance_erasures_tasks__task_id__complete_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ErasureTaskComplete"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    apply_event_api_v1_admin_data_governance_events_inbox_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InboxApply"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    enqueue_event_api_v1_admin_data_governance_events_outbox_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventEnvelope"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    register_external_identifier_api_v1_admin_data_governance_external_identifiers_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExternalIdentifierCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rebuild_projection_api_v1_admin_data_governance_projections_rebuild_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectionRebuild"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    evaluate_quality_api_v1_admin_data_governance_quality_evaluate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QualityEvaluationCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    run_reconciliation_api_v1_admin_data_governance_reconciliations_run_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReconciliationRun"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    request_repair_api_v1_admin_data_governance_repairs_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RepairRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    section_api_v1_admin_data_governance__section__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                section: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {

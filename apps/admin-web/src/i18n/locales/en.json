@@ -30,6 +30,7 @@
     "designSystem": "Design system governance",
     "experience": "Experience orchestration",
     "processes": "Process governance",
+    "dataGovernance": "Data integrity",
     "settings": "Site settings",
     "admins": "Administrators",
     "audit": "Audit log"

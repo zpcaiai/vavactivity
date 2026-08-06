@@ -1,0 +1,5 @@
+schema_version: "1.0"
+backfills:
+  - {code: rebuild-search-source-versions, target: experience.search_index, candidate: experience.search.missing_source_version, transform: experience.search.rebuild_entity, validate: experience.search.verify_entity, chunk: 100, rate: 1000, approval: true}
+  - {code: rebuild-recommendation-safety-version, target: recommendations.cards, candidate: recommendations.cards.stale_safety, transform: recommendations.card.rebuild, validate: recommendations.card.verify, chunk: 50, rate: 300, approval: true}
+  - {code: rebuild-user-home-projection, target: experience.home_projection, candidate: experience.home.stale_users, transform: experience.home.rebuild_user, validate: experience.home.verify_user, chunk: 200, rate: 2000, approval: false}

@@ -44,6 +44,7 @@ const menu = [
   { path: "/admin/design-system/dashboard", labelKey: "menu.designSystem", icon: DataAnalysis },
   { path: "/admin/experience/dashboard", labelKey: "menu.experience", icon: DataAnalysis },
   { path: "/admin/processes/dashboard", labelKey: "menu.processes", icon: DataAnalysis },
+  { path: "/admin/data-governance/dashboard", labelKey: "menu.dataGovernance", icon: DataAnalysis },
   { path: "/admin/content/settings", labelKey: "menu.settings", icon: Setting },
   { path: "/admin/access/admins", labelKey: "menu.admins", icon: Lock },
   { path: "/admin/audit/auth", labelKey: "menu.audit", icon: DataAnalysis }
@@ -83,6 +84,7 @@ const visibleMenu = computed(() => {
       "/admin/design-system/dashboard": "design.analytics.read",
       "/admin/experience/dashboard": "experience.analytics.read",
       "/admin/processes/dashboard": "process.dashboard.read",
+      "/admin/data-governance/dashboard": "data.dashboard.read",
       "/admin/content/settings": "content.settings.read",
       "/admin/access/admins": "admins.read",
       "/admin/audit/auth": "audit.read"

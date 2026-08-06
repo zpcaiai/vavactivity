@@ -34,6 +34,7 @@ import QualityManagementPage from "@/pages/QualityManagementPage.vue";
 import DesignSystemManagementPage from "@/pages/DesignSystemManagementPage.vue";
 import ExperienceManagementPage from "@/pages/ExperienceManagementPage.vue";
 import ProcessGovernancePage from "@/pages/ProcessGovernancePage.vue";
+import DataGovernancePage from "@/pages/DataGovernancePage.vue";
 import { useAccessStore } from "@/stores/access";
 
 const modules = [
@@ -244,6 +245,10 @@ export const processSectionPermissions: Record<string, string> = {
   simulations: "process.simulations.read",
   certifications: "process.certifications.read",
   release: "process.release.read"
+};
+
+export const dataGovernanceSectionPermissions: Record<string, string> = {
+  dashboard: "data.dashboard.read", assets: "data.assets.read", contracts: "data.contracts.read", lineage: "data.lineage.read", events: "data.events.read", "event-gaps": "data.events.read", "dead-letters": "data.dead_letters.read", quality: "data.quality.read", reconciliations: "data.reconciliations.read", differences: "data.reconciliations.read", backfills: "data.backfills.read", repairs: "data.repairs.read", projections: "data.projections.read", erasures: "data.erasures.read", certifications: "data.certifications.read", release: "data.release.read"
 };
 
 const privacySectionPermissions: Record<string, string> = {
@@ -641,6 +646,12 @@ export const router = createRouter({
           name: `admin-processes-${section}`,
           component: ProcessGovernancePage,
           meta: { title: "流程治理", permission: processSectionPermissions[section], processSection: section }
+        })),
+        ...Object.keys(dataGovernanceSectionPermissions).map((section) => ({
+          path: `data-governance/${section}`,
+          name: `admin-data-governance-${section}`,
+          component: DataGovernancePage,
+          meta: { title: "数据治理", permission: dataGovernanceSectionPermissions[section], dataGovernanceSection: section }
         })),
         ...Object.keys(privacySectionPermissions).map((section) => ({
           path: `privacy/${section}`,

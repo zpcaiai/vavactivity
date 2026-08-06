@@ -154,6 +154,14 @@ celery_app.conf.update(
             "task": "vav.skills.execute",
             "schedule": 1.0,
         },
+        "dispatch-data-governance-outbox": {
+            "task": "vav.data.dispatch_outbox",
+            "schedule": 5.0,
+        },
+        "monitor-data-integrity": {
+            "task": "vav.data.monitor_integrity",
+            "schedule": 300.0,
+        },
     },
 )
 

@@ -1,0 +1,10 @@
+schema_version: "1.0"
+rules:
+  - {code: user-id-required, asset: identity.users, dimension: completeness, field: user_id, operator: not_null, severity: critical, threshold: 0}
+  - {code: payment-order-reference, asset: commerce.payments, dimension: referential_integrity, field: order_id, operator: reference_exists, severity: critical, threshold: 0}
+  - {code: entitlement-user-required, asset: commerce.entitlements, dimension: completeness, field: user_id, operator: not_null, severity: critical, threshold: 0}
+  - {code: membership-quota-nonnegative, asset: memberships.quotas, dimension: validity, field: remaining, operator: greater_or_equal, value: 0, severity: critical, threshold: 0}
+  - {code: match-pair-unique, asset: interactions.matches, dimension: uniqueness, field: canonical_pair_id, operator: unique, severity: critical, threshold: 0}
+  - {code: search-source-version, asset: experience.search_index, dimension: completeness, field: source_version, operator: not_null, severity: high, threshold: 0}
+  - {code: vector-source-version, asset: knowledge.vector_index, dimension: completeness, field: source_entity_id, operator: not_null, severity: high, threshold: 0}
+  - {code: safety-projection-freshness, asset: recommendations.cards, dimension: freshness, field: safety_version, operator: max_lag_seconds, value: 5, severity: critical, threshold: 0}

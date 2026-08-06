@@ -1,0 +1,17 @@
+module: {code: data_governance, owner: data_platform, version: "1.0.0"}
+dependencies: {required: [identity, privacy, quality, process_governance, experience]}
+database: {revisions: [91]}
+events:
+  publishes:
+    - data.contract.changed.v1
+    - data.integrity.gap.detected.v1
+    - data.erasure.verified.v1
+    - data.certification.changed.v1
+  consumes:
+    - privacy.erasure.completed.v1
+    - process.instance.changed.v1
+    - safety.restriction.changed.v1
+permissions: {prefixes: [data.]}
+configuration: {prefixes: [DATA_GOVERNANCE_]}
+health: {checks: [contract_coverage, lineage_coverage, event_gaps, reconciliation_differences, erasure_failures]}
+schema_version: "1.0"

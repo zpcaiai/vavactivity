@@ -9,6 +9,7 @@ groups:
     - vav.cli.seed_trust_safety
     - vav.cli.seed_experience
     - vav.cli.seed_process_governance
+    - vav.cli.seed_data_governance
   reference:
     - vav.cli.seed_catalog
     - vav.cli.seed_courses

@@ -987,3 +987,78 @@ async def _process_skill_executions() -> dict[str, int]:
 @celery_app.task(name="vav.skills.execute")  # type: ignore[misc]
 def process_skill_executions() -> dict[str, int]:
     return asyncio.run(_process_skill_executions())
+
+
+async def _dispatch_data_outbox() -> dict[str, int]:
+    async with session_factory() as session:
+        rows = list(
+            (
+                await session.execute(
+                    text(
+                        "SELECT * FROM data_event_outbox WHERE status='pending' "
+                        "AND (next_attempt_at IS NULL OR next_attempt_at<=now()) "
+                        "ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT 100"
+                    )
+                )
+            ).mappings()
+        )
+        for row in rows:
+            await session.execute(
+                text(
+                    "INSERT INTO outbox_events (topic,aggregate_type,aggregate_id,payload) "
+                    "VALUES (:topic,:aggregate_type,:aggregate_id,CAST(:payload AS jsonb))"
+                ),
+                {
+                    "topic": row["event_type"],
+                    "aggregate_type": row["aggregate_type"],
+                    "aggregate_id": str(row["aggregate_id"]),
+                    "payload": json.dumps(
+                        {
+                            "event_id": str(row["event_id"]),
+                            "event_version": row["event_version"],
+                            "aggregate_version": row["aggregate_version"],
+                            "sequence_number": row["sequence_number"],
+                            "payload": row["payload"],
+                            "metadata": row["metadata"],
+                        },
+                        default=str,
+                    ),
+                },
+            )
+            await session.execute(
+                text(
+                    "UPDATE data_event_outbox SET status='published',attempt_count=attempt_count+1,published_at=now() WHERE id=:id"
+                ),
+                {"id": row["id"]},
+            )
+        await session.commit()
+    return {"published": len(rows)}
+
+
+@celery_app.task(name="vav.data.dispatch_outbox")  # type: ignore[misc]
+def dispatch_data_outbox() -> dict[str, int]:
+    return asyncio.run(_dispatch_data_outbox())
+
+
+async def _monitor_data_integrity() -> dict[str, int]:
+    async with session_factory() as session:
+        result = (
+            (
+                await session.execute(
+                    text(
+                        "SELECT (SELECT count(*) FROM data_event_gaps WHERE severity='critical' AND status IN ('open','recovering')) gaps,"
+                        "(SELECT count(*) FROM data_dead_letters WHERE status IN ('open','quarantined')) dead_letters,"
+                        "(SELECT count(*) FROM data_reconciliation_differences WHERE severity='critical' AND status IN ('open','quarantined','repair_planned')) differences,"
+                        "(SELECT count(*) FROM data_erasure_plans WHERE status='verification_failed') erasure_failures"
+                    )
+                )
+            )
+            .mappings()
+            .one()
+        )
+    return {key: int(value) for key, value in result.items()}
+
+
+@celery_app.task(name="vav.data.monitor_integrity")  # type: ignore[misc]
+def monitor_data_integrity() -> dict[str, int]:
+    return asyncio.run(_monitor_data_integrity())

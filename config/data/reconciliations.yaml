@@ -1,0 +1,11 @@
+schema_version: "1.0"
+reconciliations:
+  - {code: payment-order, source: commerce.payments, target: commerce.orders, authority: source, keys: [order_id], fields: [payment_status, order_status], repair: commerce.reconcile_confirmed_payment}
+  - {code: order-entitlement, source: commerce.orders, target: commerce.entitlements, authority: source, keys: [order_id], fields: [fulfilled, entitlement_status], repair: commerce.entitlement.reconcile}
+  - {code: entitlement-membership, source: commerce.entitlements, target: memberships.accounts, authority: source, keys: [user_id], fields: [entitlement_status, membership_status], repair: memberships.reconcile_entitlement}
+  - {code: membership-quota, source: memberships.accounts, target: memberships.quotas, authority: source, keys: [membership_account_id], fields: [plan_code, quota_policy], repair: memberships.quota.rebuild}
+  - {code: registration-ticket, source: activities.registrations, target: activities.tickets, authority: source, keys: [registration_id], fields: [status, ticket_status], repair: activities.ticket.rebuild}
+  - {code: profile-recommendation, source: matchmaking.profiles, target: recommendations.cards, authority: source, keys: [profile_id], fields: [version, source_profile_version], repair: recommendations.profile_projection.rebuild}
+  - {code: block-recommendation, source: safety.blocks, target: recommendations.cards, authority: source, keys: [canonical_pair_id], fields: [blocked, visible], repair: recommendations.safety_projection.invalidate}
+  - {code: privacy-erasure-search, source: privacy.requests, target: experience.search_index, authority: source, keys: [subject_user_id], fields: [erasure_status, residual_count], repair: experience.search.remove_subject}
+  - {code: skill-install-runtime, source: skills.installations, target: quality.analytics, authority: source, keys: [skill_installation_id], fields: [installation_status, observed_status], repair: skills.runtime.reconcile_installation}

@@ -1595,6 +1595,102 @@
         "title": "AvailabilityRuleRequest",
         "type": "object"
       },
+      "BackfillAction": {
+        "properties": {
+          "action": {
+            "enum": [
+              "approve",
+              "start",
+              "pause",
+              "resume",
+              "complete",
+              "fail",
+              "cancel"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "cursor_value": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cursor Value"
+          },
+          "failure_delta": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Failure Delta",
+            "type": "integer"
+          },
+          "processed_delta": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Processed Delta",
+            "type": "integer"
+          },
+          "success_delta": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Success Delta",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "title": "BackfillAction",
+        "type": "object"
+      },
+      "BackfillStart": {
+        "properties": {
+          "backfill_code": {
+            "maxLength": 255,
+            "minLength": 3,
+            "title": "Backfill Code",
+            "type": "string"
+          },
+          "dry_run": {
+            "default": true,
+            "title": "Dry Run",
+            "type": "boolean"
+          },
+          "environment": {
+            "enum": [
+              "local",
+              "ci",
+              "staging",
+              "production"
+            ],
+            "title": "Environment",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "maxLength": 255,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "stable_candidate_hash": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Stable Candidate Hash",
+            "type": "string"
+          }
+        },
+        "required": [
+          "backfill_code",
+          "environment",
+          "idempotency_key",
+          "stable_candidate_hash"
+        ],
+        "title": "BackfillStart",
+        "type": "object"
+      },
       "BackupRecordRequest": {
         "properties": {
           "backup_reference_encrypted": {
@@ -5128,6 +5224,33 @@
         "title": "ErasureConfirmationRequest",
         "type": "object"
       },
+      "ErasurePlanCreate": {
+        "properties": {
+          "lineage_release_version": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Lineage Release Version",
+            "type": "string"
+          },
+          "privacy_request_id": {
+            "format": "uuid",
+            "title": "Privacy Request Id",
+            "type": "string"
+          },
+          "subject_user_id": {
+            "format": "uuid",
+            "title": "Subject User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "privacy_request_id",
+          "subject_user_id",
+          "lineage_release_version"
+        ],
+        "title": "ErasurePlanCreate",
+        "type": "object"
+      },
       "ErasureRequest": {
         "properties": {
           "confirmation": {
@@ -5155,6 +5278,54 @@
           "confirmation"
         ],
         "title": "ErasureRequest",
+        "type": "object"
+      },
+      "ErasureTaskComplete": {
+        "properties": {
+          "execution_receipt": {
+            "additionalProperties": true,
+            "title": "Execution Receipt",
+            "type": "object"
+          },
+          "legal_hold_reference": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Legal Hold Reference"
+          },
+          "residual_count": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Residual Count"
+          },
+          "status": {
+            "enum": [
+              "completed",
+              "failed",
+              "retained_legal_hold"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "execution_receipt"
+        ],
+        "title": "ErasureTaskComplete",
         "type": "object"
       },
       "EvaluationRunRequest": {
@@ -5196,6 +5367,112 @@
           "strategy_id"
         ],
         "title": "EvaluationRunRequest",
+        "type": "object"
+      },
+      "EventEnvelope": {
+        "properties": {
+          "aggregate_id": {
+            "format": "uuid",
+            "title": "Aggregate Id",
+            "type": "string"
+          },
+          "aggregate_type": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Aggregate Type",
+            "type": "string"
+          },
+          "aggregate_version": {
+            "minimum": 1.0,
+            "title": "Aggregate Version",
+            "type": "integer"
+          },
+          "causation_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Causation Id"
+          },
+          "correlation_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation Id"
+          },
+          "event_id": {
+            "format": "uuid",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "event_type": {
+            "maxLength": 255,
+            "minLength": 3,
+            "title": "Event Type",
+            "type": "string"
+          },
+          "event_version": {
+            "minimum": 1.0,
+            "title": "Event Version",
+            "type": "integer"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "title": "Metadata",
+            "type": "object"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "title": "Payload",
+            "type": "object"
+          },
+          "producer_module": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Producer Module",
+            "type": "string"
+          },
+          "sequence_number": {
+            "minimum": 1.0,
+            "title": "Sequence Number",
+            "type": "integer"
+          },
+          "subject_user_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject User Id"
+          }
+        },
+        "required": [
+          "event_id",
+          "event_type",
+          "event_version",
+          "aggregate_type",
+          "aggregate_id",
+          "aggregate_version",
+          "sequence_number",
+          "producer_module",
+          "payload"
+        ],
+        "title": "EventEnvelope",
         "type": "object"
       },
       "EventReceive": {
@@ -5831,6 +6108,41 @@
           "exposure_type"
         ],
         "title": "ExposureRequest",
+        "type": "object"
+      },
+      "ExternalIdentifierCreate": {
+        "properties": {
+          "canonical_entity_id": {
+            "format": "uuid",
+            "title": "Canonical Entity Id",
+            "type": "string"
+          },
+          "entity_type": {
+            "maxLength": 128,
+            "minLength": 2,
+            "title": "Entity Type",
+            "type": "string"
+          },
+          "external_identifier": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "External Identifier",
+            "type": "string"
+          },
+          "provider_code": {
+            "maxLength": 128,
+            "minLength": 2,
+            "title": "Provider Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity_type",
+          "canonical_entity_id",
+          "provider_code",
+          "external_identifier"
+        ],
+        "title": "ExternalIdentifierCreate",
         "type": "object"
       },
       "FeatureFlagCreateRequest": {
@@ -6663,6 +6975,30 @@
         "title": "ImageData",
         "type": "object"
       },
+      "InboxApply": {
+        "properties": {
+          "consumer_code": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Consumer Code",
+            "type": "string"
+          },
+          "effect_receipt": {
+            "additionalProperties": true,
+            "title": "Effect Receipt",
+            "type": "object"
+          },
+          "envelope": {
+            "$ref": "#/components/schemas/EventEnvelope"
+          }
+        },
+        "required": [
+          "consumer_code",
+          "envelope"
+        ],
+        "title": "InboxApply",
+        "type": "object"
+      },
       "IndexActionRequest": {
         "properties": {
           "reason": {
@@ -6880,6 +7216,81 @@
           "display_name"
         ],
         "title": "InstructorCreateRequest",
+        "type": "object"
+      },
+      "IntegrityDecision": {
+        "properties": {
+          "decision": {
+            "enum": [
+              "certified",
+              "rejected"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 10,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "reason"
+        ],
+        "title": "IntegrityDecision",
+        "type": "object"
+      },
+      "IntegrityEvaluate": {
+        "properties": {
+          "business_domain": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Business Domain",
+            "type": "string"
+          },
+          "environment": {
+            "enum": [
+              "local",
+              "ci",
+              "staging",
+              "production"
+            ],
+            "title": "Environment",
+            "type": "string"
+          },
+          "evidence_checksum_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Evidence Checksum Sha256",
+            "type": "string"
+          },
+          "evidence_results": {
+            "additionalProperties": {
+              "enum": [
+                "pass",
+                "fail",
+                "not_run"
+              ],
+              "type": "string"
+            },
+            "title": "Evidence Results",
+            "type": "object"
+          },
+          "git_commit": {
+            "pattern": "^[0-9a-f]{7,64}$",
+            "title": "Git Commit",
+            "type": "string"
+          }
+        },
+        "required": [
+          "business_domain",
+          "git_commit",
+          "environment",
+          "evidence_results",
+          "evidence_checksum_sha256"
+        ],
+        "title": "IntegrityEvaluate",
         "type": "object"
       },
       "InterventionResolve": {
@@ -11099,6 +11510,54 @@
         "title": "ProjectionEventRequest",
         "type": "object"
       },
+      "ProjectionRebuild": {
+        "properties": {
+          "asset_code": {
+            "maxLength": 255,
+            "minLength": 3,
+            "title": "Asset Code",
+            "type": "string"
+          },
+          "scope": {
+            "enum": [
+              "entity",
+              "partition",
+              "full"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "scope_key": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scope Key"
+          },
+          "shadow_build": {
+            "default": false,
+            "title": "Shadow Build",
+            "type": "boolean"
+          },
+          "source_checkpoint": {
+            "additionalProperties": true,
+            "title": "Source Checkpoint",
+            "type": "object"
+          }
+        },
+        "required": [
+          "asset_code",
+          "scope",
+          "source_checkpoint"
+        ],
+        "title": "ProjectionRebuild",
+        "type": "object"
+      },
       "PromotionApplicationMode": {
         "enum": [
           "automatic",
@@ -11634,6 +12093,38 @@
         "title": "QualityCriticality",
         "type": "string"
       },
+      "QualityEvaluationCreate": {
+        "properties": {
+          "evaluated_records": {
+            "minimum": 0.0,
+            "title": "Evaluated Records",
+            "type": "integer"
+          },
+          "failed_records": {
+            "minimum": 0.0,
+            "title": "Failed Records",
+            "type": "integer"
+          },
+          "rule_code": {
+            "maxLength": 255,
+            "minLength": 3,
+            "title": "Rule Code",
+            "type": "string"
+          },
+          "sample": {
+            "additionalProperties": true,
+            "title": "Sample",
+            "type": "object"
+          }
+        },
+        "required": [
+          "rule_code",
+          "evaluated_records",
+          "failed_records"
+        ],
+        "title": "QualityEvaluationCreate",
+        "type": "object"
+      },
       "QualityEvidenceType": {
         "enum": [
           "unit_test_report",
@@ -11982,6 +12473,31 @@
           }
         },
         "title": "RecommendationSettingsRequest",
+        "type": "object"
+      },
+      "ReconciliationRun": {
+        "properties": {
+          "comparisons": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "maxItems": 10000,
+            "title": "Comparisons",
+            "type": "array"
+          },
+          "reconciliation_code": {
+            "maxLength": 255,
+            "minLength": 3,
+            "title": "Reconciliation Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reconciliation_code",
+          "comparisons"
+        ],
+        "title": "ReconciliationRun",
         "type": "object"
       },
       "RecordCreateRequest": {
@@ -12491,6 +13007,46 @@
           "deduplication_key"
         ],
         "title": "ReminderRequest",
+        "type": "object"
+      },
+      "RepairRequest": {
+        "properties": {
+          "idempotency_key": {
+            "maxLength": 255,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "input_mapping": {
+            "additionalProperties": true,
+            "title": "Input Mapping",
+            "type": "object"
+          },
+          "reconciliation_difference_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reconciliation Difference Id"
+          },
+          "repair_code": {
+            "maxLength": 255,
+            "minLength": 3,
+            "title": "Repair Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "repair_code",
+          "idempotency_key",
+          "input_mapping"
+        ],
+        "title": "RepairRequest",
         "type": "object"
       },
       "ReportCreateRequest": {
@@ -35598,6 +36154,793 @@
         "summary": "Transition Course Action",
         "tags": [
           "courses"
+        ]
+      }
+    },
+    "/api/v1/admin/data-governance/backfills": {
+      "post": {
+        "operationId": "start_backfill_api_v1_admin_data_governance_backfills_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackfillStart"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Start Backfill Api V1 Admin Data Governance Backfills Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Start Backfill",
+        "tags": [
+          "data-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/data-governance/backfills/{run_id}/action": {
+      "post": {
+        "operationId": "act_backfill_api_v1_admin_data_governance_backfills__run_id__action_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackfillAction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Act Backfill Api V1 Admin Data Governance Backfills  Run Id  Action Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Act Backfill",
+        "tags": [
+          "data-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/data-governance/certifications/evaluate": {
+      "post": {
+        "operationId": "evaluate_integrity_api_v1_admin_data_governance_certifications_evaluate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrityEvaluate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Evaluate Integrity Api V1 Admin Data Governance Certifications Evaluate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Evaluate Integrity",
+        "tags": [
+          "data-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/data-governance/certifications/{certification_id}/decide": {
+      "post": {
+        "operationId": "decide_integrity_api_v1_admin_data_governance_certifications__certification_id__decide_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "certification_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Certification Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrityDecision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Decide Integrity Api V1 Admin Data Governance Certifications  Certification Id  Decide Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Decide Integrity",
+        "tags": [
+          "data-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/data-governance/dashboard": {
+      "get": {
+        "operationId": "dashboard_api_v1_admin_data_governance_dashboard_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Dashboard Api V1 Admin Data Governance Dashboard Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dashboard",
+        "tags": [
+          "data-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/data-governance/erasures/plans": {
+      "post": {
+        "operationId": "create_erasure_plan_api_v1_admin_data_governance_erasures_plans_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErasurePlanCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Erasure Plan Api V1 Admin Data Governance Erasures Plans Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Erasure Plan",
+        "tags": [
+          "data-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/data-governance/erasures/plans/{plan_id}/certificate": {
+      "post": {
+        "operationId": "issue_erasure_certificate_api_v1_admin_data_governance_erasures_plans__plan_id__certificate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "plan_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Plan Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Issue Erasure Certificate Api V1 Admin Data Governance Erasures Plans  Plan Id  Certificate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Issue Erasure Certificate",
+        "tags": [
+          "data-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/data-governance/erasures/tasks/{task_id}/complete": {
+      "post": {
+        "operationId": "complete_erasure_task_api_v1_admin_data_governance_erasures_tasks__task_id__complete_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Task Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErasureTaskComplete"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Complete Erasure Task Api V1 Admin Data Governance Erasures Tasks  Task Id  Complete Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Complete Erasure Task",
+        "tags": [
+          "data-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/data-governance/events/inbox": {
+      "post": {
+        "operationId": "apply_event_api_v1_admin_data_governance_events_inbox_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InboxApply"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Apply Event Api V1 Admin Data Governance Events Inbox Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Apply Event",
+        "tags": [
+          "data-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/data-governance/events/outbox": {
+      "post": {
+        "operationId": "enqueue_event_api_v1_admin_data_governance_events_outbox_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventEnvelope"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Enqueue Event Api V1 Admin Data Governance Events Outbox Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Enqueue Event",
+        "tags": [
+          "data-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/data-governance/external-identifiers": {
+      "post": {
+        "operationId": "register_external_identifier_api_v1_admin_data_governance_external_identifiers_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalIdentifierCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Register External Identifier Api V1 Admin Data Governance External Identifiers Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Register External Identifier",
+        "tags": [
+          "data-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/data-governance/projections/rebuild": {
+      "post": {
+        "operationId": "rebuild_projection_api_v1_admin_data_governance_projections_rebuild_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectionRebuild"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Rebuild Projection Api V1 Admin Data Governance Projections Rebuild Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rebuild Projection",
+        "tags": [
+          "data-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/data-governance/quality/evaluate": {
+      "post": {
+        "operationId": "evaluate_quality_api_v1_admin_data_governance_quality_evaluate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QualityEvaluationCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Evaluate Quality Api V1 Admin Data Governance Quality Evaluate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Evaluate Quality",
+        "tags": [
+          "data-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/data-governance/reconciliations/run": {
+      "post": {
+        "operationId": "run_reconciliation_api_v1_admin_data_governance_reconciliations_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReconciliationRun"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Run Reconciliation Api V1 Admin Data Governance Reconciliations Run Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Run Reconciliation",
+        "tags": [
+          "data-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/data-governance/repairs": {
+      "post": {
+        "operationId": "request_repair_api_v1_admin_data_governance_repairs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RepairRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Request Repair Api V1 Admin Data Governance Repairs Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Request Repair",
+        "tags": [
+          "data-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/data-governance/{section}": {
+      "get": {
+        "operationId": "section_api_v1_admin_data_governance__section__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "section",
+            "required": true,
+            "schema": {
+              "title": "Section",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Section Api V1 Admin Data Governance  Section  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Section",
+        "tags": [
+          "data-governance-admin"
         ]
       }
     },
