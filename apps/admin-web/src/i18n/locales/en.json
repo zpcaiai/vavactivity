@@ -26,6 +26,7 @@
     "relationships": "Relationship operations",
     "system": "System operations",
     "skills": "Skill console",
+    "quality": "Quality governance",
     "settings": "Site settings",
     "admins": "Administrators",
     "audit": "Audit log"

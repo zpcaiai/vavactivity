@@ -69,7 +69,7 @@ down() { docker compose -f docker-compose.yml -f deploy/compose/docker-compose.o
 
 seed() {
   environment="$(docker compose exec -T api python -c 'from vav.core.config import get_settings; print(get_settings().environment)')"
-  system_seeds=(seed_permissions seed_notification_templates seed_privacy_inventory seed_trust_safety)
+  system_seeds=(seed_permissions seed_quality seed_notification_templates seed_privacy_inventory seed_trust_safety)
   reference_seeds=(seed_catalog seed_courses seed_counseling seed_dating_taxonomies seed_relationships seed_memberships)
   for module in "${system_seeds[@]}" "${reference_seeds[@]}"; do docker compose exec -T api python -m "vav.cli.$module"; done
   if [[ "${VAV_INCLUDE_DEMO:-false}" == "true" ]]; then
@@ -131,6 +131,7 @@ case "$command" in
   backup-verify) ./scripts/backup/verify-backups.sh "$@" ;;
   restore-drill) ./scripts/restore/run-restore-drill.sh "$@" ;;
   skill) uv run vav-skill "$@" ;;
+  quality) PYTHONPATH=services/api/src uv run python scripts/quality/control.py "$@" ;;
   reset-local) reset_local "$@" ;;
-  *) echo "Usage: $0 {doctor|bootstrap|up|down|seed|smoke|verify|backup|backup-verify|restore-drill|skill|reset-local}" >&2; exit 2 ;;
+  *) echo "Usage: $0 {doctor|bootstrap|up|down|seed|smoke|verify|backup|backup-verify|restore-drill|skill|quality|reset-local}" >&2; exit 2 ;;
 esac

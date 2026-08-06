@@ -1407,6 +1407,47 @@ class Settings(BaseSettings):
         default=True, validation_alias="SAFETY_RED_TEAM_REQUIRE_ZERO_CONTACT_LEAKAGE"
     )
 
+    quality_enabled: bool = Field(default=True, validation_alias="QUALITY_ENABLED")
+    quality_manifest_version: str = Field(
+        default="1.0.0", validation_alias="QUALITY_MANIFEST_VERSION"
+    )
+    quality_requirement_import_enabled: bool = Field(
+        default=True, validation_alias="QUALITY_REQUIREMENT_IMPORT_ENABLED"
+    )
+    quality_source_scan_enabled: bool = Field(
+        default=True, validation_alias="QUALITY_SOURCE_SCAN_ENABLED"
+    )
+    quality_blocker_trace_coverage_required: float = Field(
+        default=1.0, ge=0, le=1, validation_alias="QUALITY_BLOCKER_TRACE_COVERAGE_REQUIRED"
+    )
+    quality_critical_verification_required: float = Field(
+        default=1.0, ge=0, le=1, validation_alias="QUALITY_CRITICAL_VERIFICATION_REQUIRED"
+    )
+    quality_critical_flow_closure_required: float = Field(
+        default=1.0, ge=0, le=1, validation_alias="QUALITY_CRITICAL_FLOW_CLOSURE_REQUIRED"
+    )
+    quality_allow_blocker_waivers: bool = Field(
+        default=False, validation_alias="QUALITY_ALLOW_BLOCKER_WAIVERS"
+    )
+    quality_waiver_max_days: int = Field(
+        default=30, ge=1, le=90, validation_alias="QUALITY_WAIVER_MAX_DAYS"
+    )
+    quality_evidence_expiry_enabled: bool = Field(
+        default=True, validation_alias="QUALITY_EVIDENCE_EXPIRY_ENABLED"
+    )
+    quality_release_certification_required: bool = Field(
+        default=True, validation_alias="QUALITY_RELEASE_CERTIFICATION_REQUIRED"
+    )
+    quality_fail_release_on_orphan_critical_page: bool = Field(
+        default=True, validation_alias="QUALITY_FAIL_RELEASE_ON_ORPHAN_CRITICAL_PAGE"
+    )
+    quality_fail_release_on_critical_dead_letter: bool = Field(
+        default=True, validation_alias="QUALITY_FAIL_RELEASE_ON_CRITICAL_DEAD_LETTER"
+    )
+    quality_fail_release_on_open_critical_risk: bool = Field(
+        default=True, validation_alias="QUALITY_FAIL_RELEASE_ON_OPEN_CRITICAL_RISK"
+    )
+
     @property
     def dating_photo_allowed_type_set(self) -> frozenset[str]:
         return frozenset(
@@ -1589,6 +1630,18 @@ class Settings(BaseSettings):
             raise ValueError("release requires zero block bypass")
         if not self.safety_red_team_require_zero_contact_leakage:
             raise ValueError("release requires zero contact leakage")
+        if self.quality_allow_blocker_waivers:
+            raise ValueError("blocker quality gates cannot be waived")
+        if not all(
+            (
+                self.quality_evidence_expiry_enabled,
+                self.quality_release_certification_required,
+                self.quality_fail_release_on_orphan_critical_page,
+                self.quality_fail_release_on_critical_dead_letter,
+                self.quality_fail_release_on_open_critical_risk,
+            )
+        ):
+            raise ValueError("quality release controls must fail closed")
         if (
             production_like
             and self.recommendation_experiments_enabled
@@ -1621,6 +1674,7 @@ class Settings(BaseSettings):
                 "memberships": self.membership_enabled,
                 "trust_safety": self.safety_enabled,
                 "skills": self.skills_enabled,
+                "quality": self.quality_enabled,
             },
         }
 

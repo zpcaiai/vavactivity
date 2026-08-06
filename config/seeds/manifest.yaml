@@ -3,6 +3,7 @@ production_allowed_groups: [system, reference]
 groups:
   system:
     - vav.cli.seed_permissions
+    - vav.cli.seed_quality
     - vav.cli.seed_notification_templates
     - vav.cli.seed_privacy_inventory
     - vav.cli.seed_trust_safety

@@ -24,3 +24,6 @@ events:
   skill.installation.changed.v1: {owner: skills_platform, sensitivity: internal}
   skill.execution.changed.v1: {owner: skills_platform, sensitivity: internal}
   skill.marketplace.changed.v1: {owner: skills_platform, sensitivity: internal}
+  quality.gap.detected.v1: {owner: quality, sensitivity: internal}
+  quality.gate.evaluated.v1: {owner: quality, sensitivity: internal}
+  quality.release.decided.v1: {owner: quality, sensitivity: internal}

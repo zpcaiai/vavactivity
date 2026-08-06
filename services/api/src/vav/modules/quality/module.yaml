@@ -1,0 +1,12 @@
+module: {code: quality, owner: quality_engineering, version: "1.0.0"}
+dependencies: {required: [identity, system]}
+database: {revisions: [87]}
+events:
+  publishes:
+    - quality.gap.detected.v1
+    - quality.gate.evaluated.v1
+    - quality.release.decided.v1
+  consumes: []
+permissions: {prefixes: [quality.]}
+configuration: {prefixes: [QUALITY_]}
+health: {checks: [traceability_graph, business_closure, release_gate]}

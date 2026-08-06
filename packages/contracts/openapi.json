@@ -1804,6 +1804,110 @@
         "title": "BreakGlassRequest",
         "type": "object"
       },
+      "BusinessFlowCreate": {
+        "properties": {
+          "business_domain": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Business Domain",
+            "type": "string"
+          },
+          "cancellation_conditions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Cancellation Conditions",
+            "type": "array"
+          },
+          "closure_checks": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "title": "Closure Checks",
+            "type": "object"
+          },
+          "compensation_required": {
+            "title": "Compensation Required",
+            "type": "boolean"
+          },
+          "criticality": {
+            "$ref": "#/components/schemas/QualityCriticality"
+          },
+          "failure_end_conditions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "minItems": 1,
+            "title": "Failure End Conditions",
+            "type": "array"
+          },
+          "flow_code": {
+            "title": "Flow Code",
+            "type": "string"
+          },
+          "manual_intervention_supported": {
+            "title": "Manual Intervention Supported",
+            "type": "boolean"
+          },
+          "name": {
+            "maxLength": 300,
+            "minLength": 3,
+            "title": "Name",
+            "type": "string"
+          },
+          "owner_team": {
+            "maxLength": 128,
+            "minLength": 2,
+            "title": "Owner Team",
+            "type": "string"
+          },
+          "primary_actor_type": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Primary Actor Type",
+            "type": "string"
+          },
+          "start_condition": {
+            "additionalProperties": true,
+            "title": "Start Condition",
+            "type": "object"
+          },
+          "success_end_conditions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "minItems": 1,
+            "title": "Success End Conditions",
+            "type": "array"
+          },
+          "supporting_actor_types": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Supporting Actor Types",
+            "type": "array"
+          }
+        },
+        "required": [
+          "flow_code",
+          "name",
+          "business_domain",
+          "criticality",
+          "primary_actor_type",
+          "start_condition",
+          "success_end_conditions",
+          "failure_end_conditions",
+          "closure_checks",
+          "manual_intervention_supported",
+          "compensation_required",
+          "owner_team"
+        ],
+        "title": "BusinessFlowCreate",
+        "type": "object"
+      },
       "CallToActionBlock": {
         "properties": {
           "data": {
@@ -1972,6 +2076,124 @@
         ],
         "title": "CampaignRequest",
         "type": "object"
+      },
+      "CapabilityCreate": {
+        "properties": {
+          "capability_code": {
+            "title": "Capability Code",
+            "type": "string"
+          },
+          "capability_type": {
+            "$ref": "#/components/schemas/CapabilityType"
+          },
+          "criticality": {
+            "$ref": "#/components/schemas/QualityCriticality"
+          },
+          "current_version": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Version"
+          },
+          "description": {
+            "maxLength": 10000,
+            "minLength": 3,
+            "title": "Description",
+            "type": "string"
+          },
+          "introduced_in_batch": {
+            "anyOf": [
+              {
+                "maximum": 32.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Introduced In Batch"
+          },
+          "lifecycle_status": {
+            "default": "available",
+            "title": "Lifecycle Status",
+            "type": "string"
+          },
+          "module_code": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Module Code",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 300,
+            "minLength": 3,
+            "title": "Name",
+            "type": "string"
+          },
+          "owner_team": {
+            "maxLength": 128,
+            "minLength": 2,
+            "title": "Owner Team",
+            "type": "string"
+          },
+          "owning_service": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owning Service"
+          },
+          "primary_actor_type": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primary Actor Type"
+          }
+        },
+        "required": [
+          "capability_code",
+          "name",
+          "description",
+          "capability_type",
+          "module_code",
+          "criticality",
+          "owner_team"
+        ],
+        "title": "CapabilityCreate",
+        "type": "object"
+      },
+      "CapabilityType": {
+        "enum": [
+          "user_action",
+          "admin_action",
+          "system_process",
+          "event_consumer",
+          "scheduled_job",
+          "provider_integration",
+          "security_control",
+          "data_right",
+          "skill_capability"
+        ],
+        "title": "CapabilityType",
+        "type": "string"
       },
       "CapacityBaselineRecordRequest": {
         "properties": {
@@ -4291,6 +4513,219 @@
         "title": "EvidenceAccessRequest",
         "type": "object"
       },
+      "EvidenceRegister": {
+        "properties": {
+          "artifact_checksum_sha256": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artifact Checksum Sha256"
+          },
+          "artifact_reference": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artifact Reference"
+          },
+          "environment": {
+            "enum": [
+              "test",
+              "ci",
+              "staging",
+              "production",
+              "dr"
+            ],
+            "title": "Environment",
+            "type": "string"
+          },
+          "evidence_code": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Evidence Code",
+            "type": "string"
+          },
+          "evidence_type": {
+            "$ref": "#/components/schemas/QualityEvidenceType"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "git_commit": {
+            "pattern": "^[0-9a-f]{7,64}$",
+            "title": "Git Commit",
+            "type": "string"
+          },
+          "release_version": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Release Version",
+            "type": "string"
+          },
+          "source_reference": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference"
+          },
+          "source_system": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Source System",
+            "type": "string"
+          },
+          "summary": {
+            "additionalProperties": true,
+            "title": "Summary",
+            "type": "object"
+          },
+          "title": {
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "evidence_code",
+          "evidence_type",
+          "title",
+          "source_system",
+          "release_version",
+          "git_commit",
+          "environment",
+          "summary",
+          "generated_at"
+        ],
+        "title": "EvidenceRegister",
+        "type": "object"
+      },
+      "ExceptionScenarioCreate": {
+        "properties": {
+          "business_flow_id": {
+            "format": "uuid",
+            "title": "Business Flow Id",
+            "type": "string"
+          },
+          "compensation_expected": {
+            "title": "Compensation Expected",
+            "type": "boolean"
+          },
+          "criticality": {
+            "$ref": "#/components/schemas/QualityCriticality"
+          },
+          "exception_type": {
+            "$ref": "#/components/schemas/ExceptionScenarioType"
+          },
+          "expected_admin_action": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Admin Action"
+          },
+          "expected_business_state": {
+            "maxLength": 128,
+            "minLength": 2,
+            "title": "Expected Business State",
+            "type": "string"
+          },
+          "expected_user_message_code": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected User Message Code"
+          },
+          "retry_expected": {
+            "title": "Retry Expected",
+            "type": "boolean"
+          },
+          "scenario_code": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Scenario Code",
+            "type": "string"
+          },
+          "trigger_condition": {
+            "additionalProperties": true,
+            "title": "Trigger Condition",
+            "type": "object"
+          }
+        },
+        "required": [
+          "scenario_code",
+          "business_flow_id",
+          "exception_type",
+          "trigger_condition",
+          "expected_business_state",
+          "compensation_expected",
+          "retry_expected",
+          "criticality"
+        ],
+        "title": "ExceptionScenarioCreate",
+        "type": "object"
+      },
+      "ExceptionScenarioType": {
+        "enum": [
+          "validation",
+          "authorization",
+          "duplicate",
+          "conflict",
+          "timeout",
+          "expiry",
+          "provider_failure",
+          "partial_failure",
+          "concurrency",
+          "security_restriction",
+          "privacy_restriction",
+          "manual_review",
+          "data_inconsistency"
+        ],
+        "title": "ExceptionScenarioType",
+        "type": "string"
+      },
       "ExecuteConfirmedToolRequest": {
         "properties": {
           "arguments": {
@@ -4989,6 +5424,125 @@
           "manual_fulfillment"
         ],
         "title": "FulfillmentType",
+        "type": "string"
+      },
+      "GapAssignment": {
+        "properties": {
+          "owner_team": {
+            "maxLength": 128,
+            "minLength": 2,
+            "title": "Owner Team",
+            "type": "string"
+          },
+          "owner_user_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner User Id"
+          }
+        },
+        "required": [
+          "owner_team"
+        ],
+        "title": "GapAssignment",
+        "type": "object"
+      },
+      "GapResolution": {
+        "properties": {
+          "resolution_summary": {
+            "maxLength": 5000,
+            "minLength": 10,
+            "title": "Resolution Summary",
+            "type": "string"
+          }
+        },
+        "required": [
+          "resolution_summary"
+        ],
+        "title": "GapResolution",
+        "type": "object"
+      },
+      "GateDefinitionCreate": {
+        "properties": {
+          "applicable_modules": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Applicable Modules",
+            "type": "array"
+          },
+          "applicable_release_types": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Applicable Release Types",
+            "type": "array"
+          },
+          "category": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Category",
+            "type": "string"
+          },
+          "condition_definition": {
+            "additionalProperties": true,
+            "title": "Condition Definition",
+            "type": "object"
+          },
+          "enforcement_level": {
+            "$ref": "#/components/schemas/GateEnforcementLevel"
+          },
+          "gate_code": {
+            "title": "Gate Code",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 300,
+            "minLength": 3,
+            "title": "Name",
+            "type": "string"
+          },
+          "required_evidence_types": {
+            "items": {
+              "$ref": "#/components/schemas/QualityEvidenceType"
+            },
+            "minItems": 1,
+            "title": "Required Evidence Types",
+            "type": "array"
+          },
+          "semantic_version": {
+            "pattern": "^\\d+\\.\\d+\\.\\d+$",
+            "title": "Semantic Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "gate_code",
+          "semantic_version",
+          "name",
+          "category",
+          "enforcement_level",
+          "condition_definition",
+          "required_evidence_types",
+          "applicable_release_types"
+        ],
+        "title": "GateDefinitionCreate",
+        "type": "object"
+      },
+      "GateEnforcementLevel": {
+        "enum": [
+          "blocker",
+          "required",
+          "advisory"
+        ],
+        "title": "GateEnforcementLevel",
         "type": "string"
       },
       "GroupMemberMoveRequest": {
@@ -9976,6 +10530,53 @@
         "title": "PublisherDecisionRequest",
         "type": "object"
       },
+      "QualityCriticality": {
+        "enum": [
+          "blocker",
+          "critical",
+          "major",
+          "normal",
+          "minor"
+        ],
+        "title": "QualityCriticality",
+        "type": "string"
+      },
+      "QualityEvidenceType": {
+        "enum": [
+          "unit_test_report",
+          "integration_test_report",
+          "e2e_report",
+          "visual_regression_report",
+          "security_report",
+          "performance_report",
+          "data_reconciliation_report",
+          "restore_drill_report",
+          "uat_approval",
+          "trace_bundle",
+          "screenshot",
+          "video",
+          "manual_review"
+        ],
+        "title": "QualityEvidenceType",
+        "type": "string"
+      },
+      "QualityRequirementType": {
+        "enum": [
+          "business",
+          "user_experience",
+          "admin_operation",
+          "data",
+          "security",
+          "privacy",
+          "performance",
+          "reliability",
+          "observability",
+          "deployment",
+          "compliance"
+        ],
+        "title": "QualityRequirementType",
+        "type": "string"
+      },
       "QuestionCreateRequest": {
         "properties": {
           "answer_key": {
@@ -10576,6 +11177,65 @@
         "title": "RegistrationCreateRequest",
         "type": "object"
       },
+      "ReleaseCertificationRequest": {
+        "properties": {
+          "environment": {
+            "enum": [
+              "test",
+              "ci",
+              "staging",
+              "production",
+              "dr"
+            ],
+            "title": "Environment",
+            "type": "string"
+          },
+          "evidence_manifest": {
+            "additionalProperties": true,
+            "title": "Evidence Manifest",
+            "type": "object"
+          }
+        },
+        "required": [
+          "environment",
+          "evidence_manifest"
+        ],
+        "title": "ReleaseCertificationRequest",
+        "type": "object"
+      },
+      "ReleaseEvaluationRequest": {
+        "properties": {
+          "environment": {
+            "enum": [
+              "test",
+              "ci",
+              "staging",
+              "production",
+              "dr"
+            ],
+            "title": "Environment",
+            "type": "string"
+          },
+          "git_commit": {
+            "pattern": "^[0-9a-f]{7,64}$",
+            "title": "Git Commit",
+            "type": "string"
+          },
+          "release_type": {
+            "default": "standard",
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Release Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "git_commit",
+          "environment"
+        ],
+        "title": "ReleaseEvaluationRequest",
+        "type": "object"
+      },
       "ReleaseRecordCreateRequest": {
         "properties": {
           "configuration_fingerprint": {
@@ -10813,6 +11473,172 @@
           "idempotency_key"
         ],
         "title": "ReportCreateRequest",
+        "type": "object"
+      },
+      "RequirementCreate": {
+        "properties": {
+          "acceptance_criteria": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "minItems": 1,
+            "title": "Acceptance Criteria",
+            "type": "array"
+          },
+          "business_domain": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Business Domain",
+            "type": "string"
+          },
+          "criticality": {
+            "$ref": "#/components/schemas/QualityCriticality"
+          },
+          "description": {
+            "maxLength": 10000,
+            "minLength": 3,
+            "title": "Description",
+            "type": "string"
+          },
+          "introduced_in_batch": {
+            "anyOf": [
+              {
+                "maximum": 32.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Introduced In Batch"
+          },
+          "non_functional_criteria": {
+            "additionalProperties": true,
+            "title": "Non Functional Criteria",
+            "type": "object"
+          },
+          "owner_team": {
+            "maxLength": 128,
+            "minLength": 2,
+            "title": "Owner Team",
+            "type": "string"
+          },
+          "parent_requirement_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Requirement Id"
+          },
+          "requirement_code": {
+            "title": "Requirement Code",
+            "type": "string"
+          },
+          "requirement_type": {
+            "$ref": "#/components/schemas/QualityRequirementType"
+          },
+          "source_reference": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference"
+          },
+          "source_type": {
+            "$ref": "#/components/schemas/RequirementSourceType"
+          },
+          "source_version": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Version"
+          },
+          "target_release": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Release"
+          },
+          "title": {
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "requirement_code",
+          "title",
+          "description",
+          "source_type",
+          "requirement_type",
+          "business_domain",
+          "criticality",
+          "acceptance_criteria",
+          "owner_team"
+        ],
+        "title": "RequirementCreate",
+        "type": "object"
+      },
+      "RequirementSourceType": {
+        "enum": [
+          "project_plan",
+          "batch_specification",
+          "product_requirement",
+          "user_story",
+          "architecture_decision",
+          "security_policy",
+          "privacy_policy",
+          "incident_action",
+          "regulatory_requirement"
+        ],
+        "title": "RequirementSourceType",
+        "type": "string"
+      },
+      "RequirementTransition": {
+        "properties": {
+          "target_status": {
+            "enum": [
+              "approved",
+              "in_implementation",
+              "implemented",
+              "verified",
+              "deferred",
+              "rejected",
+              "superseded"
+            ],
+            "title": "Target Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_status"
+        ],
+        "title": "RequirementTransition",
         "type": "object"
       },
       "RestoreDrillRecordRequest": {
@@ -11550,6 +12376,126 @@
           "document"
         ],
         "title": "RichTextData",
+        "type": "object"
+      },
+      "RiskCreate": {
+        "properties": {
+          "affected_capabilities": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Affected Capabilities",
+            "type": "array"
+          },
+          "affected_requirements": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Affected Requirements",
+            "type": "array"
+          },
+          "category": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Category",
+            "type": "string"
+          },
+          "contingency_plan": {
+            "anyOf": [
+              {
+                "maxLength": 10000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contingency Plan"
+          },
+          "description": {
+            "maxLength": 10000,
+            "minLength": 10,
+            "title": "Description",
+            "type": "string"
+          },
+          "likelihood": {
+            "enum": [
+              "rare",
+              "unlikely",
+              "possible",
+              "likely",
+              "almost_certain"
+            ],
+            "title": "Likelihood",
+            "type": "string"
+          },
+          "mitigation_plan": {
+            "anyOf": [
+              {
+                "maxLength": 10000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mitigation Plan"
+          },
+          "owner_team": {
+            "maxLength": 128,
+            "minLength": 2,
+            "title": "Owner Team",
+            "type": "string"
+          },
+          "owner_user_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner User Id"
+          },
+          "risk_code": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Risk Code",
+            "type": "string"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/QualityCriticality"
+          },
+          "target_resolution_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Resolution Date"
+          },
+          "title": {
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "risk_code",
+          "title",
+          "description",
+          "category",
+          "severity",
+          "likelihood",
+          "owner_team"
+        ],
+        "title": "RiskCreate",
         "type": "object"
       },
       "RoleChangeRequest": {
@@ -13282,6 +14228,139 @@
         "title": "ToolConfirmationRequest",
         "type": "object"
       },
+      "TraceLinkCreate": {
+        "properties": {
+          "relationship_type": {
+            "title": "Relationship Type",
+            "type": "string"
+          },
+          "required": {
+            "default": true,
+            "title": "Required",
+            "type": "boolean"
+          },
+          "source_node_id": {
+            "format": "uuid",
+            "title": "Source Node Id",
+            "type": "string"
+          },
+          "target_node_id": {
+            "format": "uuid",
+            "title": "Target Node Id",
+            "type": "string"
+          },
+          "verification_method": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verification Method"
+          }
+        },
+        "required": [
+          "source_node_id",
+          "target_node_id",
+          "relationship_type"
+        ],
+        "title": "TraceLinkCreate",
+        "type": "object"
+      },
+      "TraceNodeCreate": {
+        "properties": {
+          "metadata": {
+            "additionalProperties": true,
+            "title": "Metadata",
+            "type": "object"
+          },
+          "module_code": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Module Code"
+          },
+          "node_code": {
+            "maxLength": 255,
+            "minLength": 3,
+            "title": "Node Code",
+            "type": "string"
+          },
+          "node_type": {
+            "$ref": "#/components/schemas/TraceNodeType"
+          },
+          "source_location": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Location"
+          },
+          "status": {
+            "default": "active",
+            "maxLength": 32,
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Title",
+            "type": "string"
+          },
+          "version": {
+            "default": "1.0.0",
+            "maxLength": 64,
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "node_type",
+          "node_code",
+          "title"
+        ],
+        "title": "TraceNodeCreate",
+        "type": "object"
+      },
+      "TraceNodeType": {
+        "enum": [
+          "requirement",
+          "capability",
+          "business_flow",
+          "user_journey",
+          "page",
+          "component",
+          "api",
+          "application_service",
+          "domain_entity",
+          "state_machine",
+          "database_table",
+          "event",
+          "permission",
+          "configuration",
+          "metric",
+          "test",
+          "evidence",
+          "runbook"
+        ],
+        "title": "TraceNodeType",
+        "type": "string"
+      },
       "TransitionRequest": {
         "properties": {
           "reason": {
@@ -13704,6 +14783,81 @@
           "manual_order_override"
         ],
         "title": "WaitlistReorderRequest",
+        "type": "object"
+      },
+      "WaiverRequest": {
+        "properties": {
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "gate_definition_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gate Definition Id"
+          },
+          "justification": {
+            "maxLength": 10000,
+            "minLength": 20,
+            "title": "Justification",
+            "type": "string"
+          },
+          "mitigation_conditions": {
+            "additionalProperties": true,
+            "title": "Mitigation Conditions",
+            "type": "object"
+          },
+          "quality_gap_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quality Gap Id"
+          },
+          "quality_risk_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quality Risk Id"
+          },
+          "scope": {
+            "additionalProperties": true,
+            "title": "Scope",
+            "type": "object"
+          },
+          "valid_from": {
+            "format": "date-time",
+            "title": "Valid From",
+            "type": "string"
+          }
+        },
+        "required": [
+          "justification",
+          "mitigation_conditions",
+          "scope",
+          "valid_from",
+          "expires_at"
+        ],
+        "title": "WaiverRequest",
         "type": "object"
       },
       "vav__modules__activities__schemas__CheckinRequest": {
@@ -42109,6 +43263,1643 @@
         "summary": "Run Retention",
         "tags": [
           "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/audit": {
+      "get": {
+        "operationId": "quality_audit_api_v1_admin_quality_audit_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Quality Audit Api V1 Admin Quality Audit Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Quality Audit",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/business-flows": {
+      "get": {
+        "operationId": "business_flows_api_v1_admin_quality_business_flows_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Business Flows Api V1 Admin Quality Business Flows Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Business Flows",
+        "tags": [
+          "quality-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_business_flow_api_v1_admin_quality_business_flows_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessFlowCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Business Flow Api V1 Admin Quality Business Flows Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Business Flow",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/business-flows/{flow_id}/certify": {
+      "post": {
+        "operationId": "certify_business_flow_api_v1_admin_quality_business_flows__flow_id__certify_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flow_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Flow Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Certify Business Flow Api V1 Admin Quality Business Flows  Flow Id  Certify Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Certify Business Flow",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/capabilities": {
+      "get": {
+        "operationId": "capabilities_api_v1_admin_quality_capabilities_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Capabilities Api V1 Admin Quality Capabilities Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Capabilities",
+        "tags": [
+          "quality-admin"
+        ]
+      },
+      "post": {
+        "operationId": "upsert_capability_api_v1_admin_quality_capabilities_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CapabilityCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Upsert Capability Api V1 Admin Quality Capabilities Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Upsert Capability",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/certifications": {
+      "get": {
+        "operationId": "certifications_api_v1_admin_quality_certifications_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Certifications Api V1 Admin Quality Certifications Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Certifications",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/dashboard": {
+      "get": {
+        "operationId": "quality_dashboard_api_v1_admin_quality_dashboard_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Quality Dashboard Api V1 Admin Quality Dashboard Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Quality Dashboard",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/evidence": {
+      "get": {
+        "operationId": "evidence_api_v1_admin_quality_evidence_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Evidence Api V1 Admin Quality Evidence Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Evidence",
+        "tags": [
+          "quality-admin"
+        ]
+      },
+      "post": {
+        "operationId": "register_evidence_api_v1_admin_quality_evidence_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvidenceRegister"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Register Evidence Api V1 Admin Quality Evidence Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Register Evidence",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/evidence/{evidence_id}/accept": {
+      "post": {
+        "operationId": "accept_evidence_api_v1_admin_quality_evidence__evidence_id__accept_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "evidence_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Evidence Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Accept Evidence Api V1 Admin Quality Evidence  Evidence Id  Accept Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Accept Evidence",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/evidence/{evidence_id}/validate": {
+      "post": {
+        "operationId": "validate_evidence_api_v1_admin_quality_evidence__evidence_id__validate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "evidence_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Evidence Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Validate Evidence Api V1 Admin Quality Evidence  Evidence Id  Validate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Validate Evidence",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/exception-scenarios": {
+      "post": {
+        "operationId": "create_exception_scenario_api_v1_admin_quality_exception_scenarios_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExceptionScenarioCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Exception Scenario Api V1 Admin Quality Exception Scenarios Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Exception Scenario",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/gaps": {
+      "get": {
+        "operationId": "gaps_api_v1_admin_quality_gaps_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Gaps Api V1 Admin Quality Gaps Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Gaps",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/gaps/{gap_id}/assign": {
+      "post": {
+        "operationId": "assign_gap_api_v1_admin_quality_gaps__gap_id__assign_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gap_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Gap Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GapAssignment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Assign Gap Api V1 Admin Quality Gaps  Gap Id  Assign Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Assign Gap",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/gaps/{gap_id}/resolve": {
+      "post": {
+        "operationId": "resolve_gap_api_v1_admin_quality_gaps__gap_id__resolve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gap_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Gap Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GapResolution"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Resolve Gap Api V1 Admin Quality Gaps  Gap Id  Resolve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Resolve Gap",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/gate-runs": {
+      "get": {
+        "operationId": "gate_runs_api_v1_admin_quality_gate_runs_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Gate Runs Api V1 Admin Quality Gate Runs Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Gate Runs",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/gates": {
+      "get": {
+        "operationId": "gates_api_v1_admin_quality_gates_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Gates Api V1 Admin Quality Gates Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Gates",
+        "tags": [
+          "quality-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_gate_api_v1_admin_quality_gates_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GateDefinitionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Gate Api V1 Admin Quality Gates Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Gate",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/gates/{_gate_id}/rerun": {
+      "post": {
+        "operationId": "rerun_gate_api_v1_admin_quality_gates___gate_id__rerun_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "_gate_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": " Gate Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "release_version",
+            "required": true,
+            "schema": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Release Version",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReleaseEvaluationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Rerun Gate Api V1 Admin Quality Gates   Gate Id  Rerun Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rerun Gate",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/gates/{gate_id}/approve": {
+      "post": {
+        "operationId": "approve_gate_api_v1_admin_quality_gates__gate_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gate_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Gate Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Gate Api V1 Admin Quality Gates  Gate Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Gate",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/releases": {
+      "get": {
+        "operationId": "releases_api_v1_admin_quality_releases_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Releases Api V1 Admin Quality Releases Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Releases",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/releases/{release_version}": {
+      "get": {
+        "operationId": "release_detail_api_v1_admin_quality_releases__release_version__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "release_version",
+            "required": true,
+            "schema": {
+              "title": "Release Version",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "environment",
+            "required": false,
+            "schema": {
+              "default": "production",
+              "pattern": "^(test|ci|staging|production|dr)$",
+              "title": "Environment",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Release Detail Api V1 Admin Quality Releases  Release Version  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Release Detail",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/releases/{release_version}/certify": {
+      "post": {
+        "operationId": "certify_release_api_v1_admin_quality_releases__release_version__certify_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "release_version",
+            "required": true,
+            "schema": {
+              "title": "Release Version",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReleaseCertificationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Certify Release Api V1 Admin Quality Releases  Release Version  Certify Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Certify Release",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/releases/{release_version}/evaluate": {
+      "post": {
+        "operationId": "evaluate_release_api_v1_admin_quality_releases__release_version__evaluate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "release_version",
+            "required": true,
+            "schema": {
+              "title": "Release Version",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReleaseEvaluationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Evaluate Release Api V1 Admin Quality Releases  Release Version  Evaluate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Evaluate Release",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/requirements": {
+      "get": {
+        "operationId": "requirements_api_v1_admin_quality_requirements_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Requirements Api V1 Admin Quality Requirements Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Requirements",
+        "tags": [
+          "quality-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_requirement_api_v1_admin_quality_requirements_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequirementCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Requirement Api V1 Admin Quality Requirements Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Requirement",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/requirements/{requirement_id}/transition": {
+      "post": {
+        "operationId": "transition_requirement_api_v1_admin_quality_requirements__requirement_id__transition_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "requirement_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Requirement Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequirementTransition"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Transition Requirement Api V1 Admin Quality Requirements  Requirement Id  Transition Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Transition Requirement",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/risks": {
+      "get": {
+        "operationId": "risks_api_v1_admin_quality_risks_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Risks Api V1 Admin Quality Risks Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Risks",
+        "tags": [
+          "quality-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_risk_api_v1_admin_quality_risks_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RiskCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Risk Api V1 Admin Quality Risks Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Risk",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/traceability": {
+      "get": {
+        "operationId": "traceability_api_v1_admin_quality_traceability_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Traceability Api V1 Admin Quality Traceability Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Traceability",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/traceability/links": {
+      "post": {
+        "operationId": "create_trace_link_api_v1_admin_quality_traceability_links_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TraceLinkCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Trace Link Api V1 Admin Quality Traceability Links Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Trace Link",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/traceability/links/{link_id}/verify": {
+      "post": {
+        "operationId": "verify_trace_link_api_v1_admin_quality_traceability_links__link_id__verify_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "link_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Link Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Verify Trace Link Api V1 Admin Quality Traceability Links  Link Id  Verify Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Verify Trace Link",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/traceability/nodes": {
+      "post": {
+        "operationId": "create_trace_node_api_v1_admin_quality_traceability_nodes_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TraceNodeCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Trace Node Api V1 Admin Quality Traceability Nodes Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Trace Node",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/waivers": {
+      "get": {
+        "operationId": "waivers_api_v1_admin_quality_waivers_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Waivers Api V1 Admin Quality Waivers Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Waivers",
+        "tags": [
+          "quality-admin"
+        ]
+      },
+      "post": {
+        "operationId": "request_waiver_api_v1_admin_quality_waivers_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaiverRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Request Waiver Api V1 Admin Quality Waivers Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Request Waiver",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/waivers/{waiver_id}/approve": {
+      "post": {
+        "operationId": "approve_waiver_api_v1_admin_quality_waivers__waiver_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "waiver_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Waiver Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Waiver Api V1 Admin Quality Waivers  Waiver Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Waiver",
+        "tags": [
+          "quality-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/quality/waivers/{waiver_id}/revoke": {
+      "post": {
+        "operationId": "revoke_waiver_api_v1_admin_quality_waivers__waiver_id__revoke_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "waiver_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Waiver Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Revoke Waiver Api V1 Admin Quality Waivers  Waiver Id  Revoke Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Revoke Waiver",
+        "tags": [
+          "quality-admin"
         ]
       }
     },

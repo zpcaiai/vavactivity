@@ -593,6 +593,42 @@ SKILL_PLATFORM_PERMISSIONS = {
     "skills.audit.read",
 }
 
+QUALITY_PERMISSIONS = {
+    "quality.requirements.read",
+    "quality.requirements.create",
+    "quality.requirements.update",
+    "quality.requirements.approve",
+    "quality.capabilities.read",
+    "quality.capabilities.manage",
+    "quality.traceability.read",
+    "quality.traceability.manage",
+    "quality.traceability.verify",
+    "quality.business_flows.read",
+    "quality.business_flows.manage",
+    "quality.business_flows.certify",
+    "quality.gaps.read",
+    "quality.gaps.assign",
+    "quality.gaps.resolve",
+    "quality.risks.read",
+    "quality.risks.manage",
+    "quality.waivers.read",
+    "quality.waivers.request",
+    "quality.waivers.approve",
+    "quality.waivers.revoke",
+    "quality.evidence.read",
+    "quality.evidence.register",
+    "quality.evidence.validate",
+    "quality.evidence.accept",
+    "quality.gates.read",
+    "quality.gates.manage",
+    "quality.gates.approve",
+    "quality.gates.execute",
+    "quality.releases.read",
+    "quality.releases.certify",
+    "quality.analytics.read",
+    "quality.audit.read",
+}
+
 ALL_PERMISSIONS = (
     IDENTITY_PERMISSIONS
     | CMS_PERMISSIONS
@@ -613,6 +649,7 @@ ALL_PERMISSIONS = (
     | SAFETY_PERMISSIONS
     | SYSTEM_PERMISSIONS
     | SKILL_PLATFORM_PERMISSIONS
+    | QUALITY_PERMISSIONS
 )
 
 ROLE_PERMISSIONS: dict[str, set[str]] = {
@@ -1128,6 +1165,46 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         or permission.startswith("skills.marketplace.")
     }
     | {"skills.registry.revoke", "skills.audit.read"},
+    "quality_analyst": {
+        "quality.requirements.read",
+        "quality.capabilities.read",
+        "quality.traceability.read",
+        "quality.business_flows.read",
+        "quality.gaps.read",
+        "quality.risks.read",
+        "quality.evidence.read",
+        "quality.gates.read",
+        "quality.analytics.read",
+    },
+    "quality_engineer": {
+        permission
+        for permission in QUALITY_PERMISSIONS
+        if permission.startswith(
+            ("quality.traceability.", "quality.business_flows.", "quality.gaps.")
+        )
+    }
+    | {"quality.evidence.register", "quality.gates.execute", "quality.audit.read"},
+    "quality_release_manager": {
+        permission for permission in QUALITY_PERMISSIONS if permission.startswith("quality.gates.")
+    }
+    | {
+        "quality.waivers.read",
+        "quality.releases.read",
+        "quality.releases.certify",
+        "quality.evidence.read",
+        "quality.audit.read",
+    },
+    "quality_governance_reviewer": {
+        "quality.requirements.approve",
+        "quality.waivers.read",
+        "quality.waivers.request",
+        "quality.waivers.approve",
+        "quality.waivers.revoke",
+        "quality.evidence.validate",
+        "quality.evidence.accept",
+        "quality.releases.certify",
+        "quality.audit.read",
+    },
     "analyst": {"audit.read", "catalog.audit.read"},
     "support_agent": {"users.read", "catalog.products.read"},
     "member": set(),

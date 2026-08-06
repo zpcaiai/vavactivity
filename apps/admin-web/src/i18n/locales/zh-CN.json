@@ -26,6 +26,7 @@
     "relationships": "关系运营中心",
     "system": "系统运维中心",
     "skills": "Skill 控制台",
+    "quality": "质量治理",
     "settings": "网站设置",
     "admins": "管理员",
     "audit": "审计日志"

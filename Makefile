@@ -716,3 +716,9 @@ final-certification:
 
 final-release: acceptance skill-verify final-certification
 	@echo "Final release evidence generated; inspect production_certification before deployment."
+
+# ---------------------------------------------------------------------------
+# Batch 21-32 quality-governance targets. Each batch owns one fragment file so
+# that batches can be developed independently without editing this Makefile.
+# ---------------------------------------------------------------------------
+-include make/batch-*.mk

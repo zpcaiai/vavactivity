@@ -30,6 +30,7 @@ import MembershipManagementPage from "@/pages/MembershipManagementPage.vue";
 import TrustSafetyManagementPage from "@/pages/TrustSafetyManagementPage.vue";
 import SystemOperationsPage from "@/pages/SystemOperationsPage.vue";
 import SkillManagementPage from "@/pages/SkillManagementPage.vue";
+import QualityManagementPage from "@/pages/QualityManagementPage.vue";
 import { useAccessStore } from "@/stores/access";
 
 const modules = [
@@ -174,6 +175,23 @@ export const skillSectionPermissions: Record<string, string> = {
   marketplace: "skills.marketplace.read",
   incidents: "skills.incidents.read",
   audit: "skills.audit.read"
+};
+
+export const qualitySectionPermissions: Record<string, string> = {
+  dashboard: "quality.analytics.read",
+  requirements: "quality.requirements.read",
+  capabilities: "quality.capabilities.read",
+  traceability: "quality.traceability.read",
+  "business-flows": "quality.business_flows.read",
+  gaps: "quality.gaps.read",
+  risks: "quality.risks.read",
+  waivers: "quality.waivers.read",
+  evidence: "quality.evidence.read",
+  gates: "quality.gates.read",
+  "gate-runs": "quality.gates.read",
+  releases: "quality.releases.read",
+  certifications: "quality.releases.read",
+  audit: "quality.audit.read"
 };
 
 const privacySectionPermissions: Record<string, string> = {
@@ -547,6 +565,12 @@ export const router = createRouter({
           name: `admin-skills-${section}`,
           component: SkillManagementPage,
           meta: { title: "Skill 控制台", permission: skillSectionPermissions[section], skillSection: section }
+        })),
+        ...Object.keys(qualitySectionPermissions).map((section) => ({
+          path: `quality/${section}`,
+          name: `admin-quality-${section}`,
+          component: QualityManagementPage,
+          meta: { title: "质量治理", permission: qualitySectionPermissions[section], qualitySection: section }
         })),
         ...Object.keys(privacySectionPermissions).map((section) => ({
           path: `privacy/${section}`,

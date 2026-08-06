@@ -1,0 +1,71 @@
+schema_version: "1.0.0"
+constitution:
+  dimensions:
+    - functional_correctness
+    - business_closure
+    - data_integrity
+    - usability
+    - admin_operability
+    - security_privacy
+    - performance
+    - resilience
+    - observability
+  release_policy: fail_closed
+  production_conditional_go_allowed: false
+  non_waivable_gates:
+    - GATE-SECURITY-CRITICAL
+    - GATE-BLOCK-PROPAGATION
+    - GATE-PRIVACY-ERASURE-COMPLETENESS
+    - GATE-PAYMENT-ENTITLEMENT-INTEGRITY
+    - GATE-RESTORE-DRILL
+    - GATE-DATA-CRITICAL-RECONCILIATION
+requirements:
+  - {code: REQ-VAV-PROJECT-001, title: Project plan production closure, source: project_plan, batch: null, module: system, criticality: blocker}
+  - {code: REQ-VAV-BATCH-001, title: Batch 01 identity closure, source: batch_specification, batch: 1, module: identity, criticality: critical}
+  - {code: REQ-VAV-BATCH-002, title: Batch 02 content closure, source: batch_specification, batch: 2, module: content, criticality: major}
+  - {code: REQ-VAV-BATCH-003, title: Batch 03 catalog closure, source: batch_specification, batch: 3, module: catalog, criticality: major}
+  - {code: REQ-VAV-BATCH-004, title: Batch 04 commerce closure, source: batch_specification, batch: 4, module: commerce, criticality: blocker}
+  - {code: REQ-VAV-BATCH-005, title: Batch 05 activity closure, source: batch_specification, batch: 5, module: activities, criticality: critical}
+  - {code: REQ-VAV-BATCH-006, title: Batch 06 course closure, source: batch_specification, batch: 6, module: courses, criticality: major}
+  - {code: REQ-VAV-BATCH-007, title: Batch 07 counseling closure, source: batch_specification, batch: 7, module: counseling, criticality: critical}
+  - {code: REQ-VAV-BATCH-008, title: Batch 08 knowledge closure, source: batch_specification, batch: 8, module: knowledge, criticality: major}
+  - {code: REQ-VAV-BATCH-009, title: Batch 09 AI closure, source: batch_specification, batch: 9, module: ai_assistant, criticality: critical}
+  - {code: REQ-VAV-BATCH-010, title: Batch 10 notification closure, source: batch_specification, batch: 10, module: notifications, criticality: major}
+  - {code: REQ-VAV-BATCH-011, title: Batch 11 privacy closure, source: batch_specification, batch: 11, module: privacy, criticality: blocker}
+  - {code: REQ-VAV-BATCH-012, title: Batch 12 profile closure, source: batch_specification, batch: 12, module: matchmaking_profiles, criticality: critical}
+  - {code: REQ-VAV-BATCH-013, title: Batch 13 recommendation closure, source: batch_specification, batch: 13, module: recommendations, criticality: critical}
+  - {code: REQ-VAV-BATCH-014, title: Batch 14 interaction closure, source: batch_specification, batch: 14, module: matchmaking_interactions, criticality: blocker}
+  - {code: REQ-VAV-BATCH-015, title: Batch 15 relationship closure, source: batch_specification, batch: 15, module: relationships, criticality: blocker}
+  - {code: REQ-VAV-BATCH-016, title: Batch 16 relationship hardening closure, source: batch_specification, batch: 16, module: relationships, criticality: critical}
+  - {code: REQ-VAV-BATCH-017, title: Batch 17 membership closure, source: batch_specification, batch: 17, module: memberships, criticality: blocker}
+  - {code: REQ-VAV-BATCH-018, title: Batch 18 safety closure, source: batch_specification, batch: 18, module: trust_safety, criticality: blocker}
+  - {code: REQ-VAV-BATCH-019, title: Batch 19 operations closure, source: batch_specification, batch: 19, module: system, criticality: blocker}
+  - {code: REQ-VAV-BATCH-020, title: Batch 20 Skill platform closure, source: batch_specification, batch: 20, module: skills_platform, criticality: blocker}
+capabilities:
+  - {code: CAP-QUALITY-REQUIREMENTS, name: Requirement registry, module: quality, criticality: blocker}
+  - {code: CAP-QUALITY-INVENTORY, name: Capability inventory, module: quality, criticality: critical}
+  - {code: CAP-QUALITY-TRACE, name: Bidirectional traceability, module: quality, criticality: blocker}
+  - {code: CAP-QUALITY-CLOSURE, name: Business closure verification, module: quality, criticality: blocker}
+  - {code: CAP-QUALITY-GAPS, name: Gap detection and ownership, module: quality, criticality: critical}
+  - {code: CAP-QUALITY-WAIVERS, name: Governed expiring waiver, module: quality, criticality: blocker}
+  - {code: CAP-QUALITY-EVIDENCE, name: Commit-bound evidence, module: quality, criticality: blocker}
+  - {code: CAP-QUALITY-GATES, name: Reproducible release gates, module: quality, criticality: blocker}
+business_flows:
+  - code: FLOW-QUALITY-RELEASE-CERTIFICATION
+    name: Release quality evaluation and certification
+    criticality: blocker
+    entry: release candidate submitted
+    success_terminal: certified
+    failure_terminal: no_go
+    cancel_or_expire: evidence_expired
+    admin_recovery: replace evidence and rerun gates
+    manual_intervention: independent reviewer
+gates:
+  - {code: GATE-SECURITY-CRITICAL, level: blocker, metric: critical_security_findings, operator: eq, expected: 0, evidence: security_report}
+  - {code: GATE-BLOCK-PROPAGATION, level: blocker, metric: block_bypass_count, operator: eq, expected: 0, evidence: security_report}
+  - {code: GATE-PRIVACY-ERASURE-COMPLETENESS, level: blocker, metric: erasure_completeness, operator: eq, expected: 1.0, evidence: data_reconciliation_report}
+  - {code: GATE-PAYMENT-ENTITLEMENT-INTEGRITY, level: blocker, metric: entitlement_mismatches, operator: eq, expected: 0, evidence: data_reconciliation_report}
+  - {code: GATE-RESTORE-DRILL, level: blocker, metric: restore_status, operator: eq, expected: passed, evidence: restore_drill_report}
+  - {code: GATE-DATA-CRITICAL-RECONCILIATION, level: blocker, metric: critical_mismatches, operator: eq, expected: 0, evidence: data_reconciliation_report}
+  - {code: GATE-TRACE-COVERAGE, level: required, metric: critical_trace_coverage, operator: gte, expected: 1.0, evidence: trace_bundle}
+  - {code: GATE-E2E, level: required, metric: e2e_statuses, operator: all_passed, expected: passed, evidence: e2e_report}
