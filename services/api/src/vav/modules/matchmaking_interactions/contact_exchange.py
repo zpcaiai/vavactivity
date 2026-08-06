@@ -830,7 +830,8 @@ async def reveal(
     rows = (
         await session.execute(
             text(
-                "SELECT t.*, g.owner_user_id, g.status AS grant_status "
+                "SELECT t.*, g.owner_user_id, g.status AS grant_status, "
+                "g.contact_hash_snapshot "
                 "FROM matchmaking_contact_reveal_tokens t "
                 "JOIN matchmaking_contact_exchange_grants g ON g.id = t.grant_id "
                 "WHERE t.token_hash=:hash AND g.contact_exchange_request_id=:exchange "
@@ -863,8 +864,36 @@ async def reveal(
     point = await PrivacyGateway(session).contact_point(
         token_row["contact_point_id"], owner_user_id=token_row["owner_user_id"]
     )
-    if point is None:
+    if point is None or str(point["status"]) != "verified":
         raise VavError("CONTACT_POINT_UNAVAILABLE", "That channel is unavailable.", status_code=409)
+
+    stored_hash = (service.jsonb(token_row["contact_hash_snapshot"]) or {}).get(
+        str(token_row["contact_point_id"])
+    )
+    current_hash = _contact_hash(str(point["contact_type"]), str(point["value_hmac"]))
+    if stored_hash != current_hash:
+        # A reveal token authorises only the exact value that both members
+        # confirmed.  Re-check at consumption time so a token issued before a
+        # contact edit can never expose the replacement value.
+        await session.execute(
+            text(
+                "UPDATE matchmaking_contact_exchange_grants SET status='suspended', "
+                "suspended_at=now() WHERE id=:grant"
+            ),
+            {"grant": token_row["grant_id"]},
+        )
+        await session.execute(
+            text(
+                "UPDATE matchmaking_contact_reveal_tokens SET status='invalidated', "
+                "invalidated_at=now() WHERE id=:id AND status='issued'"
+            ),
+            {"id": token_row["id"]},
+        )
+        raise VavError(
+            "CONTACT_CONSENT_STALE",
+            "This channel changed and needs to be confirmed again by its owner.",
+            status_code=409,
+        )
 
     await session.execute(
         text(

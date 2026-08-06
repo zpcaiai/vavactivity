@@ -6,9 +6,7 @@ import time
 from collections import Counter, defaultdict
 from threading import Lock
 
-from fastapi import Request
-from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
-from starlette.responses import Response
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 BUCKETS = (0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0)
 
@@ -69,15 +67,49 @@ class MetricsRegistry:
 registry = MetricsRegistry()
 
 
-class MetricsMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+class MetricsMiddleware:
+    """Record route templates from the shared ASGI scope.
+
+    A pure ASGI middleware observes the same scope that FastAPI's router
+    updates. This remains compatible with Starlette 1.4's isolated
+    ``BaseHTTPMiddleware`` request scopes and prevents metrics from ever
+    falling back to a raw path containing user identifiers.
+    """
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
         started = time.perf_counter()
         status = 500
+
+        async def send_with_status(message: Message) -> None:
+            nonlocal status
+            if message["type"] == "http.response.start":
+                status = int(message["status"])
+            await send(message)
+
         try:
-            response = await call_next(request)
-            status = response.status_code
-            return response
+            await self.app(scope, receive, send_with_status)
         finally:
-            route_object = request.scope.get("route")
-            route = getattr(route_object, "path", "unmatched")
-            registry.observe(request.method, route, status, time.perf_counter() - started)
+            fastapi_scope = scope.get("fastapi")
+            effective_context = (
+                fastapi_scope.get("effective_route_context")
+                if isinstance(fastapi_scope, dict)
+                else None
+            )
+            route_object = scope.get("route")
+            # FastAPI 0.141 keeps the fully-prefixed template on its effective
+            # route context while the Starlette route contains only the leaf.
+            route = str(
+                getattr(
+                    effective_context,
+                    "path",
+                    getattr(route_object, "path", "unmatched"),
+                )
+            )
+            registry.observe(str(scope["method"]), route, status, time.perf_counter() - started)
