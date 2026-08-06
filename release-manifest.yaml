@@ -8,7 +8,7 @@ images:
   worker: ${WORKER_IMAGE}
   user_web: ${USER_WEB_IMAGE}
   admin_web: ${ADMIN_WEB_IMAGE}
-database: {target_revision: head, minimum_revision: "20260731_0001", maximum_revision: "20260806_0083"}
+database: {target_revision: head, minimum_revision: "20260731_0001", maximum_revision: "20260806_0086"}
 contracts:
   openapi_sha256: ${OPENAPI_CHECKSUM}
   events_sha256: ${EVENT_MANIFEST_CHECKSUM}

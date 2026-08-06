@@ -47,7 +47,7 @@ def main() -> None:
             "user_web": args.user_web,
             "admin_web": args.admin_web,
         },
-        "database": {"target_revision": "20260806_0083"},
+        "database": {"target_revision": "20260806_0086"},
         "contracts": {
             "openapi_sha256": checksum(root / "packages/contracts/openapi.json"),
             "events_sha256": checksum(root / "config/events/manifest.yaml"),

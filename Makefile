@@ -706,3 +706,13 @@ skill-complete-e2e:
 	corepack pnpm exec playwright test e2e/skills.admin.spec.ts
 
 skill-verify: skill-sdk-test skill-schema-test skill-runtime-test skill-registry-test skill-security-test skill-marketplace-test skill-complete-e2e
+
+.PHONY: final-certification final-release
+
+final-certification:
+	.venv/bin/python scripts/certification/skill_platform.py \
+		--mode "$${SKILL_CERTIFICATION_MODE:-architecture}" \
+		$${SKILL_CERTIFICATION_EVIDENCE_DIR:+--evidence-dir "$$SKILL_CERTIFICATION_EVIDENCE_DIR"}
+
+final-release: acceptance skill-verify final-certification
+	@echo "Final release evidence generated; inspect production_certification before deployment."

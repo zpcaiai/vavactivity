@@ -32,4 +32,4 @@ for database in vav_snapshot vav_empty; do
   tables="$(docker exec "$container" psql -U vav_gate -d "$database" -Atc "SELECT count(*) FROM information_schema.tables WHERE table_schema='public'")"
   [[ "$tables" -gt 100 ]] || { echo "$database has incomplete schema: $tables tables" >&2; exit 1; }
 done
-echo "migration gate PASS: single head, empty database, and revision-0082 snapshot upgrade through Batch 20 execution contracts"
+echo "migration gate PASS: single head, empty database, and revision-0082 snapshot upgrade through Batch 20 governance contracts"
