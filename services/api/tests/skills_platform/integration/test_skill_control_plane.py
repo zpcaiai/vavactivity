@@ -14,7 +14,13 @@ from vav.common.exceptions import VavError
 from vav.core.database import session_factory
 from vav.models.identity import User
 from vav.modules.identity.security import PasswordHasher
+from vav.modules.privacy.crypto import decrypt_private
 from vav.modules.skills_platform import service
+from vav.modules.skills_platform.executor import (
+    AdapterRegistry,
+    ExecutionContext,
+    process_execution_batch,
+)
 from vav.modules.skills_platform.schemas import (
     ExecuteSkillRequest,
     InstallPlanRequest,
@@ -57,6 +63,24 @@ async def _registered_fixture(*, signature: str = "verified") -> tuple[str, UUID
         },
     }
     manifest_payload = json.dumps(manifest, sort_keys=True, separators=(",", ":"))
+    input_schema = {
+        "type": "object",
+        "required": ["message"],
+        "properties": {"message": {"type": "string", "maxLength": 200}},
+        "additionalProperties": False,
+    }
+    output_schema = {
+        "type": "object",
+        "required": ["echo"],
+        "properties": {"echo": {"type": "string", "maxLength": 200}},
+        "additionalProperties": False,
+    }
+    error_schema = {
+        "type": "object",
+        "required": ["code"],
+        "properties": {"code": {"type": "string"}},
+        "additionalProperties": False,
+    }
     checksum = hashlib.sha256(manifest_payload.encode()).hexdigest()
     async with session_factory() as session:
         publisher_id = await session.scalar(
@@ -80,15 +104,20 @@ async def _registered_fixture(*, signature: str = "verified") -> tuple[str, UUID
                 "INSERT INTO registered_skill_versions (registered_skill_id,semantic_version,manifest_version,"
                 "runtime_api_version,manifest,manifest_checksum,package_reference_encrypted,package_checksum,"
                 "sbom_reference_encrypted,provenance_reference_encrypted,signature_status,security_status,"
-                "review_status,compatibility_status,published_at) VALUES (:skill,'1.0.0','1.0','1.0',"
+                "review_status,compatibility_status,input_schema,output_schema,error_schema,published_at) "
+                "VALUES (:skill,'1.0.0','1.0','1.0',"
                 "CAST(:manifest AS jsonb),:checksum,'test://package',:checksum,'test://sbom','test://provenance',"
-                ":signature,'passed','approved','compatible',now()) RETURNING id"
+                ":signature,'passed','approved','compatible',CAST(:input_schema AS jsonb),"
+                "CAST(:output_schema AS jsonb),CAST(:error_schema AS jsonb),now()) RETURNING id"
             ),
             {
                 "skill": skill_id,
                 "manifest": manifest_payload,
                 "checksum": checksum,
                 "signature": signature,
+                "input_schema": json.dumps(input_schema),
+                "output_schema": json.dumps(output_schema),
+                "error_schema": json.dumps(error_schema),
             },
         )
         await session.execute(
@@ -134,6 +163,65 @@ async def test_install_activate_and_queue_are_fail_closed_and_idempotent() -> No
         second = await service.queue_execution(session, actor, skill_name, payload)
         assert first["id"] == second["id"]
         assert first["status"] == "queued"
+
+        stored_input = await session.scalar(
+            text("SELECT input_encrypted FROM skill_executions WHERE id=:id"), {"id": first["id"]}
+        )
+        assert stored_input != payload.input
+        assert "hello" not in json.dumps(stored_input)
+
+
+@pytest.mark.asyncio
+async def test_worker_executes_exact_isolated_adapter_and_encrypts_output() -> None:
+    actor = await _operator()
+    skill_name, _version_id = await _registered_fixture()
+    async with session_factory() as session:
+        plan = await service.create_install_plan(
+            session,
+            actor,
+            InstallPlanRequest(
+                skill_name=skill_name,
+                semantic_version="1.0.0",
+                environment="test",
+            ),
+        )
+        installation = await service.create_installation(
+            session, actor, plan["id"], plan["plan_checksum"], {"private": "configured"}
+        )
+        await service.activate_installation(session, installation["id"], actor)
+        queued = await service.queue_execution(
+            session,
+            actor,
+            skill_name,
+            ExecuteSkillRequest(
+                input={"message": "worker hello"},
+                deadline=datetime.now(UTC) + timedelta(seconds=30),
+            ),
+        )
+
+        async def echo(payload: dict[str, object], context: ExecutionContext) -> dict[str, object]:
+            assert context.actor_user_id == actor
+            return {"echo": payload["message"]}
+
+        registry = AdapterRegistry()
+        registry.register(skill_name, "1.0.0", echo, isolated=True)
+        assert await process_execution_batch(session, registry) >= 1
+        result = (
+            (
+                await session.execute(
+                    text(
+                        "SELECT status,output_encrypted,output_hash,error_code FROM skill_executions WHERE id=:id"
+                    ),
+                    {"id": queued["id"]},
+                )
+            )
+            .mappings()
+            .one()
+        )
+        assert result["status"] == "succeeded"
+        assert result["error_code"] is None
+        assert "worker hello" not in json.dumps(result["output_encrypted"])
+        assert decrypt_private(result["output_encrypted"]["ciphertext"]) == {"echo": "worker hello"}
 
 
 @pytest.mark.asyncio

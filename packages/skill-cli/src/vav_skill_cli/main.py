@@ -157,7 +157,11 @@ def _remote(args: argparse.Namespace) -> object:
         return client.request(
             "POST",
             "/admin/skill-installations",
-            {"plan_id": args.plan_id, "expected_plan_checksum": args.plan_checksum},
+            {
+                "plan_id": args.plan_id,
+                "expected_plan_checksum": args.plan_checksum,
+                "configuration": {},
+            },
         )
     if command in {"disable", "enable", "rollback", "uninstall"}:
         operation = "activate" if command == "enable" else command

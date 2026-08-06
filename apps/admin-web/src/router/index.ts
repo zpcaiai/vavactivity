@@ -29,6 +29,7 @@ import RelationshipManagementPage from "@/pages/RelationshipManagementPage.vue";
 import MembershipManagementPage from "@/pages/MembershipManagementPage.vue";
 import TrustSafetyManagementPage from "@/pages/TrustSafetyManagementPage.vue";
 import SystemOperationsPage from "@/pages/SystemOperationsPage.vue";
+import SkillManagementPage from "@/pages/SkillManagementPage.vue";
 import { useAccessStore } from "@/stores/access";
 
 const modules = [
@@ -158,6 +159,21 @@ export const systemSectionPermissions: Record<string, string> = {
   backups: "system.backups.read",
   "restore-drills": "system.restore_drills.read",
   capacity: "system.capacity.read"
+};
+
+export const skillSectionPermissions: Record<string, string> = {
+  dashboard: "skills.analytics.read",
+  catalog: "skills.registry.read",
+  installations: "skills.installations.read",
+  executions: "skills.executions.read",
+  dependencies: "skills.registry.read",
+  permissions: "skills.permissions.read",
+  configurations: "skills.installations.read",
+  publishers: "skills.publishers.read",
+  reviews: "skills.marketplace.review",
+  marketplace: "skills.marketplace.read",
+  incidents: "skills.incidents.read",
+  audit: "skills.audit.read"
 };
 
 const privacySectionPermissions: Record<string, string> = {
@@ -525,6 +541,12 @@ export const router = createRouter({
           name: `admin-system-${section}`,
           component: SystemOperationsPage,
           meta: { title: "系统运维中心", permission: systemSectionPermissions[section], systemSection: section }
+        })),
+        ...Object.keys(skillSectionPermissions).map((section) => ({
+          path: `skills/${section}`,
+          name: `admin-skills-${section}`,
+          component: SkillManagementPage,
+          meta: { title: "Skill 控制台", permission: skillSectionPermissions[section], skillSection: section }
         })),
         ...Object.keys(privacySectionPermissions).map((section) => ({
           path: `privacy/${section}`,

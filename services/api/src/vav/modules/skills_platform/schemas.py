@@ -22,6 +22,7 @@ class InstallPlanRequest(StrictRequest):
 class CreateInstallationRequest(StrictRequest):
     plan_id: UUID
     expected_plan_checksum: str = Field(pattern=r"^[0-9a-f]{64}$")
+    configuration: dict[str, Any] = Field(default_factory=dict)
 
 
 class InstallationReasonRequest(StrictRequest):

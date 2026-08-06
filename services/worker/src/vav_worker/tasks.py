@@ -40,6 +40,7 @@ from vav.modules.recommendations import batches as recommendation_batches
 from vav.modules.recommendations import service as recommendation_service
 from vav.modules.trust_safety import service as trust_safety_service
 from vav_worker.celery_app import celery_app
+from vav_worker.skill_adapters import configured_registry
 
 
 async def _publish_scheduled() -> int:
@@ -971,3 +972,18 @@ async def _escalate_safety_cases() -> dict[str, int]:
 @celery_app.task(name="vav.safety.escalate_cases")  # type: ignore[misc]
 def escalate_safety_cases() -> dict[str, int]:
     return asyncio.run(_escalate_safety_cases())
+
+
+async def _process_skill_executions() -> dict[str, int]:
+    from vav.modules.skills_platform.executor import process_execution_batch
+
+    registry = configured_registry()
+    async with session_factory() as session:
+        processed = await process_execution_batch(session, registry)
+    await get_engine().dispose()
+    return {"processed": processed}
+
+
+@celery_app.task(name="vav.skills.execute")  # type: ignore[misc]
+def process_skill_executions() -> dict[str, int]:
+    return asyncio.run(_process_skill_executions())

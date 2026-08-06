@@ -14,6 +14,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from vav.common.exceptions import VavError
+from vav.modules.privacy.crypto import decrypt_private, encrypt_private
 from vav.modules.skills_platform.schemas import (
     AppealRequest,
     ExecuteSkillRequest,
@@ -283,7 +284,11 @@ async def create_install_plan(
 
 
 async def create_installation(
-    session: AsyncSession, actor_id: UUID, plan_id: UUID, expected_checksum: str
+    session: AsyncSession,
+    actor_id: UUID,
+    plan_id: UUID,
+    expected_checksum: str,
+    configuration: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     plan = (
         (
@@ -308,7 +313,7 @@ async def create_installation(
             text(
                 "INSERT INTO skill_installations (registered_skill_id,installed_version_id,environment,status,"
                 "configuration_encrypted,granted_permissions,granted_capabilities,installed_by,installed_at) "
-                "VALUES (:skill,:version,:environment,:status,'{}'::jsonb,CAST(:permissions AS jsonb),'[]'::jsonb,"
+                "VALUES (:skill,:version,:environment,:status,CAST(:configuration AS jsonb),CAST(:permissions AS jsonb),'[]'::jsonb,"
                 ":actor,now()) ON CONFLICT (registered_skill_id,environment) DO NOTHING RETURNING *"
             ),
             {
@@ -316,6 +321,7 @@ async def create_installation(
                 "version": plan["target_version_id"],
                 "environment": plan["environment"],
                 "status": status,
+                "configuration": _json({"ciphertext": encrypt_private(configuration or {})}),
                 "permissions": _json(plan["plan"]["permission_changes"]["granted"]),
                 "actor": actor_id,
             },
@@ -616,7 +622,7 @@ async def queue_execution(
                 "version": installation["installed_version_id"],
                 "actor": actor_id,
                 "source": payload.invocation_source,
-                "input": _json(payload.input),
+                "input": _json({"ciphertext": encrypt_private(payload.input)}),
                 "input_hash": input_hash,
                 "key": payload.idempotency_key,
                 "permissions": _json(installation["granted_permissions"]),
@@ -651,6 +657,38 @@ async def list_executions(session: AsyncSession) -> list[dict[str, Any]]:
         )
     ).mappings()
     return [dict(row) for row in rows]
+
+
+async def execution_detail(
+    session: AsyncSession, execution_id: UUID, *, include_sensitive: bool = False
+) -> dict[str, Any]:
+    row = (
+        await session.execute(
+            text(
+                "SELECT e.*,s.skill_name,v.semantic_version FROM skill_executions e "
+                "JOIN registered_skill_versions v ON v.id=e.skill_version_id "
+                "JOIN registered_skills s ON s.id=v.registered_skill_id WHERE e.id=:id"
+            ),
+            {"id": execution_id},
+        )
+    ).first()
+    if row is None:
+        raise VavError(
+            "SKILL_EXECUTION_NOT_FOUND", "Skill execution was not found.", status_code=404
+        )
+    result = _mapping(row)
+    encrypted_input = result.pop("input_encrypted", None)
+    encrypted_output = result.pop("output_encrypted", None)
+    result["input_present"] = encrypted_input is not None
+    result["output_present"] = encrypted_output is not None
+    if include_sensitive:
+        if isinstance(encrypted_input, dict) and isinstance(encrypted_input.get("ciphertext"), str):
+            result["input"] = decrypt_private(encrypted_input["ciphertext"])
+        if isinstance(encrypted_output, dict) and isinstance(
+            encrypted_output.get("ciphertext"), str
+        ):
+            result["output"] = decrypt_private(encrypted_output["ciphertext"])
+    return result
 
 
 async def cancel_execution(

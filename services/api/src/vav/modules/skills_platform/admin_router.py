@@ -48,7 +48,11 @@ async def install(
 ) -> dict[str, Any]:
     return success(
         await service.create_installation(
-            session, principal.user.id, payload.plan_id, payload.expected_plan_checksum
+            session,
+            principal.user.id,
+            payload.plan_id,
+            payload.expected_plan_checksum,
+            payload.configuration,
         ),
         request_id_from_request(request),
     )
@@ -177,6 +181,22 @@ async def executions(
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return success(await service.list_executions(session), request_id_from_request(request))
+
+
+@router.get("/skill-executions/{execution_id}")
+async def execution(
+    execution_id: UUID,
+    request: Request,
+    include_sensitive: bool = False,
+    principal: AuthenticatedPrincipal = Depends(require_permission("skills.executions.read")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    if include_sensitive:
+        principal.require("skills.executions.sensitive.read")
+    return success(
+        await service.execution_detail(session, execution_id, include_sensitive=include_sensitive),
+        request_id_from_request(request),
+    )
 
 
 @router.post("/skill-executions/{execution_id}/cancel")

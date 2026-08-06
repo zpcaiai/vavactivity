@@ -150,6 +150,10 @@ celery_app.conf.update(
             "task": "vav.safety.escalate_cases",
             "schedule": 60.0,
         },
+        "execute-queued-skills": {
+            "task": "vav.skills.execute",
+            "schedule": 1.0,
+        },
     },
 )
 

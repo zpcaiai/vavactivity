@@ -38,6 +38,7 @@ const menu = [
   { path: "/admin/matchmaking-interactions/dashboard", labelKey: "menu.interactions", icon: User },
   { path: "/admin/relationships/dashboard", labelKey: "menu.relationships", icon: User },
   { path: "/admin/system/status", labelKey: "menu.system", icon: Setting },
+  { path: "/admin/skills/dashboard", labelKey: "menu.skills", icon: DataAnalysis },
   { path: "/admin/content/settings", labelKey: "menu.settings", icon: Setting },
   { path: "/admin/access/admins", labelKey: "menu.admins", icon: Lock },
   { path: "/admin/audit/auth", labelKey: "menu.audit", icon: DataAnalysis }
@@ -72,6 +73,7 @@ const visibleMenu = computed(() => {
       "/admin/matchmaking-interactions/dashboard": "matchmaking.analytics.read",
       "/admin/relationships/dashboard": "relationships.analytics.read",
       "/admin/system/status": "system.status.read",
+      "/admin/skills/dashboard": "skills.analytics.read",
       "/admin/content/settings": "content.settings.read",
       "/admin/access/admins": "admins.read",
       "/admin/audit/auth": "audit.read"
