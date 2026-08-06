@@ -51,7 +51,7 @@ module_registry:
   contact_exchange: {owner: matchmaking_and_privacy, status: foundation_in_progress, phase: phase_2}
   relationship_state: {owner: matchmaking_and_privacy, status: foundation_in_progress, phase: phase_2}
   memberships: {owner: backend, status: foundation_in_progress, phase: phase_2}
-  moderation: {owner: trust_and_safety, status: planned, phase: phase_2}
+  moderation: {owner: trust_and_safety, status: foundation_in_progress, phase: phase_2}
 
 phases:
   phase_1:
@@ -84,6 +84,26 @@ phases:
       - moderation
 
 pending_decisions:
+  safety_automated_moderation_provider:
+    owner: platform_and_trust
+    status: undecided
+    value: null
+  safety_classifier_release_thresholds:
+    owner: trust_and_safety
+    status: undecided
+    value: null
+  safety_high_impact_duration_threshold:
+    owner: trust_and_legal
+    status: undecided
+    value: null
+  safety_evidence_retention_policy:
+    owner: privacy_legal_and_trust
+    status: undecided
+    value: null
+  safety_red_team_acceptance_owner:
+    owner: security_and_trust
+    status: undecided
+    value: null
   membership_default_free_plan:
     owner: product_and_platform
     status: undecided

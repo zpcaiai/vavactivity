@@ -68,6 +68,19 @@ class ModerationGateway:
     async def evaluate_pair(
         self, *, actor_user_id: UUID, target_user_id: UUID
     ) -> InteractionDecision:
+        from vav.modules.trust_safety.service import evaluate_gate
+
+        governed = await evaluate_gate(
+            self._session,
+            decision_context="interaction",
+            subject_user_id=actor_user_id,
+            counterpart_user_id=target_user_id,
+        )
+        if not governed.allowed:
+            return InteractionDecision.deny(
+                governed.safe_reason_code or "safety_restricted",
+                restriction_version=governed.restriction_version,
+            )
         settings = get_settings()
         low, high = canonical_pair(actor_user_id, target_user_id)
         try:

@@ -1265,6 +1265,63 @@ class Settings(BaseSettings):
         default=300, ge=0, validation_alias="MEMBERSHIP_PLAN_CACHE_TTL_SECONDS"
     )
 
+    safety_enabled: bool = Field(default=True, validation_alias="SAFETY_ENABLED")
+    safety_fail_closed: bool = Field(default=True, validation_alias="SAFETY_FAIL_CLOSED")
+    safety_default_policy_version: str = Field(
+        default="1.0.0", validation_alias="SAFETY_DEFAULT_POLICY_VERSION"
+    )
+    safety_report_rate_limit_per_hour: int = Field(
+        default=20, ge=1, validation_alias="SAFETY_REPORT_RATE_LIMIT_PER_HOUR"
+    )
+    safety_report_duplicate_window_hours: int = Field(
+        default=24, ge=1, validation_alias="SAFETY_REPORT_DUPLICATE_WINDOW_HOURS"
+    )
+    safety_immediate_report_rate_limit_bypass: bool = Field(
+        default=True, validation_alias="SAFETY_IMMEDIATE_REPORT_RATE_LIMIT_BYPASS"
+    )
+    safety_block_propagation_synchronous: bool = Field(
+        default=True, validation_alias="SAFETY_BLOCK_PROPAGATION_SYNCHRONOUS"
+    )
+    safety_block_revoke_contact_grants: bool = Field(
+        default=True, validation_alias="SAFETY_BLOCK_REVOKE_CONTACT_GRANTS"
+    )
+    safety_block_freeze_relationship: bool = Field(
+        default=True, validation_alias="SAFETY_BLOCK_FREEZE_RELATIONSHIP"
+    )
+    safety_auto_permanent_ban_enabled: bool = Field(
+        default=False, validation_alias="SAFETY_AUTO_PERMANENT_BAN_ENABLED"
+    )
+    safety_case_critical_sla_minutes: int = Field(
+        default=15, ge=1, validation_alias="SAFETY_CASE_CRITICAL_SLA_MINUTES"
+    )
+    safety_case_urgent_sla_hours: int = Field(
+        default=2, ge=1, validation_alias="SAFETY_CASE_URGENT_SLA_HOURS"
+    )
+    safety_case_high_sla_hours: int = Field(
+        default=12, ge=1, validation_alias="SAFETY_CASE_HIGH_SLA_HOURS"
+    )
+    safety_case_normal_sla_hours: int = Field(
+        default=72, ge=1, validation_alias="SAFETY_CASE_NORMAL_SLA_HOURS"
+    )
+    safety_high_impact_second_approval_required: bool = Field(
+        default=True, validation_alias="SAFETY_HIGH_IMPACT_SECOND_APPROVAL_REQUIRED"
+    )
+    safety_appeal_default_due_days: int = Field(
+        default=14, ge=1, validation_alias="SAFETY_APPEAL_DEFAULT_DUE_DAYS"
+    )
+    safety_appeal_independent_review_required: bool = Field(
+        default=True, validation_alias="SAFETY_APPEAL_INDEPENDENT_REVIEW_REQUIRED"
+    )
+    safety_red_team_required_for_release: bool = Field(
+        default=True, validation_alias="SAFETY_RED_TEAM_REQUIRED_FOR_RELEASE"
+    )
+    safety_red_team_require_zero_block_bypass: bool = Field(
+        default=True, validation_alias="SAFETY_RED_TEAM_REQUIRE_ZERO_BLOCK_BYPASS"
+    )
+    safety_red_team_require_zero_contact_leakage: bool = Field(
+        default=True, validation_alias="SAFETY_RED_TEAM_REQUIRE_ZERO_CONTACT_LEAKAGE"
+    )
+
     @property
     def dating_photo_allowed_type_set(self) -> frozenset[str]:
         return frozenset(
@@ -1391,6 +1448,24 @@ class Settings(BaseSettings):
             raise ValueError("repeat trials require an explicit anti-abuse policy")
         if not self.membership_manual_grant_approval_required:
             raise ValueError("manual membership grants require approval")
+        if not self.safety_fail_closed:
+            raise ValueError("Trust & Safety decisions must fail closed")
+        if not self.safety_block_propagation_synchronous:
+            raise ValueError("user blocks must propagate synchronously")
+        if not self.safety_block_revoke_contact_grants:
+            raise ValueError("a user block must revoke contact grants")
+        if not self.safety_block_freeze_relationship:
+            raise ValueError("a user block must freeze the relationship journey")
+        if self.safety_auto_permanent_ban_enabled:
+            raise ValueError("automated systems cannot permanently ban members")
+        if not self.safety_high_impact_second_approval_required:
+            raise ValueError("high-impact safety restrictions require second approval")
+        if not self.safety_appeal_independent_review_required:
+            raise ValueError("safety appeals require independent review")
+        if not self.safety_red_team_require_zero_block_bypass:
+            raise ValueError("release requires zero block bypass")
+        if not self.safety_red_team_require_zero_contact_leakage:
+            raise ValueError("release requires zero contact leakage")
         if (
             self.environment == "production"
             and self.recommendation_experiments_enabled
@@ -1421,6 +1496,7 @@ class Settings(BaseSettings):
                 "dating_profile": self.dating_profile_enabled,
                 "recommendations": self.recommendation_enabled,
                 "memberships": self.membership_enabled,
+                "trust_safety": self.safety_enabled,
             },
         }
 

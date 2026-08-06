@@ -139,6 +139,17 @@ celery_app.conf.update(
             )
             * 60.0,
         },
+        "expire-safety-restrictions": {
+            "task": "vav.safety.expire_restrictions",
+            "schedule": float(
+                os.getenv("SAFETY_RESTRICTION_EXPIRY_JOB_INTERVAL_MINUTES", "10")
+            )
+            * 60.0,
+        },
+        "escalate-overdue-safety-cases": {
+            "task": "vav.safety.escalate_cases",
+            "schedule": 60.0,
+        },
     },
 )
 

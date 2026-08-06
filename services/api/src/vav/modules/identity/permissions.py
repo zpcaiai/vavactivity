@@ -495,6 +495,42 @@ MEMBERSHIP_PERMISSIONS = {
     "memberships.audit.read",
 }
 
+SAFETY_PERMISSIONS = {
+    "safety.reports.read",
+    "safety.reports.sensitive.read",
+    "safety.reports.triage",
+    "safety.cases.read",
+    "safety.cases.sensitive.read",
+    "safety.cases.manage",
+    "safety.cases.assign",
+    "safety.cases.investigate",
+    "safety.cases.decide",
+    "safety.cases.approve_high_impact",
+    "safety.cases.close",
+    "safety.evidence.read",
+    "safety.evidence.highly_restricted.read",
+    "safety.evidence.collect",
+    "safety.moderation.read",
+    "safety.moderation.decide",
+    "safety.restrictions.read",
+    "safety.restrictions.create",
+    "safety.restrictions.lift",
+    "safety.restrictions.high_impact.approve",
+    "safety.appeals.read",
+    "safety.appeals.assign",
+    "safety.appeals.decide",
+    "safety.rules.read",
+    "safety.rules.create",
+    "safety.rules.update",
+    "safety.rules.activate",
+    "safety.rules.rollback",
+    "safety.red_team.read",
+    "safety.red_team.run",
+    "safety.red_team.approve",
+    "safety.analytics.read",
+    "safety.audit.read",
+}
+
 ALL_PERMISSIONS = (
     IDENTITY_PERMISSIONS
     | CMS_PERMISSIONS
@@ -512,6 +548,7 @@ ALL_PERMISSIONS = (
     | MATCHMAKING_INTERACTION_PERMISSIONS
     | RELATIONSHIP_PERMISSIONS
     | MEMBERSHIP_PERMISSIONS
+    | SAFETY_PERMISSIONS
 )
 
 ROLE_PERMISSIONS: dict[str, set[str]] = {
@@ -936,6 +973,46 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "memberships.changes.read",
         "memberships.analytics.read",
         "memberships.audit.read",
+    },
+    "safety_triage_operator": {
+        "safety.reports.read",
+        "safety.reports.triage",
+        "safety.cases.read",
+        "safety.cases.assign",
+        "safety.moderation.read",
+        "safety.analytics.read",
+        "safety.audit.read",
+    },
+    "safety_investigator": SAFETY_PERMISSIONS
+    - {
+        "safety.rules.create",
+        "safety.rules.update",
+        "safety.rules.activate",
+        "safety.rules.rollback",
+        "safety.appeals.decide",
+        "safety.red_team.approve",
+        "safety.restrictions.high_impact.approve",
+    },
+    "safety_appeal_reviewer": {
+        "safety.cases.read",
+        "safety.evidence.read",
+        "safety.restrictions.read",
+        "safety.restrictions.lift",
+        "safety.appeals.read",
+        "safety.appeals.assign",
+        "safety.appeals.decide",
+        "safety.audit.read",
+    },
+    "safety_rule_manager": {
+        "safety.rules.read",
+        "safety.rules.create",
+        "safety.rules.update",
+        "safety.rules.activate",
+        "safety.rules.rollback",
+        "safety.red_team.read",
+        "safety.red_team.run",
+        "safety.red_team.approve",
+        "safety.audit.read",
     },
     "analyst": {"audit.read", "catalog.audit.read"},
     "support_agent": {"users.read", "catalog.products.read"},

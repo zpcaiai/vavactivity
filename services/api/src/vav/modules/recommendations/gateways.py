@@ -52,6 +52,24 @@ class ModerationGateway:
     async def evaluate_recommendation_pair(
         self, *, viewer_user_id: UUID, candidate_user_id: UUID
     ) -> RecommendationSafetyDecision:
+        from vav.modules.trust_safety.service import evaluate_gate
+
+        governed = await evaluate_gate(
+            self._session,
+            decision_context="recommendation",
+            subject_user_id=viewer_user_id,
+            counterpart_user_id=candidate_user_id,
+        )
+        if not governed.allowed:
+            return RecommendationSafetyDecision(
+                allowed=False,
+                reason_code=(
+                    "moderation_unavailable"
+                    if governed.safe_reason_code == "safety_unavailable"
+                    else governed.safe_reason_code
+                ),
+                restriction_version=governed.restriction_version,
+            )
         settings = get_settings()
         low, high = canonical_pair(viewer_user_id, candidate_user_id)
         try:

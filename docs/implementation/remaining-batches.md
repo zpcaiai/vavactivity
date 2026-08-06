@@ -26,9 +26,11 @@ commands):
 **543 is the real backend baseline.** Any future report that claims a larger number without a
 matching test count is wrong.
 
-Batches 1–16 are committed. Batch 17 implementation is in progress with local static gates
-passing; its fresh-database CI and acceptance evidence remain pending. Batches 18–32 have not
-started.
+Batches 1–17 are committed. Batch 17 passed the full fresh-PostgreSQL suite (580 tests),
+single-head migration gate and dependent Neon migration in run `31025708244`. Batch 18 is
+implemented locally with 605 full-backend tests, 25 Trust & Safety tests, both frontend builds and
+6 live browser scenarios passing; its remote Backend/Neon gate is pending push. Batches 19–32
+remain pending.
 
 ## The roadmap is 32 batches, not 33
 

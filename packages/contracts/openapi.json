@@ -65,6 +65,25 @@
         "title": "AccessDecisionRequest",
         "type": "object"
       },
+      "AccountRestrictionType": {
+        "enum": [
+          "profile_hidden",
+          "profile_edit_review_required",
+          "recommendation_disabled",
+          "like_disabled",
+          "invitation_disabled",
+          "contact_exchange_disabled",
+          "relationship_interaction_frozen",
+          "activity_registration_disabled",
+          "ai_write_actions_disabled",
+          "communication_rate_limited",
+          "reverification_required",
+          "account_temporarily_suspended",
+          "account_permanently_disabled"
+        ],
+        "title": "AccountRestrictionType",
+        "type": "string"
+      },
       "Action": {
         "properties": {
           "href": {
@@ -699,6 +718,33 @@
         "title": "AdminInvitationRequest",
         "type": "object"
       },
+      "AdminReasonRequest": {
+        "properties": {
+          "expected_version": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
+          },
+          "reason": {
+            "maxLength": 5000,
+            "minLength": 3,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "AdminReasonRequest",
+        "type": "object"
+      },
       "AdminSafetyRequest": {
         "properties": {
           "purpose": {
@@ -872,6 +918,106 @@
           "content"
         ],
         "title": "AiMemoryUpdateRequest",
+        "type": "object"
+      },
+      "AppealCreateRequest": {
+        "properties": {
+          "decision_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Id"
+          },
+          "evidence_manifest": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "maxItems": 20,
+            "title": "Evidence Manifest",
+            "type": "array"
+          },
+          "reason": {
+            "maxLength": 5000,
+            "minLength": 10,
+            "title": "Reason",
+            "type": "string"
+          },
+          "restriction_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Restriction Id"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "AppealCreateRequest",
+        "type": "object"
+      },
+      "AppealDecisionRequest": {
+        "properties": {
+          "internal_review": {
+            "maxLength": 5000,
+            "minLength": 3,
+            "title": "Internal Review",
+            "type": "string"
+          },
+          "modified_ends_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modified Ends At"
+          },
+          "modified_scope_definition": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modified Scope Definition"
+          },
+          "outcome": {
+            "pattern": "^(upheld|modified|overturned|ineligible)$",
+            "title": "Outcome",
+            "type": "string"
+          },
+          "outcome_message": {
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "Outcome Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "outcome",
+          "outcome_message",
+          "internal_review"
+        ],
+        "title": "AppealDecisionRequest",
         "type": "object"
       },
       "AppointmentRequest": {
@@ -1346,6 +1492,63 @@
         "title": "BatchRequest",
         "type": "object"
       },
+      "BehaviorAggregateRequest": {
+        "properties": {
+          "aggregation_version": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Aggregation Version",
+            "type": "string"
+          },
+          "distinct_target_count": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Distinct Target Count",
+            "type": "integer"
+          },
+          "event_count": {
+            "minimum": 0.0,
+            "title": "Event Count",
+            "type": "integer"
+          },
+          "metric_code": {
+            "pattern": "^(like_rate|invitation_rate|repeated_contact|post_decline_contact|post_ending_contact|block_evasion|bulk_contact)$",
+            "title": "Metric Code",
+            "type": "string"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          },
+          "window_ends_at": {
+            "format": "date-time",
+            "title": "Window Ends At",
+            "type": "string"
+          },
+          "window_starts_at": {
+            "format": "date-time",
+            "title": "Window Starts At",
+            "type": "string"
+          },
+          "window_type": {
+            "pattern": "^(minute|hour|day|rolling_24h)$",
+            "title": "Window Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "metric_code",
+          "window_type",
+          "window_starts_at",
+          "window_ends_at",
+          "event_count",
+          "aggregation_version"
+        ],
+        "title": "BehaviorAggregateRequest",
+        "type": "object"
+      },
       "BenefitCreateRequest": {
         "properties": {
           "benefit_code": {
@@ -1401,6 +1604,36 @@
         ],
         "title": "BillingType",
         "type": "string"
+      },
+      "BlockCreateRequest": {
+        "properties": {
+          "private_reason": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Private Reason"
+          },
+          "reason_code": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Code"
+          }
+        },
+        "title": "BlockCreateRequest",
+        "type": "object"
       },
       "Body_upload_document_api_v1_admin_knowledge_sources__source_id__upload_post": {
         "properties": {
@@ -1748,6 +1981,119 @@
           }
         },
         "title": "CartOwnerRequest",
+        "type": "object"
+      },
+      "CaseAssignmentRequest": {
+        "properties": {
+          "assigned_team": {
+            "maxLength": 128,
+            "minLength": 2,
+            "title": "Assigned Team",
+            "type": "string"
+          },
+          "assigned_to": {
+            "format": "uuid",
+            "title": "Assigned To",
+            "type": "string"
+          },
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "assigned_to",
+          "assigned_team",
+          "expected_version"
+        ],
+        "title": "CaseAssignmentRequest",
+        "type": "object"
+      },
+      "CaseDecisionRequest": {
+        "properties": {
+          "appeal_allowed": {
+            "default": true,
+            "title": "Appeal Allowed",
+            "type": "boolean"
+          },
+          "decision_scope": {
+            "additionalProperties": true,
+            "title": "Decision Scope",
+            "type": "object"
+          },
+          "decision_type": {
+            "maxLength": 64,
+            "minLength": 3,
+            "title": "Decision Type",
+            "type": "string"
+          },
+          "evidence_item_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 100,
+            "title": "Evidence Item Ids",
+            "type": "array"
+          },
+          "internal_rationale": {
+            "maxLength": 5000,
+            "minLength": 3,
+            "title": "Internal Rationale",
+            "type": "string"
+          },
+          "reason_codes": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Reason Codes",
+            "type": "array"
+          },
+          "restriction_manifest": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "maxItems": 20,
+            "title": "Restriction Manifest",
+            "type": "array"
+          },
+          "user_message": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Message"
+          }
+        },
+        "required": [
+          "decision_type",
+          "reason_codes",
+          "internal_rationale"
+        ],
+        "title": "CaseDecisionRequest",
+        "type": "object"
+      },
+      "CaseTransitionRequest": {
+        "properties": {
+          "target_status": {
+            "pattern": "^(triaged|assigned|investigating|pending_action|resolved|closed|reopened)$",
+            "title": "Target Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_status"
+        ],
+        "title": "CaseTransitionRequest",
         "type": "object"
       },
       "CategoryCreateRequest": {
@@ -3305,6 +3651,61 @@
         "title": "CreateConversationRequest",
         "type": "object"
       },
+      "DecisionRequest": {
+        "properties": {
+          "context": {
+            "additionalProperties": true,
+            "title": "Context",
+            "type": "object"
+          },
+          "counterpart_user_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Counterpart User Id"
+          },
+          "subject_user_id": {
+            "format": "uuid",
+            "title": "Subject User Id",
+            "type": "string"
+          },
+          "target_reference_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Reference Id"
+          },
+          "target_type": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Type"
+          }
+        },
+        "required": [
+          "subject_user_id"
+        ],
+        "title": "DecisionRequest",
+        "type": "object"
+      },
       "DeclineInvitationRequest": {
         "properties": {
           "expected_invitation_version": {
@@ -3604,6 +4005,27 @@
           "strategy_id"
         ],
         "title": "EvaluationRunRequest",
+        "type": "object"
+      },
+      "EvidenceAccessRequest": {
+        "properties": {
+          "access_type": {
+            "default": "view",
+            "pattern": "^(view|download|verify)$",
+            "title": "Access Type",
+            "type": "string"
+          },
+          "purpose_code": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Purpose Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "purpose_code"
+        ],
+        "title": "EvidenceAccessRequest",
         "type": "object"
       },
       "ExecuteConfirmedToolRequest": {
@@ -4075,6 +4497,92 @@
           "form_schema"
         ],
         "title": "FormUpsertRequest",
+        "type": "object"
+      },
+      "FraudSignalRequest": {
+        "properties": {
+          "confidence_basis_points": {
+            "anyOf": [
+              {
+                "maximum": 10000.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence Basis Points"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "safe_signal_context": {
+            "additionalProperties": true,
+            "title": "Safe Signal Context",
+            "type": "object"
+          },
+          "severity": {
+            "pattern": "^(low|moderate|high|critical)$",
+            "title": "Severity",
+            "type": "string"
+          },
+          "signal_code": {
+            "pattern": "^(money_request|gift_card|crypto_investment|emergency_loan|external_payment|staff_impersonation|mentor_impersonation|duplicate_narrative|duplicate_photo_hash|bulk_contact|contact_change|account_takeover|payment_dispute)$",
+            "title": "Signal Code",
+            "type": "string"
+          },
+          "signal_source": {
+            "pattern": "^(moderation|interaction|identity|commerce|manual_review)$",
+            "title": "Signal Source",
+            "type": "string"
+          },
+          "source_reference_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference Id"
+          },
+          "source_reference_type": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference Type"
+          },
+          "subject_user_id": {
+            "format": "uuid",
+            "title": "Subject User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject_user_id",
+          "signal_code",
+          "signal_source",
+          "severity"
+        ],
+        "title": "FraudSignalRequest",
         "type": "object"
       },
       "FulfillmentType": {
@@ -5982,6 +6490,116 @@
         },
         "title": "MilestoneUpdateRequest",
         "type": "object"
+      },
+      "ModerationCreateRequest": {
+        "properties": {
+          "content": {
+            "maxLength": 20000,
+            "minLength": 1,
+            "title": "Content",
+            "type": "string"
+          },
+          "priority": {
+            "default": "normal",
+            "pattern": "^(low|normal|high|urgent|critical)$",
+            "title": "Priority",
+            "type": "string"
+          },
+          "target_reference_id": {
+            "format": "uuid",
+            "title": "Target Reference Id",
+            "type": "string"
+          },
+          "target_type": {
+            "$ref": "#/components/schemas/ModerationTargetType"
+          },
+          "target_version": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Target Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_type",
+          "target_reference_id",
+          "target_version",
+          "content"
+        ],
+        "title": "ModerationCreateRequest",
+        "type": "object"
+      },
+      "ModerationDecisionRequest": {
+        "properties": {
+          "category_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Category Codes",
+            "type": "array"
+          },
+          "decision": {
+            "pattern": "^(approve|reject|limit|remove|escalate)$",
+            "title": "Decision",
+            "type": "string"
+          },
+          "internal_note": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Internal Note"
+          },
+          "reason_code": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Code"
+          },
+          "user_message": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Message"
+          }
+        },
+        "required": [
+          "decision"
+        ],
+        "title": "ModerationDecisionRequest",
+        "type": "object"
+      },
+      "ModerationTargetType": {
+        "enum": [
+          "dating_profile_field",
+          "dating_profile_photo",
+          "dating_profile_narrative",
+          "activity_content",
+          "invitation_message",
+          "relationship_shared_content",
+          "testimonial",
+          "ai_response",
+          "campaign_content"
+        ],
+        "title": "ModerationTargetType",
+        "type": "string"
       },
       "ModuleCreateRequest": {
         "properties": {
@@ -9018,6 +9636,53 @@
         "title": "RecordCreateRequest",
         "type": "object"
       },
+      "RedTeamRunCompleteRequest": {
+        "properties": {
+          "block_bypass_count": {
+            "minimum": 0.0,
+            "title": "Block Bypass Count",
+            "type": "integer"
+          },
+          "contact_leakage_count": {
+            "minimum": 0.0,
+            "title": "Contact Leakage Count",
+            "type": "integer"
+          },
+          "result_manifest": {
+            "additionalProperties": true,
+            "title": "Result Manifest",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result_manifest",
+          "block_bypass_count",
+          "contact_leakage_count"
+        ],
+        "title": "RedTeamRunCompleteRequest",
+        "type": "object"
+      },
+      "RedTeamRunCreateRequest": {
+        "properties": {
+          "fixture_manifest": {
+            "additionalProperties": true,
+            "title": "Fixture Manifest",
+            "type": "object"
+          },
+          "policy_version": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Policy Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "policy_version",
+          "fixture_manifest"
+        ],
+        "title": "RedTeamRunCreateRequest",
+        "type": "object"
+      },
       "ReferralActionRequest": {
         "properties": {
           "action": {
@@ -9325,6 +9990,95 @@
         "title": "ReminderRequest",
         "type": "object"
       },
+      "ReportCreateRequest": {
+        "properties": {
+          "block_user": {
+            "default": false,
+            "title": "Block User",
+            "type": "boolean"
+          },
+          "category": {
+            "$ref": "#/components/schemas/SafetyReportCategory"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "idempotency_key": {
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "immediate_danger": {
+            "default": false,
+            "title": "Immediate Danger",
+            "type": "boolean"
+          },
+          "reported_user_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reported User Id"
+          },
+          "severity_claim": {
+            "anyOf": [
+              {
+                "pattern": "^(low|moderate|high|critical)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Severity Claim"
+          },
+          "source_context": {
+            "additionalProperties": true,
+            "title": "Source Context",
+            "type": "object"
+          },
+          "target_reference_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Reference Id"
+          },
+          "target_type": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Target Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_type",
+          "category",
+          "idempotency_key"
+        ],
+        "title": "ReportCreateRequest",
+        "type": "object"
+      },
       "RestoreRequest": {
         "properties": {
           "reason": {
@@ -9341,6 +10095,101 @@
           }
         },
         "title": "RestoreRequest",
+        "type": "object"
+      },
+      "RestrictionCreateRequest": {
+        "properties": {
+          "appeal_allowed": {
+            "default": true,
+            "title": "Appeal Allowed",
+            "type": "boolean"
+          },
+          "ends_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends At"
+          },
+          "internal_reason": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Internal Reason"
+          },
+          "reason_code": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "restriction_type": {
+            "$ref": "#/components/schemas/AccountRestrictionType"
+          },
+          "scope_definition": {
+            "additionalProperties": true,
+            "title": "Scope Definition",
+            "type": "object"
+          },
+          "source_reference_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference Id"
+          },
+          "source_type": {
+            "pattern": "^(case|rule|moderation|manual)$",
+            "title": "Source Type",
+            "type": "string"
+          },
+          "starts_at": {
+            "format": "date-time",
+            "title": "Starts At",
+            "type": "string"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          },
+          "user_message": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Message"
+          }
+        },
+        "required": [
+          "user_id",
+          "restriction_type",
+          "source_type",
+          "reason_code",
+          "starts_at"
+        ],
+        "title": "RestrictionCreateRequest",
         "type": "object"
       },
       "RestrictionRequest": {
@@ -9859,6 +10708,81 @@
         "title": "RoleChangeRequest",
         "type": "object"
       },
+      "RuleCreateRequest": {
+        "properties": {
+          "action_definition": {
+            "additionalProperties": true,
+            "title": "Action Definition",
+            "type": "object"
+          },
+          "applicable_modules": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Applicable Modules",
+            "type": "array"
+          },
+          "category": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Category",
+            "type": "string"
+          },
+          "condition_definition": {
+            "additionalProperties": true,
+            "title": "Condition Definition",
+            "type": "object"
+          },
+          "rollout_basis_points": {
+            "default": 10000,
+            "maximum": 10000.0,
+            "minimum": 0.0,
+            "title": "Rollout Basis Points",
+            "type": "integer"
+          },
+          "rule_code": {
+            "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$",
+            "title": "Rule Code",
+            "type": "string"
+          },
+          "rule_type": {
+            "pattern": "^(deterministic|rate|sequence|content_classifier|aggregate|manual_flag)$",
+            "title": "Rule Type",
+            "type": "string"
+          },
+          "score_delta": {
+            "default": 0,
+            "maximum": 10000.0,
+            "minimum": -10000.0,
+            "title": "Score Delta",
+            "type": "integer"
+          },
+          "semantic_version": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Semantic Version",
+            "type": "string"
+          },
+          "severity": {
+            "pattern": "^(low|moderate|high|critical)$",
+            "title": "Severity",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rule_code",
+          "semantic_version",
+          "category",
+          "rule_type",
+          "condition_definition",
+          "action_definition",
+          "severity",
+          "applicable_modules"
+        ],
+        "title": "RuleCreateRequest",
+        "type": "object"
+      },
       "SafetyReferralRequest": {
         "properties": {
           "category": {
@@ -9890,6 +10814,29 @@
         ],
         "title": "SafetyReferralRequest",
         "type": "object"
+      },
+      "SafetyReportCategory": {
+        "enum": [
+          "harassment",
+          "threat",
+          "abuse",
+          "coercive_control",
+          "stalking",
+          "hate_or_degrading_content",
+          "sexual_content",
+          "impersonation",
+          "fraud_or_scam",
+          "money_request",
+          "off_platform_payment",
+          "spam",
+          "false_profile",
+          "underage_concern",
+          "privacy_violation",
+          "safety_concern",
+          "other"
+        ],
+        "title": "SafetyReportCategory",
+        "type": "string"
       },
       "ScheduleRequest": {
         "properties": {
@@ -11582,6 +12529,57 @@
           "checksum_sha256"
         ],
         "title": "UploadCreateRequest",
+        "type": "object"
+      },
+      "UserEvidenceUploadRequest": {
+        "properties": {
+          "collection_reason": {
+            "default": "reporter_submission",
+            "maxLength": 128,
+            "title": "Collection Reason",
+            "type": "string"
+          },
+          "content": {
+            "maxLength": 20000,
+            "minLength": 1,
+            "title": "Content",
+            "type": "string"
+          },
+          "evidence_type": {
+            "pattern": "^(text|image_metadata|document_metadata|link)$",
+            "title": "Evidence Type",
+            "type": "string"
+          },
+          "filename": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filename"
+          },
+          "media_type": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Media Type"
+          }
+        },
+        "required": [
+          "evidence_type",
+          "content"
+        ],
+        "title": "UserEvidenceUploadRequest",
         "type": "object"
       },
       "ValidationError": {
@@ -20041,6 +21039,324 @@
         "summary": "Timeline",
         "tags": [
           "relationships"
+        ]
+      }
+    },
+    "/api/v1/account/safety/appeals": {
+      "get": {
+        "operationId": "my_appeals_api_v1_account_safety_appeals_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response My Appeals Api V1 Account Safety Appeals Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "My Appeals",
+        "tags": [
+          "trust-safety"
+        ]
+      },
+      "post": {
+        "operationId": "submit_appeal_api_v1_account_safety_appeals_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppealCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Submit Appeal Api V1 Account Safety Appeals Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Submit Appeal",
+        "tags": [
+          "trust-safety"
+        ]
+      }
+    },
+    "/api/v1/account/safety/blocks": {
+      "get": {
+        "operationId": "my_blocks_api_v1_account_safety_blocks_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response My Blocks Api V1 Account Safety Blocks Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "My Blocks",
+        "tags": [
+          "trust-safety"
+        ]
+      }
+    },
+    "/api/v1/account/safety/reports": {
+      "get": {
+        "operationId": "my_reports_api_v1_account_safety_reports_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response My Reports Api V1 Account Safety Reports Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "My Reports",
+        "tags": [
+          "trust-safety"
+        ]
+      }
+    },
+    "/api/v1/account/safety/reports/{report_id}": {
+      "get": {
+        "operationId": "my_report_api_v1_account_safety_reports__report_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "report_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Report Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response My Report Api V1 Account Safety Reports  Report Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "My Report",
+        "tags": [
+          "trust-safety"
+        ]
+      }
+    },
+    "/api/v1/account/safety/reports/{report_id}/evidence": {
+      "post": {
+        "operationId": "upload_report_evidence_api_v1_account_safety_reports__report_id__evidence_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "report_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Report Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserEvidenceUploadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Upload Report Evidence Api V1 Account Safety Reports  Report Id  Evidence Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Upload Report Evidence",
+        "tags": [
+          "trust-safety"
+        ]
+      }
+    },
+    "/api/v1/account/safety/reports/{report_id}/withdraw": {
+      "post": {
+        "operationId": "withdraw_report_api_v1_account_safety_reports__report_id__withdraw_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "report_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Report Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Withdraw Report Api V1 Account Safety Reports  Report Id  Withdraw Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Withdraw Report",
+        "tags": [
+          "trust-safety"
+        ]
+      }
+    },
+    "/api/v1/account/safety/restrictions": {
+      "get": {
+        "operationId": "my_restrictions_api_v1_account_safety_restrictions_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response My Restrictions Api V1 Account Safety Restrictions Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "My Restrictions",
+        "tags": [
+          "trust-safety"
         ]
       }
     },
@@ -41491,6 +42807,1322 @@
         ]
       }
     },
+    "/api/v1/admin/trust-safety/appeals": {
+      "get": {
+        "operationId": "appeal_queue_api_v1_admin_trust_safety_appeals_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Appeal Queue Api V1 Admin Trust Safety Appeals Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Appeal Queue",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/appeals/{appeal_id}/decision": {
+      "post": {
+        "operationId": "decide_appeal_api_v1_admin_trust_safety_appeals__appeal_id__decision_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "appeal_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Appeal Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppealDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Decide Appeal Api V1 Admin Trust Safety Appeals  Appeal Id  Decision Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Decide Appeal",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/audit": {
+      "get": {
+        "operationId": "audit_queue_api_v1_admin_trust_safety_audit_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Audit Queue Api V1 Admin Trust Safety Audit Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Audit Queue",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/cases": {
+      "get": {
+        "operationId": "case_queue_api_v1_admin_trust_safety_cases_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Case Queue Api V1 Admin Trust Safety Cases Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Case Queue",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/cases/{case_id}": {
+      "get": {
+        "operationId": "case_detail_api_v1_admin_trust_safety_cases__case_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Case Detail Api V1 Admin Trust Safety Cases  Case Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Case Detail",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/cases/{case_id}/assign": {
+      "post": {
+        "operationId": "assign_case_api_v1_admin_trust_safety_cases__case_id__assign_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaseAssignmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Assign Case Api V1 Admin Trust Safety Cases  Case Id  Assign Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Assign Case",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/cases/{case_id}/decisions": {
+      "post": {
+        "operationId": "create_case_decision_api_v1_admin_trust_safety_cases__case_id__decisions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaseDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Case Decision Api V1 Admin Trust Safety Cases  Case Id  Decisions Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Case Decision",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/cases/{case_id}/decisions/{decision_id}/approve": {
+      "post": {
+        "operationId": "approve_case_decision_api_v1_admin_trust_safety_cases__case_id__decisions__decision_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "decision_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Decision Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Case Decision Api V1 Admin Trust Safety Cases  Case Id  Decisions  Decision Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Case Decision",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/cases/{case_id}/transition": {
+      "post": {
+        "operationId": "transition_case_api_v1_admin_trust_safety_cases__case_id__transition_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaseTransitionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Transition Case Api V1 Admin Trust Safety Cases  Case Id  Transition Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Transition Case",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/evidence/{evidence_id}/access": {
+      "post": {
+        "operationId": "access_evidence_api_v1_admin_trust_safety_evidence__evidence_id__access_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "evidence_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Evidence Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvidenceAccessRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Access Evidence Api V1 Admin Trust Safety Evidence  Evidence Id  Access Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Access Evidence",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/fraud": {
+      "get": {
+        "operationId": "fraud_queue_api_v1_admin_trust_safety_fraud_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Fraud Queue Api V1 Admin Trust Safety Fraud Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Fraud Queue",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/fraud/signals": {
+      "post": {
+        "operationId": "create_fraud_signal_api_v1_admin_trust_safety_fraud_signals_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FraudSignalRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Fraud Signal Api V1 Admin Trust Safety Fraud Signals Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Fraud Signal",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/harassment": {
+      "get": {
+        "operationId": "harassment_queue_api_v1_admin_trust_safety_harassment_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Harassment Queue Api V1 Admin Trust Safety Harassment Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Harassment Queue",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/harassment/aggregates": {
+      "post": {
+        "operationId": "upsert_behavior_aggregate_api_v1_admin_trust_safety_harassment_aggregates_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BehaviorAggregateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Upsert Behavior Aggregate Api V1 Admin Trust Safety Harassment Aggregates Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Upsert Behavior Aggregate",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/moderation": {
+      "get": {
+        "operationId": "moderation_queue_api_v1_admin_trust_safety_moderation_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Moderation Queue Api V1 Admin Trust Safety Moderation Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Moderation Queue",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/moderation/{task_id}/decisions": {
+      "post": {
+        "operationId": "decide_moderation_api_v1_admin_trust_safety_moderation__task_id__decisions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Task Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModerationDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Decide Moderation Api V1 Admin Trust Safety Moderation  Task Id  Decisions Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Decide Moderation",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/red-team": {
+      "get": {
+        "operationId": "red_team_queue_api_v1_admin_trust_safety_red_team_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Red Team Queue Api V1 Admin Trust Safety Red Team Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Red Team Queue",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/red-team/runs": {
+      "post": {
+        "operationId": "create_red_team_run_api_v1_admin_trust_safety_red_team_runs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RedTeamRunCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Red Team Run Api V1 Admin Trust Safety Red Team Runs Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Red Team Run",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/red-team/runs/{run_id}/approve": {
+      "post": {
+        "operationId": "approve_red_team_run_api_v1_admin_trust_safety_red_team_runs__run_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Red Team Run Api V1 Admin Trust Safety Red Team Runs  Run Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Red Team Run",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/red-team/runs/{run_id}/complete": {
+      "post": {
+        "operationId": "complete_red_team_run_api_v1_admin_trust_safety_red_team_runs__run_id__complete_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RedTeamRunCompleteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Complete Red Team Run Api V1 Admin Trust Safety Red Team Runs  Run Id  Complete Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Complete Red Team Run",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/reports": {
+      "get": {
+        "operationId": "report_queue_api_v1_admin_trust_safety_reports_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Report Queue Api V1 Admin Trust Safety Reports Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Report Queue",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/restrictions": {
+      "get": {
+        "operationId": "restriction_queue_api_v1_admin_trust_safety_restrictions_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Restriction Queue Api V1 Admin Trust Safety Restrictions Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Restriction Queue",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_restriction_api_v1_admin_trust_safety_restrictions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RestrictionCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Restriction Api V1 Admin Trust Safety Restrictions Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Restriction",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/restrictions/{restriction_id}/approve": {
+      "post": {
+        "operationId": "approve_restriction_api_v1_admin_trust_safety_restrictions__restriction_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restriction_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restriction Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Restriction Api V1 Admin Trust Safety Restrictions  Restriction Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Restriction",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/restrictions/{restriction_id}/lift": {
+      "post": {
+        "operationId": "lift_restriction_api_v1_admin_trust_safety_restrictions__restriction_id__lift_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restriction_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Restriction Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Lift Restriction Api V1 Admin Trust Safety Restrictions  Restriction Id  Lift Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lift Restriction",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/rules": {
+      "get": {
+        "operationId": "rule_queue_api_v1_admin_trust_safety_rules_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Rule Queue Api V1 Admin Trust Safety Rules Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rule Queue",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_rule_api_v1_admin_trust_safety_rules_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Rule Api V1 Admin Trust Safety Rules Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Rule",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/rules/{rule_id}/activate": {
+      "post": {
+        "operationId": "activate_rule_api_v1_admin_trust_safety_rules__rule_id__activate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rule_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Rule Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Activate Rule Api V1 Admin Trust Safety Rules  Rule Id  Activate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Activate Rule",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/trust-safety/rules/{rule_id}/rollback": {
+      "post": {
+        "operationId": "rollback_rule_api_v1_admin_trust_safety_rules__rule_id__rollback_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rule_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Rule Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Rollback Rule Api V1 Admin Trust Safety Rules  Rule Id  Rollback Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rollback Rule",
+        "tags": [
+          "trust-safety-admin"
+        ]
+      }
+    },
     "/api/v1/admin/users": {
       "get": {
         "operationId": "list_users_api_v1_admin_users_get",
@@ -44372,6 +47004,113 @@
         ]
       }
     },
+    "/api/v1/internal/trust-safety/decisions/{decision_context}": {
+      "post": {
+        "operationId": "safety_decision_api_v1_internal_trust_safety_decisions__decision_context__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "decision_context",
+            "required": true,
+            "schema": {
+              "title": "Decision Context",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Safety Decision Api V1 Internal Trust Safety Decisions  Decision Context  Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Safety Decision",
+        "tags": [
+          "trust-safety"
+        ]
+      }
+    },
+    "/api/v1/internal/trust-safety/moderation-tasks": {
+      "post": {
+        "operationId": "moderation_task_api_v1_internal_trust_safety_moderation_tasks_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModerationCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Moderation Task Api V1 Internal Trust Safety Moderation Tasks Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Moderation Task",
+        "tags": [
+          "trust-safety"
+        ]
+      }
+    },
     "/api/v1/learning/playback/{session_id}/manifest": {
       "get": {
         "operationId": "playback_manifest_api_v1_learning_playback__session_id__manifest_get",
@@ -46879,6 +49618,162 @@
         "summary": "Skip Recommendation",
         "tags": [
           "matchmaking-interactions"
+        ]
+      }
+    },
+    "/api/v1/safety/blocks/{user_id}": {
+      "delete": {
+        "operationId": "unblock_user_api_v1_safety_blocks__user_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Unblock User Api V1 Safety Blocks  User Id  Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Unblock User",
+        "tags": [
+          "trust-safety"
+        ]
+      },
+      "post": {
+        "operationId": "block_user_api_v1_safety_blocks__user_id__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlockCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Block User Api V1 Safety Blocks  User Id  Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Block User",
+        "tags": [
+          "trust-safety"
+        ]
+      }
+    },
+    "/api/v1/safety/reports": {
+      "post": {
+        "operationId": "submit_report_api_v1_safety_reports_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Submit Report Api V1 Safety Reports Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Submit Report",
+        "tags": [
+          "trust-safety"
         ]
       }
     },

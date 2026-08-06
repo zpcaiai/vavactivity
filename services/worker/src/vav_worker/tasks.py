@@ -38,6 +38,7 @@ from vav.modules.memberships import projection as membership_projection
 from vav.modules.privacy.service import execute_erasure_plan, process_export_request
 from vav.modules.recommendations import batches as recommendation_batches
 from vav.modules.recommendations import service as recommendation_service
+from vav.modules.trust_safety import service as trust_safety_service
 from vav_worker.celery_app import celery_app
 
 
@@ -946,3 +947,27 @@ async def _reconcile_memberships() -> dict[str, int]:
 @celery_app.task(name="vav.memberships.reconcile")  # type: ignore[misc]
 def reconcile_memberships() -> dict[str, int]:
     return asyncio.run(_reconcile_memberships())
+
+
+async def _expire_safety_restrictions() -> dict[str, int]:
+    async with session_factory() as session:
+        expired = await trust_safety_service.expire_restrictions(session)
+    await get_engine().dispose()
+    return {"expired_safety_restrictions": expired}
+
+
+@celery_app.task(name="vav.safety.expire_restrictions")  # type: ignore[misc]
+def expire_safety_restrictions() -> dict[str, int]:
+    return asyncio.run(_expire_safety_restrictions())
+
+
+async def _escalate_safety_cases() -> dict[str, int]:
+    async with session_factory() as session:
+        escalated = await trust_safety_service.escalate_overdue_cases(session)
+    await get_engine().dispose()
+    return {"escalated_safety_cases": escalated}
+
+
+@celery_app.task(name="vav.safety.escalate_cases")  # type: ignore[misc]
+def escalate_safety_cases() -> dict[str, int]:
+    return asyncio.run(_escalate_safety_cases())

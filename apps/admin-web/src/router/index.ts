@@ -27,6 +27,7 @@ import RecommendationManagementPage from "@/pages/RecommendationManagementPage.v
 import MatchmakingInteractionManagementPage from "@/pages/MatchmakingInteractionManagementPage.vue";
 import RelationshipManagementPage from "@/pages/RelationshipManagementPage.vue";
 import MembershipManagementPage from "@/pages/MembershipManagementPage.vue";
+import TrustSafetyManagementPage from "@/pages/TrustSafetyManagementPage.vue";
 import { useAccessStore } from "@/stores/access";
 
 const modules = [
@@ -130,6 +131,19 @@ export const membershipSectionPermissions: Record<string, string> = {
   reconciliation: "memberships.reconciliation.read",
   incidents: "memberships.incidents.read",
   audit: "memberships.audit.read"
+};
+
+export const safetySectionPermissions: Record<string, string> = {
+  reports: "safety.reports.read",
+  cases: "safety.cases.read",
+  moderation: "safety.moderation.read",
+  harassment: "safety.analytics.read",
+  fraud: "safety.analytics.read",
+  restrictions: "safety.restrictions.read",
+  appeals: "safety.appeals.read",
+  rules: "safety.rules.read",
+  "red-team": "safety.red_team.read",
+  audit: "safety.audit.read"
 };
 
 const privacySectionPermissions: Record<string, string> = {
@@ -485,6 +499,12 @@ export const router = createRouter({
           name: `admin-memberships-${section}`,
           component: MembershipManagementPage,
           meta: { title: "会员运营中心", permission: membershipSectionPermissions[section], membershipSection: section }
+        })),
+        ...Object.keys(safetySectionPermissions).map((section) => ({
+          path: `trust-safety/${section}`,
+          name: `admin-trust-safety-${section}`,
+          component: TrustSafetyManagementPage,
+          meta: { title: "信任与安全中心", permission: safetySectionPermissions[section], safetySection: section }
         })),
         ...Object.keys(privacySectionPermissions).map((section) => ({
           path: `privacy/${section}`,

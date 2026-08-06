@@ -38,6 +38,10 @@
 	relationship-concurrency-test relationship-security-test relationship-privacy-test \
 	relationship-user-e2e relationship-admin-e2e relationship-verify
 
+.PHONY: safety-migrate safety-seed safety-seed-rules safety-test safety-concurrency-test \
+	safety-security-test safety-privacy-test safety-red-team safety-user-e2e \
+	safety-admin-e2e safety-verify
+
 bootstrap:
 	./scripts/bootstrap.sh
 
@@ -564,3 +568,45 @@ membership-verify:
 	$(MAKE) membership-reconciliation-test
 	$(MAKE) membership-user-e2e
 	$(MAKE) membership-admin-e2e
+
+safety-migrate:
+	docker compose exec api alembic upgrade head
+
+safety-seed:
+	docker compose exec api python -m vav.cli.seed_trust_safety
+
+safety-seed-rules:
+	docker compose exec api python -m vav.cli.seed_trust_safety
+
+safety-test:
+	docker compose exec api pytest tests/trust_safety/unit tests/trust_safety/integration -q
+
+safety-concurrency-test:
+	docker compose exec api pytest tests/trust_safety/concurrency -q
+
+safety-security-test:
+	docker compose exec api pytest tests/trust_safety/security -q
+
+safety-privacy-test:
+	docker compose exec api pytest tests/trust_safety/privacy -q
+
+safety-red-team:
+	docker compose exec api pytest tests/trust_safety/red_team -q
+
+safety-user-e2e:
+	pnpm exec playwright test e2e/user-trust-safety
+
+safety-admin-e2e:
+	pnpm exec playwright test e2e/admin-trust-safety
+
+safety-verify:
+	$(MAKE) safety-migrate
+	$(MAKE) safety-seed
+	$(MAKE) safety-seed-rules
+	$(MAKE) safety-test
+	$(MAKE) safety-concurrency-test
+	$(MAKE) safety-security-test
+	$(MAKE) safety-privacy-test
+	$(MAKE) safety-red-team
+	$(MAKE) safety-user-e2e
+	$(MAKE) safety-admin-e2e

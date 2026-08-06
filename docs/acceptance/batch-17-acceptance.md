@@ -1,6 +1,6 @@
 # Batch 17 Acceptance Evidence
 
-Status: **IN PROGRESS — local static and non-DB gates pass; fresh PostgreSQL CI pending.**
+Status: **IMPLEMENTED — local gates and fresh PostgreSQL/Neon migration gates pass.**
 
 ## Implemented scope
 
@@ -21,9 +21,16 @@ Status: **IN PROGRESS — local static and non-DB gates pass; fresh PostgreSQL C
 | Alembic heads | PASS — `20260805_0076` |
 | Backend no-DB membership tests | PASS |
 | User/admin Vue typecheck | PASS |
-| Fresh PostgreSQL migration + DB integration | PENDING remote Backend CI |
+| Fresh PostgreSQL migration + DB integration | PASS — 580 tests in 265.96s; migrated to single head `20260805_0076` |
+| Remote Neon migration | PASS — dependent migration job `92375174441` |
 | Browser E2E | NOT_RUN — local Docker registry unavailable |
 | Production certification | NOT_CERTIFIED |
 
-No runtime, live migration or browser result is claimed from static inspection. This report must
-be updated with exact full-suite counts and CI URLs before Batch 17 is marked complete.
+Remote evidence: Backend/Neon run
+`https://github.com/zpcaiai/vavactivity/actions/runs/31025708244`; Frontend run
+`https://github.com/zpcaiai/vavactivity/actions/runs/31025708115`; Secret Scan run
+`https://github.com/zpcaiai/vavactivity/actions/runs/31025708068`.
+
+The database evidence proves a fresh PostgreSQL migration, the full API test suite and the
+configured Neon migration gate. It does not claim browser E2E, an application deployment, live
+HTTP reachability, customer acceptance or external security certification.

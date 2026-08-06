@@ -30,6 +30,7 @@ import RecommendationTransparencyPage from "@/features/recommendations/pages/Rec
 import MatchmakingInteractionsPage from "@/features/matchmaking-interactions/pages/MatchmakingInteractionsPage.vue";
 import RelationshipJourneyPage from "@/features/relationships/pages/RelationshipJourneyPage.vue";
 import MembershipPage from "@/features/memberships/pages/MembershipPage.vue";
+import SafetyCenterPage from "@/features/trust-safety/pages/SafetyCenterPage.vue";
 import PrivacyCenterPage from "@/features/privacy/pages/PrivacyCenterPage.vue";
 import UnsubscribePage from "@/features/notifications/pages/UnsubscribePage.vue";
 import AuthPage from "@/pages/AuthPage.vue";
@@ -154,6 +155,12 @@ export const router = createRouter({
         { path: "account/membership/usage", name: "account-membership-usage", component: MembershipPage, meta: { requiresAuth: true } },
         { path: "account/membership/manage", name: "account-membership-manage", component: MembershipPage, meta: { requiresAuth: true } },
         { path: "account/membership/history", name: "account-membership-history", component: MembershipPage, meta: { requiresAuth: true } },
+        { path: "safety-support", name: "safety-support", component: SafetyCenterPage },
+        { path: "account/safety", name: "account-safety", component: SafetyCenterPage, meta: { requiresAuth: true } },
+        { path: "account/safety/reports", name: "account-safety-reports", component: SafetyCenterPage, meta: { requiresAuth: true } },
+        { path: "account/safety/blocks", name: "account-safety-blocks", component: SafetyCenterPage, meta: { requiresAuth: true } },
+        { path: "account/safety/restrictions", name: "account-safety-restrictions", component: SafetyCenterPage, meta: { requiresAuth: true } },
+        { path: "account/safety/appeals", name: "account-safety-appeals", component: SafetyCenterPage, meta: { requiresAuth: true } },
         { path: "login", redirect: (to) => `/${String(to.params.locale)}/auth/login` },
         { path: "register", redirect: (to) => `/${String(to.params.locale)}/auth/register` },
         { path: "auth/login", name: "login", component: AuthPage, props: { mode: "login" } },

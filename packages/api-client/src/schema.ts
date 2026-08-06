@@ -2414,6 +2414,126 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/account/safety/appeals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Appeals */
+        get: operations["my_appeals_api_v1_account_safety_appeals_get"];
+        put?: never;
+        /** Submit Appeal */
+        post: operations["submit_appeal_api_v1_account_safety_appeals_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/safety/blocks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Blocks */
+        get: operations["my_blocks_api_v1_account_safety_blocks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/safety/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Reports */
+        get: operations["my_reports_api_v1_account_safety_reports_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/safety/reports/{report_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Report */
+        get: operations["my_report_api_v1_account_safety_reports__report_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/safety/reports/{report_id}/evidence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload Report Evidence */
+        post: operations["upload_report_evidence_api_v1_account_safety_reports__report_id__evidence_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/safety/reports/{report_id}/withdraw": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Withdraw Report */
+        post: operations["withdraw_report_api_v1_account_safety_reports__report_id__withdraw_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/account/safety/restrictions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Restrictions */
+        get: operations["my_restrictions_api_v1_account_safety_restrictions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/activities": {
         parameters: {
             query?: never;
@@ -9116,6 +9236,467 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/trust-safety/appeals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Appeal Queue */
+        get: operations["appeal_queue_api_v1_admin_trust_safety_appeals_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/appeals/{appeal_id}/decision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decide Appeal */
+        post: operations["decide_appeal_api_v1_admin_trust_safety_appeals__appeal_id__decision_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Audit Queue */
+        get: operations["audit_queue_api_v1_admin_trust_safety_audit_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/cases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Case Queue */
+        get: operations["case_queue_api_v1_admin_trust_safety_cases_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/cases/{case_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Case Detail */
+        get: operations["case_detail_api_v1_admin_trust_safety_cases__case_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/cases/{case_id}/assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Assign Case */
+        post: operations["assign_case_api_v1_admin_trust_safety_cases__case_id__assign_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/cases/{case_id}/decisions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Case Decision */
+        post: operations["create_case_decision_api_v1_admin_trust_safety_cases__case_id__decisions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/cases/{case_id}/decisions/{decision_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve Case Decision */
+        post: operations["approve_case_decision_api_v1_admin_trust_safety_cases__case_id__decisions__decision_id__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/cases/{case_id}/transition": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Transition Case */
+        post: operations["transition_case_api_v1_admin_trust_safety_cases__case_id__transition_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/evidence/{evidence_id}/access": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Access Evidence */
+        post: operations["access_evidence_api_v1_admin_trust_safety_evidence__evidence_id__access_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/fraud": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Fraud Queue */
+        get: operations["fraud_queue_api_v1_admin_trust_safety_fraud_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/fraud/signals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Fraud Signal */
+        post: operations["create_fraud_signal_api_v1_admin_trust_safety_fraud_signals_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/harassment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Harassment Queue */
+        get: operations["harassment_queue_api_v1_admin_trust_safety_harassment_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/harassment/aggregates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upsert Behavior Aggregate */
+        post: operations["upsert_behavior_aggregate_api_v1_admin_trust_safety_harassment_aggregates_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/moderation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Moderation Queue */
+        get: operations["moderation_queue_api_v1_admin_trust_safety_moderation_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/moderation/{task_id}/decisions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decide Moderation */
+        post: operations["decide_moderation_api_v1_admin_trust_safety_moderation__task_id__decisions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/red-team": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Red Team Queue */
+        get: operations["red_team_queue_api_v1_admin_trust_safety_red_team_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/red-team/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Red Team Run */
+        post: operations["create_red_team_run_api_v1_admin_trust_safety_red_team_runs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/red-team/runs/{run_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve Red Team Run */
+        post: operations["approve_red_team_run_api_v1_admin_trust_safety_red_team_runs__run_id__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/red-team/runs/{run_id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Complete Red Team Run */
+        post: operations["complete_red_team_run_api_v1_admin_trust_safety_red_team_runs__run_id__complete_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Report Queue */
+        get: operations["report_queue_api_v1_admin_trust_safety_reports_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/restrictions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Restriction Queue */
+        get: operations["restriction_queue_api_v1_admin_trust_safety_restrictions_get"];
+        put?: never;
+        /** Create Restriction */
+        post: operations["create_restriction_api_v1_admin_trust_safety_restrictions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/restrictions/{restriction_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve Restriction */
+        post: operations["approve_restriction_api_v1_admin_trust_safety_restrictions__restriction_id__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/restrictions/{restriction_id}/lift": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Lift Restriction */
+        post: operations["lift_restriction_api_v1_admin_trust_safety_restrictions__restriction_id__lift_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Rule Queue */
+        get: operations["rule_queue_api_v1_admin_trust_safety_rules_get"];
+        put?: never;
+        /** Create Rule */
+        post: operations["create_rule_api_v1_admin_trust_safety_rules_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/rules/{rule_id}/activate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Activate Rule */
+        post: operations["activate_rule_api_v1_admin_trust_safety_rules__rule_id__activate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/trust-safety/rules/{rule_id}/rollback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rollback Rule */
+        post: operations["rollback_rule_api_v1_admin_trust_safety_rules__rule_id__rollback_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/users": {
         parameters: {
             query?: never;
@@ -10058,6 +10639,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/internal/trust-safety/decisions/{decision_context}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Safety Decision */
+        post: operations["safety_decision_api_v1_internal_trust_safety_decisions__decision_context__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/internal/trust-safety/moderation-tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Moderation Task */
+        post: operations["moderation_task_api_v1_internal_trust_safety_moderation_tasks_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/learning/playback/{session_id}/manifest": {
         parameters: {
             query?: never;
@@ -10836,6 +11451,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/safety/blocks/{user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Block User */
+        post: operations["block_user_api_v1_safety_blocks__user_id__post"];
+        /** Unblock User */
+        delete: operations["unblock_user_api_v1_safety_blocks__user_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/safety/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Report */
+        post: operations["submit_report_api_v1_safety_reports_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/subscriptions": {
         parameters: {
             query?: never;
@@ -10967,6 +11617,11 @@ export interface components {
              */
             user_id: string;
         };
+        /**
+         * AccountRestrictionType
+         * @enum {string}
+         */
+        AccountRestrictionType: "profile_hidden" | "profile_edit_review_required" | "recommendation_disabled" | "like_disabled" | "invitation_disabled" | "contact_exchange_disabled" | "relationship_interaction_frozen" | "activity_registration_disabled" | "ai_write_actions_disabled" | "communication_rate_limited" | "reverification_required" | "account_temporarily_suspended" | "account_permanently_disabled";
         /** Action */
         Action: {
             /** Href */
@@ -11174,6 +11829,13 @@ export interface components {
             /** Role Codes */
             role_codes: string[];
         };
+        /** AdminReasonRequest */
+        AdminReasonRequest: {
+            /** Expected Version */
+            expected_version?: number | null;
+            /** Reason */
+            reason: string;
+        };
         /** AdminSafetyRequest */
         AdminSafetyRequest: {
             /** Purpose */
@@ -11245,6 +11907,34 @@ export interface components {
         AiMemoryUpdateRequest: {
             /** Content */
             content: string;
+        };
+        /** AppealCreateRequest */
+        AppealCreateRequest: {
+            /** Decision Id */
+            decision_id?: string | null;
+            /** Evidence Manifest */
+            evidence_manifest?: {
+                [key: string]: unknown;
+            }[];
+            /** Reason */
+            reason: string;
+            /** Restriction Id */
+            restriction_id?: string | null;
+        };
+        /** AppealDecisionRequest */
+        AppealDecisionRequest: {
+            /** Internal Review */
+            internal_review: string;
+            /** Modified Ends At */
+            modified_ends_at?: string | null;
+            /** Modified Scope Definition */
+            modified_scope_definition?: {
+                [key: string]: unknown;
+            } | null;
+            /** Outcome */
+            outcome: string;
+            /** Outcome Message */
+            outcome_message: string;
         };
         /** AppointmentRequest */
         AppointmentRequest: {
@@ -11438,6 +12128,37 @@ export interface components {
             /** Requested Size */
             requested_size?: number | null;
         };
+        /** BehaviorAggregateRequest */
+        BehaviorAggregateRequest: {
+            /** Aggregation Version */
+            aggregation_version: string;
+            /**
+             * Distinct Target Count
+             * @default 0
+             */
+            distinct_target_count: number;
+            /** Event Count */
+            event_count: number;
+            /** Metric Code */
+            metric_code: string;
+            /**
+             * User Id
+             * Format: uuid
+             */
+            user_id: string;
+            /**
+             * Window Ends At
+             * Format: date-time
+             */
+            window_ends_at: string;
+            /**
+             * Window Starts At
+             * Format: date-time
+             */
+            window_starts_at: string;
+            /** Window Type */
+            window_type: string;
+        };
         /** BenefitCreateRequest */
         BenefitCreateRequest: {
             /** Benefit Code */
@@ -11463,6 +12184,13 @@ export interface components {
          * @enum {string}
          */
         BillingType: "one_time" | "recurring" | "free";
+        /** BlockCreateRequest */
+        BlockCreateRequest: {
+            /** Private Reason */
+            private_reason?: string | null;
+            /** Reason Code */
+            reason_code?: string | null;
+        };
         /** Body_upload_document_api_v1_admin_knowledge_sources__source_id__upload_post */
         Body_upload_document_api_v1_admin_knowledge_sources__source_id__upload_post: {
             /** Document Code */
@@ -11600,6 +12328,49 @@ export interface components {
              * @default USD
              */
             currency_code: string;
+        };
+        /** CaseAssignmentRequest */
+        CaseAssignmentRequest: {
+            /** Assigned Team */
+            assigned_team: string;
+            /**
+             * Assigned To
+             * Format: uuid
+             */
+            assigned_to: string;
+            /** Expected Version */
+            expected_version: number;
+        };
+        /** CaseDecisionRequest */
+        CaseDecisionRequest: {
+            /**
+             * Appeal Allowed
+             * @default true
+             */
+            appeal_allowed: boolean;
+            /** Decision Scope */
+            decision_scope?: {
+                [key: string]: unknown;
+            };
+            /** Decision Type */
+            decision_type: string;
+            /** Evidence Item Ids */
+            evidence_item_ids?: string[];
+            /** Internal Rationale */
+            internal_rationale: string;
+            /** Reason Codes */
+            reason_codes: string[];
+            /** Restriction Manifest */
+            restriction_manifest?: {
+                [key: string]: unknown;
+            }[];
+            /** User Message */
+            user_message?: string | null;
+        };
+        /** CaseTransitionRequest */
+        CaseTransitionRequest: {
+            /** Target Status */
+            target_status: string;
         };
         /** CategoryCreateRequest */
         CategoryCreateRequest: {
@@ -12127,6 +12898,24 @@ export interface components {
              */
             user_timezone: string;
         };
+        /** DecisionRequest */
+        DecisionRequest: {
+            /** Context */
+            context?: {
+                [key: string]: unknown;
+            };
+            /** Counterpart User Id */
+            counterpart_user_id?: string | null;
+            /**
+             * Subject User Id
+             * Format: uuid
+             */
+            subject_user_id: string;
+            /** Target Reference Id */
+            target_reference_id?: string | null;
+            /** Target Type */
+            target_type?: string | null;
+        };
         /** DeclineInvitationRequest */
         DeclineInvitationRequest: {
             /** Expected Invitation Version */
@@ -12239,6 +13028,16 @@ export interface components {
              * Format: uuid
              */
             strategy_id: string;
+        };
+        /** EvidenceAccessRequest */
+        EvidenceAccessRequest: {
+            /**
+             * Access Type
+             * @default view
+             */
+            access_type: string;
+            /** Purpose Code */
+            purpose_code: string;
         };
         /** ExecuteConfirmedToolRequest */
         ExecuteConfirmedToolRequest: {
@@ -12425,6 +13224,32 @@ export interface components {
             };
             /** Schema Version */
             schema_version: number;
+        };
+        /** FraudSignalRequest */
+        FraudSignalRequest: {
+            /** Confidence Basis Points */
+            confidence_basis_points?: number | null;
+            /** Expires At */
+            expires_at?: string | null;
+            /** Safe Signal Context */
+            safe_signal_context?: {
+                [key: string]: unknown;
+            };
+            /** Severity */
+            severity: string;
+            /** Signal Code */
+            signal_code: string;
+            /** Signal Source */
+            signal_source: string;
+            /** Source Reference Id */
+            source_reference_id?: string | null;
+            /** Source Reference Type */
+            source_reference_type?: string | null;
+            /**
+             * Subject User Id
+             * Format: uuid
+             */
+            subject_user_id: string;
         };
         /**
          * FulfillmentType
@@ -13072,6 +13897,42 @@ export interface components {
             /** Visibility */
             visibility?: ("private" | "shared") | null;
         };
+        /** ModerationCreateRequest */
+        ModerationCreateRequest: {
+            /** Content */
+            content: string;
+            /**
+             * Priority
+             * @default normal
+             */
+            priority: string;
+            /**
+             * Target Reference Id
+             * Format: uuid
+             */
+            target_reference_id: string;
+            target_type: components["schemas"]["ModerationTargetType"];
+            /** Target Version */
+            target_version: string;
+        };
+        /** ModerationDecisionRequest */
+        ModerationDecisionRequest: {
+            /** Category Codes */
+            category_codes?: string[];
+            /** Decision */
+            decision: string;
+            /** Internal Note */
+            internal_note?: string | null;
+            /** Reason Code */
+            reason_code?: string | null;
+            /** User Message */
+            user_message?: string | null;
+        };
+        /**
+         * ModerationTargetType
+         * @enum {string}
+         */
+        ModerationTargetType: "dating_profile_field" | "dating_profile_photo" | "dating_profile_narrative" | "activity_content" | "invitation_message" | "relationship_shared_content" | "testimonial" | "ai_response" | "campaign_content";
         /** ModuleCreateRequest */
         ModuleCreateRequest: {
             /** Internal Name */
@@ -14120,6 +14981,26 @@ export interface components {
              */
             record_type: "client_summary" | "mentor_note" | "operations_note";
         };
+        /** RedTeamRunCompleteRequest */
+        RedTeamRunCompleteRequest: {
+            /** Block Bypass Count */
+            block_bypass_count: number;
+            /** Contact Leakage Count */
+            contact_leakage_count: number;
+            /** Result Manifest */
+            result_manifest: {
+                [key: string]: unknown;
+            };
+        };
+        /** RedTeamRunCreateRequest */
+        RedTeamRunCreateRequest: {
+            /** Fixture Manifest */
+            fixture_manifest: {
+                [key: string]: unknown;
+            };
+            /** Policy Version */
+            policy_version: string;
+        };
         /** ReferralActionRequest */
         ReferralActionRequest: {
             /**
@@ -14251,10 +15132,75 @@ export interface components {
             /** Trigger Reference Version */
             trigger_reference_version: number;
         };
+        /** ReportCreateRequest */
+        ReportCreateRequest: {
+            /**
+             * Block User
+             * @default false
+             */
+            block_user: boolean;
+            category: components["schemas"]["SafetyReportCategory"];
+            /** Description */
+            description?: string | null;
+            /** Idempotency Key */
+            idempotency_key: string;
+            /**
+             * Immediate Danger
+             * @default false
+             */
+            immediate_danger: boolean;
+            /** Reported User Id */
+            reported_user_id?: string | null;
+            /** Severity Claim */
+            severity_claim?: string | null;
+            /** Source Context */
+            source_context?: {
+                [key: string]: unknown;
+            };
+            /** Target Reference Id */
+            target_reference_id?: string | null;
+            /** Target Type */
+            target_type: string;
+        };
         /** RestoreRequest */
         RestoreRequest: {
             /** Reason */
             reason?: string | null;
+        };
+        /** RestrictionCreateRequest */
+        RestrictionCreateRequest: {
+            /**
+             * Appeal Allowed
+             * @default true
+             */
+            appeal_allowed: boolean;
+            /** Ends At */
+            ends_at?: string | null;
+            /** Internal Reason */
+            internal_reason?: string | null;
+            /** Reason Code */
+            reason_code: string;
+            restriction_type: components["schemas"]["AccountRestrictionType"];
+            /** Scope Definition */
+            scope_definition?: {
+                [key: string]: unknown;
+            };
+            /** Source Reference Id */
+            source_reference_id?: string | null;
+            /** Source Type */
+            source_type: string;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /**
+             * User Id
+             * Format: uuid
+             */
+            user_id: string;
+            /** User Message */
+            user_message?: string | null;
         };
         /** RestrictionRequest */
         RestrictionRequest: {
@@ -14418,6 +15364,39 @@ export interface components {
             /** Role Code */
             role_code: string;
         };
+        /** RuleCreateRequest */
+        RuleCreateRequest: {
+            /** Action Definition */
+            action_definition: {
+                [key: string]: unknown;
+            };
+            /** Applicable Modules */
+            applicable_modules: string[];
+            /** Category */
+            category: string;
+            /** Condition Definition */
+            condition_definition: {
+                [key: string]: unknown;
+            };
+            /**
+             * Rollout Basis Points
+             * @default 10000
+             */
+            rollout_basis_points: number;
+            /** Rule Code */
+            rule_code: string;
+            /** Rule Type */
+            rule_type: string;
+            /**
+             * Score Delta
+             * @default 0
+             */
+            score_delta: number;
+            /** Semantic Version */
+            semantic_version: string;
+            /** Severity */
+            severity: string;
+        };
         /** SafetyReferralRequest */
         SafetyReferralRequest: {
             /** Category */
@@ -14432,6 +15411,11 @@ export interface components {
              */
             risk_level: "low" | "moderate" | "high" | "immediate";
         };
+        /**
+         * SafetyReportCategory
+         * @enum {string}
+         */
+        SafetyReportCategory: "harassment" | "threat" | "abuse" | "coercive_control" | "stalking" | "hate_or_degrading_content" | "sexual_content" | "impersonation" | "fraud_or_scam" | "money_request" | "off_platform_payment" | "spam" | "false_profile" | "underage_concern" | "privacy_violation" | "safety_concern" | "other";
         /** ScheduleRequest */
         ScheduleRequest: {
             /** Reason */
@@ -15081,6 +16065,22 @@ export interface components {
             source_id: string;
             /** Title */
             title: string;
+        };
+        /** UserEvidenceUploadRequest */
+        UserEvidenceUploadRequest: {
+            /**
+             * Collection Reason
+             * @default reporter_submission
+             */
+            collection_reason: string;
+            /** Content */
+            content: string;
+            /** Evidence Type */
+            evidence_type: string;
+            /** Filename */
+            filename?: string | null;
+            /** Media Type */
+            media_type?: string | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -20466,6 +21466,232 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_appeals_api_v1_account_safety_appeals_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    submit_appeal_api_v1_account_safety_appeals_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AppealCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_blocks_api_v1_account_safety_blocks_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    my_reports_api_v1_account_safety_reports_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    my_report_api_v1_account_safety_reports__report_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                report_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_report_evidence_api_v1_account_safety_reports__report_id__evidence_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                report_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserEvidenceUploadRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    withdraw_report_api_v1_account_safety_reports__report_id__withdraw_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                report_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_restrictions_api_v1_account_safety_restrictions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
         };
@@ -34493,6 +35719,900 @@ export interface operations {
             };
         };
     };
+    appeal_queue_api_v1_admin_trust_safety_appeals_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    decide_appeal_api_v1_admin_trust_safety_appeals__appeal_id__decision_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                appeal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AppealDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    audit_queue_api_v1_admin_trust_safety_audit_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    case_queue_api_v1_admin_trust_safety_cases_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    case_detail_api_v1_admin_trust_safety_cases__case_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assign_case_api_v1_admin_trust_safety_cases__case_id__assign_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CaseAssignmentRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_case_decision_api_v1_admin_trust_safety_cases__case_id__decisions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CaseDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    approve_case_decision_api_v1_admin_trust_safety_cases__case_id__decisions__decision_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+                decision_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transition_case_api_v1_admin_trust_safety_cases__case_id__transition_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CaseTransitionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    access_evidence_api_v1_admin_trust_safety_evidence__evidence_id__access_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                evidence_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EvidenceAccessRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    fraud_queue_api_v1_admin_trust_safety_fraud_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_fraud_signal_api_v1_admin_trust_safety_fraud_signals_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FraudSignalRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    harassment_queue_api_v1_admin_trust_safety_harassment_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    upsert_behavior_aggregate_api_v1_admin_trust_safety_harassment_aggregates_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BehaviorAggregateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    moderation_queue_api_v1_admin_trust_safety_moderation_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    decide_moderation_api_v1_admin_trust_safety_moderation__task_id__decisions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ModerationDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    red_team_queue_api_v1_admin_trust_safety_red_team_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_red_team_run_api_v1_admin_trust_safety_red_team_runs_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RedTeamRunCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    approve_red_team_run_api_v1_admin_trust_safety_red_team_runs__run_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    complete_red_team_run_api_v1_admin_trust_safety_red_team_runs__run_id__complete_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RedTeamRunCompleteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    report_queue_api_v1_admin_trust_safety_reports_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    restriction_queue_api_v1_admin_trust_safety_restrictions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_restriction_api_v1_admin_trust_safety_restrictions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RestrictionCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    approve_restriction_api_v1_admin_trust_safety_restrictions__restriction_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restriction_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    lift_restriction_api_v1_admin_trust_safety_restrictions__restriction_id__lift_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restriction_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rule_queue_api_v1_admin_trust_safety_rules_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    create_rule_api_v1_admin_trust_safety_rules_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    activate_rule_api_v1_admin_trust_safety_rules__rule_id__activate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rollback_rule_api_v1_admin_trust_safety_rules__rule_id__rollback_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rule_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_users_api_v1_admin_users_get: {
         parameters: {
             query?: {
@@ -36433,6 +38553,78 @@ export interface operations {
             };
         };
     };
+    safety_decision_api_v1_internal_trust_safety_decisions__decision_context__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                decision_context: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    moderation_task_api_v1_internal_trust_safety_moderation_tasks_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ModerationCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     playback_manifest_api_v1_learning_playback__session_id__manifest_get: {
         parameters: {
             query: {
@@ -37965,6 +40157,111 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["SkipRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    block_user_api_v1_safety_blocks__user_id__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BlockCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unblock_user_api_v1_safety_blocks__user_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_report_api_v1_safety_reports_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportCreateRequest"];
             };
         };
         responses: {

@@ -1653,20 +1653,16 @@ async def issue_photo_view_token(
 
 
 async def is_blocked(session: AsyncSession, viewer_id: UUID, owner_id: UUID) -> bool:
-    """Blocking is owned by Batch 18; read it defensively if present."""
-    exists = await session.scalar(
-        text("SELECT to_regclass('public.user_blocks') IS NOT NULL"),
+    """Consume the Batch 18 safe-output gateway, not raw reports or evidence."""
+    from vav.modules.trust_safety.service import evaluate_gate
+
+    decision = await evaluate_gate(
+        session,
+        decision_context="profile-view",
+        subject_user_id=viewer_id,
+        counterpart_user_id=owner_id,
     )
-    if not exists:
-        return False
-    blocked = await session.scalar(
-        text(
-            "SELECT count(*) FROM user_blocks WHERE (blocker_user_id=:a AND blocked_user_id=:b) "
-            "OR (blocker_user_id=:b AND blocked_user_id=:a)"
-        ),
-        {"a": viewer_id, "b": owner_id},
-    )
-    return bool(blocked)
+    return not decision.allowed
 
 
 # --------------------------------------------------------------------------

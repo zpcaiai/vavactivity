@@ -33,6 +33,8 @@ from vav.modules.recommendations.router import router as recommendations_router
 from vav.modules.relationships.admin_router import router as relationships_admin_router
 from vav.modules.relationships.router import router as relationships_router
 from vav.modules.system.router import router as system_router
+from vav.modules.trust_safety.admin_router import router as trust_safety_admin_router
+from vav.modules.trust_safety.router import router as trust_safety_router
 
 api_router = APIRouter()
 api_router.include_router(health_router, prefix="/health", tags=["health"])
@@ -64,3 +66,5 @@ api_router.include_router(relationships_admin_router, tags=["relationships-admin
 api_router.include_router(memberships_router, tags=["memberships"])
 api_router.include_router(memberships_admin_router, tags=["memberships-admin"])
 api_router.include_router(membership_versions_admin_router, tags=["memberships-admin"])
+api_router.include_router(trust_safety_router, tags=["trust-safety"])
+api_router.include_router(trust_safety_admin_router, tags=["trust-safety-admin"])
