@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.vav.io/skills/permission/v1.json",
+  "title": "VAV Skill permission declaration",
+  "type": "object",
+  "required": ["permission", "scope", "riskLevel", "purpose"],
+  "properties": {
+    "permission": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*){2,5}$",
+      "not": { "pattern": "(^|\\.)(admin|secret|database|all_user_data)\\.\\*$" }
+    },
+    "scope": {
+      "enum": ["user_data", "domain_data", "admin_operation", "network", "filesystem", "secret", "tool", "event", "schedule"]
+    },
+    "riskLevel": { "enum": ["low", "medium", "high", "critical"] },
+    "purpose": { "type": "string", "minLength": 3, "maxLength": 300 },
+    "requiresApproval": { "type": "boolean", "default": false }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.vav.io/skills/marketplace-listing/v1.json",
+  "title": "VAV Skill Marketplace listing",
+  "type": "object",
+  "required": ["skillName", "version", "categories", "summaries", "supportPolicy", "privacyDisclosure", "pricingModel"],
+  "properties": {
+    "skillName": { "type": "string", "pattern": "^[a-z0-9]+([.-][a-z0-9]+)+$", "maxLength": 255 },
+    "version": { "type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?$" },
+    "categories": { "type": "array", "minItems": 1, "maxItems": 10, "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{1,63}$" } },
+    "summaries": { "type": "object", "required": ["zh-CN", "en"], "properties": { "zh-CN": { "type": "string", "minLength": 10, "maxLength": 500 }, "zh-TW": { "type": "string", "minLength": 10, "maxLength": 500 }, "en": { "type": "string", "minLength": 10, "maxLength": 500 } }, "additionalProperties": false },
+    "supportPolicy": { "type": "object", "required": ["contact", "responseTimeHours", "endOfSupportPolicy"], "properties": { "contact": { "type": "string", "minLength": 3, "maxLength": 300 }, "responseTimeHours": { "type": "integer", "minimum": 1, "maximum": 720 }, "endOfSupportPolicy": { "type": "string", "minLength": 10, "maxLength": 2000 } }, "additionalProperties": false },
+    "privacyDisclosure": { "type": "object", "required": ["reads", "writes", "externalDestinations", "retention", "deletion", "modelTraining", "automatedDecision"], "properties": { "reads": { "$ref": "#/$defs/stringList" }, "writes": { "$ref": "#/$defs/stringList" }, "externalDestinations": { "$ref": "#/$defs/stringList" }, "retention": { "type": "string", "minLength": 3, "maxLength": 500 }, "deletion": { "type": "string", "minLength": 3, "maxLength": 1000 }, "modelTraining": { "type": "boolean" }, "automatedDecision": { "type": "boolean" } }, "additionalProperties": false },
+    "pricingModel": { "enum": ["free", "private_contract"] },
+    "documentationReference": { "type": "string", "format": "uri", "maxLength": 1000 }
+  },
+  "$defs": { "stringList": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1, "maxLength": 255 } } },
+  "additionalProperties": false
+}

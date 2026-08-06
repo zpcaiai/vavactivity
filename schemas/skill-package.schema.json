@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.vav.io/skills/package/v1.json",
+  "title": "VAV deterministic Skill package metadata",
+  "type": "object",
+  "required": ["skillName", "semanticVersion", "packageSha256", "contentSha256", "files", "sbom", "provenance", "signature"],
+  "properties": {
+    "skillName": { "type": "string", "pattern": "^[a-z0-9]+([.-][a-z0-9]+)+$", "maxLength": 255 },
+    "semanticVersion": { "type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?$" },
+    "packageSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "contentSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "files": {
+      "type": "array",
+      "minItems": 4,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$" }
+    },
+    "sbom": { "type": "object", "required": ["format", "sha256"], "properties": { "format": { "enum": ["cyclonedx-json", "spdx-json"] }, "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" } }, "additionalProperties": false },
+    "provenance": { "type": "object", "required": ["sha256"], "properties": { "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" } }, "additionalProperties": false },
+    "signature": { "type": "object", "required": ["algorithm", "keyId", "value"], "properties": { "algorithm": { "const": "ed25519" }, "keyId": { "type": "string", "minLength": 3, "maxLength": 255 }, "value": { "type": "string", "minLength": 40, "maxLength": 1024 } }, "additionalProperties": false }
+  },
+  "additionalProperties": false
+}

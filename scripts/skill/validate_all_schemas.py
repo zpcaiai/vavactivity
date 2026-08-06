@@ -13,9 +13,11 @@ from vav_skill_sdk.manifest import validate_manifest
 
 def main() -> int:
     root = Path(__file__).resolve().parents[2]
-    schema_paths = sorted((root / "schemas").glob("skill-*.schema.json"))
-    if len(schema_paths) < 4:
-        raise SystemExit("expected at least four canonical Skill schemas")
+    schema_paths = sorted((root / "schemas").glob("*.schema.json"))
+    if len(schema_paths) < 7:
+        raise SystemExit(
+            "expected at least seven canonical Skill and Marketplace schemas"
+        )
     for path in schema_paths:
         Draft202012Validator.check_schema(json.loads(path.read_text(encoding="utf-8")))
 
