@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def test_every_backend_module_declares_a_production_contract() -> None:
     modules = sorted((ROOT / "services/api/src/vav/modules").glob("*/module.yaml"))
-    assert len(modules) == 22
+    assert len(modules) == 23
     codes: set[str] = set()
     revisions: list[int] = []
     for path in modules:
@@ -20,8 +20,8 @@ def test_every_backend_module_declares_a_production_contract() -> None:
         assert contract["module"]["version"]
         assert contract["health"]
         revisions.extend(contract["database"]["revisions"])
-    assert len(codes) == 22
-    assert sorted(revisions) == list(range(1, 90))
+    assert len(codes) == 23
+    assert sorted(revisions) == list(range(1, 91))
 
 
 def test_openapi_operation_ids_and_routes_are_unique() -> None:

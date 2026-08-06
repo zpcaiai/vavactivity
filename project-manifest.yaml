@@ -53,6 +53,7 @@ module_registry:
   memberships: {owner: backend, status: foundation_in_progress, phase: phase_2}
   moderation: {owner: trust_and_safety, status: foundation_in_progress, phase: phase_2}
   experience: {owner: product_experience, status: foundation_in_progress, phase: phase_1}
+  process_governance: {owner: platform_operations, status: foundation_in_progress, phase: phase_1}
 
 phases:
   phase_1:
@@ -71,6 +72,7 @@ phases:
       - payments
       - admin
       - experience
+      - process_governance
   phase_2:
     objective: 完成建档、推荐、互选、认识期和安全治理闭环
     modules:
@@ -405,7 +407,7 @@ quality:
 production_assembly:
   architecture_version: "1.0.0"
   minimum_supported_schema_version: 83
-  migration_head: "20260806_0089"
+  migration_head: "20260806_0090"
   module_manifest_root: services/api/src/vav/modules
   event_manifest: config/events/manifest.yaml
   feature_manifest: config/features/manifest.yaml

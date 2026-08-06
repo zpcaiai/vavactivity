@@ -685,6 +685,40 @@ EXPERIENCE_PERMISSIONS = {
     "experience.audit.read",
 }
 
+PROCESS_PERMISSIONS = {
+    "process.dashboard.read",
+    "process.definitions.read",
+    "process.definitions.manage",
+    "process.definitions.activate",
+    "process.state_machines.read",
+    "process.state_machines.manage",
+    "process.state_machines.verify",
+    "process.instances.read",
+    "process.instances.start",
+    "process.instances.cancel",
+    "process.sagas.read",
+    "process.sagas.execute",
+    "process.sagas.retry",
+    "process.events.consume",
+    "process.timeouts.read",
+    "process.timeouts.process",
+    "process.cancellations.read",
+    "process.compensations.read",
+    "process.compensations.execute",
+    "process.compensations.approve",
+    "process.stuck.read",
+    "process.stuck.scan",
+    "process.interventions.read",
+    "process.interventions.execute",
+    "process.simulations.read",
+    "process.simulations.run",
+    "process.certifications.read",
+    "process.certifications.evaluate",
+    "process.certifications.certify",
+    "process.release.read",
+    "process.audit.read",
+}
+
 ALL_PERMISSIONS = (
     IDENTITY_PERMISSIONS
     | CMS_PERMISSIONS
@@ -708,6 +742,7 @@ ALL_PERMISSIONS = (
     | QUALITY_PERMISSIONS
     | DESIGN_SYSTEM_PERMISSIONS
     | EXPERIENCE_PERMISSIONS
+    | PROCESS_PERMISSIONS
 )
 
 ROLE_PERMISSIONS: dict[str, set[str]] = {
@@ -1358,6 +1393,51 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "experience.closure.evaluate",
         "experience.closure.certify",
         "experience.audit.read",
+    },
+    "process_analyst": {
+        "process.dashboard.read",
+        "process.definitions.read",
+        "process.state_machines.read",
+        "process.instances.read",
+        "process.sagas.read",
+        "process.timeouts.read",
+        "process.cancellations.read",
+        "process.compensations.read",
+        "process.stuck.read",
+        "process.interventions.read",
+        "process.simulations.read",
+        "process.certifications.read",
+        "process.release.read",
+        "process.audit.read",
+    },
+    "process_operator": PROCESS_PERMISSIONS
+    - {
+        "process.definitions.manage",
+        "process.definitions.activate",
+        "process.state_machines.manage",
+        "process.compensations.approve",
+        "process.certifications.certify",
+    },
+    "process_architect": PROCESS_PERMISSIONS
+    - {
+        "process.compensations.approve",
+        "process.certifications.certify",
+    },
+    "process_release_reviewer": {
+        "process.dashboard.read",
+        "process.definitions.read",
+        "process.state_machines.read",
+        "process.instances.read",
+        "process.sagas.read",
+        "process.compensations.read",
+        "process.stuck.read",
+        "process.interventions.read",
+        "process.simulations.read",
+        "process.certifications.read",
+        "process.certifications.evaluate",
+        "process.certifications.certify",
+        "process.release.read",
+        "process.audit.read",
     },
     "analyst": {"audit.read", "catalog.audit.read"},
     "support_agent": {"users.read", "catalog.products.read"},

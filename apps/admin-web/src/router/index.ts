@@ -33,6 +33,7 @@ import SkillManagementPage from "@/pages/SkillManagementPage.vue";
 import QualityManagementPage from "@/pages/QualityManagementPage.vue";
 import DesignSystemManagementPage from "@/pages/DesignSystemManagementPage.vue";
 import ExperienceManagementPage from "@/pages/ExperienceManagementPage.vue";
+import ProcessGovernancePage from "@/pages/ProcessGovernancePage.vue";
 import { useAccessStore } from "@/stores/access";
 
 const modules = [
@@ -227,6 +228,22 @@ export const experienceSectionPermissions: Record<string, string> = {
   evidence: "experience.closure.read",
   release: "experience.closure.read",
   audit: "experience.audit.read"
+};
+
+export const processSectionPermissions: Record<string, string> = {
+  dashboard: "process.dashboard.read",
+  definitions: "process.definitions.read",
+  "state-machines": "process.state_machines.read",
+  instances: "process.instances.read",
+  sagas: "process.sagas.read",
+  timeouts: "process.timeouts.read",
+  cancellations: "process.cancellations.read",
+  compensations: "process.compensations.read",
+  stuck: "process.stuck.read",
+  interventions: "process.interventions.read",
+  simulations: "process.simulations.read",
+  certifications: "process.certifications.read",
+  release: "process.release.read"
 };
 
 const privacySectionPermissions: Record<string, string> = {
@@ -618,6 +635,12 @@ export const router = createRouter({
           name: `admin-experience-${section}`,
           component: ExperienceManagementPage,
           meta: { title: "体验编排", permission: experienceSectionPermissions[section], experienceSection: section }
+        })),
+        ...Object.keys(processSectionPermissions).map((section) => ({
+          path: `processes/${section}`,
+          name: `admin-processes-${section}`,
+          component: ProcessGovernancePage,
+          meta: { title: "流程治理", permission: processSectionPermissions[section], processSection: section }
         })),
         ...Object.keys(privacySectionPermissions).map((section) => ({
           path: `privacy/${section}`,

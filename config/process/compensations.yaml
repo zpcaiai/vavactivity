@@ -1,0 +1,8 @@
+schema_version: "1.0"
+compensations:
+  - {code: release-activity-capacity, module: activities, command: activities.capacity.release, reversible: true, approval: false}
+  - {code: release-counseling-slot, module: counseling, command: counseling.slot.release, reversible: true, approval: false}
+  - {code: revoke-unused-entitlement, module: commerce, command: commerce.entitlement.revoke_unused, reversible: true, approval: false}
+  - {code: request-payment-refund, module: commerce, command: commerce.refund.request, reversible: false, approval: true}
+  - {code: revoke-contact-grant, module: matchmaking_interactions, command: interactions.contact_grant.revoke, reversible: true, approval: false}
+  - {code: deactivate-skill-version, module: skills_platform, command: skills.version.deactivate, reversible: true, approval: true}

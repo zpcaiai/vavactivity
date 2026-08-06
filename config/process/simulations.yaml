@@ -1,0 +1,10 @@
+schema_version: "1.0"
+scenarios:
+  - {code: membership-provider-timeout, process: membership-purchase, faults: [provider_timeout], expected: compensating}
+  - {code: activity-last-seat-race, process: activity-registration, faults: [concurrency_race], expected: one_success}
+  - {code: counseling-worker-restart, process: counseling-booking, faults: [worker_crash], expected: resume_without_duplicate}
+  - {code: duplicate-payment-webhook, process: membership-purchase, faults: [duplicate_event], expected: one_entitlement}
+  - {code: out-of-order-reciprocal-like, process: reciprocal-like, faults: [event_out_of_order], expected: buffered_until_gap_closed}
+  - {code: privacy-erasure-during-recommendation, process: privacy-erasure, faults: [privacy_erasure, delayed_event], expected: no_new_processing}
+  - {code: safety-block-during-relationship, process: relationship-transition, faults: [safety_restriction], expected: safety_frozen}
+  - {code: compensation-command-failure, process: activity-registration, faults: [compensation_failure], expected: manual_intervention}

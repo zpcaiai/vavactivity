@@ -1,0 +1,19 @@
+module: {code: process_governance, owner: platform_operations, version: "1.0.0"}
+dependencies: {required: [identity, system, quality, experience]}
+database: {revisions: [90]}
+events:
+  publishes:
+    - process.instance.changed.v1
+    - process.compensation.changed.v1
+    - process.stuck.detected.v1
+    - process.certification.changed.v1
+  consumes:
+    - commerce.entitlement.activated.v1
+    - activity.registration.confirmed.v1
+    - counseling.appointment.confirmed.v1
+    - privacy.erasure.completed.v1
+    - safety.restriction.changed.v1
+permissions: {prefixes: [process.]}
+configuration: {prefixes: [PROCESS_]}
+health: {checks: [manifest_validity, saga_progress, stuck_processes, compensation_failures]}
+schema_version: "1.0"

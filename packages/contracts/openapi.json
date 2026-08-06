@@ -2382,6 +2382,46 @@
         "title": "CampaignRequest",
         "type": "object"
       },
+      "CancellationCreate": {
+        "properties": {
+          "cancellation_key": {
+            "maxLength": 255,
+            "minLength": 8,
+            "title": "Cancellation Key",
+            "type": "string"
+          },
+          "expected_lock_version": {
+            "minimum": 0.0,
+            "title": "Expected Lock Version",
+            "type": "integer"
+          },
+          "reason_code": {
+            "maxLength": 128,
+            "minLength": 2,
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "request_type": {
+            "enum": [
+              "user",
+              "system",
+              "admin_technical",
+              "safety",
+              "provider"
+            ],
+            "title": "Request Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cancellation_key",
+          "request_type",
+          "reason_code",
+          "expected_lock_version"
+        ],
+        "title": "CancellationCreate",
+        "type": "object"
+      },
       "CapabilityCreate": {
         "properties": {
           "capability_code": {
@@ -2874,6 +2914,81 @@
         "title": "CategoryLocalizationInput",
         "type": "object"
       },
+      "CertificationDecision": {
+        "properties": {
+          "decision": {
+            "enum": [
+              "certified",
+              "rejected"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 10,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "reason"
+        ],
+        "title": "CertificationDecision",
+        "type": "object"
+      },
+      "CertificationEvaluate": {
+        "properties": {
+          "business_domain": {
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Business Domain",
+            "type": "string"
+          },
+          "environment": {
+            "enum": [
+              "local",
+              "ci",
+              "staging",
+              "production"
+            ],
+            "title": "Environment",
+            "type": "string"
+          },
+          "evidence_checksum_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Evidence Checksum Sha256",
+            "type": "string"
+          },
+          "git_commit": {
+            "pattern": "^[0-9a-f]{7,64}$",
+            "title": "Git Commit",
+            "type": "string"
+          },
+          "path_results": {
+            "additionalProperties": {
+              "enum": [
+                "pass",
+                "fail",
+                "not_run"
+              ],
+              "type": "string"
+            },
+            "title": "Path Results",
+            "type": "object"
+          }
+        },
+        "required": [
+          "business_domain",
+          "git_commit",
+          "environment",
+          "path_results",
+          "evidence_checksum_sha256"
+        ],
+        "title": "CertificationEvaluate",
+        "type": "object"
+      },
       "ChangeCreateRequest": {
         "properties": {
           "change_type": {
@@ -3223,6 +3338,34 @@
           }
         },
         "title": "CollectionData",
+        "type": "object"
+      },
+      "CompensationRequest": {
+        "properties": {
+          "compensation_code": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Compensation Code",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "maxLength": 255,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "step_execution_id": {
+            "format": "uuid",
+            "title": "Step Execution Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "step_execution_id",
+          "compensation_code",
+          "idempotency_key"
+        ],
+        "title": "CompensationRequest",
         "type": "object"
       },
       "ComponentDeprecate": {
@@ -5055,6 +5198,59 @@
         "title": "EvaluationRunRequest",
         "type": "object"
       },
+      "EventReceive": {
+        "properties": {
+          "aggregate_id": {
+            "format": "uuid",
+            "title": "Aggregate Id",
+            "type": "string"
+          },
+          "aggregate_type": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Aggregate Type",
+            "type": "string"
+          },
+          "aggregate_version": {
+            "minimum": 1.0,
+            "title": "Aggregate Version",
+            "type": "integer"
+          },
+          "consumer_code": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Consumer Code",
+            "type": "string"
+          },
+          "event_code": {
+            "maxLength": 160,
+            "minLength": 3,
+            "title": "Event Code",
+            "type": "string"
+          },
+          "event_id": {
+            "format": "uuid",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "payload_hash": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Payload Hash",
+            "type": "string"
+          }
+        },
+        "required": [
+          "consumer_code",
+          "event_id",
+          "event_code",
+          "aggregate_type",
+          "aggregate_id",
+          "aggregate_version",
+          "payload_hash"
+        ],
+        "title": "EventReceive",
+        "type": "object"
+      },
       "EvidenceAccessRequest": {
         "properties": {
           "access_type": {
@@ -6684,6 +6880,27 @@
           "display_name"
         ],
         "title": "InstructorCreateRequest",
+        "type": "object"
+      },
+      "InterventionResolve": {
+        "properties": {
+          "receipt": {
+            "additionalProperties": true,
+            "title": "Receipt",
+            "type": "object"
+          },
+          "resolution_command": {
+            "maxLength": 160,
+            "minLength": 3,
+            "title": "Resolution Command",
+            "type": "string"
+          }
+        },
+        "required": [
+          "resolution_command",
+          "receipt"
+        ],
+        "title": "InterventionResolve",
         "type": "object"
       },
       "InventoryAdjustRequest": {
@@ -10112,6 +10329,52 @@
           }
         },
         "title": "PrivacyUpdateRequest",
+        "type": "object"
+      },
+      "ProcessStart": {
+        "properties": {
+          "business_key": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Business Key",
+            "type": "string"
+          },
+          "context": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Context",
+            "type": "object"
+          },
+          "process_code": {
+            "pattern": "^[a-z0-9][a-z0-9-]{2,127}$",
+            "title": "Process Code",
+            "type": "string"
+          },
+          "source_entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Entity Id"
+          },
+          "source_entity_type": {
+            "pattern": "^[a-z][a-z0-9_]{1,63}$",
+            "title": "Source Entity Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "process_code",
+          "business_key",
+          "source_entity_type"
+        ],
+        "title": "ProcessStart",
         "type": "object"
       },
       "ProductCreateRequest": {
@@ -13905,6 +14168,26 @@
         "title": "SignatureRevocationRequest",
         "type": "object"
       },
+      "SimulationRequest": {
+        "properties": {
+          "scenario_code": {
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Scenario Code",
+            "type": "string"
+          },
+          "synthetic_seed": {
+            "default": 1,
+            "title": "Synthetic Seed",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "scenario_code"
+        ],
+        "title": "SimulationRequest",
+        "type": "object"
+      },
       "SiteSettingRequest": {
         "properties": {
           "is_public": {
@@ -14349,6 +14632,53 @@
           "to_stage_code"
         ],
         "title": "StageProposalRequest",
+        "type": "object"
+      },
+      "StepBegin": {
+        "properties": {
+          "idempotency_key": {
+            "maxLength": 255,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "input": {
+            "additionalProperties": true,
+            "title": "Input",
+            "type": "object"
+          },
+          "step_code": {
+            "pattern": "^[a-z0-9][a-z0-9-]{1,127}$",
+            "title": "Step Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "step_code",
+          "idempotency_key"
+        ],
+        "title": "StepBegin",
+        "type": "object"
+      },
+      "StepComplete": {
+        "properties": {
+          "idempotency_key": {
+            "maxLength": 255,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "receipt": {
+            "additionalProperties": true,
+            "title": "Receipt",
+            "type": "object"
+          }
+        },
+        "required": [
+          "idempotency_key",
+          "receipt"
+        ],
+        "title": "StepComplete",
         "type": "object"
       },
       "StrategyCreateRequest": {
@@ -45803,6 +46133,753 @@
         "summary": "Run Retention",
         "tags": [
           "privacy-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/processes/certifications/evaluate": {
+      "post": {
+        "operationId": "evaluate_certification_api_v1_admin_processes_certifications_evaluate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CertificationEvaluate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Evaluate Certification Api V1 Admin Processes Certifications Evaluate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Evaluate Certification",
+        "tags": [
+          "process-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/processes/certifications/{certification_id}/decide": {
+      "post": {
+        "operationId": "decide_certification_api_v1_admin_processes_certifications__certification_id__decide_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "certification_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Certification Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CertificationDecision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Decide Certification Api V1 Admin Processes Certifications  Certification Id  Decide Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Decide Certification",
+        "tags": [
+          "process-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/processes/dashboard": {
+      "get": {
+        "operationId": "dashboard_api_v1_admin_processes_dashboard_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Dashboard Api V1 Admin Processes Dashboard Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dashboard",
+        "tags": [
+          "process-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/processes/instances": {
+      "post": {
+        "operationId": "start_instance_api_v1_admin_processes_instances_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessStart"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Start Instance Api V1 Admin Processes Instances Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Start Instance",
+        "tags": [
+          "process-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/processes/instances/{instance_id}": {
+      "get": {
+        "operationId": "instance_detail_api_v1_admin_processes_instances__instance_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "instance_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Instance Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Instance Detail Api V1 Admin Processes Instances  Instance Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Instance Detail",
+        "tags": [
+          "process-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/processes/instances/{instance_id}/cancel": {
+      "post": {
+        "operationId": "cancel_process_api_v1_admin_processes_instances__instance_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "instance_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Instance Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancellationCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Cancel Process Api V1 Admin Processes Instances  Instance Id  Cancel Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Cancel Process",
+        "tags": [
+          "process-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/processes/instances/{instance_id}/compensations": {
+      "post": {
+        "operationId": "request_compensation_api_v1_admin_processes_instances__instance_id__compensations_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "instance_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Instance Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompensationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Request Compensation Api V1 Admin Processes Instances  Instance Id  Compensations Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Request Compensation",
+        "tags": [
+          "process-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/processes/instances/{instance_id}/events": {
+      "post": {
+        "operationId": "receive_event_api_v1_admin_processes_instances__instance_id__events_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "instance_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Instance Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventReceive"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Receive Event Api V1 Admin Processes Instances  Instance Id  Events Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Receive Event",
+        "tags": [
+          "process-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/processes/instances/{instance_id}/steps/begin": {
+      "post": {
+        "operationId": "begin_step_api_v1_admin_processes_instances__instance_id__steps_begin_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "instance_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Instance Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StepBegin"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Begin Step Api V1 Admin Processes Instances  Instance Id  Steps Begin Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Begin Step",
+        "tags": [
+          "process-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/processes/instances/{instance_id}/steps/complete": {
+      "post": {
+        "operationId": "complete_step_api_v1_admin_processes_instances__instance_id__steps_complete_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "instance_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Instance Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StepComplete"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Complete Step Api V1 Admin Processes Instances  Instance Id  Steps Complete Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Complete Step",
+        "tags": [
+          "process-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/processes/interventions/{task_id}/resolve": {
+      "post": {
+        "operationId": "resolve_intervention_api_v1_admin_processes_interventions__task_id__resolve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Task Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InterventionResolve"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Resolve Intervention Api V1 Admin Processes Interventions  Task Id  Resolve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Resolve Intervention",
+        "tags": [
+          "process-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/processes/simulations": {
+      "post": {
+        "operationId": "run_simulation_api_v1_admin_processes_simulations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimulationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Run Simulation Api V1 Admin Processes Simulations Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Run Simulation",
+        "tags": [
+          "process-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/processes/state-machines/verify": {
+      "post": {
+        "operationId": "verify_state_machines_api_v1_admin_processes_state_machines_verify_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Verify State Machines Api V1 Admin Processes State Machines Verify Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Verify State Machines",
+        "tags": [
+          "process-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/processes/stuck/scan": {
+      "post": {
+        "operationId": "scan_stuck_api_v1_admin_processes_stuck_scan_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Scan Stuck Api V1 Admin Processes Stuck Scan Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Scan Stuck",
+        "tags": [
+          "process-governance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/processes/{section}": {
+      "get": {
+        "operationId": "section_api_v1_admin_processes__section__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "section",
+            "required": true,
+            "schema": {
+              "title": "Section",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Section Api V1 Admin Processes  Section  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Section",
+        "tags": [
+          "process-governance-admin"
         ]
       }
     },

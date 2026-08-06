@@ -1,0 +1,82 @@
+schema_version: "1.0"
+machines:
+  - code: order
+    module: commerce
+    aggregate: Order
+    initial: pending
+    states: {pending: active, awaiting_payment: waiting, paid: active, fulfilled: success_terminal, cancelled: cancelled_terminal, expired: expired_terminal, failed: failure_terminal}
+    transitions:
+      - {code: await-payment, from: [pending], to: awaiting_payment, command: commerce.order.await_payment, actors: [system], idempotent: true, concurrency: optimistic_lock, timeout: 1800}
+      - {code: confirm-payment, from: [awaiting_payment], to: paid, command: commerce.payment.confirm, actors: [provider], idempotent: true, concurrency: unique_constraint}
+      - {code: fulfill, from: [paid], to: fulfilled, command: commerce.order.fulfill, actors: [system], idempotent: true, concurrency: optimistic_lock}
+      - {code: cancel, from: [pending, awaiting_payment], to: cancelled, command: commerce.order.cancel, actors: [user, system], idempotent: true, concurrency: pessimistic_lock}
+      - {code: expire, from: [awaiting_payment], to: expired, command: commerce.order.expire, actors: [system], idempotent: true, concurrency: advisory_lock}
+      - {code: provider-failure, from: [awaiting_payment], to: failed, command: commerce.order.fail_payment, actors: [system], idempotent: true, concurrency: optimistic_lock}
+  - code: activity-registration
+    module: activities
+    aggregate: ActivityRegistration
+    initial: requested
+    states: {requested: initial, held: waiting, confirmed: success_terminal, waitlisted: active, cancelled: cancelled_terminal, expired: expired_terminal, failed: failure_terminal}
+    transitions:
+      - {code: hold, from: [requested], to: held, command: activities.registration.hold, actors: [user], idempotent: true, concurrency: atomic_counter, timeout: 900}
+      - {code: confirm, from: [held], to: confirmed, command: activities.registration.confirm, actors: [system], idempotent: true, concurrency: pessimistic_lock}
+      - {code: cancel, from: [requested, held, waitlisted], to: cancelled, command: activities.registration.cancel, actors: [user, system], idempotent: true, concurrency: pessimistic_lock}
+      - {code: expire, from: [held], to: expired, command: activities.registration.expire, actors: [system], idempotent: true, concurrency: advisory_lock}
+      - {code: validation-failure, from: [requested], to: failed, command: activities.registration.reject, actors: [system], idempotent: true, concurrency: optimistic_lock}
+      - {code: waitlist, from: [requested], to: waitlisted, command: activities.registration.waitlist, actors: [user, system], idempotent: true, concurrency: unique_constraint}
+      - {code: promote-waitlist, from: [waitlisted], to: confirmed, command: activities.registration.promote, actors: [system], idempotent: true, concurrency: atomic_counter}
+  - code: counseling-appointment
+    module: counseling
+    aggregate: CounselingAppointment
+    initial: requested
+    states: {requested: initial, slot_held: waiting, confirmed: success_terminal, cancelled: cancelled_terminal, expired: expired_terminal, manual_review: manual_intervention, failed: failure_terminal}
+    transitions:
+      - {code: hold-slot, from: [requested], to: slot_held, command: counseling.appointment.hold, actors: [user], idempotent: true, concurrency: unique_constraint, timeout: 900}
+      - {code: confirm, from: [slot_held], to: confirmed, command: counseling.appointment.confirm, actors: [counselor, system], idempotent: true, concurrency: pessimistic_lock}
+      - {code: cancel, from: [requested, slot_held], to: cancelled, command: counseling.appointment.cancel, actors: [user, system], idempotent: true, concurrency: pessimistic_lock}
+      - {code: expire, from: [slot_held], to: expired, command: counseling.appointment.expire, actors: [system], idempotent: true, concurrency: advisory_lock}
+      - {code: escalate, from: [slot_held], to: manual_review, command: counseling.appointment.escalate, actors: [system], idempotent: true, concurrency: optimistic_lock}
+      - {code: resolve-manual, from: [manual_review], to: confirmed, command: counseling.appointment.resolve, actors: [counselor], idempotent: true, concurrency: pessimistic_lock, timeout: 86400}
+      - {code: provider-failure, from: [slot_held, manual_review], to: failed, command: counseling.appointment.fail, actors: [system, counselor], idempotent: true, concurrency: optimistic_lock}
+  - code: matchmaking-interaction
+    module: matchmaking_interactions
+    aggregate: MatchmakingPair
+    initial: introduced
+    states: {introduced: initial, one_sided_like: waiting, mutual_match: success_terminal, declined: failure_terminal, blocked: safety_restricted, expired: expired_terminal, cancelled: cancelled_terminal}
+    transitions:
+      - {code: like, from: [introduced], to: one_sided_like, command: interactions.like.record, actors: [user], idempotent: true, concurrency: unique_constraint, timeout: 2592000}
+      - {code: reciprocate, from: [one_sided_like], to: mutual_match, command: interactions.match.create, actors: [other_party], idempotent: true, concurrency: advisory_lock}
+      - {code: decline, from: [introduced, one_sided_like], to: declined, command: interactions.decline.record, actors: [user], idempotent: true, concurrency: unique_constraint}
+      - {code: safety-block, from: [introduced, one_sided_like], to: blocked, command: safety.block.enforce, actors: [system], idempotent: true, concurrency: serialized_queue}
+      - {code: expire, from: [one_sided_like], to: expired, command: interactions.like.expire, actors: [system], idempotent: true, concurrency: advisory_lock}
+      - {code: cancel, from: [introduced], to: cancelled, command: interactions.introduction.cancel, actors: [user, system], idempotent: true, concurrency: optimistic_lock}
+  - code: privacy-request
+    module: privacy
+    aggregate: PrivacyRequest
+    initial: submitted
+    states: {submitted: initial, verified: active, processing: active, waiting_dependency: waiting, completed: success_terminal, rejected: failure_terminal, cancelled: cancelled_terminal, expired: expired_terminal, manual_review: manual_intervention}
+    transitions:
+      - {code: verify, from: [submitted], to: verified, command: privacy.request.verify, actors: [privacy_operator], idempotent: true, concurrency: optimistic_lock}
+      - {code: process, from: [verified], to: processing, command: privacy.request.process, actors: [system], idempotent: true, concurrency: advisory_lock}
+      - {code: wait, from: [processing], to: waiting_dependency, command: privacy.request.wait_dependency, actors: [system], idempotent: true, concurrency: optimistic_lock, timeout: 86400}
+      - {code: complete, from: [processing, waiting_dependency], to: completed, command: privacy.request.complete, actors: [system], idempotent: true, concurrency: optimistic_lock}
+      - {code: escalate, from: [waiting_dependency], to: manual_review, command: privacy.request.escalate, actors: [system], idempotent: true, concurrency: optimistic_lock}
+      - {code: cancel, from: [submitted], to: cancelled, command: privacy.request.cancel, actors: [user], idempotent: true, concurrency: optimistic_lock}
+      - {code: expire, from: [submitted], to: expired, command: privacy.request.expire, actors: [system], idempotent: true, concurrency: advisory_lock}
+      - {code: reject, from: [submitted], to: rejected, command: privacy.request.reject, actors: [privacy_operator], idempotent: true, concurrency: optimistic_lock}
+      - {code: resolve-manual, from: [manual_review], to: processing, command: privacy.request.resume, actors: [privacy_operator], idempotent: true, concurrency: optimistic_lock, timeout: 86400}
+  - code: relationship-journey
+    module: relationships
+    aggregate: RelationshipJourney
+    initial: proposed
+    states: {proposed: initial, awaiting_mutual_consent: waiting, active: active, paused: paused, ended: success_terminal, declined: failure_terminal, cancelled: cancelled_terminal, expired: expired_terminal, safety_frozen: safety_restricted}
+    transitions:
+      - {code: await-consent, from: [proposed], to: awaiting_mutual_consent, command: relationships.consent.request, actors: [user], idempotent: true, concurrency: unique_constraint, timeout: 604800}
+      - {code: activate, from: [awaiting_mutual_consent], to: active, command: relationships.journey.activate, actors: [other_party], idempotent: true, concurrency: advisory_lock}
+      - {code: pause, from: [active], to: paused, command: relationships.journey.pause, actors: [user], idempotent: true, concurrency: optimistic_lock}
+      - {code: resume, from: [paused], to: active, command: relationships.journey.resume, actors: [user, other_party], idempotent: true, concurrency: advisory_lock}
+      - {code: end, from: [active, paused], to: ended, command: relationships.journey.end, actors: [user], idempotent: true, concurrency: pessimistic_lock}
+      - {code: decline, from: [awaiting_mutual_consent], to: declined, command: relationships.consent.decline, actors: [other_party], idempotent: true, concurrency: unique_constraint}
+      - {code: expire, from: [awaiting_mutual_consent], to: expired, command: relationships.consent.expire, actors: [system], idempotent: true, concurrency: advisory_lock}
+      - {code: freeze, from: [proposed, awaiting_mutual_consent, active, paused], to: safety_frozen, command: safety.relationship.freeze, actors: [system], idempotent: true, concurrency: serialized_queue}
+      - {code: cancel, from: [proposed], to: cancelled, command: relationships.journey.cancel, actors: [user], idempotent: true, concurrency: optimistic_lock}

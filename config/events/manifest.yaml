@@ -31,3 +31,7 @@ events:
   experience.journey.changed.v1: {owner: experience, sensitivity: restricted}
   experience.handoff.changed.v1: {owner: experience, sensitivity: restricted}
   experience.dead_end.detected.v1: {owner: experience, sensitivity: internal}
+  process.instance.changed.v1: {owner: process_governance, sensitivity: restricted}
+  process.compensation.changed.v1: {owner: process_governance, sensitivity: restricted}
+  process.stuck.detected.v1: {owner: process_governance, sensitivity: internal}
+  process.certification.changed.v1: {owner: process_governance, sensitivity: internal}
