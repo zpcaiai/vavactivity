@@ -28,6 +28,13 @@ def main() -> int:
         (root / "schemas/skill-manifest.schema.json").read_text(encoding="utf-8")
     ):
         raise SystemExit("packaged and repository Skill manifest schemas have drifted")
+    extension_manifest_schema = (
+        root / "extensions/vav-skills-vscode/schemas/skill-manifest.schema.json"
+    )
+    if json.loads(extension_manifest_schema.read_text(encoding="utf-8")) != json.loads(
+        (root / "schemas/skill-manifest.schema.json").read_text(encoding="utf-8")
+    ):
+        raise SystemExit("VS Code and repository Skill manifest schemas have drifted")
 
     manifests = sorted((root / "skill-packs").glob("*/*/skill.yaml"))
     if not manifests:
@@ -37,7 +44,7 @@ def main() -> int:
             manifest, schema_path=root / "schemas/skill-manifest.schema.json"
         )
     print(
-        f"Skill schema validation PASS: {len(schema_paths)} schemas, {len(manifests)} packages, packaged manifest synchronized"
+        f"Skill schema validation PASS: {len(schema_paths)} schemas, {len(manifests)} packages, packaged manifests synchronized"
     )
     return 0
 

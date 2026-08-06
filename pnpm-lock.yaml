@@ -134,6 +134,8 @@ importers:
         specifier: 3.0.4
         version: 3.0.4(typescript@5.8.3)
 
+  extensions/vav-skills-vscode: {}
+
   packages/api-client:
     devDependencies:
       openapi-typescript:
