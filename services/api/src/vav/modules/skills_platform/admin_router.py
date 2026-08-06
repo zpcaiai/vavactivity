@@ -15,15 +15,127 @@ from vav.modules.identity.dependencies import AuthenticatedPrincipal
 from vav.modules.identity.permissions import require_permission
 from vav.modules.skills_platform import service
 from vav.modules.skills_platform.schemas import (
+    AppealDecisionRequest,
+    AppealRequest,
     CreateInstallationRequest,
+    CreatePublisherRequest,
     InstallationReasonRequest,
     InstallPlanRequest,
     MarketplaceListingRequest,
+    PublisherDecisionRequest,
+    PublishSkillVersionRequest,
     ReviewDecisionRequest,
+    SecurityReviewRequest,
+    SignatureRevocationRequest,
     UpgradeInstallationRequest,
 )
 
 router = APIRouter(prefix="/admin")
+
+
+@router.get("/skills/publishers")
+async def publishers(
+    request: Request,
+    _principal: AuthenticatedPrincipal = Depends(require_permission("skills.publishers.read")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    return success(await service.list_publishers(session), request_id_from_request(request))
+
+
+@router.post("/skills/publishers")
+async def create_publisher(
+    payload: CreatePublisherRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(require_permission("skills.registry.publish")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    return success(
+        await service.create_publisher(session, principal.user.id, payload),
+        request_id_from_request(request),
+    )
+
+
+@router.post("/skills/publishers/{publisher_id}/verify")
+async def verify_publisher(
+    publisher_id: UUID,
+    payload: PublisherDecisionRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(require_permission("skills.publishers.verify")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    return success(
+        await service.decide_publisher(session, publisher_id, principal.user.id, payload),
+        request_id_from_request(request),
+    )
+
+
+@router.post("/skills/registry/versions")
+async def publish_registry_version(
+    payload: PublishSkillVersionRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(require_permission("skills.registry.publish")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    return success(
+        await service.publish_skill_version(session, principal.user.id, payload),
+        request_id_from_request(request),
+    )
+
+
+@router.post("/skills/registry/versions/{version_id}/security-review")
+async def review_registry_version(
+    version_id: UUID,
+    payload: SecurityReviewRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(require_permission("skills.security.read")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    return success(
+        await service.review_skill_version_security(
+            session, version_id, principal.user.id, payload
+        ),
+        request_id_from_request(request),
+    )
+
+
+@router.post("/skills/registry/versions/{version_id}/quarantine")
+async def quarantine_registry_version(
+    version_id: UUID,
+    payload: InstallationReasonRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(require_permission("skills.security.quarantine")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    return success(
+        await service.quarantine_skill_version(
+            session, version_id, principal.user.id, payload.reason_code
+        ),
+        request_id_from_request(request),
+    )
+
+
+@router.post("/skills/signature-revocations")
+async def revoke_registry_signature(
+    payload: SignatureRevocationRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(
+        require_permission("skills.security.revoke_signature")
+    ),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    return success(
+        await service.revoke_signature(session, principal.user.id, payload),
+        request_id_from_request(request),
+    )
+
+
+@router.get("/skills/incidents")
+async def skill_security_incidents(
+    request: Request,
+    _principal: AuthenticatedPrincipal = Depends(require_permission("skills.incidents.read")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    return success(await service.list_security_incidents(session), request_id_from_request(request))
 
 
 @router.post("/skill-installations/plans")
@@ -271,5 +383,47 @@ async def suspend_marketplace(
 ) -> dict[str, Any]:
     return success(
         await service.suspend_listing(session, listing_id, principal.user.id, payload.reason_code),
+        request_id_from_request(request),
+    )
+
+
+@router.post("/skills/marketplace/{listing_id}/remove")
+async def remove_marketplace(
+    listing_id: UUID,
+    payload: InstallationReasonRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(require_permission("skills.marketplace.remove")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    return success(
+        await service.remove_listing(session, listing_id, principal.user.id, payload.reason_code),
+        request_id_from_request(request),
+    )
+
+
+@router.post("/skills/marketplace/{listing_id}/appeals")
+async def appeal_marketplace(
+    listing_id: UUID,
+    payload: AppealRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(require_permission("skills.marketplace.submit")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    return success(
+        await service.create_appeal(session, listing_id, principal.user.id, payload),
+        request_id_from_request(request),
+    )
+
+
+@router.post("/skills/marketplace/appeals/{appeal_id}/decision")
+async def decide_marketplace_appeal(
+    appeal_id: UUID,
+    payload: AppealDecisionRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(require_permission("skills.marketplace.review")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    return success(
+        await service.decide_appeal(session, appeal_id, principal.user.id, payload),
         request_id_from_request(request),
     )

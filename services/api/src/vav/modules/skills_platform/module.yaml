@@ -1,6 +1,6 @@
 module: {code: skills_platform, owner: platform_engineering, version: "1.0.0"}
 dependencies: {required: [identity, privacy, system]}
-database: {revisions: [84, 85]}
+database: {revisions: [84, 85, 86]}
 events: {publishes: [skill.installation.changed.v1, skill.execution.changed.v1, skill.marketplace.changed.v1], consumes: []}
 permissions: {prefixes: [skills.]}
 configuration: {prefixes: [SKILL_]}

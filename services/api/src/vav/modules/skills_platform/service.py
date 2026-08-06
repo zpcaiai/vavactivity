@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 from datetime import UTC, datetime, timedelta
@@ -17,12 +18,24 @@ from vav.common.exceptions import VavError
 from vav.core.config import get_settings
 from vav.modules.privacy.crypto import decrypt_private, encrypt_private
 from vav.modules.skills_platform.marketplace_review import automated_review
+from vav.modules.skills_platform.registry_ingestion import (
+    SkillArtifactStore,
+    canonical_signing_key,
+    skill_artifact_store,
+    validate_release,
+)
 from vav.modules.skills_platform.schemas import (
+    AppealDecisionRequest,
     AppealRequest,
+    CreatePublisherRequest,
     ExecuteSkillRequest,
     InstallPlanRequest,
     MarketplaceListingRequest,
+    PublisherDecisionRequest,
+    PublishSkillVersionRequest,
     ReviewDecisionRequest,
+    SecurityReviewRequest,
+    SignatureRevocationRequest,
     UpgradeInstallationRequest,
 )
 
@@ -721,6 +734,357 @@ async def cancel_execution(
     return _mapping(row)
 
 
+async def create_publisher(
+    session: AsyncSession, actor_id: UUID, payload: CreatePublisherRequest
+) -> dict[str, Any]:
+    key_manifest = canonical_signing_key(payload.key_id, payload.public_key_pem)
+    await session.execute(
+        text("SELECT pg_advisory_xact_lock(hashtextextended(:code,0))"),
+        {"code": payload.publisher_code},
+    )
+    if await session.scalar(
+        text("SELECT EXISTS (SELECT 1 FROM skill_publishers WHERE publisher_code=:code)"),
+        {"code": payload.publisher_code},
+    ):
+        raise VavError(
+            "SKILL_PUBLISHER_EXISTS", "Publisher code is already registered.", status_code=409
+        )
+    row = (
+        await session.execute(
+            text(
+                "INSERT INTO skill_publishers (publisher_code,display_name,publisher_type,verification_status,"
+                "signing_key_manifest,status,created_by) VALUES (:code,:name,:type,'pending',"
+                "CAST(:keys AS jsonb),'active',:actor) RETURNING id,publisher_code,display_name,publisher_type,"
+                "verification_status,status,created_at"
+            ),
+            {
+                "code": payload.publisher_code,
+                "name": payload.display_name,
+                "type": payload.publisher_type,
+                "keys": _json(key_manifest),
+                "actor": actor_id,
+            },
+        )
+    ).first()
+    if row is None:
+        raise VavError("SKILL_PUBLISHER_CREATE_FAILED", "Publisher could not be created.")
+    await session.execute(
+        text(
+            "INSERT INTO skill_publisher_members (publisher_id,user_id,member_role) "
+            "VALUES (:publisher,:actor,'owner')"
+        ),
+        {"publisher": row.id, "actor": actor_id},
+    )
+    await _audit(session, actor_id, "skill.publisher.created", "skill_publisher", row.id)
+    await session.commit()
+    return _mapping(row)
+
+
+async def list_publishers(session: AsyncSession) -> list[dict[str, Any]]:
+    rows = (
+        await session.execute(
+            text(
+                "SELECT id,publisher_code,display_name,publisher_type,verification_status,status,"
+                "created_at,verified_at,suspended_at FROM skill_publishers ORDER BY created_at DESC"
+            )
+        )
+    ).mappings()
+    return [dict(row) for row in rows]
+
+
+async def decide_publisher(
+    session: AsyncSession,
+    publisher_id: UUID,
+    actor_id: UUID,
+    payload: PublisherDecisionRequest,
+) -> dict[str, Any]:
+    row = (
+        await session.execute(
+            text(
+                "UPDATE skill_publishers SET verification_status=CAST(:decision AS varchar),"
+                "verified_at=CASE WHEN CAST(:decision AS varchar)='verified' THEN now() ELSE NULL END "
+                "WHERE id=:id AND verification_status='pending' AND COALESCE(created_by,:actor)<>:actor "
+                "AND NOT EXISTS (SELECT 1 FROM skill_publisher_members m WHERE m.publisher_id=:id "
+                "AND m.user_id=:actor AND m.status='active') "
+                "RETURNING id,publisher_code,display_name,publisher_type,verification_status,status,verified_at"
+            ),
+            {"decision": payload.decision, "id": publisher_id, "actor": actor_id},
+        )
+    ).first()
+    if row is None:
+        raise VavError(
+            "SKILL_PUBLISHER_REVIEW_REJECTED",
+            "Publisher verification requires an independent pending review.",
+            status_code=409,
+        )
+    await _audit(
+        session,
+        actor_id,
+        f"skill.publisher.{payload.decision}",
+        "skill_publisher",
+        publisher_id,
+        {"reason_code": payload.reason_code},
+    )
+    await session.commit()
+    return _mapping(row)
+
+
+async def publish_skill_version(
+    session: AsyncSession,
+    actor_id: UUID,
+    payload: PublishSkillVersionRequest,
+    *,
+    artifact_store: SkillArtifactStore = skill_artifact_store,
+) -> dict[str, Any]:
+    publisher = (
+        (
+            await session.execute(
+                text(
+                    "SELECT p.* FROM skill_publishers p JOIN skill_publisher_members m "
+                    "ON m.publisher_id=p.id WHERE p.id=:publisher AND m.user_id=:actor "
+                    "AND m.status='active' AND m.member_role IN ('owner','release_manager') "
+                    "AND p.status='active' AND p.verification_status='verified'"
+                ),
+                {"publisher": payload.publisher_id, "actor": actor_id},
+            )
+        )
+        .mappings()
+        .first()
+    )
+    if publisher is None:
+        raise VavError(
+            "SKILL_PUBLISHER_NOT_AUTHORIZED",
+            "A verified publisher release manager is required.",
+            status_code=403,
+        )
+    metadata = payload.manifest.get("metadata", {})
+    if metadata.get("publisher") != publisher["publisher_code"]:
+        raise VavError(
+            "SKILL_PUBLISHER_MISMATCH",
+            "Manifest publisher does not match the authenticated publisher.",
+            status_code=422,
+        )
+    revoked = await session.scalar(
+        text(
+            "SELECT EXISTS (SELECT 1 FROM skill_signature_revocations WHERE publisher_id=:publisher "
+            "AND key_id=:key AND (package_checksum IS NULL OR package_checksum=:checksum))"
+        ),
+        {
+            "publisher": payload.publisher_id,
+            "key": payload.signature_envelope.get("keyId", ""),
+            "checksum": payload.package_checksum,
+        },
+    )
+    if revoked:
+        raise VavError(
+            "SKILL_SIGNATURE_REVOKED", "The package signing key was revoked.", status_code=409
+        )
+    release = await asyncio.to_thread(
+        validate_release,
+        package_base64=payload.package_base64,
+        package_checksum=payload.package_checksum,
+        manifest=payload.manifest,
+        signature_envelope=payload.signature_envelope,
+        sbom=payload.sbom,
+        provenance=payload.provenance,
+        schemas={
+            "input": payload.input_schema,
+            "output": payload.output_schema,
+            "error": payload.error_schema,
+        },
+        signing_key_manifest=publisher["signing_key_manifest"],
+    )
+    await session.execute(
+        text("SELECT pg_advisory_xact_lock(hashtextextended(:name,0))"),
+        {"name": release.manifest["metadata"]["name"]},
+    )
+    existing = (
+        (
+            await session.execute(
+                text(
+                    "SELECT s.publisher_id,v.id AS version_id FROM registered_skills s "
+                    "LEFT JOIN registered_skill_versions v ON v.registered_skill_id=s.id "
+                    "AND v.semantic_version=:version WHERE s.skill_name=:name"
+                ),
+                {
+                    "name": release.manifest["metadata"]["name"],
+                    "version": release.manifest["metadata"]["version"],
+                },
+            )
+        )
+        .mappings()
+        .first()
+    )
+    if existing and existing["publisher_id"] != payload.publisher_id:
+        raise VavError(
+            "SKILL_NAME_OWNED_BY_ANOTHER_PUBLISHER",
+            "Skill name is already owned by another publisher.",
+            status_code=409,
+        )
+    if existing and existing["version_id"] is not None:
+        raise VavError(
+            "SKILL_VERSION_EXISTS",
+            "This immutable Skill version is already registered.",
+            status_code=409,
+        )
+    artifact_reference = await artifact_store.put(release)
+    trust_level = {
+        "official": "official_signed",
+        "organization": "verified_publisher",
+        "verified_partner": "verified_publisher",
+        "community": "community_reviewed",
+    }[publisher["publisher_type"]]
+    skill = (
+        await session.execute(
+            text(
+                "INSERT INTO registered_skills (skill_name,publisher_id,display_name,description,skill_type,"
+                "visibility,trust_level,lifecycle_status) VALUES (:name,:publisher,:display,:description,:type,"
+                "'organization_private',:trust,'active') ON CONFLICT (skill_name) DO UPDATE SET "
+                "display_name=EXCLUDED.display_name,description=EXCLUDED.description,updated_at=now() "
+                "WHERE registered_skills.publisher_id=EXCLUDED.publisher_id RETURNING id"
+            ),
+            {
+                "name": metadata["name"],
+                "publisher": payload.publisher_id,
+                "display": metadata["displayName"],
+                "description": metadata["description"],
+                "type": payload.manifest["spec"]["type"],
+                "trust": trust_level,
+            },
+        )
+    ).first()
+    if skill is None:
+        raise VavError(
+            "SKILL_NAME_OWNED_BY_ANOTHER_PUBLISHER",
+            "Skill name is already owned by another publisher.",
+            status_code=409,
+        )
+    version = (
+        await session.execute(
+            text(
+                "INSERT INTO registered_skill_versions (registered_skill_id,semantic_version,manifest_version,"
+                "runtime_api_version,manifest,manifest_checksum,package_reference_encrypted,package_checksum,"
+                "sbom_reference_encrypted,provenance_reference_encrypted,signature_status,security_status,"
+                "review_status,compatibility_status,input_schema,output_schema,error_schema,submitted_by,"
+                "signature_key_id) VALUES (:skill,:version,:manifest_version,:runtime_version,CAST(:manifest AS jsonb),"
+                ":manifest_checksum,:package_ref,:package_checksum,:sbom_ref,:provenance_ref,'verified','pending',"
+                "'automated_review','pending',CAST(:input_schema AS jsonb),CAST(:output_schema AS jsonb),"
+                "CAST(:error_schema AS jsonb),:actor,:key_id) RETURNING id,registered_skill_id,semantic_version,"
+                "signature_status,security_status,review_status,compatibility_status,created_at"
+            ),
+            {
+                "skill": skill.id,
+                "version": metadata["version"],
+                "manifest_version": payload.manifest["spec"]["manifestVersion"],
+                "runtime_version": payload.manifest["spec"]["runtimeApiVersion"],
+                "manifest": _json(release.manifest),
+                "manifest_checksum": _checksum(release.manifest),
+                "package_ref": encrypt_private(artifact_reference),
+                "package_checksum": release.checksum,
+                "sbom_ref": encrypt_private({"sha256": _checksum(payload.sbom)}),
+                "provenance_ref": encrypt_private({"sha256": _checksum(payload.provenance)}),
+                "input_schema": _json(payload.input_schema),
+                "output_schema": _json(payload.output_schema),
+                "error_schema": _json(payload.error_schema),
+                "actor": actor_id,
+                "key_id": release.key_id,
+            },
+        )
+    ).first()
+    assert version is not None
+    for dependency_type in ("skills", "modules", "providers"):
+        for dependency in payload.manifest["spec"]["dependencies"].get(dependency_type, []):
+            name, constraint = next(iter(dependency.items()))
+            await session.execute(
+                text(
+                    "INSERT INTO skill_dependencies (skill_version_id,dependency_type,dependency_name,"
+                    "version_constraint,resolution_status) VALUES (:version,:type,:name,:constraint,'pending')"
+                ),
+                {
+                    "version": version.id,
+                    "type": dependency_type[:-1] if dependency_type != "skills" else "skill",
+                    "name": name,
+                    "constraint": constraint,
+                },
+            )
+    await session.execute(
+        text("UPDATE registered_skills SET latest_version_id=:version WHERE id=:skill"),
+        {"version": version.id, "skill": skill.id},
+    )
+    await _audit(
+        session,
+        actor_id,
+        "skill.version.submitted",
+        "registered_skill_version",
+        version.id,
+        {"package_checksum": release.checksum, "signature_key_id": release.key_id},
+    )
+    await session.commit()
+    return _mapping(version)
+
+
+async def review_skill_version_security(
+    session: AsyncSession,
+    version_id: UUID,
+    actor_id: UUID,
+    payload: SecurityReviewRequest,
+) -> dict[str, Any]:
+    review_status = (
+        "approved" if payload.decision in {"passed", "passed_with_warnings"} else "rejected"
+    )
+    compatibility_status = "compatible" if payload.compatible else "incompatible"
+    row = (
+        await session.execute(
+            text(
+                "UPDATE registered_skill_versions SET security_status=CAST(:decision AS varchar),"
+                "review_status=CAST(:review_status AS varchar),"
+                "compatibility_status=CAST(:compatibility AS varchar),security_reviewed_by=:actor,"
+                "security_report=CAST(:report AS jsonb),published_at=CASE WHEN "
+                "CAST(:review_status AS varchar)='approved' AND CAST(:compatibility AS varchar)='compatible' "
+                "THEN now() ELSE NULL END,quarantined_at=CASE WHEN CAST(:decision AS varchar)='failed' "
+                "THEN now() ELSE quarantined_at END,quarantine_reason_code=CASE WHEN "
+                "CAST(:decision AS varchar)='failed' THEN CAST(:reason AS varchar) "
+                "ELSE quarantine_reason_code END "
+                "WHERE id=:id AND security_status='pending' AND signature_status='verified' "
+                "AND COALESCE(submitted_by,:actor)<>:actor RETURNING *"
+            ),
+            {
+                "decision": payload.decision,
+                "review_status": review_status,
+                "compatibility": compatibility_status,
+                "actor": actor_id,
+                "report": _json(payload.report),
+                "reason": payload.reason_code,
+                "id": version_id,
+            },
+        )
+    ).first()
+    if row is None:
+        raise VavError(
+            "SKILL_SECURITY_REVIEW_REJECTED",
+            "Security review requires an independently submitted pending version.",
+            status_code=409,
+        )
+    if review_status == "approved" and compatibility_status == "compatible":
+        await session.execute(
+            text(
+                "UPDATE registered_skills SET current_stable_version_id=:version,latest_version_id=:version,"
+                "updated_at=now() WHERE id=:skill"
+            ),
+            {"version": version_id, "skill": row.registered_skill_id},
+        )
+    await _audit(
+        session,
+        actor_id,
+        "skill.version.security_reviewed",
+        "registered_skill_version",
+        version_id,
+        {"decision": payload.decision, "reason_code": payload.reason_code},
+    )
+    await session.commit()
+    return _mapping(row)
+
+
 async def submit_listing(
     session: AsyncSession, actor_id: UUID, payload: MarketplaceListingRequest
 ) -> dict[str, Any]:
@@ -915,25 +1279,206 @@ async def suspend_listing(
     return _mapping(row)
 
 
+async def _contain_version(
+    session: AsyncSession,
+    version_id: UUID,
+    actor_id: UUID,
+    reason_code: str,
+    *,
+    signature_revoked: bool,
+) -> None:
+    await session.execute(
+        text(
+            "UPDATE registered_skill_versions SET security_status='quarantined',quarantined_at=now(),"
+            "quarantine_reason_code=:reason,signature_status=CASE WHEN :revoked THEN 'revoked' "
+            "ELSE signature_status END,revoked_at=CASE WHEN :revoked THEN now() ELSE revoked_at END WHERE id=:id"
+        ),
+        {"reason": reason_code, "revoked": signature_revoked, "id": version_id},
+    )
+    await session.execute(
+        text(
+            "UPDATE skill_installations SET status='quarantined',disabled_at=now(),updated_at=now() "
+            "WHERE installed_version_id=:id AND status NOT IN ('uninstalled','quarantined')"
+        ),
+        {"id": version_id},
+    )
+    await session.execute(
+        text(
+            "UPDATE skill_executions SET status=CASE WHEN status='running' THEN 'cancel_requested' ELSE 'cancelled' END,"
+            "error_code='SKILL_VERSION_QUARANTINED',error_message_safe='Skill version was quarantined.',"
+            "updated_at=now() WHERE skill_version_id=:id AND status IN "
+            "('created','validating','authorizing','queued','running','waiting_for_dependency')"
+        ),
+        {"id": version_id},
+    )
+    await session.execute(
+        text(
+            "UPDATE marketplace_listings SET listing_status='removed',visibility='unlisted',suspended_at=now(),"
+            "updated_at=now() WHERE reviewed_version_id=:id AND listing_status<>'removed'"
+        ),
+        {"id": version_id},
+    )
+    await session.execute(
+        text(
+            "UPDATE registered_skills SET lifecycle_status='quarantined',trust_level='quarantined',updated_at=now() "
+            "WHERE id=(SELECT registered_skill_id FROM registered_skill_versions WHERE id=:id)"
+        ),
+        {"id": version_id},
+    )
+    await session.execute(
+        text(
+            "INSERT INTO skill_security_incidents (skill_version_id,severity,reason_code,evidence,created_by) "
+            "SELECT id,'critical',:reason,jsonb_build_object('package_checksum',package_checksum,"
+            "'signature_key_id',signature_key_id),:actor FROM registered_skill_versions WHERE id=:id"
+        ),
+        {"reason": reason_code, "actor": actor_id, "id": version_id},
+    )
+
+
+async def quarantine_skill_version(
+    session: AsyncSession, version_id: UUID, actor_id: UUID, reason_code: str
+) -> dict[str, Any]:
+    exists = await session.scalar(
+        text("SELECT EXISTS (SELECT 1 FROM registered_skill_versions WHERE id=:id)"),
+        {"id": version_id},
+    )
+    if not exists:
+        raise VavError("SKILL_VERSION_NOT_FOUND", "Skill version was not found.", status_code=404)
+    await _contain_version(session, version_id, actor_id, reason_code, signature_revoked=False)
+    await _audit(
+        session,
+        actor_id,
+        "skill.security.quarantined",
+        "registered_skill_version",
+        version_id,
+        {"reason_code": reason_code},
+    )
+    await session.commit()
+    return await version_detail(session, version_id)
+
+
+async def revoke_signature(
+    session: AsyncSession,
+    actor_id: UUID,
+    payload: SignatureRevocationRequest,
+) -> dict[str, Any]:
+    row = (
+        await session.execute(
+            text(
+                "INSERT INTO skill_signature_revocations (publisher_id,key_id,package_checksum,reason_code,"
+                "reason_encrypted,revoked_by) SELECT :publisher,:key,:checksum,:reason,:detail,:actor "
+                "WHERE EXISTS (SELECT 1 FROM skill_publishers WHERE id=:publisher) RETURNING *"
+            ),
+            {
+                "publisher": payload.publisher_id,
+                "key": payload.key_id,
+                "checksum": payload.package_checksum,
+                "reason": payload.reason_code,
+                "detail": encrypt_private(payload.reason),
+                "actor": actor_id,
+            },
+        )
+    ).first()
+    if row is None:
+        raise VavError("SKILL_PUBLISHER_NOT_FOUND", "Publisher was not found.", status_code=404)
+    versions = (
+        await session.execute(
+            text(
+                "SELECT v.id FROM registered_skill_versions v JOIN registered_skills s "
+                "ON s.id=v.registered_skill_id WHERE s.publisher_id=:publisher AND v.signature_key_id=:key "
+                "AND (CAST(:checksum AS varchar) IS NULL "
+                "OR v.package_checksum=CAST(:checksum AS varchar))"
+            ),
+            {
+                "publisher": payload.publisher_id,
+                "key": payload.key_id,
+                "checksum": payload.package_checksum,
+            },
+        )
+    ).all()
+    for version in versions:
+        await _contain_version(
+            session, version.id, actor_id, payload.reason_code, signature_revoked=True
+        )
+    await _audit(
+        session,
+        actor_id,
+        "skill.signature.revoked",
+        "skill_publisher",
+        payload.publisher_id,
+        {
+            "key_id": payload.key_id,
+            "package_checksum": payload.package_checksum,
+            "affected_versions": len(versions),
+        },
+    )
+    await session.commit()
+    result = _mapping(row)
+    result["affected_versions"] = len(versions)
+    return result
+
+
+async def list_security_incidents(session: AsyncSession) -> list[dict[str, Any]]:
+    rows = (
+        await session.execute(
+            text(
+                "SELECT i.id,i.skill_version_id,i.listing_id,i.severity,i.status,i.reason_code,i.evidence,"
+                "i.created_at,i.resolved_at,s.skill_name,v.semantic_version FROM skill_security_incidents i "
+                "LEFT JOIN registered_skill_versions v ON v.id=i.skill_version_id "
+                "LEFT JOIN registered_skills s ON s.id=v.registered_skill_id ORDER BY i.created_at DESC"
+            )
+        )
+    ).mappings()
+    return [dict(row) for row in rows]
+
+
+async def remove_listing(
+    session: AsyncSession, listing_id: UUID, actor_id: UUID, reason_code: str
+) -> dict[str, Any]:
+    row = (
+        await session.execute(
+            text(
+                "UPDATE marketplace_listings SET listing_status='removed',visibility='unlisted',"
+                "suspended_at=now(),updated_at=now() WHERE id=:id AND listing_status<>'removed' RETURNING *"
+            ),
+            {"id": listing_id},
+        )
+    ).first()
+    if row is None:
+        raise VavError("MARKETPLACE_STATE_CONFLICT", "Listing cannot be removed.", status_code=409)
+    await _audit(
+        session,
+        actor_id,
+        "skill.marketplace.removed",
+        "marketplace_listing",
+        listing_id,
+        {"reason_code": reason_code},
+    )
+    await session.commit()
+    return _mapping(row)
+
+
 async def create_appeal(
     session: AsyncSession,
     listing_id: UUID,
     actor_id: UUID,
-    publisher_id: UUID,
     payload: AppealRequest,
 ) -> dict[str, Any]:
     row = (
         await session.execute(
             text(
-                "INSERT INTO marketplace_appeals (listing_id,publisher_id,reason_code,statement_encrypted) "
-                "SELECT :listing,:publisher,:reason,:statement WHERE EXISTS (SELECT 1 FROM marketplace_listings "
-                "WHERE id=:listing AND listing_status IN ('changes_required','suspended','removed')) RETURNING *"
+                "INSERT INTO marketplace_appeals (listing_id,publisher_id,reason_code,statement_encrypted,submitted_by) "
+                "SELECT l.id,s.publisher_id,:reason,:statement,:actor FROM marketplace_listings l "
+                "JOIN registered_skills s ON s.id=l.registered_skill_id "
+                "JOIN skill_publisher_members m ON m.publisher_id=s.publisher_id AND m.user_id=:actor "
+                "WHERE l.id=:listing AND l.listing_status IN ('changes_required','suspended','removed') "
+                "AND m.status='active' RETURNING *"
             ),
             {
                 "listing": listing_id,
-                "publisher": publisher_id,
                 "reason": payload.reason_code,
-                "statement": payload.statement,
+                "statement": encrypt_private(payload.statement),
+                "actor": actor_id,
             },
         )
     ).first()
@@ -948,5 +1493,52 @@ async def create_appeal(
         {"id": listing_id},
     )
     await _audit(session, actor_id, "skill.marketplace.appealed", "marketplace_listing", listing_id)
+    await session.commit()
+    return _mapping(row)
+
+
+async def decide_appeal(
+    session: AsyncSession,
+    appeal_id: UUID,
+    actor_id: UUID,
+    payload: AppealDecisionRequest,
+) -> dict[str, Any]:
+    row = (
+        await session.execute(
+            text(
+                "UPDATE marketplace_appeals a SET status=:decision,decided_by=:actor,"
+                "decision_reason_encrypted=:reason,decided_at=now() WHERE a.id=:id AND a.status='pending' "
+                "AND COALESCE(a.submitted_by,:actor)<>:actor AND NOT EXISTS "
+                "(SELECT 1 FROM skill_publisher_members m WHERE m.publisher_id=a.publisher_id "
+                "AND m.user_id=:actor AND m.status='active') RETURNING *"
+            ),
+            {
+                "decision": payload.decision,
+                "actor": actor_id,
+                "reason": encrypt_private(payload.reason),
+                "id": appeal_id,
+            },
+        )
+    ).first()
+    if row is None:
+        raise VavError(
+            "MARKETPLACE_APPEAL_REVIEW_REJECTED",
+            "Appeal decision requires an independent pending review.",
+            status_code=409,
+        )
+    await session.execute(
+        text(
+            "UPDATE marketplace_listings SET listing_status=CASE WHEN :decision='accepted' "
+            "THEN 'human_review' ELSE 'suspended' END,updated_at=now() WHERE id=:listing"
+        ),
+        {"decision": payload.decision, "listing": row.listing_id},
+    )
+    await _audit(
+        session,
+        actor_id,
+        f"skill.marketplace.appeal_{payload.decision}",
+        "marketplace_listing",
+        row.listing_id,
+    )
     await session.commit()
     return _mapping(row)

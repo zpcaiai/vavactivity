@@ -96,3 +96,49 @@ class ReviewDecisionRequest(StrictRequest):
 class AppealRequest(StrictRequest):
     reason_code: str = Field(pattern=r"^[A-Z][A-Z0-9_]{2,127}$")
     statement: str = Field(min_length=20, max_length=5000)
+
+
+class CreatePublisherRequest(StrictRequest):
+    publisher_code: str = Field(pattern=r"^[a-z0-9][a-z0-9-]{1,126}[a-z0-9]$")
+    display_name: str = Field(min_length=1, max_length=300)
+    publisher_type: Literal["official", "organization", "verified_partner", "community"]
+    key_id: str = Field(pattern=r"^[A-Za-z0-9._:-]{3,255}$")
+    public_key_pem: str = Field(min_length=80, max_length=2000)
+
+
+class PublisherDecisionRequest(StrictRequest):
+    decision: Literal["verified", "rejected"]
+    reason_code: str = Field(pattern=r"^[A-Z][A-Z0-9_]{2,127}$")
+
+
+class PublishSkillVersionRequest(StrictRequest):
+    publisher_id: UUID
+    manifest: dict[str, Any]
+    package_base64: str = Field(min_length=16, max_length=14_000_000)
+    package_checksum: str = Field(pattern=r"^[0-9a-f]{64}$")
+    signature_envelope: dict[str, Any]
+    sbom: dict[str, Any]
+    provenance: dict[str, Any]
+    input_schema: dict[str, Any]
+    output_schema: dict[str, Any]
+    error_schema: dict[str, Any]
+
+
+class SecurityReviewRequest(StrictRequest):
+    decision: Literal["passed", "passed_with_warnings", "failed"]
+    compatible: bool
+    reason_code: str = Field(pattern=r"^[A-Z][A-Z0-9_]{2,127}$")
+    report: dict[str, Any]
+
+
+class SignatureRevocationRequest(StrictRequest):
+    publisher_id: UUID
+    key_id: str = Field(pattern=r"^[A-Za-z0-9._:-]{3,255}$")
+    package_checksum: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+    reason_code: str = Field(pattern=r"^[A-Z][A-Z0-9_]{2,127}$")
+    reason: str = Field(min_length=10, max_length=2000)
+
+
+class AppealDecisionRequest(StrictRequest):
+    decision: Literal["accepted", "rejected"]
+    reason: str = Field(min_length=10, max_length=2000)

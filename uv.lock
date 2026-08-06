@@ -1583,6 +1583,7 @@ dependencies = [
     { name = "fastapi" },
     { name = "greenlet" },
     { name = "httpx" },
+    { name = "jsonschema" },
     { name = "langgraph" },
     { name = "opentelemetry-api" },
     { name = "opentelemetry-exporter-otlp-proto-http" },
@@ -1598,6 +1599,7 @@ dependencies = [
     { name = "sqlalchemy" },
     { name = "structlog" },
     { name = "uvicorn", extra = ["standard"] },
+    { name = "vav-skill-sdk" },
 ]
 
 [package.dev-dependencies]
@@ -1619,6 +1621,7 @@ requires-dist = [
     { name = "fastapi", specifier = "==0.141.1" },
     { name = "greenlet", specifier = "==3.2.3" },
     { name = "httpx", specifier = "==0.28.1" },
+    { name = "jsonschema", specifier = "==4.25.1" },
     { name = "langgraph", specifier = "==1.2.9" },
     { name = "opentelemetry-api", specifier = "==1.36.0" },
     { name = "opentelemetry-exporter-otlp-proto-http", specifier = "==1.36.0" },
@@ -1634,6 +1637,7 @@ requires-dist = [
     { name = "sqlalchemy", specifier = "==2.0.42" },
     { name = "structlog", specifier = "==25.4.0" },
     { name = "uvicorn", extras = ["standard"], specifier = "==0.35.0" },
+    { name = "vav-skill-sdk", editable = "packages/skill-sdk-python" },
 ]
 
 [package.metadata.requires-dev]

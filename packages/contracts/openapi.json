@@ -968,56 +968,26 @@
         "title": "AppealCreateRequest",
         "type": "object"
       },
-      "AppealDecisionRequest": {
+      "AppealRequest": {
+        "additionalProperties": false,
         "properties": {
-          "internal_review": {
+          "reason_code": {
+            "pattern": "^[A-Z][A-Z0-9_]{2,127}$",
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "statement": {
             "maxLength": 5000,
-            "minLength": 3,
-            "title": "Internal Review",
-            "type": "string"
-          },
-          "modified_ends_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Modified Ends At"
-          },
-          "modified_scope_definition": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Modified Scope Definition"
-          },
-          "outcome": {
-            "pattern": "^(upheld|modified|overturned|ineligible)$",
-            "title": "Outcome",
-            "type": "string"
-          },
-          "outcome_message": {
-            "maxLength": 1000,
-            "minLength": 3,
-            "title": "Outcome Message",
+            "minLength": 20,
+            "title": "Statement",
             "type": "string"
           }
         },
         "required": [
-          "outcome",
-          "outcome_message",
-          "internal_review"
+          "reason_code",
+          "statement"
         ],
-        "title": "AppealDecisionRequest",
+        "title": "AppealRequest",
         "type": "object"
       },
       "AppointmentRequest": {
@@ -1770,7 +1740,7 @@
             "type": "string"
           },
           "file": {
-            "format": "binary",
+            "contentMediaType": "application/octet-stream",
             "title": "File",
             "type": "string"
           },
@@ -3847,6 +3817,78 @@
         "title": "CreateConversationRequest",
         "type": "object"
       },
+      "CreateInstallationRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "configuration": {
+            "additionalProperties": true,
+            "title": "Configuration",
+            "type": "object"
+          },
+          "expected_plan_checksum": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Expected Plan Checksum",
+            "type": "string"
+          },
+          "plan_id": {
+            "format": "uuid",
+            "title": "Plan Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "plan_id",
+          "expected_plan_checksum"
+        ],
+        "title": "CreateInstallationRequest",
+        "type": "object"
+      },
+      "CreatePublisherRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "display_name": {
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Display Name",
+            "type": "string"
+          },
+          "key_id": {
+            "pattern": "^[A-Za-z0-9._:-]{3,255}$",
+            "title": "Key Id",
+            "type": "string"
+          },
+          "public_key_pem": {
+            "maxLength": 2000,
+            "minLength": 80,
+            "title": "Public Key Pem",
+            "type": "string"
+          },
+          "publisher_code": {
+            "pattern": "^[a-z0-9][a-z0-9-]{1,126}[a-z0-9]$",
+            "title": "Publisher Code",
+            "type": "string"
+          },
+          "publisher_type": {
+            "enum": [
+              "official",
+              "organization",
+              "verified_partner",
+              "community"
+            ],
+            "title": "Publisher Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "publisher_code",
+          "display_name",
+          "publisher_type",
+          "key_id",
+          "public_key_pem"
+        ],
+        "title": "CreatePublisherRequest",
+        "type": "object"
+      },
       "DecisionRequest": {
         "properties": {
           "context": {
@@ -4275,6 +4317,63 @@
           "idempotency_key"
         ],
         "title": "ExecuteConfirmedToolRequest",
+        "type": "object"
+      },
+      "ExecuteSkillRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "deadline": {
+            "format": "date-time",
+            "title": "Deadline",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 8,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
+          "input": {
+            "additionalProperties": true,
+            "title": "Input",
+            "type": "object"
+          },
+          "invocation_source": {
+            "default": "internal_service",
+            "enum": [
+              "user_api",
+              "admin_api",
+              "agent",
+              "event",
+              "schedule",
+              "workflow",
+              "cli",
+              "ide",
+              "internal_service"
+            ],
+            "title": "Invocation Source",
+            "type": "string"
+          },
+          "version_constraint": {
+            "default": "*",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Version Constraint",
+            "type": "string"
+          }
+        },
+        "required": [
+          "input",
+          "deadline"
+        ],
+        "title": "ExecuteSkillRequest",
         "type": "object"
       },
       "ExerciseCreateRequest": {
@@ -5238,6 +5337,68 @@
           "occurred_at"
         ],
         "title": "IngestNotificationEventRequest",
+        "type": "object"
+      },
+      "InstallPlanRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "configuration": {
+            "additionalProperties": true,
+            "title": "Configuration",
+            "type": "object"
+          },
+          "environment": {
+            "enum": [
+              "development",
+              "test",
+              "ci",
+              "staging",
+              "production"
+            ],
+            "title": "Environment",
+            "type": "string"
+          },
+          "granted_permissions": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 100,
+            "title": "Granted Permissions",
+            "type": "array"
+          },
+          "semantic_version": {
+            "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$",
+            "title": "Semantic Version",
+            "type": "string"
+          },
+          "skill_name": {
+            "maxLength": 255,
+            "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)+$",
+            "title": "Skill Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "skill_name",
+          "semantic_version",
+          "environment"
+        ],
+        "title": "InstallPlanRequest",
+        "type": "object"
+      },
+      "InstallationReasonRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "reason_code": {
+            "pattern": "^[A-Z][A-Z0-9_]{2,127}$",
+            "title": "Reason Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason_code"
+        ],
+        "title": "InstallationReasonRequest",
         "type": "object"
       },
       "InstructorAssignmentRequest": {
@@ -6472,6 +6633,79 @@
           "expires_at"
         ],
         "title": "ManualGrantRequest",
+        "type": "object"
+      },
+      "MarketplaceListingRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "category_codes": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "minItems": 1,
+            "title": "Category Codes",
+            "type": "array"
+          },
+          "documentation_reference": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Documentation Reference"
+          },
+          "pricing_model": {
+            "default": "free",
+            "enum": [
+              "free",
+              "private_contract"
+            ],
+            "title": "Pricing Model",
+            "type": "string"
+          },
+          "privacy_disclosure": {
+            "additionalProperties": true,
+            "title": "Privacy Disclosure",
+            "type": "object"
+          },
+          "skill_name": {
+            "maxLength": 255,
+            "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)+$",
+            "title": "Skill Name",
+            "type": "string"
+          },
+          "summary_localizations": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Summary Localizations",
+            "type": "object"
+          },
+          "support_policy": {
+            "additionalProperties": true,
+            "title": "Support Policy",
+            "type": "object"
+          },
+          "version_id": {
+            "format": "uuid",
+            "title": "Version Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "skill_name",
+          "version_id",
+          "category_codes",
+          "summary_localizations",
+          "support_policy",
+          "privacy_disclosure"
+        ],
+        "title": "MarketplaceListingRequest",
         "type": "object"
       },
       "MediaCompleteRequest": {
@@ -9648,6 +9882,100 @@
         "title": "PublishRequest",
         "type": "object"
       },
+      "PublishSkillVersionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "error_schema": {
+            "additionalProperties": true,
+            "title": "Error Schema",
+            "type": "object"
+          },
+          "input_schema": {
+            "additionalProperties": true,
+            "title": "Input Schema",
+            "type": "object"
+          },
+          "manifest": {
+            "additionalProperties": true,
+            "title": "Manifest",
+            "type": "object"
+          },
+          "output_schema": {
+            "additionalProperties": true,
+            "title": "Output Schema",
+            "type": "object"
+          },
+          "package_base64": {
+            "maxLength": 14000000,
+            "minLength": 16,
+            "title": "Package Base64",
+            "type": "string"
+          },
+          "package_checksum": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Package Checksum",
+            "type": "string"
+          },
+          "provenance": {
+            "additionalProperties": true,
+            "title": "Provenance",
+            "type": "object"
+          },
+          "publisher_id": {
+            "format": "uuid",
+            "title": "Publisher Id",
+            "type": "string"
+          },
+          "sbom": {
+            "additionalProperties": true,
+            "title": "Sbom",
+            "type": "object"
+          },
+          "signature_envelope": {
+            "additionalProperties": true,
+            "title": "Signature Envelope",
+            "type": "object"
+          }
+        },
+        "required": [
+          "publisher_id",
+          "manifest",
+          "package_base64",
+          "package_checksum",
+          "signature_envelope",
+          "sbom",
+          "provenance",
+          "input_schema",
+          "output_schema",
+          "error_schema"
+        ],
+        "title": "PublishSkillVersionRequest",
+        "type": "object"
+      },
+      "PublisherDecisionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "decision": {
+            "enum": [
+              "verified",
+              "rejected"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "reason_code": {
+            "pattern": "^[A-Z][A-Z0-9_]{2,127}$",
+            "title": "Reason Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "reason_code"
+        ],
+        "title": "PublisherDecisionRequest",
+        "type": "object"
+      },
       "QuestionCreateRequest": {
         "properties": {
           "answer_key": {
@@ -10980,6 +11308,39 @@
         "title": "ReviewChangesRequest",
         "type": "object"
       },
+      "ReviewDecisionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "decision": {
+            "enum": [
+              "approved",
+              "changes_required",
+              "rejected"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "findings": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 100,
+            "title": "Findings",
+            "type": "array"
+          },
+          "reason_code": {
+            "pattern": "^[A-Z][A-Z0-9_]{2,127}$",
+            "title": "Reason Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "reason_code"
+        ],
+        "title": "ReviewDecisionRequest",
+        "type": "object"
+      },
       "ReviewEscalateRequest": {
         "properties": {
           "expected_version": {
@@ -11376,6 +11737,42 @@
         "title": "ScheduleRequest",
         "type": "object"
       },
+      "SecurityReviewRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "compatible": {
+            "title": "Compatible",
+            "type": "boolean"
+          },
+          "decision": {
+            "enum": [
+              "passed",
+              "passed_with_warnings",
+              "failed"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "reason_code": {
+            "pattern": "^[A-Z][A-Z0-9_]{2,127}$",
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "report": {
+            "additionalProperties": true,
+            "title": "Report",
+            "type": "object"
+          }
+        },
+        "required": [
+          "decision",
+          "compatible",
+          "reason_code",
+          "report"
+        ],
+        "title": "SecurityReviewRequest",
+        "type": "object"
+      },
       "SendMessageRequest": {
         "properties": {
           "client_message_id": {
@@ -11670,6 +12067,52 @@
           "ends_at"
         ],
         "title": "SessionCreateRequest",
+        "type": "object"
+      },
+      "SignatureRevocationRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "key_id": {
+            "pattern": "^[A-Za-z0-9._:-]{3,255}$",
+            "title": "Key Id",
+            "type": "string"
+          },
+          "package_checksum": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Package Checksum"
+          },
+          "publisher_id": {
+            "format": "uuid",
+            "title": "Publisher Id",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 10,
+            "title": "Reason",
+            "type": "string"
+          },
+          "reason_code": {
+            "pattern": "^[A-Z][A-Z0-9_]{2,127}$",
+            "title": "Reason Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "publisher_id",
+          "key_id",
+          "reason_code",
+          "reason"
+        ],
+        "title": "SignatureRevocationRequest",
         "type": "object"
       },
       "SiteSettingRequest": {
@@ -12971,6 +13414,35 @@
         "title": "UpdateNotificationPreferencesRequest",
         "type": "object"
       },
+      "UpgradeInstallationRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "granted_permissions": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 100,
+            "title": "Granted Permissions",
+            "type": "array"
+          },
+          "target_version_id": {
+            "format": "uuid",
+            "title": "Target Version Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_version_id",
+          "expected_version"
+        ],
+        "title": "UpgradeInstallationRequest",
+        "type": "object"
+      },
       "UploadCompleteRequest": {
         "properties": {
           "checksum_sha256": {
@@ -13101,6 +13573,13 @@
       },
       "ValidationError": {
         "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
           "loc": {
             "items": {
               "anyOf": [
@@ -13770,6 +14249,83 @@
           }
         },
         "title": "CheckinRequest",
+        "type": "object"
+      },
+      "vav__modules__skills_platform__schemas__AppealDecisionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "decision": {
+            "enum": [
+              "accepted",
+              "rejected"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 10,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "reason"
+        ],
+        "title": "AppealDecisionRequest",
+        "type": "object"
+      },
+      "vav__modules__trust_safety__schemas__AppealDecisionRequest": {
+        "properties": {
+          "internal_review": {
+            "maxLength": 5000,
+            "minLength": 3,
+            "title": "Internal Review",
+            "type": "string"
+          },
+          "modified_ends_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modified Ends At"
+          },
+          "modified_scope_definition": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modified Scope Definition"
+          },
+          "outcome": {
+            "pattern": "^(upheld|modified|overturned|ineligible)$",
+            "title": "Outcome",
+            "type": "string"
+          },
+          "outcome_message": {
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "Outcome Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "outcome",
+          "outcome_message",
+          "internal_review"
+        ],
+        "title": "AppealDecisionRequest",
         "type": "object"
       }
     },
@@ -43324,6 +43880,1458 @@
         ]
       }
     },
+    "/api/v1/admin/skill-executions": {
+      "get": {
+        "operationId": "executions_api_v1_admin_skill_executions_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Executions Api V1 Admin Skill Executions Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Executions",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skill-executions/{execution_id}": {
+      "get": {
+        "operationId": "execution_api_v1_admin_skill_executions__execution_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "execution_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Execution Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include_sensitive",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Include Sensitive",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Execution Api V1 Admin Skill Executions  Execution Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Execution",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skill-executions/{execution_id}/cancel": {
+      "post": {
+        "operationId": "cancel_execution_api_v1_admin_skill_executions__execution_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "execution_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Execution Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Cancel Execution Api V1 Admin Skill Executions  Execution Id  Cancel Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Cancel Execution",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skill-installations": {
+      "get": {
+        "operationId": "installations_api_v1_admin_skill_installations_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Installations Api V1 Admin Skill Installations Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Installations",
+        "tags": [
+          "skills-admin"
+        ]
+      },
+      "post": {
+        "operationId": "install_api_v1_admin_skill_installations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInstallationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Install Api V1 Admin Skill Installations Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Install",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skill-installations/plans": {
+      "post": {
+        "operationId": "install_plan_api_v1_admin_skill_installations_plans_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InstallPlanRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Install Plan Api V1 Admin Skill Installations Plans Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Install Plan",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skill-installations/{installation_id}": {
+      "get": {
+        "operationId": "installation_api_v1_admin_skill_installations__installation_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "installation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Installation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Installation Api V1 Admin Skill Installations  Installation Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Installation",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skill-installations/{installation_id}/activate": {
+      "post": {
+        "operationId": "activate_api_v1_admin_skill_installations__installation_id__activate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "installation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Installation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Activate Api V1 Admin Skill Installations  Installation Id  Activate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Activate",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skill-installations/{installation_id}/approve": {
+      "post": {
+        "operationId": "approve_api_v1_admin_skill_installations__installation_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "installation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Installation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Api V1 Admin Skill Installations  Installation Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skill-installations/{installation_id}/disable": {
+      "post": {
+        "operationId": "disable_api_v1_admin_skill_installations__installation_id__disable_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "installation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Installation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InstallationReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Disable Api V1 Admin Skill Installations  Installation Id  Disable Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Disable",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skill-installations/{installation_id}/rollback": {
+      "post": {
+        "operationId": "rollback_api_v1_admin_skill_installations__installation_id__rollback_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "installation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Installation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InstallationReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Rollback Api V1 Admin Skill Installations  Installation Id  Rollback Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rollback",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skill-installations/{installation_id}/uninstall": {
+      "post": {
+        "operationId": "uninstall_api_v1_admin_skill_installations__installation_id__uninstall_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "installation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Installation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InstallationReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Uninstall Api V1 Admin Skill Installations  Installation Id  Uninstall Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Uninstall",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skill-installations/{installation_id}/upgrade": {
+      "post": {
+        "operationId": "upgrade_api_v1_admin_skill_installations__installation_id__upgrade_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "installation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Installation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpgradeInstallationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Upgrade Api V1 Admin Skill Installations  Installation Id  Upgrade Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Upgrade",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skills/incidents": {
+      "get": {
+        "operationId": "skill_security_incidents_api_v1_admin_skills_incidents_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Skill Security Incidents Api V1 Admin Skills Incidents Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Skill Security Incidents",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skills/marketplace": {
+      "get": {
+        "operationId": "marketplace_api_v1_admin_skills_marketplace_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Marketplace Api V1 Admin Skills Marketplace Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Marketplace",
+        "tags": [
+          "skills-admin"
+        ]
+      },
+      "post": {
+        "operationId": "submit_marketplace_api_v1_admin_skills_marketplace_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarketplaceListingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Submit Marketplace Api V1 Admin Skills Marketplace Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Submit Marketplace",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skills/marketplace/appeals/{appeal_id}/decision": {
+      "post": {
+        "operationId": "decide_marketplace_appeal_api_v1_admin_skills_marketplace_appeals__appeal_id__decision_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "appeal_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Appeal Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/vav__modules__skills_platform__schemas__AppealDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Decide Marketplace Appeal Api V1 Admin Skills Marketplace Appeals  Appeal Id  Decision Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Decide Marketplace Appeal",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skills/marketplace/{listing_id}/appeals": {
+      "post": {
+        "operationId": "appeal_marketplace_api_v1_admin_skills_marketplace__listing_id__appeals_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "listing_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Listing Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppealRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Appeal Marketplace Api V1 Admin Skills Marketplace  Listing Id  Appeals Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Appeal Marketplace",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skills/marketplace/{listing_id}/publish": {
+      "post": {
+        "operationId": "publish_marketplace_api_v1_admin_skills_marketplace__listing_id__publish_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "listing_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Listing Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Publish Marketplace Api V1 Admin Skills Marketplace  Listing Id  Publish Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Publish Marketplace",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skills/marketplace/{listing_id}/remove": {
+      "post": {
+        "operationId": "remove_marketplace_api_v1_admin_skills_marketplace__listing_id__remove_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "listing_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Listing Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InstallationReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Remove Marketplace Api V1 Admin Skills Marketplace  Listing Id  Remove Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Remove Marketplace",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skills/marketplace/{listing_id}/review": {
+      "post": {
+        "operationId": "review_marketplace_api_v1_admin_skills_marketplace__listing_id__review_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "listing_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Listing Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Review Marketplace Api V1 Admin Skills Marketplace  Listing Id  Review Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Review Marketplace",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skills/marketplace/{listing_id}/suspend": {
+      "post": {
+        "operationId": "suspend_marketplace_api_v1_admin_skills_marketplace__listing_id__suspend_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "listing_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Listing Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InstallationReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Suspend Marketplace Api V1 Admin Skills Marketplace  Listing Id  Suspend Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Suspend Marketplace",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skills/publishers": {
+      "get": {
+        "operationId": "publishers_api_v1_admin_skills_publishers_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Publishers Api V1 Admin Skills Publishers Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Publishers",
+        "tags": [
+          "skills-admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_publisher_api_v1_admin_skills_publishers_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePublisherRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Publisher Api V1 Admin Skills Publishers Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Publisher",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skills/publishers/{publisher_id}/verify": {
+      "post": {
+        "operationId": "verify_publisher_api_v1_admin_skills_publishers__publisher_id__verify_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "publisher_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Publisher Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublisherDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Verify Publisher Api V1 Admin Skills Publishers  Publisher Id  Verify Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Verify Publisher",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skills/registry/versions": {
+      "post": {
+        "operationId": "publish_registry_version_api_v1_admin_skills_registry_versions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishSkillVersionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Publish Registry Version Api V1 Admin Skills Registry Versions Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Publish Registry Version",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skills/registry/versions/{version_id}/quarantine": {
+      "post": {
+        "operationId": "quarantine_registry_version_api_v1_admin_skills_registry_versions__version_id__quarantine_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InstallationReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Quarantine Registry Version Api V1 Admin Skills Registry Versions  Version Id  Quarantine Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Quarantine Registry Version",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skills/registry/versions/{version_id}/security-review": {
+      "post": {
+        "operationId": "review_registry_version_api_v1_admin_skills_registry_versions__version_id__security_review_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SecurityReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Review Registry Version Api V1 Admin Skills Registry Versions  Version Id  Security Review Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Review Registry Version",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/skills/signature-revocations": {
+      "post": {
+        "operationId": "revoke_registry_signature_api_v1_admin_skills_signature_revocations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignatureRevocationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Revoke Registry Signature Api V1 Admin Skills Signature Revocations Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Revoke Registry Signature",
+        "tags": [
+          "skills-admin"
+        ]
+      }
+    },
     "/api/v1/admin/system/backups": {
       "get": {
         "operationId": "list_system_backups_api_v1_admin_system_backups_get",
@@ -44522,7 +46530,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AppealDecisionRequest"
+                "$ref": "#/components/schemas/vav__modules__trust_safety__schemas__AppealDecisionRequest"
               }
             }
           },
@@ -48695,6 +50703,65 @@
         ]
       }
     },
+    "/api/v1/internal/skills/{skill_name}/execute": {
+      "post": {
+        "operationId": "execute_api_v1_internal_skills__skill_name__execute_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "skill_name",
+            "required": true,
+            "schema": {
+              "title": "Skill Name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteSkillRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Execute Api V1 Internal Skills  Skill Name  Execute Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Execute",
+        "tags": [
+          "skills"
+        ]
+      }
+    },
     "/api/v1/internal/trust-safety/decisions/{decision_context}": {
       "post": {
         "operationId": "safety_decision_api_v1_internal_trust_safety_decisions__decision_context__post",
@@ -51465,6 +53532,162 @@
         "summary": "Submit Report",
         "tags": [
           "trust-safety"
+        ]
+      }
+    },
+    "/api/v1/skill-versions/{version_id}": {
+      "get": {
+        "operationId": "version_api_v1_skill_versions__version_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Version Api V1 Skill Versions  Version Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Version",
+        "tags": [
+          "skills"
+        ]
+      }
+    },
+    "/api/v1/skills": {
+      "get": {
+        "operationId": "skills_api_v1_skills_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Skills Api V1 Skills Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Skills",
+        "tags": [
+          "skills"
+        ]
+      }
+    },
+    "/api/v1/skills/{skill_name}": {
+      "get": {
+        "operationId": "skill_api_v1_skills__skill_name__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "skill_name",
+            "required": true,
+            "schema": {
+              "title": "Skill Name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Skill Api V1 Skills  Skill Name  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Skill",
+        "tags": [
+          "skills"
+        ]
+      }
+    },
+    "/api/v1/skills/{skill_name}/versions": {
+      "get": {
+        "operationId": "versions_api_v1_skills__skill_name__versions_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "skill_name",
+            "required": true,
+            "schema": {
+              "title": "Skill Name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Versions Api V1 Skills  Skill Name  Versions Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Versions",
+        "tags": [
+          "skills"
         ]
       }
     },

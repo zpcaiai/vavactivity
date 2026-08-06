@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import argparse
+import base64
+import hashlib
 import json
 import os
 import shlex
@@ -12,6 +14,7 @@ from pathlib import Path
 from typing import Any, cast
 from urllib.parse import quote
 
+import yaml
 from jsonschema import Draft202012Validator  # type: ignore[import-untyped]
 
 from vav_skill_cli.api import SkillApiClient
@@ -134,6 +137,27 @@ def _remote(args: argparse.Namespace) -> object:
         return client.request("GET", f"/skills/{quote(args.name, safe='')}")
     if command == "versions":
         return client.request("GET", f"/skills/{quote(args.name, safe='')}/versions")
+    if command == "publish":
+        manifest = yaml.safe_load(Path(args.manifest).read_text(encoding="utf-8"))
+        if not isinstance(manifest, dict):
+            raise ValueError("manifest must be a YAML object")
+        package_payload = Path(args.package).read_bytes()
+        return client.request(
+            "POST",
+            "/admin/skills/registry/versions",
+            {
+                "publisher_id": args.publisher_id,
+                "manifest": manifest,
+                "package_base64": base64.b64encode(package_payload).decode(),
+                "package_checksum": hashlib.sha256(package_payload).hexdigest(),
+                "signature_envelope": json.loads(Path(args.signature).read_text(encoding="utf-8")),
+                "sbom": json.loads(Path(args.sbom).read_text(encoding="utf-8")),
+                "provenance": json.loads(Path(args.provenance).read_text(encoding="utf-8")),
+                "input_schema": _schema(args.input_schema),
+                "output_schema": _schema(args.output_schema),
+                "error_schema": _schema(args.error_schema),
+            },
+        )
     if command in {"list", "status"}:
         return client.request("GET", "/admin/skill-installations")
     if command in {"executions", "logs"}:
@@ -240,6 +264,16 @@ def parser() -> argparse.ArgumentParser:
     for name in ("info", "versions", "permissions", "dependencies"):
         item = commands.add_parser(name)
         item.add_argument("name")
+    publish = commands.add_parser("publish")
+    publish.add_argument("--publisher-id", required=True)
+    publish.add_argument("--manifest", default="skill.yaml")
+    publish.add_argument("--package", required=True)
+    publish.add_argument("--signature", required=True)
+    publish.add_argument("--sbom", required=True)
+    publish.add_argument("--provenance", required=True)
+    publish.add_argument("--input-schema", default="schemas/input.schema.json")
+    publish.add_argument("--output-schema", default="schemas/output.schema.json")
+    publish.add_argument("--error-schema", default="schemas/error.schema.json")
     for name in ("list", "status", "executions", "logs"):
         commands.add_parser(name)
     trace = commands.add_parser("trace")
