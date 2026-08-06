@@ -1,0 +1,17 @@
+schema_version: "1.0"
+journeys:
+  - {code: onboarding, steps: [{code: register, route: user.account}, {code: verify_email, route: user.account}, {code: discover, route: user.experience-home}]}
+  - {code: purchase, steps: [{code: discover, route: user.home}, {code: checkout, route: user.account}, {code: status, route: user.account}]}
+  - {code: activity, steps: [{code: discover, route: user.activities}, {code: register, route: user.activities}, {code: attend, route: user.activities}]}
+  - {code: course, steps: [{code: discover, route: user.courses}, {code: enroll, route: user.courses}, {code: learn, route: user.courses}]}
+  - {code: counseling, steps: [{code: discover, route: user.counseling}, {code: book, route: user.counseling}, {code: follow_up, route: user.counseling}]}
+  - {code: ai-discovery, steps: [{code: consent, route: user.ai}, {code: converse, route: user.ai}, {code: next_service, route: user.experience-home}]}
+  - {code: privacy-export, steps: [{code: request, route: user.privacy}, {code: verify, route: user.privacy}, {code: download, route: user.privacy}]}
+  - {code: privacy-erasure, steps: [{code: request, route: user.privacy}, {code: review, route: user.privacy}, {code: complete, route: user.privacy}]}
+  - {code: dating-profile, steps: [{code: consent, route: user.dating-profile}, {code: complete, route: user.dating-profile}, {code: review, route: user.dating-profile}]}
+  - {code: matchmaking-introduction, steps: [{code: recommendation, route: user.recommendations}, {code: invitation, route: user.matchmaking}, {code: response, route: user.matchmaking}]}
+  - {code: relationship, steps: [{code: enter, route: user.relationships}, {code: confirm, route: user.relationships}, {code: review, route: user.relationships}]}
+  - {code: membership, steps: [{code: compare, route: user.membership}, {code: purchase, route: user.account}, {code: manage, route: user.membership}]}
+  - {code: safety-report, steps: [{code: report, route: user.safety}, {code: status, route: user.safety}, {code: resolution, route: user.safety}]}
+  - {code: safety-appeal, steps: [{code: explain, route: user.safety}, {code: submit, route: user.safety}, {code: decision, route: user.safety}]}
+  - {code: skill-installation, steps: [{code: review, route: admin.skills.dashboard}, {code: install, route: admin.skills.dashboard}, {code: verify, route: admin.skills.dashboard}]}

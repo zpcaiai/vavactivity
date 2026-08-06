@@ -1,0 +1,29 @@
+schema_version: "1.0"
+ia_version: "23.0.0"
+spaces:
+  - {code: public, labels: {zh-CN: 发现服务, zh-TW: 發現服務, en: Discover}}
+  - {code: account, labels: {zh-CN: 账户, zh-TW: 帳戶, en: Account}}
+  - {code: services, labels: {zh-CN: 我的服务, zh-TW: 我的服務, en: My services}}
+  - {code: matchmaking, labels: {zh-CN: 婚恋, zh-TW: 婚戀, en: Matchmaking}}
+  - {code: safety_privacy, labels: {zh-CN: 安全与隐私, zh-TW: 安全與私隱, en: Safety and privacy}}
+  - {code: admin, labels: {zh-CN: 运营管理, zh-TW: 營運管理, en: Operations}}
+  - {code: skill_console, labels: {zh-CN: Skill 控制台, zh-TW: Skill 控制台, en: Skill console}}
+nodes:
+  - {code: public.home, space: public, labels: {zh-CN: 首页, zh-TW: 首頁, en: Home}, primary_route: user.home, order: 10}
+  - {code: public.activities, space: public, labels: {zh-CN: 活动, zh-TW: 活動, en: Activities}, primary_route: user.activities, order: 20}
+  - {code: public.courses, space: public, labels: {zh-CN: 课程, zh-TW: 課程, en: Courses}, primary_route: user.courses, order: 30}
+  - {code: public.counseling, space: public, labels: {zh-CN: 辅导, zh-TW: 輔導, en: Counseling}, primary_route: user.counseling, order: 40}
+  - {code: services.home, space: services, labels: {zh-CN: 服务首页, zh-TW: 服務首頁, en: Service home}, primary_route: user.experience-home, order: 10}
+  - {code: services.tasks, parent: services.home, space: services, labels: {zh-CN: 任务中心, zh-TW: 任務中心, en: Task center}, primary_route: user.tasks, order: 20}
+  - {code: services.journeys, parent: services.home, space: services, labels: {zh-CN: 我的旅程, zh-TW: 我的旅程, en: My journeys}, primary_route: user.journeys, order: 30}
+  - {code: services.ai, parent: services.home, space: services, labels: {zh-CN: AI 助手, zh-TW: AI 助手, en: AI assistant}, primary_route: user.ai, order: 40}
+  - {code: matchmaking.profile, space: matchmaking, labels: {zh-CN: 婚恋档案, zh-TW: 婚戀檔案, en: Dating profile}, primary_route: user.dating-profile, order: 10}
+  - {code: matchmaking.recommendations, space: matchmaking, labels: {zh-CN: 推荐, zh-TW: 推薦, en: Recommendations}, primary_route: user.recommendations, order: 20}
+  - {code: matchmaking.interactions, space: matchmaking, labels: {zh-CN: 互选与邀请, zh-TW: 互選與邀請, en: Matches and invitations}, primary_route: user.matchmaking, order: 30}
+  - {code: matchmaking.relationships, space: matchmaking, labels: {zh-CN: 关系旅程, zh-TW: 關係旅程, en: Relationship journey}, primary_route: user.relationships, order: 40}
+  - {code: account.overview, space: account, labels: {zh-CN: 账户概览, zh-TW: 帳戶概覽, en: Account overview}, primary_route: user.account, order: 10}
+  - {code: account.membership, space: account, labels: {zh-CN: 会员, zh-TW: 會員, en: Membership}, primary_route: user.membership, order: 20}
+  - {code: safety_privacy.safety, space: safety_privacy, labels: {zh-CN: 安全中心, zh-TW: 安全中心, en: Safety center}, primary_route: user.safety, order: 10}
+  - {code: safety_privacy.privacy, space: safety_privacy, labels: {zh-CN: 隐私中心, zh-TW: 私隱中心, en: Privacy center}, primary_route: user.privacy, order: 20}
+  - {code: admin.experience, space: admin, labels: {zh-CN: 体验编排, zh-TW: 體驗編排, en: Experience orchestration}, primary_route: admin.experience.dashboard, order: 10}
+  - {code: skill_console.home, space: skill_console, labels: {zh-CN: Skills, zh-TW: Skills, en: Skills}, primary_route: admin.skills.dashboard, order: 10}

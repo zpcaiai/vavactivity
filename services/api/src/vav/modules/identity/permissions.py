@@ -653,6 +653,38 @@ DESIGN_SYSTEM_PERMISSIONS = {
     "design.audit.read",
 }
 
+EXPERIENCE_PERMISSIONS = {
+    "experience.ia.read",
+    "experience.ia.manage",
+    "experience.ia.approve",
+    "experience.routes.read",
+    "experience.routes.manage",
+    "experience.navigation.read",
+    "experience.tasks.read",
+    "experience.tasks.rebuild",
+    "experience.journeys.read",
+    "experience.journeys.manage",
+    "experience.journeys.reconcile",
+    "experience.handoffs.read",
+    "experience.handoffs.manage",
+    "experience.search.read",
+    "experience.search.reindex",
+    "experience.search.govern",
+    "experience.help.read",
+    "experience.help.manage",
+    "experience.help.publish",
+    "experience.support.read",
+    "experience.support.manage",
+    "experience.dead_ends.read",
+    "experience.dead_ends.scan",
+    "experience.dead_ends.resolve",
+    "experience.analytics.read",
+    "experience.closure.read",
+    "experience.closure.evaluate",
+    "experience.closure.certify",
+    "experience.audit.read",
+}
+
 ALL_PERMISSIONS = (
     IDENTITY_PERMISSIONS
     | CMS_PERMISSIONS
@@ -675,6 +707,7 @@ ALL_PERMISSIONS = (
     | SKILL_PLATFORM_PERMISSIONS
     | QUALITY_PERMISSIONS
     | DESIGN_SYSTEM_PERMISSIONS
+    | EXPERIENCE_PERMISSIONS
 )
 
 ROLE_PERMISSIONS: dict[str, set[str]] = {
@@ -1275,6 +1308,56 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "design.evidence.accept",
         "design.analytics.read",
         "design.audit.read",
+    },
+    "experience_designer": {
+        "experience.ia.read",
+        "experience.ia.manage",
+        "experience.routes.read",
+        "experience.routes.manage",
+        "experience.navigation.read",
+        "experience.tasks.read",
+        "experience.journeys.read",
+        "experience.journeys.manage",
+        "experience.handoffs.read",
+        "experience.handoffs.manage",
+        "experience.help.read",
+        "experience.help.manage",
+        "experience.analytics.read",
+        "experience.audit.read",
+    },
+    "experience_operator": {
+        "experience.navigation.read",
+        "experience.tasks.read",
+        "experience.tasks.rebuild",
+        "experience.journeys.read",
+        "experience.journeys.reconcile",
+        "experience.handoffs.read",
+        "experience.search.read",
+        "experience.help.read",
+        "experience.support.read",
+        "experience.support.manage",
+        "experience.dead_ends.read",
+        "experience.analytics.read",
+        "experience.audit.read",
+    },
+    "experience_architect": EXPERIENCE_PERMISSIONS
+    - {"experience.ia.approve", "experience.closure.certify"},
+    "experience_release_reviewer": {
+        "experience.ia.read",
+        "experience.ia.approve",
+        "experience.routes.read",
+        "experience.tasks.read",
+        "experience.journeys.read",
+        "experience.handoffs.read",
+        "experience.search.read",
+        "experience.help.read",
+        "experience.dead_ends.read",
+        "experience.dead_ends.resolve",
+        "experience.analytics.read",
+        "experience.closure.read",
+        "experience.closure.evaluate",
+        "experience.closure.certify",
+        "experience.audit.read",
     },
     "analyst": {"audit.read", "catalog.audit.read"},
     "support_agent": {"users.read", "catalog.products.read"},

@@ -10,6 +10,7 @@ import {
 } from "@/features/public-site/api/content";
 import { useAuthStore } from "@/stores/auth";
 import NotificationBell from "@/features/notifications/components/NotificationBell.vue";
+import GlobalCommandPalette from "@/features/experience/components/GlobalCommandPalette.vue";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -140,6 +141,7 @@ watch(() => route.fullPath, async () => {
           {{ t("commerce.cart") }}
         </RouterLink>
         <NotificationBell v-if="auth.user" />
+        <GlobalCommandPalette />
         <RouterLink
           class="start-link"
           :to="auth.user ? `/${locale}/account` : `/${locale}/auth/register`"
@@ -182,6 +184,15 @@ watch(() => route.fullPath, async () => {
         :to="`/${locale}/account/privacy`"
       >
         隐私中心
+      </RouterLink>
+      <RouterLink
+        v-if="auth.user"
+        :to="`/${locale}/account/tasks`"
+      >
+        任务中心
+      </RouterLink>
+      <RouterLink :to="`/${locale}/help`">
+        帮助中心
       </RouterLink>
       <RouterLink :to="`/${locale}/account/orders`">
         {{ t("commerce.orders") }}

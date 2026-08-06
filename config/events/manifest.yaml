@@ -27,3 +27,7 @@ events:
   quality.gap.detected.v1: {owner: quality, sensitivity: internal}
   quality.gate.evaluated.v1: {owner: quality, sensitivity: internal}
   quality.release.decided.v1: {owner: quality, sensitivity: internal}
+  experience.task.changed.v1: {owner: experience, sensitivity: restricted}
+  experience.journey.changed.v1: {owner: experience, sensitivity: restricted}
+  experience.handoff.changed.v1: {owner: experience, sensitivity: restricted}
+  experience.dead_end.detected.v1: {owner: experience, sensitivity: internal}

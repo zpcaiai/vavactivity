@@ -7,6 +7,7 @@ groups:
     - vav.cli.seed_notification_templates
     - vav.cli.seed_privacy_inventory
     - vav.cli.seed_trust_safety
+    - vav.cli.seed_experience
   reference:
     - vav.cli.seed_catalog
     - vav.cli.seed_courses

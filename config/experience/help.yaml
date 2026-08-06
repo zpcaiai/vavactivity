@@ -1,0 +1,18 @@
+schema_version: "1.0"
+articles:
+  - {code: help.home, category: account, routes: [user.home, user.experience-home], title: 了解你的首页, body: 首页优先显示必须处理事项、当前服务和安全状态。}
+  - {code: help.tasks, category: account, routes: [user.tasks], title: 任务状态说明, body: 任务来自业务模块；等待你、他人、平台和服务商会分别显示。}
+  - {code: help.journeys, category: account, routes: [user.journeys], title: 旅程与下一步, body: 旅程只解释和引导，不会替你接受邀请、购买或分享信息。}
+  - {code: help.search, category: account, routes: [user.search], title: 搜索范围, body: 搜索会按身份、权限、隐私和安全状态过滤。}
+  - {code: help.account, category: account, routes: [user.account, user.login], title: 账户帮助, body: 管理身份、安全会话和个人资料。}
+  - {code: help.activities, category: activities, routes: [user.activities], title: 活动帮助, body: 查看报名、候补、签到与活动后续状态。}
+  - {code: help.courses, category: courses, routes: [user.courses], title: 课程帮助, body: 查看报名、进度、练习和证书。}
+  - {code: help.counseling, category: counseling, routes: [user.counseling], title: 辅导帮助, body: 辅导不能替代紧急服务；危机情况请优先联系当地急救资源。}
+  - {code: help.ai, category: ai, routes: [user.ai], title: AI 助手边界, body: AI 提供一般支持，不替代专业判断；高风险情况会建议人工支持。}
+  - {code: help.matchmaking, category: matchmaking, routes: [user.dating-profile, user.recommendations, user.matchmaking], title: 婚恋服务帮助, body: 你始终自主决定邀请、关系阶段和资料共享。}
+  - {code: help.relationships, category: relationships, routes: [user.relationships], title: 关系旅程帮助, body: 双方确认的阶段不会由平台或管理员代为推进。}
+  - {code: help.membership, category: memberships, routes: [user.membership], title: 会员帮助, body: 查看权益、用量、续期和变更状态。}
+  - {code: help.privacy, category: privacy, routes: [user.privacy], title: 隐私权利, body: 查看访问、导出、更正、删除和同意管理入口。}
+  - {code: help.safety, category: safety, routes: [user.safety], title: 安全支持, body: 举报、屏蔽和申诉保持可达；紧急危险请联系当地紧急服务。}
+  - {code: help.admin, category: admin, routes: [admin.dashboard, admin.experience.dashboard, admin.experience.dead-ends, admin.experience.support], title: 体验运营帮助, body: 运营人员可诊断入口和断链，但不能替用户推进业务状态。}
+  - {code: help.skill, category: skills, routes: [admin.skills.dashboard], title: Skill 控制台帮助, body: 安装和执行仍需权限、签名与运行时策略校验。}

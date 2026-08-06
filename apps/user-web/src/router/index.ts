@@ -31,6 +31,7 @@ import MatchmakingInteractionsPage from "@/features/matchmaking-interactions/pag
 import RelationshipJourneyPage from "@/features/relationships/pages/RelationshipJourneyPage.vue";
 import MembershipPage from "@/features/memberships/pages/MembershipPage.vue";
 import SafetyCenterPage from "@/features/trust-safety/pages/SafetyCenterPage.vue";
+import ExperiencePage from "@/features/experience/pages/ExperiencePage.vue";
 import PrivacyCenterPage from "@/features/privacy/pages/PrivacyCenterPage.vue";
 import UnsubscribePage from "@/features/notifications/pages/UnsubscribePage.vue";
 import AuthPage from "@/pages/AuthPage.vue";
@@ -108,6 +109,11 @@ export const router = createRouter({
         { path: "ai-assistant/:conversationId", name: "ai-assistant-conversation", component: AiAssistantPage, meta: { requiresAuth: true } },
         { path: "ai-assistant/plans", name: "ai-plans", component: CatalogPage, meta: { catalogTitle: "AI 辅导方案", catalogCategory: "ai-coaching" } },
         { path: "account/notifications", name: "account-notifications", component: NotificationsPage, meta: { requiresAuth: true } },
+        { path: "account/home", name: "experience-home", component: ExperiencePage, meta: { requiresAuth: true, experienceSection: "home" } },
+        { path: "account/tasks", name: "account-tasks", component: ExperiencePage, meta: { requiresAuth: true, experienceSection: "tasks" } },
+        { path: "account/journeys", name: "account-journeys", component: ExperiencePage, meta: { requiresAuth: true, experienceSection: "journeys" } },
+        { path: "search", name: "global-search", component: ExperiencePage, meta: { experienceSection: "search" } },
+        { path: "help", name: "help-center", component: ExperiencePage, meta: { experienceSection: "help" } },
         { path: "account/notification-preferences", name: "account-notification-preferences", component: NotificationsPage, meta: { requiresAuth: true } },
         { path: "account/dating-profile", name: "account-dating-profile", component: DatingProfilePage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },
         { path: "account/dating-profile/edit", name: "account-dating-profile-edit", component: DatingProfilePage, meta: { requiresAuth: true, requiresVerifiedEmail: true } },

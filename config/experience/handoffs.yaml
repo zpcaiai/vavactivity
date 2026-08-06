@@ -1,0 +1,12 @@
+schema_version: "1.0"
+handoffs:
+  - {code: ai-to-catalog, source: ai_assistant, target: catalog, target_route: user.home, return_route: user.ai, context_keys: [recommendation_id]}
+  - {code: catalog-to-checkout, source: catalog, target: commerce, target_route: user.account, return_route: user.home, context_keys: [product_id, sku_id]}
+  - {code: commerce-to-service, source: commerce, target: memberships, target_route: user.membership, return_route: user.account, context_keys: [order_id, entitlement_id]}
+  - {code: activity-to-matchmaking, source: activities, target: matchmaking_profiles, target_route: user.dating-profile, return_route: user.activities, context_keys: [activity_id]}
+  - {code: recommendation-to-interaction, source: recommendations, target: matchmaking_interactions, target_route: user.matchmaking, return_route: user.recommendations, context_keys: [recommendation_item_id]}
+  - {code: interaction-to-relationship, source: matchmaking_interactions, target: relationships, target_route: user.relationships, return_route: user.matchmaking, context_keys: [match_id, invitation_id]}
+  - {code: relationship-to-counseling, source: relationships, target: counseling, target_route: user.counseling, return_route: user.relationships, context_keys: [relationship_id]}
+  - {code: safety-to-appeal, source: trust_safety, target: trust_safety, target_route: user.safety, return_route: user.safety, context_keys: [case_id, restriction_id]}
+  - {code: privacy-to-authentication, source: privacy, target: identity, target_route: user.account, return_route: user.privacy, context_keys: [request_id]}
+  - {code: membership-to-commerce, source: memberships, target: commerce, target_route: user.account, return_route: user.membership, context_keys: [plan_version_id, sku_id]}

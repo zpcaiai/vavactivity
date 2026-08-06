@@ -3092,6 +3092,77 @@
         "title": "CloseMatchRequest",
         "type": "object"
       },
+      "ClosureCertification": {
+        "properties": {
+          "decision": {
+            "enum": [
+              "certify",
+              "reject"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "evidence_manifest": {
+            "additionalProperties": true,
+            "title": "Evidence Manifest",
+            "type": "object"
+          },
+          "reason": {
+            "maxLength": 5000,
+            "minLength": 10,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "reason",
+          "evidence_manifest"
+        ],
+        "title": "ClosureCertification",
+        "type": "object"
+      },
+      "ClosureEvaluation": {
+        "properties": {
+          "capability_codes": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Capability Codes",
+            "type": "array"
+          },
+          "environment": {
+            "enum": [
+              "test",
+              "ci",
+              "staging",
+              "production"
+            ],
+            "title": "Environment",
+            "type": "string"
+          },
+          "evidence_reference": {
+            "maxLength": 2000,
+            "minLength": 3,
+            "title": "Evidence Reference",
+            "type": "string"
+          },
+          "git_commit": {
+            "pattern": "^[0-9a-f]{7,64}$",
+            "title": "Git Commit",
+            "type": "string"
+          }
+        },
+        "required": [
+          "git_commit",
+          "environment",
+          "capability_codes",
+          "evidence_reference"
+        ],
+        "title": "ClosureEvaluation",
+        "type": "object"
+      },
       "CollectionBlock": {
         "properties": {
           "data": {
@@ -4501,6 +4572,30 @@
         "title": "CreatePublisherRequest",
         "type": "object"
       },
+      "DeadEndResolution": {
+        "properties": {
+          "reason": {
+            "maxLength": 5000,
+            "minLength": 10,
+            "title": "Reason",
+            "type": "string"
+          },
+          "resolution": {
+            "enum": [
+              "resolved",
+              "false_positive"
+            ],
+            "title": "Resolution",
+            "type": "string"
+          }
+        },
+        "required": [
+          "resolution",
+          "reason"
+        ],
+        "title": "DeadEndResolution",
+        "type": "object"
+      },
       "DecisionRequest": {
         "properties": {
           "context": {
@@ -4584,6 +4679,84 @@
           }
         },
         "title": "DeclineInvitationRequest",
+        "type": "object"
+      },
+      "DeepLinkCreate": {
+        "properties": {
+          "entity_id": {
+            "format": "uuid",
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "entity_type": {
+            "pattern": "^[a-z][a-z0-9_]{1,63}$",
+            "title": "Entity Type",
+            "type": "string"
+          },
+          "fallback_route_code": {
+            "pattern": "^[a-z][a-z0-9.-]{2,127}$",
+            "title": "Fallback Route Code",
+            "type": "string"
+          },
+          "permission_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Permission Codes",
+            "type": "array"
+          },
+          "purpose": {
+            "pattern": "^[a-z][a-z0-9_.-]{2,127}$",
+            "title": "Purpose",
+            "type": "string"
+          },
+          "route_parameters": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "title": "Route Parameters",
+            "type": "object"
+          },
+          "single_use": {
+            "default": true,
+            "title": "Single Use",
+            "type": "boolean"
+          },
+          "target_route_code": {
+            "pattern": "^[a-z][a-z0-9.-]{2,127}$",
+            "title": "Target Route Code",
+            "type": "string"
+          },
+          "ttl_seconds": {
+            "default": 900,
+            "maximum": 86400.0,
+            "minimum": 60.0,
+            "title": "Ttl Seconds",
+            "type": "integer"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "purpose",
+          "user_id",
+          "entity_type",
+          "entity_id",
+          "target_route_code",
+          "fallback_route_code"
+        ],
+        "title": "DeepLinkCreate",
         "type": "object"
       },
       "DeploymentEvidenceRequest": {
@@ -5538,6 +5711,50 @@
         "title": "FeatureFlagUpdateRequest",
         "type": "object"
       },
+      "FeedbackCreate": {
+        "properties": {
+          "context": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "title": "Context",
+            "type": "object"
+          },
+          "feedback_type": {
+            "enum": [
+              "cannot_find_next_step",
+              "unclear_explanation",
+              "broken_page",
+              "incorrect_status",
+              "broken_link",
+              "unhelpful_help"
+            ],
+            "title": "Feedback Type",
+            "type": "string"
+          },
+          "route_code": {
+            "pattern": "^[a-z][a-z0-9.-]{2,127}$",
+            "title": "Route Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "route_code",
+          "feedback_type"
+        ],
+        "title": "FeedbackCreate",
+        "type": "object"
+      },
       "FieldVisibility": {
         "enum": [
           "private",
@@ -6021,6 +6238,59 @@
           }
         },
         "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HandoffCreate": {
+        "properties": {
+          "context": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "title": "Context",
+            "type": "object"
+          },
+          "handoff_code": {
+            "pattern": "^[a-z][a-z0-9-]{2,127}$",
+            "title": "Handoff Code",
+            "type": "string"
+          },
+          "source_entity_id": {
+            "format": "uuid",
+            "title": "Source Entity Id",
+            "type": "string"
+          },
+          "source_entity_type": {
+            "pattern": "^[a-z][a-z0-9_]{1,63}$",
+            "title": "Source Entity Type",
+            "type": "string"
+          },
+          "source_route_code": {
+            "pattern": "^[a-z][a-z0-9.-]{2,127}$",
+            "title": "Source Route Code",
+            "type": "string"
+          },
+          "user_intent": {
+            "pattern": "^[a-z][a-z0-9_.-]{2,127}$",
+            "title": "User Intent",
+            "type": "string"
+          }
+        },
+        "required": [
+          "handoff_code",
+          "source_entity_type",
+          "source_entity_id",
+          "user_intent",
+          "source_route_code"
+        ],
+        "title": "HandoffCreate",
         "type": "object"
       },
       "HeartbeatRequest": {
@@ -6587,6 +6857,104 @@
           }
         },
         "title": "InvitationRequest",
+        "type": "object"
+      },
+      "JourneyReconcile": {
+        "properties": {
+          "authoritative_state_version": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Authoritative State Version",
+            "type": "string"
+          },
+          "block_reason_code": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Block Reason Code"
+          },
+          "current_step_code": {
+            "pattern": "^[a-z][a-z0-9_.-]{1,127}$",
+            "title": "Current Step Code",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "active",
+              "blocked",
+              "waiting",
+              "completed",
+              "cancelled",
+              "expired",
+              "invalidated"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "current_step_code",
+          "state",
+          "authoritative_state_version"
+        ],
+        "title": "JourneyReconcile",
+        "type": "object"
+      },
+      "JourneyStart": {
+        "properties": {
+          "authoritative_state_version": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Authoritative State Version",
+            "type": "string"
+          },
+          "journey_code": {
+            "pattern": "^[a-z][a-z0-9-]{2,127}$",
+            "title": "Journey Code",
+            "type": "string"
+          },
+          "source_entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Entity Id"
+          },
+          "source_entity_type": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Entity Type"
+          },
+          "source_module": {
+            "pattern": "^[a-z][a-z0-9_]{1,63}$",
+            "title": "Source Module",
+            "type": "string"
+          }
+        },
+        "required": [
+          "journey_code",
+          "source_module",
+          "authoritative_state_version"
+        ],
+        "title": "JourneyStart",
         "type": "object"
       },
       "LearningEventRequest": {
@@ -14118,6 +14486,64 @@
           "reason"
         ],
         "title": "SubscriptionCancelRequest",
+        "type": "object"
+      },
+      "SupportRequestCreate": {
+        "properties": {
+          "category": {
+            "enum": [
+              "general",
+              "safety",
+              "privacy",
+              "payment_dispute",
+              "broken_link",
+              "unclear_status"
+            ],
+            "title": "Category",
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 5000,
+            "minLength": 10,
+            "title": "Description",
+            "type": "string"
+          },
+          "source_entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Entity Id"
+          },
+          "source_entity_type": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Entity Type"
+          },
+          "source_route_code": {
+            "pattern": "^[a-z][a-z0-9.-]{2,127}$",
+            "title": "Source Route Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_route_code",
+          "category",
+          "description"
+        ],
+        "title": "SupportRequestCreate",
         "type": "object"
       },
       "SuppressionRequest": {
@@ -37176,6 +37602,545 @@
         ]
       }
     },
+    "/api/v1/admin/experience/analytics": {
+      "get": {
+        "operationId": "analytics_api_v1_admin_experience_analytics_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Analytics Api V1 Admin Experience Analytics Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Analytics",
+        "tags": [
+          "experience-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/experience/audit": {
+      "get": {
+        "operationId": "audit_api_v1_admin_experience_audit_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Audit Api V1 Admin Experience Audit Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Audit",
+        "tags": [
+          "experience-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/experience/closure/evaluate": {
+      "post": {
+        "operationId": "evaluate_closure_api_v1_admin_experience_closure_evaluate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClosureEvaluation"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Evaluate Closure Api V1 Admin Experience Closure Evaluate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Evaluate Closure",
+        "tags": [
+          "experience-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/experience/closure/{closure_id}/certify": {
+      "post": {
+        "operationId": "certify_closure_api_v1_admin_experience_closure__closure_id__certify_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "closure_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Closure Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClosureCertification"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Certify Closure Api V1 Admin Experience Closure  Closure Id  Certify Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Certify Closure",
+        "tags": [
+          "experience-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/experience/dashboard": {
+      "get": {
+        "operationId": "dashboard_api_v1_admin_experience_dashboard_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Dashboard Api V1 Admin Experience Dashboard Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dashboard",
+        "tags": [
+          "experience-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/experience/dead-ends/scan": {
+      "post": {
+        "operationId": "dead_end_scan_api_v1_admin_experience_dead_ends_scan_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Dead End Scan Api V1 Admin Experience Dead Ends Scan Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dead End Scan",
+        "tags": [
+          "experience-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/experience/dead-ends/{finding_id}/resolve": {
+      "post": {
+        "operationId": "resolve_dead_end_api_v1_admin_experience_dead_ends__finding_id__resolve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "finding_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Finding Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeadEndResolution"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Resolve Dead End Api V1 Admin Experience Dead Ends  Finding Id  Resolve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Resolve Dead End",
+        "tags": [
+          "experience-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/experience/deep-links": {
+      "post": {
+        "operationId": "create_deep_link_api_v1_admin_experience_deep_links_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeepLinkCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Deep Link Api V1 Admin Experience Deep Links Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Deep Link",
+        "tags": [
+          "experience-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/experience/journeys/{journey_id}/reconcile": {
+      "post": {
+        "operationId": "reconcile_journey_api_v1_admin_experience_journeys__journey_id__reconcile_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "journey_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Journey Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JourneyReconcile"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reconcile Journey Api V1 Admin Experience Journeys  Journey Id  Reconcile Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reconcile Journey",
+        "tags": [
+          "experience-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/experience/navigation": {
+      "get": {
+        "operationId": "admin_navigation_api_v1_admin_experience_navigation_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {
+              "default": "zh-CN",
+              "pattern": "^(zh-CN|zh-TW|en)$",
+              "title": "Locale",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Admin Navigation Api V1 Admin Experience Navigation Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Admin Navigation",
+        "tags": [
+          "experience-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/experience/search/query": {
+      "get": {
+        "operationId": "admin_search_api_v1_admin_experience_search_query_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Q",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Admin Search Api V1 Admin Experience Search Query Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Admin Search",
+        "tags": [
+          "experience-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/experience/{section}": {
+      "get": {
+        "operationId": "section_api_v1_admin_experience__section__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "section",
+            "required": true,
+            "schema": {
+              "title": "Section",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Section Api V1 Admin Experience  Section  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Section",
+        "tags": [
+          "experience-admin"
+        ]
+      }
+    },
     "/api/v1/admin/knowledge/audit": {
       "get": {
         "operationId": "knowledge_audit_api_v1_admin_knowledge_audit_get",
@@ -54350,6 +55315,620 @@
         ]
       }
     },
+    "/api/v1/experience/deep-links/{token}/resolve": {
+      "post": {
+        "operationId": "resolve_deep_link_api_v1_experience_deep_links__token__resolve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Resolve Deep Link Api V1 Experience Deep Links  Token  Resolve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Resolve Deep Link",
+        "tags": [
+          "experience"
+        ]
+      }
+    },
+    "/api/v1/experience/feedback": {
+      "post": {
+        "operationId": "feedback_api_v1_experience_feedback_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Feedback Api V1 Experience Feedback Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Feedback",
+        "tags": [
+          "experience"
+        ]
+      }
+    },
+    "/api/v1/experience/handoffs": {
+      "post": {
+        "operationId": "create_handoff_api_v1_experience_handoffs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HandoffCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Handoff Api V1 Experience Handoffs Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Handoff",
+        "tags": [
+          "experience"
+        ]
+      }
+    },
+    "/api/v1/experience/handoffs/{handoff_id}/accept": {
+      "post": {
+        "operationId": "accept_handoff_api_v1_experience_handoffs__handoff_id__accept_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "handoff_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Handoff Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Accept Handoff Api V1 Experience Handoffs  Handoff Id  Accept Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Accept Handoff",
+        "tags": [
+          "experience"
+        ]
+      }
+    },
+    "/api/v1/experience/help": {
+      "get": {
+        "operationId": "user_help_api_v1_experience_help_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "route_code",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Route Code"
+            }
+          },
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {
+              "default": "zh-CN",
+              "pattern": "^(zh-CN|zh-TW|en)$",
+              "title": "Locale",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response User Help Api V1 Experience Help Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "User Help",
+        "tags": [
+          "experience"
+        ]
+      }
+    },
+    "/api/v1/experience/home": {
+      "get": {
+        "operationId": "home_api_v1_experience_home_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Home Api V1 Experience Home Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Home",
+        "tags": [
+          "experience"
+        ]
+      }
+    },
+    "/api/v1/experience/journeys": {
+      "get": {
+        "operationId": "journeys_api_v1_experience_journeys_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Journeys Api V1 Experience Journeys Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Journeys",
+        "tags": [
+          "experience"
+        ]
+      },
+      "post": {
+        "operationId": "start_journey_api_v1_experience_journeys_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JourneyStart"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Start Journey Api V1 Experience Journeys Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Start Journey",
+        "tags": [
+          "experience"
+        ]
+      }
+    },
+    "/api/v1/experience/navigation": {
+      "get": {
+        "operationId": "user_navigation_api_v1_experience_navigation_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {
+              "default": "zh-CN",
+              "pattern": "^(zh-CN|zh-TW|en)$",
+              "title": "Locale",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response User Navigation Api V1 Experience Navigation Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "User Navigation",
+        "tags": [
+          "experience"
+        ]
+      }
+    },
+    "/api/v1/experience/routes/{route_code}/eligibility": {
+      "get": {
+        "operationId": "eligibility_api_v1_experience_routes__route_code__eligibility_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "route_code",
+            "required": true,
+            "schema": {
+              "title": "Route Code",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Eligibility Api V1 Experience Routes  Route Code  Eligibility Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Eligibility",
+        "tags": [
+          "experience"
+        ]
+      }
+    },
+    "/api/v1/experience/search": {
+      "get": {
+        "operationId": "user_search_api_v1_experience_search_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Q",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response User Search Api V1 Experience Search Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "User Search",
+        "tags": [
+          "experience"
+        ]
+      }
+    },
+    "/api/v1/experience/support": {
+      "post": {
+        "operationId": "support_request_api_v1_experience_support_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportRequestCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Support Request Api V1 Experience Support Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Support Request",
+        "tags": [
+          "experience"
+        ]
+      }
+    },
+    "/api/v1/experience/tasks": {
+      "get": {
+        "operationId": "tasks_api_v1_experience_tasks_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "include_history",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Include History",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Tasks Api V1 Experience Tasks Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Tasks",
+        "tags": [
+          "experience"
+        ]
+      }
+    },
     "/api/v1/health/live": {
       "get": {
         "operationId": "liveness_api_v1_health_live_get",
@@ -56863,6 +58442,161 @@
         "summary": "Course Detail",
         "tags": [
           "courses"
+        ]
+      }
+    },
+    "/api/v1/public/experience/help": {
+      "get": {
+        "operationId": "public_help_api_v1_public_experience_help_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "route_code",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Route Code"
+            }
+          },
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {
+              "default": "zh-CN",
+              "pattern": "^(zh-CN|zh-TW|en)$",
+              "title": "Locale",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Public Help Api V1 Public Experience Help Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Public Help",
+        "tags": [
+          "experience-public"
+        ]
+      }
+    },
+    "/api/v1/public/experience/navigation": {
+      "get": {
+        "operationId": "public_navigation_api_v1_public_experience_navigation_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "locale",
+            "required": false,
+            "schema": {
+              "default": "zh-CN",
+              "pattern": "^(zh-CN|zh-TW|en)$",
+              "title": "Locale",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Public Navigation Api V1 Public Experience Navigation Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Public Navigation",
+        "tags": [
+          "experience-public"
+        ]
+      }
+    },
+    "/api/v1/public/experience/search": {
+      "get": {
+        "operationId": "public_search_api_v1_public_experience_search_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Q",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Public Search Api V1 Public Experience Search Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Public Search",
+        "tags": [
+          "experience-public"
         ]
       }
     },

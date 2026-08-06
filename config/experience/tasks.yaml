@@ -1,0 +1,12 @@
+schema_version: "1.0"
+tasks:
+  - {code: identity.verify-email, module: identity, title: 验证电子邮箱, description: 完成验证以继续需要身份确认的服务。, priority: 950, route: user.account, fallback: user.experience-home, completion: {source: users, predicate: email_verified_at_is_not_null}}
+  - {code: commerce.complete-payment, module: commerce, title: 完成待处理付款, description: 返回订单查看当前付款状态。, priority: 900, route: user.account, fallback: user.experience-home, completion: {source: commerce_orders, predicate: not_pending_payment}}
+  - {code: safety.respond, module: trust_safety, title: 处理安全事项, description: 在安全中心查看当前状态与可用操作。, priority: 1000, route: user.safety, fallback: user.account, completion: {source: safety_cases, predicate: terminal}}
+  - {code: privacy.request, module: privacy, title: 查看隐私请求, description: 查看导出、更正或删除请求的当前状态。, priority: 920, route: user.privacy, fallback: user.account, completion: {source: data_subject_requests, predicate: terminal}}
+  - {code: activities.registration, module: activities, title: 查看活动安排, description: 查看报名、签到和活动后续事项。, priority: 600, route: user.activities, fallback: user.experience-home, completion: {source: activity_registrations, predicate: terminal}}
+  - {code: courses.continue, module: courses, title: 继续课程, description: 返回课程继续学习。, priority: 500, route: user.courses, fallback: user.experience-home, completion: {source: course_enrollments, predicate: completed}}
+  - {code: counseling.appointment, module: counseling, title: 查看辅导预约, description: 查看预约状态和下一步。, priority: 700, route: user.counseling, fallback: user.experience-home, completion: {source: counseling_appointments, predicate: terminal}}
+  - {code: matchmaking.profile, module: matchmaking_profiles, title: 完善婚恋档案, description: 完成档案后再进入推荐。, priority: 650, route: user.dating-profile, fallback: user.experience-home, completion: {source: dating_profiles, predicate: approved}}
+  - {code: matchmaking.invitation, module: matchmaking_interactions, title: 回应邀请, description: 查看并自主决定是否接受邀请。, priority: 800, route: user.matchmaking, fallback: user.recommendations, completion: {source: matchmaking_invitations, predicate: terminal}}
+  - {code: membership.review, module: memberships, title: 查看会员状态, description: 查看权益、用量和到期状态。, priority: 400, route: user.membership, fallback: user.account, completion: {source: membership_accounts, predicate: current}}

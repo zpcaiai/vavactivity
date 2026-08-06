@@ -1,0 +1,26 @@
+schema_version: "1.0"
+routes:
+  - {code: user.home, app: user-web, name: home, path: "/{locale}", page: home, node: public.home, critical: true, help: help.home}
+  - {code: user.activities, app: user-web, name: activities, path: "/{locale}/activities", page: activities, node: public.activities, critical: true, help: help.activities, fallback: user.home}
+  - {code: user.courses, app: user-web, name: courses, path: "/{locale}/courses", page: courses, node: public.courses, critical: true, help: help.courses, fallback: user.home}
+  - {code: user.counseling, app: user-web, name: counseling, path: "/{locale}/counseling", page: counseling, node: public.counseling, critical: true, help: help.counseling, fallback: user.home}
+  - {code: user.experience-home, app: user-web, name: experience-home, path: "/{locale}/account/home", page: experience-home, node: services.home, auth: true, critical: true, help: help.home, fallback: user.account}
+  - {code: user.tasks, app: user-web, name: account-tasks, path: "/{locale}/account/tasks", page: task-center, node: services.tasks, auth: true, critical: true, help: help.tasks, fallback: user.experience-home}
+  - {code: user.journeys, app: user-web, name: account-journeys, path: "/{locale}/account/journeys", page: journeys, node: services.journeys, auth: true, critical: true, help: help.journeys, fallback: user.tasks}
+  - {code: user.search, app: user-web, name: global-search, path: "/{locale}/search", page: global-search, node: services.home, critical: true, help: help.search, fallback: user.home}
+  - {code: user.help, app: user-web, name: help-center, path: "/{locale}/help", page: help-center, node: services.home, critical: true, help: help.home, fallback: user.home}
+  - {code: user.ai, app: user-web, name: ai-assistant, path: "/{locale}/ai-assistant", page: ai-assistant, node: services.ai, auth: true, critical: true, help: help.ai, fallback: user.experience-home}
+  - {code: user.dating-profile, app: user-web, name: account-dating-profile, path: "/{locale}/account/dating-profile", page: dating-profile, node: matchmaking.profile, auth: true, critical: true, help: help.matchmaking, fallback: user.experience-home}
+  - {code: user.recommendations, app: user-web, name: recommendations, path: "/{locale}/recommendations", page: recommendations, node: matchmaking.recommendations, auth: true, critical: true, help: help.matchmaking, fallback: user.dating-profile}
+  - {code: user.matchmaking, app: user-web, name: account-matchmaking-matches, path: "/{locale}/account/matchmaking/matches", page: matchmaking, node: matchmaking.interactions, auth: true, critical: true, help: help.matchmaking, fallback: user.recommendations}
+  - {code: user.relationships, app: user-web, name: account-relationships, path: "/{locale}/account/relationships", page: relationships, node: matchmaking.relationships, auth: true, critical: true, help: help.relationships, fallback: user.matchmaking}
+  - {code: user.account, app: user-web, name: account, path: "/{locale}/account", page: account, node: account.overview, auth: true, critical: true, help: help.account, fallback: user.home}
+  - {code: user.membership, app: user-web, name: account-membership, path: "/{locale}/account/membership", page: membership, node: account.membership, auth: true, critical: true, help: help.membership, fallback: user.account}
+  - {code: user.safety, app: user-web, name: account-safety, path: "/{locale}/account/safety", page: safety, node: safety_privacy.safety, auth: true, critical: true, help: help.safety, fallback: user.account}
+  - {code: user.privacy, app: user-web, name: account-privacy, path: "/{locale}/account/privacy", page: privacy, node: safety_privacy.privacy, auth: true, critical: true, help: help.privacy, fallback: user.account}
+  - {code: user.login, app: user-web, name: login, path: "/{locale}/auth/login", page: login, node: account.overview, critical: true, help: help.account, fallback: user.home}
+  - {code: admin.experience.dashboard, app: admin-web, name: admin-experience-dashboard, path: /admin/experience/dashboard, page: experience-dashboard, node: admin.experience, auth: true, permissions: [experience.analytics.read], critical: true, help: help.admin, fallback: admin.dashboard}
+  - {code: admin.experience.dead-ends, app: admin-web, name: admin-experience-dead-ends, path: /admin/experience/dead-ends, page: dead-end-center, node: admin.experience, auth: true, permissions: [experience.dead_ends.read], critical: true, help: help.admin, fallback: admin.experience.dashboard}
+  - {code: admin.experience.support, app: admin-web, name: admin-experience-support, path: /admin/experience/support, page: support-center, node: admin.experience, auth: true, permissions: [experience.support.read], critical: true, help: help.admin, fallback: admin.experience.dashboard}
+  - {code: admin.dashboard, app: admin-web, name: admin-dashboard, path: /admin/dashboard, page: admin-dashboard, node: admin.experience, auth: true, critical: true, help: help.admin}
+  - {code: admin.skills.dashboard, app: admin-web, name: admin-skills-dashboard, path: /admin/skills/dashboard, page: skill-dashboard, node: skill_console.home, auth: true, permissions: [skills.analytics.read], critical: true, help: help.skill, fallback: admin.dashboard}

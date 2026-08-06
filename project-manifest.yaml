@@ -52,6 +52,7 @@ module_registry:
   relationship_state: {owner: matchmaking_and_privacy, status: foundation_in_progress, phase: phase_2}
   memberships: {owner: backend, status: foundation_in_progress, phase: phase_2}
   moderation: {owner: trust_and_safety, status: foundation_in_progress, phase: phase_2}
+  experience: {owner: product_experience, status: foundation_in_progress, phase: phase_1}
 
 phases:
   phase_1:
@@ -69,6 +70,7 @@ phases:
       - orders
       - payments
       - admin
+      - experience
   phase_2:
     objective: 完成建档、推荐、互选、认识期和安全治理闭环
     modules:
@@ -403,7 +405,7 @@ quality:
 production_assembly:
   architecture_version: "1.0.0"
   minimum_supported_schema_version: 83
-  migration_head: "20260806_0083"
+  migration_head: "20260806_0089"
   module_manifest_root: services/api/src/vav/modules
   event_manifest: config/events/manifest.yaml
   feature_manifest: config/features/manifest.yaml

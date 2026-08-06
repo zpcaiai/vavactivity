@@ -1,0 +1,18 @@
+module: {code: experience, owner: product_experience, version: "1.0.0"}
+dependencies: {required: [identity, system, notifications, privacy, quality]}
+database: {revisions: [89]}
+events:
+  publishes:
+    - experience.task.changed.v1
+    - experience.journey.changed.v1
+    - experience.handoff.changed.v1
+    - experience.dead_end.detected.v1
+  consumes:
+    - identity.user.registered.v1
+    - notification.delivery.failed.v1
+    - privacy.erasure.completed.v1
+    - safety.block.created.v1
+permissions: {prefixes: [experience.]}
+configuration: {prefixes: [EXPERIENCE_]}
+health: {checks: [route_graph, task_freshness, journey_closure, dead_end_gate]}
+schema_version: "1.0"

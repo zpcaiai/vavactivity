@@ -1,0 +1,1 @@
+import { mount } from "@vue/test-utils"; import { expect,it } from "vitest"; import { ContextualHelp } from "../src"; it("provides a support path",()=>expect(mount(ContextualHelp,{props:{title:"帮助",body:"说明",supportHref:"/support"}}).get("a").attributes("href")).toBe("/support"));

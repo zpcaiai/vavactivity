@@ -8,6 +8,9 @@ from vav.modules.commerce.router import router as commerce_router
 from vav.modules.content.router import router as content_router
 from vav.modules.counseling.router import router as counseling_router
 from vav.modules.courses.router import router as courses_router
+from vav.modules.experience.admin_router import router as experience_admin_router
+from vav.modules.experience.router import public_router as experience_public_router
+from vav.modules.experience.router import router as experience_router
 from vav.modules.health.router import router as health_router
 from vav.modules.identity.router import router as identity_router
 from vav.modules.knowledge.router import router as knowledge_router
@@ -55,6 +58,9 @@ api_router.include_router(activities_router, tags=["activities"])
 api_router.include_router(ai_assistant_router, tags=["ai-assistant"])
 api_router.include_router(ai_assistant_admin_router, tags=["ai-assistant-admin"])
 api_router.include_router(courses_router, tags=["courses"])
+api_router.include_router(experience_public_router, tags=["experience-public"])
+api_router.include_router(experience_router, tags=["experience"])
+api_router.include_router(experience_admin_router, tags=["experience-admin"])
 api_router.include_router(counseling_router, tags=["counseling"])
 api_router.include_router(knowledge_router, tags=["knowledge"])
 api_router.include_router(notifications_router, tags=["notifications"])
