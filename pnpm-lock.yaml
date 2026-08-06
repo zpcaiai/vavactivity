@@ -176,6 +176,19 @@ importers:
         specifier: 3.2.4
         version: 3.2.4(@types/node@24.1.0)(jiti@1.21.7)(jsdom@26.1.0)(yaml@2.9.0)
 
+  packages/skill-ui-sdk:
+    dependencies:
+      '@vav/skill-sdk':
+        specifier: workspace:*
+        version: link:../skill-sdk-typescript
+    devDependencies:
+      typescript:
+        specifier: 5.8.3
+        version: 5.8.3
+      vitest:
+        specifier: 3.2.4
+        version: 3.2.4(@types/node@24.1.0)(jiti@1.21.7)(jsdom@26.1.0)(yaml@2.9.0)
+
 packages:
 
   '@alloc/quick-lru@5.2.0':

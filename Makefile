@@ -681,6 +681,10 @@ acceptance: bootstrap smoke verify-all production-readiness
 
 skill-sdk-test:
 	.venv/bin/pytest tests/skill-sdk -q
+	corepack pnpm --filter @vav/skill-sdk test
+	corepack pnpm --filter @vav/skill-sdk typecheck
+	corepack pnpm --filter @vav/skill-ui-sdk test
+	corepack pnpm --filter @vav/skill-ui-sdk typecheck
 
 skill-schema-test:
 	.venv/bin/python scripts/skill/validate_all_schemas.py
