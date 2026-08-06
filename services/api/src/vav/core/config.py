@@ -1270,6 +1270,86 @@ class Settings(BaseSettings):
         default=300, ge=0, validation_alias="MEMBERSHIP_PLAN_CACHE_TTL_SECONDS"
     )
 
+    skills_enabled: bool = Field(default=True, validation_alias="SKILLS_ENABLED")
+    skill_runtime_api_version: str = Field(
+        default="1.0", pattern=r"^\d+\.\d+$", validation_alias="SKILL_RUNTIME_API_VERSION"
+    )
+    skill_manifest_version: str = Field(
+        default="1.0", pattern=r"^\d+\.\d+$", validation_alias="SKILL_MANIFEST_VERSION"
+    )
+    skill_registry_mode: Literal["private", "public"] = Field(
+        default="private", validation_alias="SKILL_REGISTRY_MODE"
+    )
+    skill_registry_require_signature: bool = Field(
+        default=True, validation_alias="SKILL_REGISTRY_REQUIRE_SIGNATURE"
+    )
+    skill_registry_allow_unverified: bool = Field(
+        default=False, validation_alias="SKILL_REGISTRY_ALLOW_UNVERIFIED"
+    )
+    skill_runtime_default_timeout_seconds: int = Field(
+        default=30, ge=1, le=900, validation_alias="SKILL_RUNTIME_DEFAULT_TIMEOUT_SECONDS"
+    )
+    skill_runtime_max_timeout_seconds: int = Field(
+        default=900, ge=1, le=3600, validation_alias="SKILL_RUNTIME_MAX_TIMEOUT_SECONDS"
+    )
+    skill_runtime_max_retries: int = Field(
+        default=3, ge=0, le=10, validation_alias="SKILL_RUNTIME_MAX_RETRIES"
+    )
+    skill_runtime_max_concurrent_executions: int = Field(
+        default=100, ge=1, le=10_000, validation_alias="SKILL_RUNTIME_MAX_CONCURRENT_EXECUTIONS"
+    )
+    skill_sandbox_enabled: bool = Field(default=True, validation_alias="SKILL_SANDBOX_ENABLED")
+    skill_sandbox_network_default: Literal["deny"] = Field(
+        default="deny", validation_alias="SKILL_SANDBOX_NETWORK_DEFAULT"
+    )
+    skill_sandbox_memory_mb: int = Field(
+        default=512, ge=64, le=4096, validation_alias="SKILL_SANDBOX_MEMORY_MB"
+    )
+    skill_sandbox_cpu_limit: float = Field(
+        default=1.0, gt=0, le=8, validation_alias="SKILL_SANDBOX_CPU_LIMIT"
+    )
+    skill_sandbox_max_output_mb: int = Field(
+        default=10, ge=1, le=100, validation_alias="SKILL_SANDBOX_MAX_OUTPUT_MB"
+    )
+    skill_high_risk_permission_approval_required: bool = Field(
+        default=True, validation_alias="SKILL_HIGH_RISK_PERMISSION_APPROVAL_REQUIRED"
+    )
+    skill_dynamic_permission_escalation_disabled: bool = Field(
+        default=True, validation_alias="SKILL_DYNAMIC_PERMISSION_ESCALATION_DISABLED"
+    )
+    skill_signature_algorithm: Literal["ed25519"] = Field(
+        default="ed25519", validation_alias="SKILL_SIGNATURE_ALGORITHM"
+    )
+    skill_trust_roots_path: str = Field(
+        default="registry/trust-roots.json", validation_alias="SKILL_TRUST_ROOTS_PATH"
+    )
+    skill_revocation_list_path: str = Field(
+        default="registry/revoked-signatures.json",
+        validation_alias="SKILL_REVOCATION_LIST_PATH",
+    )
+    skill_sbom_required: bool = Field(default=True, validation_alias="SKILL_SBOM_REQUIRED")
+    skill_vulnerability_scan_required: bool = Field(
+        default=True, validation_alias="SKILL_VULNERABILITY_SCAN_REQUIRED"
+    )
+    skill_critical_vulnerability_block: bool = Field(
+        default=True, validation_alias="SKILL_CRITICAL_VULNERABILITY_BLOCK"
+    )
+    skill_secret_scan_required: bool = Field(
+        default=True, validation_alias="SKILL_SECRET_SCAN_REQUIRED"
+    )
+    skill_marketplace_enabled: bool = Field(
+        default=True, validation_alias="SKILL_MARKETPLACE_ENABLED"
+    )
+    skill_marketplace_public_installs_enabled: bool = Field(
+        default=False, validation_alias="SKILL_MARKETPLACE_PUBLIC_INSTALLS_ENABLED"
+    )
+    skill_marketplace_human_review_required: bool = Field(
+        default=True, validation_alias="SKILL_MARKETPLACE_HUMAN_REVIEW_REQUIRED"
+    )
+    skill_marketplace_automated_pricing_enabled: bool = Field(
+        default=False, validation_alias="SKILL_MARKETPLACE_AUTOMATED_PRICING_ENABLED"
+    )
+
     safety_enabled: bool = Field(default=True, validation_alias="SAFETY_ENABLED")
     safety_fail_closed: bool = Field(default=True, validation_alias="SAFETY_FAIL_CLOSED")
     safety_default_policy_version: str = Field(
@@ -1466,6 +1546,31 @@ class Settings(BaseSettings):
             raise ValueError("repeat trials require an explicit anti-abuse policy")
         if not self.membership_manual_grant_approval_required:
             raise ValueError("manual membership grants require approval")
+        if self.skill_registry_allow_unverified:
+            raise ValueError("unverified Skill packages cannot be enabled")
+        if not self.skill_registry_require_signature:
+            raise ValueError("Skill package signatures are mandatory")
+        if not self.skill_dynamic_permission_escalation_disabled:
+            raise ValueError("dynamic Skill permission escalation must remain disabled")
+        if not self.skill_high_risk_permission_approval_required:
+            raise ValueError("high-risk Skill permissions require approval")
+        if not all(
+            (
+                self.skill_sbom_required,
+                self.skill_vulnerability_scan_required,
+                self.skill_critical_vulnerability_block,
+                self.skill_secret_scan_required,
+            )
+        ):
+            raise ValueError("Skill supply-chain security gates are mandatory")
+        if not self.skill_marketplace_human_review_required:
+            raise ValueError("Marketplace listings require human review")
+        if self.skill_marketplace_automated_pricing_enabled:
+            raise ValueError("automated Marketplace pricing is not approved")
+        if self.skill_marketplace_public_installs_enabled:
+            raise ValueError("public Marketplace auto-install is not approved")
+        if production_like and self.skills_enabled and not self.skill_sandbox_enabled:
+            raise ValueError("production Skills require the sandbox boundary")
         if not self.safety_fail_closed:
             raise ValueError("Trust & Safety decisions must fail closed")
         if not self.safety_block_propagation_synchronous:
@@ -1515,6 +1620,7 @@ class Settings(BaseSettings):
                 "recommendations": self.recommendation_enabled,
                 "memberships": self.membership_enabled,
                 "trust_safety": self.safety_enabled,
+                "skills": self.skills_enabled,
             },
         }
 

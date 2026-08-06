@@ -14,6 +14,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from vav.common.exceptions import VavError
+from vav.core.config import get_settings
 from vav.modules.privacy.crypto import decrypt_private, encrypt_private
 from vav.modules.skills_platform.marketplace_review import automated_review
 from vav.modules.skills_platform.schemas import (
@@ -146,6 +147,8 @@ async def version_detail(session: AsyncSession, version_id: UUID) -> dict[str, A
 async def create_install_plan(
     session: AsyncSession, actor_id: UUID, payload: InstallPlanRequest
 ) -> dict[str, Any]:
+    if not get_settings().skills_enabled:
+        raise VavError("SKILLS_DISABLED", "The Skill platform is disabled.", status_code=503)
     version = (
         (
             await session.execute(
@@ -556,10 +559,14 @@ async def rollback_installation(
 async def queue_execution(
     session: AsyncSession, actor_id: UUID, skill_name: str, payload: ExecuteSkillRequest
 ) -> dict[str, Any]:
+    settings = get_settings()
+    if not settings.skills_enabled:
+        raise VavError("SKILLS_DISABLED", "The Skill platform is disabled.", status_code=503)
     if (
         payload.deadline.tzinfo is None
         or payload.deadline <= datetime.now(UTC)
-        or payload.deadline > datetime.now(UTC) + timedelta(minutes=15)
+        or payload.deadline
+        > datetime.now(UTC) + timedelta(seconds=settings.skill_runtime_max_timeout_seconds)
     ):
         raise VavError(
             "SKILL_DEADLINE_INVALID",
@@ -717,6 +724,10 @@ async def cancel_execution(
 async def submit_listing(
     session: AsyncSession, actor_id: UUID, payload: MarketplaceListingRequest
 ) -> dict[str, Any]:
+    if not get_settings().skill_marketplace_enabled:
+        raise VavError(
+            "SKILL_MARKETPLACE_DISABLED", "The Skill Marketplace is disabled.", status_code=503
+        )
     version = await version_detail(session, payload.version_id)
     if version["skill_name"] != payload.skill_name:
         raise VavError(
