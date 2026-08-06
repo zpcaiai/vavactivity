@@ -21,3 +21,6 @@ events:
   system.feature_flag.activated.v1: {owner: system, sensitivity: internal}
   system.maintenance.changed.v1: {owner: system, sensitivity: internal}
   system.release.created.v1: {owner: system, sensitivity: internal}
+  skill.installation.changed.v1: {owner: skills_platform, sensitivity: internal}
+  skill.execution.changed.v1: {owner: skills_platform, sensitivity: internal}
+  skill.marketplace.changed.v1: {owner: skills_platform, sensitivity: internal}

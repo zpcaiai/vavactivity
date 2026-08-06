@@ -32,6 +32,8 @@ from vav.modules.recommendations.admin_router import router as recommendations_a
 from vav.modules.recommendations.router import router as recommendations_router
 from vav.modules.relationships.admin_router import router as relationships_admin_router
 from vav.modules.relationships.router import router as relationships_router
+from vav.modules.skills_platform.admin_router import router as skills_platform_admin_router
+from vav.modules.skills_platform.router import router as skills_platform_router
 from vav.modules.system.admin_router import router as system_admin_router
 from vav.modules.system.router import router as system_router
 from vav.modules.trust_safety.admin_router import router as trust_safety_admin_router
@@ -41,6 +43,8 @@ api_router = APIRouter()
 api_router.include_router(health_router, prefix="/health", tags=["health"])
 api_router.include_router(system_router, prefix="/system", tags=["system"])
 api_router.include_router(system_admin_router, tags=["system-admin"])
+api_router.include_router(skills_platform_router, tags=["skills"])
+api_router.include_router(skills_platform_admin_router, tags=["skills-admin"])
 api_router.include_router(identity_router, tags=["identity"])
 api_router.include_router(content_router, tags=["content"])
 api_router.include_router(catalog_router, tags=["catalog"])

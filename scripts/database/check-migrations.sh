@@ -28,8 +28,8 @@ DATABASE_URL="$snapshot_url" .venv/bin/alembic -c services/api/alembic.ini upgra
 
 for database in vav_snapshot vav_empty; do
   revision="$(docker exec "$container" psql -U vav_gate -d "$database" -Atc 'SELECT version_num FROM alembic_version')"
-  [[ "$revision" == "20260806_0083" ]] || { echo "$database stopped at $revision" >&2; exit 1; }
+  [[ "$revision" == "20260806_0084" ]] || { echo "$database stopped at $revision" >&2; exit 1; }
   tables="$(docker exec "$container" psql -U vav_gate -d "$database" -Atc "SELECT count(*) FROM information_schema.tables WHERE table_schema='public'")"
   [[ "$tables" -gt 100 ]] || { echo "$database has incomplete schema: $tables tables" >&2; exit 1; }
 done
-echo "migration gate PASS: single head, empty database, and revision-0082 snapshot upgrade"
+echo "migration gate PASS: single head, empty database, and revision-0082 snapshot upgrade through Batch 20"

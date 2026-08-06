@@ -556,6 +556,43 @@ SYSTEM_PERMISSIONS = {
     "system.audit.read",
 }
 
+SKILL_PLATFORM_PERMISSIONS = {
+    "skills.registry.read",
+    "skills.registry.publish",
+    "skills.registry.deprecate",
+    "skills.registry.revoke",
+    "skills.installations.read",
+    "skills.installations.plan",
+    "skills.installations.install",
+    "skills.installations.approve",
+    "skills.installations.activate",
+    "skills.installations.disable",
+    "skills.installations.upgrade",
+    "skills.installations.rollback",
+    "skills.installations.uninstall",
+    "skills.executions.read",
+    "skills.executions.sensitive.read",
+    "skills.executions.cancel",
+    "skills.permissions.read",
+    "skills.permissions.approve",
+    "skills.publishers.read",
+    "skills.publishers.verify",
+    "skills.publishers.suspend",
+    "skills.marketplace.read",
+    "skills.marketplace.submit",
+    "skills.marketplace.review",
+    "skills.marketplace.approve",
+    "skills.marketplace.suspend",
+    "skills.marketplace.remove",
+    "skills.security.read",
+    "skills.security.quarantine",
+    "skills.security.revoke_signature",
+    "skills.analytics.read",
+    "skills.incidents.read",
+    "skills.incidents.manage",
+    "skills.audit.read",
+}
+
 ALL_PERMISSIONS = (
     IDENTITY_PERMISSIONS
     | CMS_PERMISSIONS
@@ -575,6 +612,7 @@ ALL_PERMISSIONS = (
     | MEMBERSHIP_PERMISSIONS
     | SAFETY_PERMISSIONS
     | SYSTEM_PERMISSIONS
+    | SKILL_PLATFORM_PERMISSIONS
 )
 
 ROLE_PERMISSIONS: dict[str, set[str]] = {
@@ -1058,6 +1096,38 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "system.audit.read",
     },
     "system_release_manager": SYSTEM_PERMISSIONS,
+    "skill_developer": {
+        "skills.registry.read",
+        "skills.registry.publish",
+        "skills.marketplace.submit",
+        "skills.executions.read",
+    },
+    "skill_platform_operator": {
+        "skills.installations.read",
+        "skills.installations.plan",
+        "skills.installations.install",
+        "skills.installations.disable",
+        "skills.installations.upgrade",
+        "skills.installations.rollback",
+        "skills.executions.read",
+        "skills.analytics.read",
+        "skills.audit.read",
+    },
+    "skill_security_reviewer": {
+        permission
+        for permission in SKILL_PLATFORM_PERMISSIONS
+        if permission.startswith("skills.permissions.")
+        or permission.startswith("skills.security.")
+        or permission.startswith("skills.incidents.")
+    }
+    | {"skills.marketplace.review", "skills.audit.read"},
+    "marketplace_release_manager": {
+        permission
+        for permission in SKILL_PLATFORM_PERMISSIONS
+        if permission.startswith("skills.publishers.")
+        or permission.startswith("skills.marketplace.")
+    }
+    | {"skills.registry.revoke", "skills.audit.read"},
     "analyst": {"audit.read", "catalog.audit.read"},
     "support_agent": {"users.read", "catalog.products.read"},
     "member": set(),
