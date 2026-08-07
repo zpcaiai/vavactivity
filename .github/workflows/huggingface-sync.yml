@@ -93,6 +93,28 @@ jobs:
           rm -rf "$HF_SYNC_DIR/_to_delete"
           rm -f "$HF_SYNC_DIR/_to_delete/"*_vav-*.tgz
 
+          # Fail fast if any binary artifacts are still present in the deploy snapshot.
+          OFFENDING_FILES=(
+            "$HF_SYNC_DIR/apps/user-web/src/assets/images/vav-hero-couple.png"
+            "$HF_SYNC_DIR/tests/ui/visual.spec.ts-snapshots/desktop-light-chromium-darwin.png"
+            "$HF_SYNC_DIR/tests/ui/visual.spec.ts-snapshots/mobile-light-chromium-darwin.png"
+            "$HF_SYNC_DIR/tests/ui/visual.spec.ts-snapshots/tablet-dark-chromium-darwin.png"
+            "$HF_SYNC_DIR/tests/ui/visual.spec.ts-snapshots/wide-high-contrast-chromium-darwin.png"
+            "$HF_SYNC_DIR/_to_delete/_vav-batch13.tgz"
+            "$HF_SYNC_DIR/_to_delete/_vav-src.tgz"
+          )
+          FOUND_OFFENDER=0
+          for file in "${OFFENDING_FILES[@]}"; do
+            if [ -f "$file" ]; then
+              echo "Found forbidden binary in HF sync snapshot: $file"
+              FOUND_OFFENDER=1
+            fi
+          done
+          if [ "$FOUND_OFFENDER" -ne 0 ]; then
+            echo "Refusing to push to Hugging Face with forbidden binaries."
+            exit 1
+          fi
+
           if [ -f "$HF_SYNC_DIR/apps/user-web/src/assets/main.css" ]; then
             SYNC_DIR="${HF_SYNC_DIR}"
             sed -i "s#url(\\\"./images/vav-hero-couple.png\\\")#none#g" "${SYNC_DIR}/apps/user-web/src/assets/main.css"
