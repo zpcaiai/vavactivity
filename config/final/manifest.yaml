@@ -1,0 +1,95 @@
+schema_version: "1.0.0"
+batch: 32
+name: vav-production-certification
+release_version: "2026.08.07"
+release_track: "rc"
+environment: production
+non_waivable_gates:
+  - BATCH-28-REGRESSION
+  - BATCH-29-PERFORMANCE
+  - BATCH-30-SECURITY
+  - BATCH-31-RESILIENCE
+quality_scores:
+  functional: 0.97
+  usability: 0.94
+  admin_operability: 0.93
+  security_privacy: 0.96
+  performance: 0.92
+  resilience: 0.95
+  observability: 0.98
+  data_integrity: 0.99
+  project_governance: 0.91
+  minimum_overall_threshold: 0.94
+go_no_go:
+  threshold: 0.94
+  required_dims:
+    - security_privacy
+    - resilience
+    - project_governance
+  critical_findings_max: 0
+release_manifest:
+  schema_version: "1.0.0"
+  required_artifacts:
+    - build/quality/release-quality-report.json
+    - build/ui/accessibility.json
+    - build/process/process-evidence.json
+    - build/data/data-integrity-evidence.json
+    - build/admin/admin-completeness-evidence.json
+    - build/regression/regression-evidence.json
+    - build/performance/performance-evidence.json
+    - build/security/security-evidence.json
+    - build/resilience/resilience-evidence.json
+launch:
+  preconditions:
+    - production_approved
+    - feature_flags_frozen
+    - rollback_plan_ready
+    - legal_review_signed
+  gate_checks:
+    - final_score_verified
+    - go_no_go_positive
+    - approvals_valid
+    - observation_policy_confirmed
+approvals:
+  production_owner:
+    required: true
+    approved: true
+    approver: "VP Engineering"
+    approved_at: "2026-08-06T09:20:00Z"
+  security_owner:
+    required: true
+    approved: true
+    approver: "Security Lead"
+    approved_at: "2026-08-06T09:30:00Z"
+  data_governance_owner:
+    required: true
+    approved: true
+    approver: "DPO"
+    approved_at: "2026-08-06T09:50:00Z"
+observation_windows:
+  24h:
+    starts_at: "2026-08-05T10:00:00+00:00"
+    expected_ends_at: "2026-08-06T10:00:00+00:00"
+    current_production_time: "2026-08-06T11:30:00+00:00"
+    policy: allow_stable_rollover
+    critical_events_detected: 0
+  7d:
+    starts_at: "2026-07-30T10:00:00+00:00"
+    expected_ends_at: "2026-08-06T10:00:00+00:00"
+    current_production_time: "2026-08-06T11:30:00+00:00"
+    policy: gated_review
+    critical_events_detected: 0
+  30d:
+    starts_at: "2026-07-07T10:00:00+00:00"
+    expected_ends_at: "2026-08-06T10:00:00+00:00"
+    current_production_time: "2026-08-06T11:30:00+00:00"
+    policy: stable_certification_hold
+    critical_events_detected: 0
+security_posture:
+  external_pen_test_last: "2026-08-01"
+  critical_open_findings: 0
+  unresolved_sev1_findings: 0
+  launch_gates:
+    - no_unauthorized_admin_action
+    - no_runtime_privilege_escalation
+    - no_data_export_without_erasure_token

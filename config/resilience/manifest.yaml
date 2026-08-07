@@ -1,0 +1,162 @@
+schema_version: "1.0.0"
+batch: 31
+name: vav-resilience-and-ha
+slos:
+  - code: SLO-API-P95
+    objective: 0.995
+    window_minutes: 30
+    burn_rate_threshold: 14
+    window_hours: 1
+    category: reliability
+  - code: SLO-INGEST-THROUGHPUT
+    objective: 0.990
+    window_minutes: 30
+    burn_rate_threshold: 12
+    window_hours: 1
+    category: throughput
+  - code: SLO-REGISTER-RATE
+    objective: 0.998
+    window_minutes: 30
+    burn_rate_threshold: 10
+    window_hours: 1
+    category: availability
+error_budgets:
+  - code: ERR-API
+    budget_ms: 15
+    observed_error_rate: 0.0018
+    target_error_rate: 0.003
+    burn_rate: 0.92
+  - code: ERR-WORKER
+    budget_ms: 20
+    observed_error_rate: 0.0042
+    target_error_rate: 0.005
+    burn_rate: 0.84
+observability:
+  logs:
+    schema_version: "1.0.0"
+    required_fields: [trace_id, event_name, tenant_id, severity]
+    pii_fields_present: []
+  metrics:
+    expected_coverage_ratio: 0.96
+    observed_coverage_ratio: 0.98
+    sensitive_data_redacted_ratio: 1.0
+    traces_per_minute_min: 1000
+  canary:
+    enabled: true
+    tests:
+      - id: pii
+        covered: true
+      - id: auth
+        covered: true
+      - id: payment
+        covered: true
+synthetic_monitors:
+  enabled: true
+  cadence_minutes: 3
+  tests:
+    - name: checkout-flow
+      critical: true
+      status: passed
+    - name: authentication-flow
+      critical: true
+      status: passed
+    - name: relationship-flow
+      critical: true
+      status: passed
+    - name: safety-alert-flow
+      critical: true
+      status: passed
+    - name: block-propagation
+      critical: true
+      status: passed
+ha_checks:
+  api:
+    readiness_time_seconds: 3.1
+    failover_time_seconds: 58
+    required_readiness_threshold_seconds: 15
+    required_failover_threshold_seconds: 75
+  database:
+    failover_time_seconds: 95
+    wal_replay_seconds: 72
+    required_failover_threshold_seconds: 120
+    read_after_write_time_ms: 430
+    required_read_after_write_threshold_ms: 800
+  redis_worker:
+    failover_time_seconds: 40
+    queue_recover_time_seconds: 150
+    required_failover_threshold_seconds: 75
+    queue_replay_lag_seconds: 45
+    required_replay_lag_seconds: 90
+provider_resilience:
+  services:
+    - provider: sms-gateway
+      timeout_seconds: 2.0
+      fallback_enabled: true
+      circuit_breaker_failure_ratio: 0.12
+      circuit_breaker_window: 30
+      retry_budget: 3
+    - provider: map-service
+      timeout_seconds: 1.8
+      fallback_enabled: true
+      circuit_breaker_failure_ratio: 0.14
+      circuit_breaker_window: 40
+      retry_budget: 2
+    - provider: payment-provider
+      timeout_seconds: 1.6
+      fallback_enabled: false
+      circuit_breaker_failure_ratio: 0.03
+      circuit_breaker_window: 30
+      retry_budget: 4
+degradation:
+  expected_behavior:
+    quality_graceful_delay_ms: 120
+    reduced_feature_set: true
+    queue_retries_cap: 5
+  tolerance:
+    max_feature_blackout_ratio: 0.25
+    max_latency_increase_ratio: 1.4
+    min_user_task_throughput_ratio: 0.8
+chaos:
+  allowed: true
+  approved: true
+  max_duration_seconds: 780
+  tests:
+    - name: pod-kill-api
+      status: passed
+      severity: medium
+    - name: cpu-spike-worker
+      status: passed
+      severity: high
+    - name: region-partition
+      status: passed
+      severity: critical
+backup_restore:
+  backup_window_minutes: 20
+  restore_time_minutes: 35
+  restore_tested: true
+  consistency_checks_passed: true
+disaster_recovery:
+  exercise_executed: true
+  rto_minutes: 115
+  rpo_minutes: 7
+  data_integrity_verified: true
+incident_management:
+  requires_postmortem_sev0: true
+  requires_postmortem_sev1: true
+  postmortem_examples:
+    - severity: sev2
+      completed: true
+    - severity: sev1
+      completed: true
+    - severity: sev0
+      completed: true
+security:
+  critical_findings: 0
+  auth_bypass_detected: false
+  open_incidents: 0
+  secrets_in_logs_detected: 0
+resilience_tests:
+  chaos_exit_codes:
+    pod-kill: 0
+    db-lag: 0
+    provider-delay: 0

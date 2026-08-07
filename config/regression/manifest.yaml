@@ -1,0 +1,42 @@
+schema_version: "1.0.0"
+batch: 28
+name: vav-regression-control
+manifest_version: "1.0"
+minimum_skill_count: 12
+requirements:
+  - code: REQ-VAV-B28-REG-001
+    owner: usability
+    criticality: blocker
+    description: "Critical API contracts must stay stable and versioned."
+  - code: REQ-VAV-B28-REG-002
+    owner: relationships
+    criticality: critical
+    description: "Regression registry must map all critical requirements to test cases."
+  - code: REQ-VAV-B28-REG-003
+    owner: quality
+    criticality: major
+    description: "Release gates and visual baseline must emit evidence for each release path."
+controls:
+  test_registry:
+    minimum_units: 4
+    minimum_components: 2
+    minimum_contracts: 2
+  pyramid:
+    minimum_fast_ratio: 0.25
+    maximum_fast_ratio: 0.80
+    minimum_complete_journey_ratio: 0.05
+  visual:
+    critical_blockers_allowed: 0
+  integration:
+    required_modules:
+      - usability
+      - relations
+      - data_governance
+      - trust_safety
+  mutation:
+    critical_required_score: 0.80
+    blocker_required_score: 0.90
+    critical_mutant_survivors_allowed: 0
+  flaky:
+    critical_allowed: 0
+    diagnostic_retries: 2

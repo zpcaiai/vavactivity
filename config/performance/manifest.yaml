@@ -1,0 +1,410 @@
+schema_version: "1.0.0"
+batch: 29
+name: vav-performance-capacity-framework
+schema_timestamp: "2026-08-07T00:00:00Z"
+workload_profiles:
+  - workload_code: VAV-PILOT-PROFILE
+    semantic_version: "1.0.0"
+    scale: development
+    environment_profile:
+      daily_active_users: 25000
+      sessions_per_user_per_day: 2.2
+      requests_per_session: 14.4
+      active_hours_per_day: 16
+      peak_factor: 2.0
+      session_duration_seconds: 300
+      role_weights:
+        visitor: 0.25
+        member: 0.35
+        administrator: 0.15
+        partner: 0.20
+        staff: 0.05
+    user_distribution:
+      users: 0.70
+      admins: 0.15
+      partners: 0.15
+    traffic_distribution:
+      browse: 0.45
+      match: 0.20
+      safety: 0.10
+      commerce: 0.10
+      notifications: 0.15
+    concurrency_profile:
+      peak_rps: 450
+      concurrent_users: 220
+      provider_callback_wait_ms: 280
+    background_job_profile:
+      hourly_jobs: 12000
+      critical_job_ratio: 0.22
+    provider_profile:
+      provider_count: 8
+      reliability_target: 0.996
+    growth_assumptions:
+      annual_growth_rate: 0.20
+      seasonal_peak_mult: 2.5
+    peak_event_manifest:
+      - event_code: FLASH-SALE
+        ramp_seconds: 300
+        peak_duration_seconds: 1200
+        expected_degradations:
+          - p95_increase
+          - queue_growth
+        primary_targets: [api.search, api.matching]
+        peak_multiplier: 3.5
+        recovery_budget_seconds: 500
+    value_provenance:
+      concurrency_profile: measured
+      background_job_profile: measured
+      provider_profile: assumed
+      growth_assumptions: inferred
+  - workload_code: VAV-SCALE-PRODUCTION
+    semantic_version: "1.0.0"
+    scale: medium_production
+    environment_profile:
+      daily_active_users: 98000
+      sessions_per_user_per_day: 3.1
+      requests_per_session: 10.7
+      active_hours_per_day: 15
+      peak_factor: 2.8
+      session_duration_seconds: 420
+      role_weights:
+        visitor: 0.35
+        member: 0.40
+        administrator: 0.12
+        partner: 0.10
+        staff: 0.03
+    user_distribution:
+      users: 0.78
+      admins: 0.07
+      partners: 0.15
+    traffic_distribution:
+      browse: 0.52
+      match: 0.23
+      safety: 0.07
+      commerce: 0.11
+      notifications: 0.07
+    concurrency_profile:
+      peak_rps: 850
+      concurrent_users: 580
+      provider_callback_wait_ms: 320
+    background_job_profile:
+      hourly_jobs: 41000
+      critical_job_ratio: 0.26
+    provider_profile:
+      provider_count: 12
+      reliability_target: 0.997
+    growth_assumptions:
+      annual_growth_rate: 0.22
+      seasonal_peak_mult: 2.9
+    peak_event_manifest:
+      - event_code: WEEKEND-SURGE
+        ramp_seconds: 240
+        peak_duration_seconds: 1800
+        expected_degradations:
+          - latency_regression
+          - cache_miss
+        primary_targets: [api.matching, api.notifications, workers.task_queue]
+        peak_multiplier: 2.2
+        recovery_budget_seconds: 420
+    value_provenance:
+      concurrency_profile: measured
+      background_job_profile: inferred
+      provider_profile: measured
+      growth_assumptions: measured
+endpoint_budgets:
+  - endpoint_code: api.notifications.send
+    semantic_version: "1.0.0"
+    workload_code: VAV-SCALE-PRODUCTION
+    criticality: critical
+    latency_budget:
+      p50_ms: 170
+      p90_ms: 290
+      p95_ms: 420
+      p99_ms: 780
+      max_ms: 1600
+    error_budget:
+      error_rate: 0.008
+      timeout_rate: 0.002
+    throughput_budget:
+      minimum_rps: 95
+    resource_budget:
+      cpu_ratio: 1.2
+      memory_ratio: 0.70
+      db_pool_ratio: 0.68
+    observed_samples:
+      p50_ms: 150
+      p90_ms: 250
+      p95_ms: 360
+      p99_ms: 640
+      max_ms: 900
+      error_rate: 0.002
+      timeout_rate: 0.001
+      achieved_rps: 102
+  - endpoint_code: api.matchmaking.recommend
+    semantic_version: "1.0.0"
+    workload_code: VAV-SCALE-PRODUCTION
+    criticality: high
+    latency_budget:
+      p50_ms: 320
+      p90_ms: 650
+      p95_ms: 980
+      p99_ms: 1800
+      max_ms: 3500
+    error_budget:
+      error_rate: 0.010
+      timeout_rate: 0.004
+    throughput_budget:
+      minimum_rps: 120
+    resource_budget:
+      cpu_ratio: 1.5
+      memory_ratio: 0.80
+      db_pool_ratio: 0.58
+    observed_samples:
+      p50_ms: 310
+      p90_ms: 610
+      p95_ms: 980
+      p99_ms: 1520
+      max_ms: 2200
+      error_rate: 0.008
+      timeout_rate: 0.003
+      achieved_rps: 116
+  - endpoint_code: api.security.tokens.refresh
+    semantic_version: "1.0.0"
+    workload_code: VAV-PILOT-PROFILE
+    criticality: critical
+    latency_budget:
+      p50_ms: 140
+      p90_ms: 260
+      p95_ms: 380
+      p99_ms: 700
+      max_ms: 1300
+    error_budget:
+      error_rate: 0.005
+      timeout_rate: 0.002
+    throughput_budget:
+      minimum_rps: 65
+    resource_budget:
+      cpu_ratio: 1.0
+      memory_ratio: 0.45
+      db_pool_ratio: 0.45
+    observed_samples:
+      p50_ms: 125
+      p90_ms: 240
+      p95_ms: 360
+      p99_ms: 620
+      max_ms: 900
+      error_rate: 0.001
+      timeout_rate: 0.001
+      achieved_rps: 72
+concurrency:
+  operations:
+    - resource: safety.blocks
+      key: user:{user_id}
+      mode: write
+      actors: 6
+      scenario_code: BLK-001
+    - resource: relationships.edges
+      key: relation:{user_id}:{target_id}
+      mode: write
+      actors: 5
+      scenario_code: REL-010
+    - resource: recommendations.cache
+      key: ranking:{bucket}
+      mode: write
+      actors: 2
+      scenario_code: REC-101
+    - resource: matches.list
+      key: visible:{user_id}
+      mode: read
+      actors: 6
+      scenario_code: MAT-030
+  lock_orders:
+    match-worker: [match_slot, relationship_slot, cache_lock]
+    safety-worker: [report_row, user_profile, audit_log]
+    payment-worker: [order_row, ledger_row, notification_queue]
+    cycle-worker: [a, b, c, a]
+  race_scenarios:
+    - scenario_code: CURRENCY-EXCHANGE
+      scenario_type: race
+      mutating: true
+      idempotency_key_expression: user_id + "+" + action_id
+      expected_invariants:
+        final_balance_not_negative: true
+        ledger_consistency: true
+      expected_result_distribution:
+        ok: 3
+        conflict_retried: 1
+      concurrent_actor_count: 4
+      synchronization_mode: provider_callback_race
+      duplicate_callback_expected: true
+    - scenario_code: CONTACT-REVEAL
+      scenario_type: race
+      mutating: true
+      idempotency_key_expression: payload_id + ":" + user
+      expected_invariants:
+        reveal_count_leq_limit: true
+        audit_covered: true
+      expected_result_distribution:
+        approved: 1
+        rejected_by_rate_limit: 1
+      concurrent_actor_count: 2
+      synchronization_mode: scheduler_command_race
+      duplicate_callback_expected: false
+  race_observations:
+    - scenario_code: CURRENCY-EXCHANGE
+      result_distribution:
+        ok: 3
+        conflict_retried: 1
+      invariants:
+        final_balance_not_negative: true
+        ledger_consistency: true
+      duplicate_side_effects: 0
+    - scenario_code: CONTACT-REVEAL
+      result_distribution:
+        approved: 1
+        rejected_by_rate_limit: 1
+      invariants:
+        reveal_count_leq_limit: true
+        audit_covered: true
+      duplicate_side_effects: 0
+baseline:
+  baseline:
+    p50_ms: 130
+    p90_ms: 250
+    p95_ms: 430
+    p99_ms: 900
+    max_ms: 1400
+    sample_count: 64
+  candidate:
+    p50_ms: 135
+    p90_ms: 272
+    p95_ms: 455
+    p99_ms: 980
+    max_ms: 1530
+    sample_count: 70
+  tolerance_ratio: 0.10
+  noise_band_ms: 20
+load_check:
+  scenario:
+    target_rps: 380
+    observed:
+      p50_ms: 360
+      p90_ms: 690
+      p95_ms: 980
+      p99_ms: 1500
+      max_ms: 3100
+      error_rate: 0.006
+      timeout_rate: 0.001
+      achieved_rps: 365
+    min_p95_ms: 1500
+  check_status: passed
+spike_check:
+  baseline_p95_ms: 430
+  recovery_budget_seconds: 720
+  spike_end_seconds: 300
+  samples:
+    - t_seconds: 0
+      p95_ms: 420
+      error_rate: 0.001
+    - t_seconds: 60
+      p95_ms: 455
+      error_rate: 0.004
+    - t_seconds: 180
+      p95_ms: 512
+      error_rate: 0.019
+    - t_seconds: 260
+      p95_ms: 610
+      error_rate: 0.043
+    - t_seconds: 320
+      p95_ms: 480
+      error_rate: 0.011
+    - t_seconds: 420
+      p95_ms: 455
+      error_rate: 0.008
+    - t_seconds: 520
+      p95_ms: 434
+      error_rate: 0.004
+stress_check:
+  points:
+    - offered_rps: 120
+      achieved_rps: 118
+      error_rate: 0.001
+      p95_ms: 430
+    - offered_rps: 240
+      achieved_rps: 212
+      error_rate: 0.004
+      p95_ms: 470
+    - offered_rps: 360
+      achieved_rps: 290
+      error_rate: 0.008
+      p95_ms: 520
+    - offered_rps: 500
+      achieved_rps: 380
+      error_rate: 0.018
+      p95_ms: 760
+    - offered_rps: 600
+      achieved_rps: 430
+      error_rate: 0.028
+      p95_ms: 900
+    - offered_rps: 700
+      achieved_rps: 430
+      error_rate: 0.080
+      p95_ms: 1520
+  max_error_rate: 0.05
+  latency_budget_ms: 1000
+  data_corruption_detected: false
+  authorization_bypass_detected: false
+  recovered_after_stress: true
+soak_check:
+  series:
+    event_queue_depth:
+      - [0, 220]
+      - [2, 228]
+      - [4, 238]
+      - [8, 250]
+      - [12, 266]
+      - [16, 294]
+    worker_backlog_seconds:
+      - [0, 16]
+      - [2, 18]
+      - [4, 20]
+      - [8, 23]
+      - [12, 28]
+      - [16, 31]
+    p95_ms:
+      - [0, 520]
+      - [4, 535]
+      - [8, 560]
+      - [12, 592]
+      - [16, 607]
+  leak_thresholds:
+    event_queue_depth: 0.4
+    worker_backlog_seconds: 0.2
+    p95_ms: 12
+  minimum_duration_hours: 8
+database_tests:
+  index_regression:
+    expected_queries:
+      - index_coverage_ok: true
+      - index_coverage_ok: true
+      - index_coverage_ok: true
+  lock_wait:
+    max_p95_ms: 220
+    observed_p95_ms: 190
+  deadlock_detection:
+    cycles_detected: 0
+cache_checks:
+  miss_rate:
+    baseline_ratio: 0.18
+    observed_ratio: 0.22
+  stampede_detected: false
+  hot_key_distribution:
+    hot_keys: 2
+    acceptable_hot_keys: 6
+queue_checks:
+  average_age_seconds: 95
+  max_age_seconds: 230
+  worker_throughput_rps: 420
+  target_throughput_rps: 500
+  oldest_unacked_seconds: 110
+  allowed_oldest_unacked_seconds: 240
