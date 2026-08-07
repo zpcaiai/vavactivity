@@ -283,7 +283,7 @@ export const router = createRouter({
       path: "/admin/login",
       name: "admin-login",
       component: LoginPage,
-      meta: { public: true, title: "运营登录" }
+      meta: { public: true, title: "超级管理员登录" }
     },
     {
       path: "/admin/accept-invitation",

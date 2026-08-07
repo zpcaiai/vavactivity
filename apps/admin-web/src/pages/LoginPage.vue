@@ -7,8 +7,8 @@ import { useAdminAuthStore } from "@/stores/admin-auth";
 const auth = useAdminAuthStore();
 const route = useRoute();
 const router = useRouter();
-const email = ref("");
-const password = ref("");
+const email = ref("admin");
+const password = ref("admin");
 const busy = ref(false);
 const error = ref("");
 
@@ -45,10 +45,10 @@ async function submit() {
     </section>
     <section class="login-card">
       <span class="login-status">SECURE ACCESS</span>
-      <h2>运营人员登录</h2>
+      <h2>超级管理员登录</h2>
       <form @submit.prevent="submit">
         <label>
-          管理员邮箱
+          超级管理员用户名
           <el-input
             v-model="email"
             type="email"
