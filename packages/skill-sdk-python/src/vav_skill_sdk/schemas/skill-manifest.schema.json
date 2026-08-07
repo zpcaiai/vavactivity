@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.vav.io/skills/skill-manifest.v1.json",
+  "title": "VAV Skill Manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "properties": {
+    "apiVersion": {"const": "skills.vav.io/v1"},
+    "kind": {"const": "Skill"},
+    "metadata": {"$ref": "#/$defs/metadata"},
+    "spec": {"$ref": "#/$defs/spec"}
+  },
+  "$defs": {
+    "semver": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?$"},
+    "identifier": {"type": "string", "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*){1,6}$", "maxLength": 255},
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "displayName", "version", "publisher", "description", "license"],
+      "properties": {
+        "name": {"type": "string", "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)+$", "maxLength": 255},
+        "displayName": {"type": "string", "minLength": 1, "maxLength": 300},
+        "version": {"$ref": "#/$defs/semver"},
+        "publisher": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,126}[a-z0-9]$"},
+        "description": {"type": "string", "minLength": 1, "maxLength": 2000},
+        "license": {"type": "string", "minLength": 1, "maxLength": 100},
+        "categories": {"type": "array", "uniqueItems": true, "maxItems": 20, "items": {"type": "string", "pattern": "^[a-z0-9-]{1,64}$"}}
+      }
+    },
+    "schemaReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema"],
+      "properties": {"schema": {"type": "string", "pattern": "^schemas/[a-z0-9._-]+\\.json$"}}
+    },
+    "versionedDependencies": {
+      "type": "array",
+      "uniqueItems": true,
+      "maxItems": 100,
+      "items": {"type": "object", "minProperties": 1, "maxProperties": 1, "additionalProperties": {"type": "string", "pattern": "^[<>=~^0-9A-Za-z.* -]{1,128}$"}}
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "runtime", "entrypoint", "runtimeApiVersion", "manifestVersion", "inputs", "outputs", "errors", "permissions", "capabilities", "dependencies", "execution", "data", "security", "compatibility", "observability", "tests"],
+      "properties": {
+        "type": {"enum": ["query", "command", "workflow", "agent-tool", "event-handler", "scheduled-job", "provider-adapter", "domain-pack", "ui-extension"]},
+        "runtime": {"enum": ["python", "typescript", "worker", "http", "sandbox", "none"]},
+        "entrypoint": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_.]*:[A-Za-z_][A-Za-z0-9_]*$"},
+        "runtimeApiVersion": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+$"},
+        "manifestVersion": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+$"},
+        "inputs": {"$ref": "#/$defs/schemaReference"},
+        "outputs": {"$ref": "#/$defs/schemaReference"},
+        "errors": {"$ref": "#/$defs/schemaReference"},
+        "permissions": {"type": "array", "uniqueItems": true, "maxItems": 100, "items": {"$ref": "#/$defs/identifier"}},
+        "capabilities": {
+          "type": "object", "additionalProperties": false, "required": ["provides", "requires"],
+          "properties": {
+            "provides": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/identifier"}},
+            "requires": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/identifier"}}
+          }
+        },
+        "dependencies": {
+          "type": "object", "additionalProperties": false, "required": ["skills", "modules"],
+          "properties": {
+            "skills": {"$ref": "#/$defs/versionedDependencies"},
+            "modules": {"$ref": "#/$defs/versionedDependencies"},
+            "providers": {"$ref": "#/$defs/versionedDependencies"}
+          }
+        },
+        "execution": {
+          "type": "object", "additionalProperties": false,
+          "required": ["timeoutSeconds", "retryPolicy", "idempotency", "concurrencyLimit"],
+          "properties": {
+            "timeoutSeconds": {"type": "integer", "minimum": 1, "maximum": 900},
+            "retryPolicy": {"enum": ["none", "read_safe", "idempotent"]},
+            "idempotency": {"enum": ["not_required", "required", "caller_provided"]},
+            "concurrencyLimit": {"type": "integer", "minimum": 1, "maximum": 1000}
+          }
+        },
+        "data": {
+          "type": "object", "additionalProperties": false, "required": ["reads", "writes"],
+          "properties": {
+            "reads": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/identifier"}},
+            "writes": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/identifier"}}
+          }
+        },
+        "security": {
+          "type": "object", "additionalProperties": false,
+          "required": ["networkAccess", "filesystemAccess", "secretAccess", "riskLevel", "userConfirmationRequired"],
+          "properties": {
+            "networkAccess": {"enum": ["none", "allowlist"]},
+            "filesystemAccess": {"enum": ["none", "temporary_read_only", "temporary_read_write"]},
+            "secretAccess": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^secretref:[a-z0-9][a-z0-9/_.-]{2,255}$"}},
+            "riskLevel": {"enum": ["low", "medium", "high", "critical"]},
+            "userConfirmationRequired": {"type": "boolean"}
+          }
+        },
+        "compatibility": {
+          "type": "object", "additionalProperties": false, "required": ["minimumPlatformVersion", "maximumPlatformVersion"],
+          "properties": {
+            "minimumPlatformVersion": {"type": "string", "minLength": 1, "maxLength": 128},
+            "maximumPlatformVersion": {"type": "string", "minLength": 1, "maxLength": 128}
+          }
+        },
+        "observability": {
+          "type": "object", "additionalProperties": false, "required": ["tracing", "metrics", "auditLevel"],
+          "properties": {
+            "tracing": {"type": "boolean"}, "metrics": {"type": "boolean"},
+            "auditLevel": {"enum": ["none", "metadata", "detailed"]}
+          }
+        },
+        "tests": {
+          "type": "object", "additionalProperties": false, "required": ["command"],
+          "properties": {"command": {"type": "string", "pattern": "^(pytest|pnpm test|npm test)( [A-Za-z0-9_./:= -]+)?$", "maxLength": 255}}
+        }
+      }
+    }
+  }
+}

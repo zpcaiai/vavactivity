@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-set -o errexit
-set -o nounset
-set -o pipefail
+
+set -euo pipefail
 
 if [ "$#" -lt 1 ]; then
   echo "run_if_available: missing command" >&2
@@ -23,56 +22,59 @@ set +e
 rc=$?
 set -e
 
-audit=$(cat "$tmp_out")
-err_out=$(cat "$tmp_err")
-if [ -n "$audit" ]; then
-  printf '%s\n' "$audit"
+stdout=$(cat "$tmp_out")
+stderr=$(cat "$tmp_err")
+if [ -n "$stdout" ]; then
+  printf '%s\n' "$stdout"
 fi
-if [ -n "$err_out" ]; then
-  printf '%s\n' "$err_out" >&2
+if [ -n "$stderr" ]; then
+  printf '%s\n' "$stderr" >&2
 fi
 
 if [ "$rc" -eq 0 ]; then
   exit 0
 fi
 
-combined="$(printf '%s\n%s' "$audit" "$err_out")"
-lower=$(printf '%s' "$combined" | tr '[:upper:]' '[:lower:]')
+combined="$(printf '%s\n%s' "$stdout" "$stderr")"
+lower="$(printf '%s' "$combined" | tr '[:upper:]' '[:lower:]')"
 
-need_not_run=0
-for pattern in \
-  "no such file or directory" \
-  "command not found" \
-  "filenotfound" \
-  "filenotfound" \
-  "unable to locate" \
-  "cannot connect to the docker daemon" \
-  "can\x27t connect to the docker daemon" \
-  "docker daemon" \
-  "service .* is not running" \
-  "connection refused" \
-  "ecconnrefused" \
-  "failed to connect" \
-  "unavailable" \
-  "no space left on device" \
-  "modulenotfounderror" \
-  "filenotfounderror" \
-  "cannot import name" \
-  "could not find" \
-  "operation timed out" \
-  "connect timed out" \
-  "playwright: not found" \
-  "docker: not found"
-  do
-    if printf '%s' "$lower" | grep -E -q "$pattern"; then
-      need_not_run=1
-      break
-    fi
-  done
+need_not_run=false
 
-if [ "$need_not_run" -eq 1 ]; then
-  echo "{\"status\": \"NOT_RUN\", \"command\": \"$cmd_text\", \"reason\": \"environment dependency unavailable\", \"exit_code\": $rc}"
-  exit 0
+if [ "$rc" -eq 126 ] || [ "$rc" -eq 127 ]; then
+  need_not_run=true
 fi
 
-exit "$rc"
+case "$lower" in
+  *"command not found"*|\
+  *"no such file or directory"*|\
+  *"file not found"*|\
+  *"module not found"*|\
+  *"modulenotfounderror"*|\
+  *"cannot import name"*|\
+  *"python:"*|\
+  *"cannot connect to the docker daemon"*|\
+  *"connection refused"*|\
+  *"timed out (110)"*|\
+  *"operation timed out"*|\
+  *"connect timed out"*|\
+  *"could not resolve host"*|\
+  *"failed to connect"*|\
+  *"playwright: not found"*|\
+  *"playwright not found"*|\
+  *"service is not running"*|\
+  *"playwright is not a function"*|\
+  *"no space left on device"*|\
+  *"permission denied"* )
+    need_not_run=true
+    ;;
+  *)
+    ;;
+esac
+
+if [ "$need_not_run" != true ]; then
+  exit "$rc"
+fi
+
+json_command=$(printf '%s' "$cmd_text" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' -e 's/\r/ /g' -e 's/\n/ /g')
+printf '{"status":"NOT_RUN","command":"%s","reason":"environment dependency unavailable","exit_code":%s}\n' "$json_command" "$rc"
+exit 0

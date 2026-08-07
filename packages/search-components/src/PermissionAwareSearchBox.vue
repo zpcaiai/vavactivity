@@ -1,0 +1,1 @@
+<script setup lang="ts">import { ref } from "vue"; const emit=defineEmits<{search:[query:string]}>(); const query=ref("");</script><template><form role="search" @submit.prevent="emit('search',query.trim())"><label for="vav-search">搜索</label><input id="vav-search" v-model="query" maxlength="200"><button type="submit">搜索</button></form></template>
