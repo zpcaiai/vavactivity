@@ -65,11 +65,29 @@ export const useAccessStore = defineStore("access", () => {
     } catch {
       throw new Error(explainApiConnectionError("管理员认证", baseUrl));
     }
-    const result = (await response.json()) as AuthResponse & {
+
+    const text = await response.text();
+    let result: (AuthResponse & {
       error?: { message: string };
-    };
+    }) | null = null;
+    if (text) {
+      try {
+        result = JSON.parse(text);
+      } catch {
+        if (!response.ok) {
+          throw new Error(text);
+        }
+        throw new Error("管理员认证返回了无效响应");
+      }
+    }
     if (!response.ok) {
-      throw new Error(result.error?.message ?? "管理员认证失败");
+      if (result && "error" in result && result.error?.message) {
+        throw new Error(result.error.message);
+      }
+      throw new Error(text.trim() ? text : "管理员认证失败");
+    }
+    if (!result) {
+      throw new Error("管理员认证返回为空");
     }
     return result;
   }
