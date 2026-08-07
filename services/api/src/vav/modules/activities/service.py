@@ -2253,7 +2253,7 @@ class MutualChoiceService:
                 ActivityPostEventChoice.chosen_user_id == chosen_user_id,
             )
             .with_for_update()
-        )
+        )   
         if choice is None or choice.status != "active":
             return
         choice.status = "withdrawn"

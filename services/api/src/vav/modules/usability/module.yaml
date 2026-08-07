@@ -1,0 +1,10 @@
+module: {code: usability, owner: product_quality, version: "1.0.0"}
+dependencies: {required: [identity, notifications, privacy, admin_platform, quality]}
+database: {revisions: [93]}
+events:
+  publishes: [usability.uat.completed.v1, usability.certification.changed.v1]
+  consumes: [admin.certification.changed.v1]
+permissions: {prefixes: [usability., uat.]}
+configuration: {prefixes: [USABILITY_, UAT_, DEMO_]}
+health: {checks: [critical_uat, compatibility, localization, draft_recovery, notification_content, certification]}
+schema_version: "1.0"

@@ -1,0 +1,29 @@
+schema_version: "1.0"
+locales: [en, zh-CN, zh-TW]
+personas: [visitor, member, purchaser, activity_participant, learner, counseling_client, dating_member, safety_reporter, privacy_requester, admin_operator]
+critical_scenarios:
+  - {code: UAT-IDENTITY-REGISTRATION, domain: identity, persona: visitor, locales: [en, zh-CN, zh-TW], devices: [desktop-chrome, mobile-safari]}
+  - {code: UAT-COMMERCE-PURCHASE, domain: commerce, persona: purchaser, locales: [en, zh-CN], devices: [desktop-chrome, mobile-safari]}
+  - {code: UAT-ACTIVITY-REGISTRATION, domain: activities, persona: activity_participant, locales: [en, zh-CN], devices: [desktop-chrome, mobile-chrome]}
+  - {code: UAT-COURSE-COMPLETION, domain: courses, persona: learner, locales: [en, zh-CN], devices: [desktop-chrome, mobile-safari]}
+  - {code: UAT-COUNSELING-BOOKING, domain: counseling, persona: counseling_client, locales: [en, zh-CN, zh-TW], devices: [desktop-safari, mobile-safari]}
+  - {code: UAT-DATING-PROFILE-REVIEW, domain: matchmaking_profiles, persona: dating_member, locales: [en, zh-CN, zh-TW], devices: [desktop-chrome, mobile-chrome]}
+  - {code: UAT-SAFETY-REPORT-BLOCK, domain: safety, persona: safety_reporter, locales: [en, zh-CN, zh-TW], devices: [desktop-chrome, mobile-safari]}
+  - {code: UAT-PRIVACY-ERASURE, domain: privacy, persona: privacy_requester, locales: [en, zh-CN, zh-TW], devices: [desktop-chrome, mobile-safari]}
+  - {code: UAT-ADMIN-EXCEPTION-RECOVERY, domain: admin_platform, persona: admin_operator, locales: [en, zh-CN], devices: [desktop-chrome, desktop-safari]}
+compatibility:
+  browsers: [chrome-current, chrome-previous, safari-current, safari-previous, firefox-current, edge-current]
+  devices: [desktop-1440, desktop-1024, tablet-portrait, mobile-390, mobile-360]
+  inputs: [keyboard, mouse, touch, screen-reader]
+  networks: [broadband, 4g, slow-3g, intermittent]
+drafts:
+  - {code: DRAFT-DATING-PROFILE, owner: matchmaking_profiles, ttl_seconds: 604800, conflict: manual_merge, sensitive: [private_narrative, preferences]}
+  - {code: DRAFT-COUNSELING-INTAKE, owner: counseling, ttl_seconds: 86400, conflict: reject_stale, sensitive: [intake_answers]}
+  - {code: DRAFT-SAFETY-REPORT, owner: safety, ttl_seconds: 86400, conflict: reject_stale, sensitive: [description, evidence]}
+imports:
+  - {code: IMPORT-CMS-CONTENT, owner: cms, command: cms.import_content, maximum_rows: 10000}
+  - {code: IMPORT-ACTIVITY-INVITATIONS, owner: activities, command: activities.import_invitations, maximum_rows: 5000}
+support_playbooks:
+  - {code: SUPPORT-PAYMENT-ENTITLEMENT, owner: commerce, resolution: commerce.reconcile_entitlement}
+  - {code: SUPPORT-PRIVACY-ERASURE, owner: privacy, resolution: privacy.retry_erasure_task}
+  - {code: SUPPORT-SKILL-INSTALL, owner: skills, resolution: skills.rollback_installation}
