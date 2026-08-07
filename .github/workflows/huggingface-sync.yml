@@ -52,14 +52,19 @@ jobs:
         run: |
           set -euo pipefail
 
-          SOURCE_BRANCH="${HF_TARGET_BRANCH:-${GITHUB_REF_NAME:-$HF_TARGET_BRANCH_DEFAULT}}"
+          SOURCE_BRANCH="${GITHUB_REF_NAME:-}"
           if [ -z "$SOURCE_BRANCH" ]; then
-            SOURCE_BRANCH="${GITHUB_REF#refs/heads/}"
+            if [ -n "${GITHUB_REF:-}" ]; then
+              SOURCE_BRANCH="${GITHUB_REF#refs/heads/}"
+            fi
           fi
           if [ -z "$SOURCE_BRANCH" ]; then
             SOURCE_BRANCH="$HF_TARGET_BRANCH_DEFAULT"
           fi
+          TARGET_BRANCH="${HF_TARGET_BRANCH:-$SOURCE_BRANCH}"
+
           echo "Source branch: $SOURCE_BRANCH"
+          echo "Configured target branch: $TARGET_BRANCH"
           echo "HF target space: $HF_SPACE_REPO"
 
           git config user.name "github-actions[bot]"
@@ -67,9 +72,27 @@ jobs:
 
           git remote add hf "https://huggingface:${HF_TOKEN}@huggingface.co/spaces/${HF_SPACE_REPO}.git"
           git remote -v
-          git ls-remote hf "refs/heads/${SOURCE_BRANCH}" || true
+          git fetch --quiet hf
 
-          git push hf "HEAD:refs/heads/${SOURCE_BRANCH}" --force
+          HF_DEFAULT_BRANCH="$(git ls-remote --symref hf HEAD | awk '/^ref:/{print $2}' | sed 's#refs/heads/##' | head -n 1 || true)"
+          if [ -z "$HF_DEFAULT_BRANCH" ]; then
+            HF_DEFAULT_BRANCH="$HF_TARGET_BRANCH_DEFAULT"
+          fi
+          echo "HF remote default branch: $HF_DEFAULT_BRANCH"
+
+          if ! git ls-remote --heads hf "refs/heads/${TARGET_BRANCH}" >/dev/null; then
+            echo "Target branch ${TARGET_BRANCH} is missing on HF; falling back to remote default ${HF_DEFAULT_BRANCH}."
+            TARGET_BRANCH="$HF_DEFAULT_BRANCH"
+          fi
+          echo "Resolved target branch: $TARGET_BRANCH"
+
+          # Push source code to the resolved HF branch.
+          git push hf "HEAD:refs/heads/${TARGET_BRANCH}" --force
+
+          if [ "$TARGET_BRANCH" != "$SOURCE_BRANCH" ]; then
+            echo "Also mirroring to source branch ${SOURCE_BRANCH}."
+            git push hf "HEAD:refs/heads/${SOURCE_BRANCH}" --force
+          fi
 
           echo "Verification (remote HEAD):"
-          git ls-remote hf "refs/heads/${SOURCE_BRANCH}"
+          git ls-remote hf "refs/heads/${TARGET_BRANCH}"
