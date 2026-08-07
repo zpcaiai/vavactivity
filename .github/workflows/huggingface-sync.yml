@@ -87,16 +87,8 @@ jobs:
           fi
           if [ -f "$HF_SYNC_DIR/apps/user-web/src/assets/main.css" ]; then
             SYNC_DIR="${HF_SYNC_DIR}"
-            python - <<PY
-            from pathlib import Path
-
-            css_path = Path("${SYNC_DIR}") / "apps/user-web/src/assets/main.css"
-            if css_path.exists():
-                text = css_path.read_text()
-                text = text.replace('url("./images/vav-hero-couple.png")', 'none')
-                text = text.replace("url('./images/vav-hero-couple.png')", "none")
-                css_path.write_text(text)
-            PY
+            sed -i "s#url(\\\"./images/vav-hero-couple.png\\\")#none#g" "${SYNC_DIR}/apps/user-web/src/assets/main.css"
+            sed -i "s#url('./images/vav-hero-couple.png')#none#g" "${SYNC_DIR}/apps/user-web/src/assets/main.css"
           fi
 
           if ! git -C "$HF_SYNC_DIR" init -b "$TARGET_BRANCH"; then
