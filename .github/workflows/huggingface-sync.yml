@@ -117,7 +117,7 @@ jobs:
 
           if [ -f "$HF_SYNC_DIR/apps/user-web/src/assets/main.css" ]; then
             SYNC_DIR="${HF_SYNC_DIR}"
-            sed -i "s#url(\\\"./images/vav-hero-couple.png\\\")#none#g" "${SYNC_DIR}/apps/user-web/src/assets/main.css"
+            sed -i 's#url("./images/vav-hero-couple.png")#none#g' "${SYNC_DIR}/apps/user-web/src/assets/main.css"
             sed -i "s#url('./images/vav-hero-couple.png')#none#g" "${SYNC_DIR}/apps/user-web/src/assets/main.css"
           fi
 

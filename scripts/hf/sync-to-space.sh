@@ -39,7 +39,7 @@ rm -f \
   "${SYNC_DIR}/_to_delete/_vav-src.tgz"
 
 if [ -f "${SYNC_DIR}/apps/user-web/src/assets/main.css" ]; then
-  sed -i "s#url(\\\"./images/vav-hero-couple.png\\\")#none#g" "${SYNC_DIR}/apps/user-web/src/assets/main.css"
+  sed -i 's#url("./images/vav-hero-couple.png")#none#g' "${SYNC_DIR}/apps/user-web/src/assets/main.css"
   sed -i "s#url('./images/vav-hero-couple.png')#none#g" "${SYNC_DIR}/apps/user-web/src/assets/main.css"
 fi
 
