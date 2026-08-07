@@ -451,6 +451,8 @@ def parse_action(parts: list[str]) -> str:
             for token in str(part).replace("_", "-").lower().split("-")
             if token
         )
+    if normalized and normalized[0] == "final":
+        normalized = normalized[1:]
     aliases = {
         ("migrate",): "migrate",
         ("seed",): "seed",
@@ -463,7 +465,6 @@ def parse_action(parts: list[str]) -> str:
         ("release-candidate",): "release-candidate",
         ("certify",): "certify",
         ("production", "stable", "certify"): "certify",
-        ("release", "candidate"): "release-candidate",
         ("score", "test"): "score-test",
         ("score",): "score-test",
         ("go", "no", "go", "test"): "go-no-go-test",

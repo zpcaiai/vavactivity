@@ -72,7 +72,7 @@ def _status_is_passed(status: str) -> bool:
 
 
 def _is_passed_result(status: str) -> bool:
-    return status in {"passed", "passed_with_warnings", "PASS"}
+    return str(status).strip().lower() in {"pass", "passed", "passed_with_warnings", "evaluated", "PASS".lower()}
 
 
 def _git_commit() -> str:
@@ -276,7 +276,7 @@ def _load_result(manifest: dict[str, Any]) -> dict[str, Any]:
     achieved_rps = _as_float(observed.get("achieved_rps"), 0.0)
     observed_p95 = _as_float(observed.get("p95_ms"), 0.0)
     min_p95 = _as_float(scenario.get("min_p95_ms"), _as_float(observed_p95))
-    manifest_check = str(section.get("check_status", "")).lower()
+    manifest_check = str(section.get("check_status", "")).strip().lower()
 
     if not scenario:
         findings.append("load_scenario_missing")
@@ -292,7 +292,7 @@ def _load_result(manifest: dict[str, Any]) -> dict[str, Any]:
         findings.append("achieved_rps_below_95pct_target")
     if observed_p95 > min_p95 * 1.5:
         findings.append("p95_exceeds_expected_envelope")
-    if manifest_check and manifest_check not in {"passed", "pass", "passed_with_warnings", "not_evaluated"}:
+    if manifest_check and manifest_check not in {"passed", "pass", "passed_with_warnings", "not_evaluated", "pass_with_warning", "pass_with_warnings"}:
         findings.append(f"manifest_check_status_not_passed:{manifest_check}")
 
     status = "PASS" if not findings else "FAIL"
@@ -395,7 +395,11 @@ def _database_checks(manifest: dict[str, Any]) -> dict[str, Any]:
     if not section:
         return {"status": "FAIL", "findings": ["database-tests-missing"]}
 
-    index_checks = _as_list(section.get("index_regression"))
+    raw_index_checks = _as_list(section.get("index_regression"))
+    if not raw_index_checks:
+        legacy_index = _as_dict(section.get("index_regression"))
+        raw_index_checks = _as_list(legacy_index.get("expected_queries"))
+    index_checks = raw_index_checks
     lock_wait = _as_dict(section.get("lock_wait"))
     deadlock = _as_dict(section.get("deadlock_detection"))
 

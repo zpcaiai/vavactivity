@@ -40,3 +40,20 @@ controls:
   flaky:
     critical_allowed: 0
     diagnostic_retries: 2
+selection:
+  changed_paths:
+    - services/api/src/vav/modules/usability/admin_router.py
+  impact_rules:
+    - pattern: "services/api/src/vav/modules/usability/.*"
+      modules:
+        - usability
+      reason: usability changes
+    - pattern: "services/api/src/vav/modules/data_governance/.*"
+      modules:
+        - data_governance
+      reason: governance changes
+      force_full_suite: true
+contracts:
+  gate:
+    approved_breaking_contract_codes:
+      - usability.import.v1

@@ -3,6 +3,9 @@
 	final-preproduction-verify production-observation-24h-evaluate production-observation-7d-evaluate production-observation-30d-evaluate \
 	final-release-candidate
 
+batch-32: final-release-candidate
+	@:
+
 final-migrate:
 	uv run --package vav-platform-api python scripts/final/control.py migrate
 

@@ -2079,12 +2079,6 @@ async def create_promotion(
     principal: AuthenticatedPrincipal = Depends(require_permission("catalog.promotions.create")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
-    if payload.promotion_type == "free_item":
-        raise VavError(
-            "PROMOTION_TYPE_NOT_IMPLEMENTED",
-            "Free-item promotions are reserved but not implemented.",
-            status_code=422,
-        )
     promotion = Promotion(
         **payload.model_dump(mode="json", exclude={"rules", "benefits"}),
         rules=payload.rules.model_dump(mode="json"),

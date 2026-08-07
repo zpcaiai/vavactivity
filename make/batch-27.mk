@@ -1,7 +1,10 @@
 .PHONY: usability-migrate usability-seed usability-sync uat-scenario-check synthetic-data-test \
 	demo-environment-test compatibility-test localization-qa draft-recovery-test notification-content-test \
 	import-export-test uat-user-e2e uat-admin-e2e usability-security-test usability-evidence-build \
-	functional-usability-verify
+	batch-27 functional-usability-verify
+
+batch-27: functional-usability-verify
+	@:
 
 usability-migrate:
 	docker compose exec -T api alembic upgrade head

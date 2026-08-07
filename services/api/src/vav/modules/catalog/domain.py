@@ -335,6 +335,14 @@ def apply_promotions(
         elif candidate.promotion_type == PromotionType.FIXED_PRICE:
             fixed_price = benefits.fixed_prices.get(context.currency)
             discount = max(0, remaining - fixed_price) if fixed_price is not None else 0
+        elif candidate.promotion_type == PromotionType.FREE_ITEM:
+            free_items = benefits.amounts.get(context.currency, 0)
+            if free_items <= 0:
+                continue
+            if context.quantity <= 0:
+                continue
+            unit_amount = remaining // context.quantity
+            discount = unit_amount * min(context.quantity, free_items)
         else:
             raise VavError(
                 "PROMOTION_TYPE_NOT_IMPLEMENTED",

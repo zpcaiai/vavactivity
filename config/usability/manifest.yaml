@@ -2,6 +2,7 @@ schema_version: "1.0"
 locales: [en, zh-CN, zh-TW]
 personas: [visitor, member, purchaser, activity_participant, learner, counseling_client, dating_member, safety_reporter, privacy_requester, admin_operator]
 critical_scenarios:
+  - {code: UAT-MEMBER-DASHBOARD, domain: profiles, persona: member, locales: [en, zh-CN], devices: [desktop-chrome, mobile-safari]}
   - {code: UAT-IDENTITY-REGISTRATION, domain: identity, persona: visitor, locales: [en, zh-CN, zh-TW], devices: [desktop-chrome, mobile-safari]}
   - {code: UAT-COMMERCE-PURCHASE, domain: commerce, persona: purchaser, locales: [en, zh-CN], devices: [desktop-chrome, mobile-safari]}
   - {code: UAT-ACTIVITY-REGISTRATION, domain: activities, persona: activity_participant, locales: [en, zh-CN], devices: [desktop-chrome, mobile-chrome]}

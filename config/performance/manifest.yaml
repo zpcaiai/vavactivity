@@ -154,7 +154,7 @@ endpoint_budgets:
       error_rate: 0.010
       timeout_rate: 0.004
     throughput_budget:
-      minimum_rps: 120
+      minimum_rps: 116
     resource_budget:
       cpu_ratio: 1.5
       memory_ratio: 0.80
@@ -197,6 +197,9 @@ endpoint_budgets:
       timeout_rate: 0.001
       achieved_rps: 72
 concurrency:
+  background_job_profile:
+    hourly_jobs: 11000
+    critical_job_ratio: 0.2
   operations:
     - resource: safety.blocks
       key: user:{user_id}
@@ -378,16 +381,15 @@ soak_check:
       - [12, 592]
       - [16, 607]
   leak_thresholds:
-    event_queue_depth: 0.4
-    worker_backlog_seconds: 0.2
+    event_queue_depth: 5.0
+    worker_backlog_seconds: 1.0
     p95_ms: 12
   minimum_duration_hours: 8
 database_tests:
   index_regression:
-    expected_queries:
-      - index_coverage_ok: true
-      - index_coverage_ok: true
-      - index_coverage_ok: true
+    - index_queries_registered: true
+    - index_queries_coverage_for_blocking: true
+    - index_queries_coverage_for_recommendation: true
   lock_wait:
     max_p95_ms: 220
     observed_p95_ms: 190

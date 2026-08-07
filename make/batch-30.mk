@@ -2,7 +2,10 @@
 	security-sast security-sca security-secret-scan security-iac-scan security-container-scan security-api-dast security-api-fuzz \
 	security-auth-test security-authorization-test security-injection-test security-ssrf-test security-upload-test \
 	security-webhook-test security-privacy-test security-ai-test security-skill-test security-pentest-regression \
-	security-admin-e2e security-evidence-build security-verify security-release
+	security-admin-e2e security-evidence-build security-verify security-release batch-30
+
+batch-30: security-release
+	@:
 
 security-migrate:
 	uv run --package vav-platform-api python scripts/security/control.py migrate

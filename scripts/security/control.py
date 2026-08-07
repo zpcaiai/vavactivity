@@ -931,7 +931,10 @@ def parse_action(parts: list[str]) -> str:
             )
         return normalized
 
-    parts = _normalize(parts)
+    normalized = _normalize(parts)
+    if normalized and normalized[0] == "security":
+        normalized = normalized[1:]
+
     aliases = {
         ("migrate",): "migrate",
         ("seed",): "seed",
@@ -981,7 +984,7 @@ def parse_action(parts: list[str]) -> str:
         ("evidence",): "evidence",
         ("evidence", "build"): "evidence",
     }
-    return aliases.get(tuple(parts), "-".join(parts))
+    return aliases.get(tuple(normalized), "-".join(normalized))
 
 
 def main() -> int:

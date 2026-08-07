@@ -2,7 +2,10 @@
 	regression-contract-test regression-integration-test regression-model-test regression-property-test \
 	regression-visual-test regression-mutation-test regression-flaky-test regression-isolation-test \
 	regression-impact-test regression-critical regression-full regression-admin-e2e regression-evidence-build \
-	regression-verify regression-release
+	regression-verify regression-release batch-28
+
+batch-28: regression-release
+	@:
 
 regression-migrate:
 	uv run --package vav-platform-api python scripts/regression/control.py migrate

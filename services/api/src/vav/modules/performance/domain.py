@@ -720,9 +720,9 @@ def evaluate_stress(
     if knee["status"] == "not_evaluated" or knee["max_stable_rps"] <= 0:
         blocking.append("no_stable_throughput_measured")
     return {
-        "status": "failed" if blocking else "passed",
         "blocking_reasons": sorted(blocking),
         **knee,
+        "status": "failed" if blocking else "passed",
     }
 
 

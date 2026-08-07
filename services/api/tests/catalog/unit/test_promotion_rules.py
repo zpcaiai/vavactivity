@@ -31,14 +31,14 @@ def candidate(
     )
 
 
-def context(subtotal: int = 1999) -> PromotionContext:
+def context(*, subtotal: int = 1999, quantity: int = 1) -> PromotionContext:
     return PromotionContext(
         product_id=uuid4(),
         sku_id=uuid4(),
         category_id=None,
         currency="USD",
         subtotal_minor=subtotal,
-        quantity=1,
+        quantity=quantity,
     )
 
 
@@ -72,8 +72,8 @@ def test_fixed_price_and_discount_floor() -> None:
         PromotionType.FIXED_AMOUNT,
         PromotionBenefits(amounts={"USD": 800}),
     )
-    _, fixed_price_total = apply_promotions([fixed_price], context(1200))
-    _, capped_total = apply_promotions([fixed_amount], context(500))
+    _, fixed_price_total = apply_promotions([fixed_price], context(subtotal=1200))
+    _, capped_total = apply_promotions([fixed_amount], context(subtotal=500))
     assert fixed_price_total == 201
     assert capped_total == 500
 
@@ -90,6 +90,29 @@ def test_exclusive_high_priority_promotion_blocks_stacking() -> None:
         PromotionBenefits(amounts={"USD": 200}),
         priority=10,
     )
-    applied, total = apply_promotions([second, exclusive], context(1000))
+    applied, total = apply_promotions([second, exclusive], context(subtotal=1000))
     assert len(applied) == 1
     assert total == 300
+
+
+def test_free_item_discount_based_on_quantity() -> None:
+    free_item = candidate(
+        PromotionType.FREE_ITEM,
+        PromotionBenefits(amounts={"USD": 1}),
+    )
+    applied, total = apply_promotions([free_item], context(subtotal=6000, quantity=3))
+    assert len(applied) == 1
+    assert applied[0].discount_type == PromotionType.FREE_ITEM
+    assert applied[0].discount_amount_minor == 2000
+    assert total == 2000
+
+
+def test_free_item_more_than_quantity_is_clamped_to_quantity() -> None:
+    free_item = candidate(
+        PromotionType.FREE_ITEM,
+        PromotionBenefits(amounts={"USD": 8}),
+    )
+    applied, total = apply_promotions([free_item], context(subtotal=5000, quantity=3))
+    assert len(applied) == 1
+    assert applied[0].discount_amount_minor == 4998
+    assert total == 4998

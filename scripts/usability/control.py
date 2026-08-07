@@ -85,7 +85,7 @@ def _scenarios(manifest: dict[str, Any]) -> tuple[list[dict[str, Any]], dict[str
                 "fixture_blueprint_code": str(scenario["code"]),
                 "required_locales": list(scenario.get("locales", manifest.get("locales", []))),
                 "required_device_profiles": list(scenario.get("devices", [])),
-                "required_outcomes": ["passed", "not_run"],
+                "expected_outcomes": ["passed", "not_run"],
                 "steps": [
                     {
                         "step_code": f"{scenario['code']}-step-1",
@@ -135,8 +135,9 @@ def _compatibility(manifest: dict[str, Any]) -> dict[str, Any]:
         "combinations": combos,
     }
     runs: list[dict[str, Any]] = []
-    for combo in combos[:8]:
-        for index, journey in enumerate(matrix["critical_journeys"][:2]):
+    journeys = matrix["critical_journeys"]
+    for combo in combos:
+        for index, journey in enumerate(journeys):
             runs.append(
                 {
                     "browser": combo["browser"],
@@ -170,12 +171,12 @@ def _localization(manifest: dict[str, Any]) -> dict[str, Any]:
     translations = {
         "zh-CN": {
             "title": {"translated_text": "开始您的体验"},
-            "summary": {"translated_text": "完成您的个人资料设置", "placeholder_manifest": ["date", "timezone"]},
+            "summary": {"translated_text": "完成您的個人資料設置"},
             "expiry": {"translated_text": "到期时间 {date} 於 {timezone}"},
         },
         "zh-TW": {
             "title": {"translated_text": "開始您的體驗"},
-            "summary": {"translated_text": "完成您的個人資料設置", "placeholder_manifest": ["date", "timezone"]},
+            "summary": {"translated_text": "完成您的個人資料設定"},
             "expiry": {"translated_text": "到期時間 {date} 於 {timezone}"},
         },
         "en": {
@@ -378,7 +379,7 @@ def run(command: str) -> int:
         return 0 if status == "PASS" else 1
 
     if command == "draft-recovery":
-        status = _status_from(snap["drafts"]["needs_user_choice"] >= 0)
+        status = _status_from(snap["drafts"]["needs_user_choice"] == 0)
         print(json.dumps({"command": command, "status": status, "drafts": snap["drafts"]}, sort_keys=True))
         return 0 if status == "PASS" else 1
 
@@ -451,31 +452,45 @@ def parse_action(parts: list[str]) -> str:
             for token in str(part).replace("_", "-").lower().split("-")
             if token
         )
+    if normalized and normalized[0] == "usability":
+        normalized = normalized[1:]
     aliases = {
         ("sync",): "sync",
         ("uat", "scenario", "check"): "uat-scenario",
         ("uat-scenario",): "uat-scenario",
         ("scenario", "check"): "scenario-check",
         ("synthetic",): "synthetic",
+        ("synthetic", "data", "test"): "synthetic",
         ("synthetic", "data"): "synthetic",
         ("synthetic-data",): "synthetic",
         ("demo", "environment"): "demo-environment",
         ("demo-environment",): "demo-environment",
         ("compatibility",): "compatibility",
+        ("compatibility", "test"): "compatibility",
+        ("compatibility", "qa"): "compatibility",
+        ("compatibility", "check"): "compatibility",
+        ("compatibility", "report"): "compatibility",
         ("localization",): "localization",
+        ("localization", "qa"): "localization",
         ("draft", "recovery"): "draft-recovery",
         ("draft-recovery",): "draft-recovery",
+        ("draft", "recovery", "test"): "draft-recovery",
+        ("draft-recovery-test",): "draft-recovery",
         ("notification", "content"): "notification-content",
         ("notification-content",): "notification-content",
+        ("notification", "content", "test"): "notification-content",
         ("import", "export"): "import-export",
         ("import-export",): "import-export",
+        ("import", "export", "test"): "import-export",
         ("uat", "user", "e2e"): "uat-user-e2e",
         ("uat-user-e2e",): "uat-user-e2e",
         ("uat", "admin", "e2e"): "uat-admin-e2e",
         ("uat-admin-e2e",): "uat-admin-e2e",
         ("uat", "scenario"): "uat-scenario",
+        ("security", "test"): "security",
         ("security",): "security",
         ("evidence",): "evidence",
+        ("evidence", "build"): "evidence",
         ("final-evidence",): "evidence",
     }
     return aliases.get(tuple(normalized), "-".join(normalized))

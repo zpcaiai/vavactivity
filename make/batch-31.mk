@@ -1,6 +1,9 @@
 .PHONY: resilience-migrate resilience-seed resilience-sync slo-check error-budget-test observability-test synthetic-monitor-test \
 	api-ha-test database-ha-test redis-worker-ha-test provider-resilience-test degradation-test resilience-security-test resilience-admin-e2e \
-	resilience-evidence-build resilience-verify chaos-test backup-restore-test dr-game-day-test incident-management-test resilience-release
+	resilience-evidence-build resilience-verify batch-31 chaos-test backup-restore-test dr-game-day-test incident-management-test resilience-release
+
+batch-31: resilience-verify
+	@:
 
 resilience-migrate:
 	uv run --package vav-platform-api python scripts/resilience/control.py migrate

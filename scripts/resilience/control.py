@@ -723,6 +723,8 @@ def parse_action(parts: list[str]) -> str:
             for token in str(part).replace("_", "-").lower().split("-")
             if token
         )
+    if normalized and normalized[0] == "resilience":
+        normalized = normalized[1:]
 
     aliases = {
         ("migrate",): "migrate",

@@ -2,7 +2,10 @@
 	performance-concurrency-test performance-baseline performance-load performance-spike performance-stress \
 	performance-soak performance-database-test performance-cache-test performance-queue-test performance-scaling-test \
 	performance-cost-report performance-security-test performance-admin-e2e performance-evidence-build performance-verify \
-	performance-release
+	performance-release batch-29
+
+batch-29: performance-release
+	@:
 
 performance-migrate:
 	uv run --package vav-platform-api python scripts/performance/control.py migrate
