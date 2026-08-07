@@ -1,7 +1,7 @@
 .PHONY: usability-migrate usability-seed usability-sync uat-scenario-check synthetic-data-test \
-	@./scripts/run_if_available.sh demo-environment-test compatibility-test localization-qa draft-recovery-test notification-content-test \
-	@./scripts/run_if_available.sh import-export-test uat-user-e2e uat-admin-e2e usability-security-test usability-evidence-build \
-	@./scripts/run_if_available.sh batch-27 functional-usability-verify
+	demo-environment-test compatibility-test localization-qa draft-recovery-test notification-content-test \
+	import-export-test uat-user-e2e uat-admin-e2e usability-security-test usability-evidence-build \
+	batch-27 functional-usability-verify
 
 batch-27: functional-usability-verify
 	@:
@@ -53,6 +53,6 @@ usability-evidence-build:
 	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/usability/control.py evidence
 
 functional-usability-verify: usability-sync uat-scenario-check synthetic-data-test demo-environment-test \
-	@./scripts/run_if_available.sh compatibility-test localization-qa draft-recovery-test notification-content-test import-export-test \
-	@./scripts/run_if_available.sh uat-user-e2e uat-admin-e2e usability-security-test usability-evidence-build
+	compatibility-test localization-qa draft-recovery-test notification-content-test import-export-test \
+	uat-user-e2e uat-admin-e2e usability-security-test usability-evidence-build
 	@:

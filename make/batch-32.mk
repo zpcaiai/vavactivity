@@ -1,7 +1,7 @@
 .PHONY: final-migrate final-seed final-sync final-release-manifest-check final-score-test final-go-no-go-test final-approval-test final-launch-test \
-	@./scripts/run_if_available.sh final-observation-policy-test final-evidence-test final-security-test final-admin-e2e final-evidence-build \
-	@./scripts/run_if_available.sh final-preproduction-verify production-observation-24h-evaluate production-observation-7d-evaluate production-observation-30d-evaluate \
-	@./scripts/run_if_available.sh final-release-candidate
+	final-observation-policy-test final-evidence-test final-security-test final-admin-e2e final-evidence-build \
+	final-preproduction-verify production-observation-24h-evaluate production-observation-7d-evaluate production-observation-30d-evaluate \
+	final-release-candidate
 
 batch-32: final-release-candidate
 	@:
@@ -55,9 +55,9 @@ production-observation-30d-evaluate:
 	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/final/control.py observe-30d
 
 final-preproduction-verify: final-migrate final-seed final-sync final-release-manifest-check final-score-test final-go-no-go-test \
-	@./scripts/run_if_available.sh final-approval-test final-launch-test final-observation-policy-test final-evidence-test final-security-test final-admin-e2e \
-	@./scripts/run_if_available.sh final-evidence-build
+	final-approval-test final-launch-test final-observation-policy-test final-evidence-test final-security-test final-admin-e2e \
+	final-evidence-build
 
 final-release-candidate: quality-verify ui-verify experience-verify process-verify data-integrity-verify admin-completeness-verify functional-usability-verify \
-	@./scripts/run_if_available.sh regression-release performance-release security-release resilience-release final-preproduction-verify
+	regression-release performance-release security-release resilience-release final-preproduction-verify
 	@:

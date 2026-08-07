@@ -1,7 +1,7 @@
 .PHONY: quality-migrate quality-seed quality-sync quality-manifest-check quality-trace-check \
-	@./scripts/run_if_available.sh quality-closure-check quality-gap-check quality-domain-test quality-test quality-gate-test \
-	@./scripts/run_if_available.sh quality-security-test quality-concurrency-test quality-contract-test quality-gate-evaluate \
-	@./scripts/run_if_available.sh quality-admin-e2e quality-evidence-build quality-release-report quality-verify
+	quality-closure-check quality-gap-check quality-domain-test quality-test quality-gate-test \
+	quality-security-test quality-concurrency-test quality-contract-test quality-gate-evaluate \
+	quality-admin-e2e quality-evidence-build quality-release-report quality-verify
 
 quality-migrate:
 	@./scripts/run_if_available.sh docker compose exec -T api alembic upgrade head
@@ -56,5 +56,5 @@ quality-release-report:
 	@./scripts/run_if_available.sh PYTHONPATH=services/api/src .venv/bin/python scripts/quality/control.py release-report
 
 quality-verify: quality-migrate quality-seed quality-sync quality-manifest-check quality-trace-check \
-	@./scripts/run_if_available.sh quality-closure-check quality-gap-check quality-test quality-gate-test quality-security-test \
-	@./scripts/run_if_available.sh quality-admin-e2e quality-evidence-build quality-release-report
+	quality-closure-check quality-gap-check quality-test quality-gate-test quality-security-test \
+	quality-admin-e2e quality-evidence-build quality-release-report

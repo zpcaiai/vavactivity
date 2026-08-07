@@ -1,8 +1,8 @@
 .PHONY: security-migrate security-seed security-sync security-threat-model-check security-attack-surface-check \
-	@./scripts/run_if_available.sh security-sast security-sca security-secret-scan security-iac-scan security-container-scan security-api-dast security-api-fuzz \
-	@./scripts/run_if_available.sh security-auth-test security-authorization-test security-injection-test security-ssrf-test security-upload-test \
-	@./scripts/run_if_available.sh security-webhook-test security-privacy-test security-ai-test security-skill-test security-pentest-regression \
-	@./scripts/run_if_available.sh security-admin-e2e security-evidence-build security-verify security-release batch-30
+	security-sast security-sca security-secret-scan security-iac-scan security-container-scan security-api-dast security-api-fuzz \
+	security-auth-test security-authorization-test security-injection-test security-ssrf-test security-upload-test \
+	security-webhook-test security-privacy-test security-ai-test security-skill-test security-pentest-regression \
+	security-admin-e2e security-evidence-build security-verify security-release batch-30
 
 batch-30: security-release
 	@:
@@ -80,10 +80,10 @@ security-evidence-build:
 	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/security/control.py evidence
 
 security-verify: security-migrate security-seed security-sync security-threat-model-check security-attack-surface-check \
-	@./scripts/run_if_available.sh security-sast security-sca security-secret-scan security-iac-scan security-container-scan security-api-dast \
-	@./scripts/run_if_available.sh security-api-fuzz security-auth-test security-authorization-test security-injection-test security-ssrf-test \
-	@./scripts/run_if_available.sh security-upload-test security-webhook-test security-privacy-test security-ai-test security-skill-test \
-	@./scripts/run_if_available.sh security-pentest-regression security-admin-e2e security-evidence-build
+	security-sast security-sca security-secret-scan security-iac-scan security-container-scan security-api-dast \
+	security-api-fuzz security-auth-test security-authorization-test security-injection-test security-ssrf-test \
+	security-upload-test security-webhook-test security-privacy-test security-ai-test security-skill-test \
+	security-pentest-regression security-admin-e2e security-evidence-build
 
 security-release: security-verify
 	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/security/control.py pen-test

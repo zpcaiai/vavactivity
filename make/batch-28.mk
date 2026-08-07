@@ -1,8 +1,8 @@
 .PHONY: regression-migrate regression-seed regression-sync regression-registry-check regression-pyramid-check \
-	@./scripts/run_if_available.sh regression-contract-test regression-integration-test regression-model-test regression-property-test \
-	@./scripts/run_if_available.sh regression-visual-test regression-mutation-test regression-flaky-test regression-isolation-test \
-	@./scripts/run_if_available.sh regression-impact-test regression-critical regression-full regression-admin-e2e regression-evidence-build \
-	@./scripts/run_if_available.sh regression-verify regression-release batch-28
+	regression-contract-test regression-integration-test regression-model-test regression-property-test \
+	regression-visual-test regression-mutation-test regression-flaky-test regression-isolation-test \
+	regression-impact-test regression-critical regression-full regression-admin-e2e regression-evidence-build \
+	regression-verify regression-release batch-28
 
 batch-28: regression-release
 	@:
@@ -62,9 +62,9 @@ regression-evidence-build:
 	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/regression/control.py evidence
 
 regression-verify: regression-migrate regression-seed regression-sync regression-registry-check \
-	@./scripts/run_if_available.sh regression-pyramid-check regression-contract-test regression-integration-test regression-model-test \
-	@./scripts/run_if_available.sh regression-property-test regression-visual-test regression-flaky-test regression-isolation-test \
-	@./scripts/run_if_available.sh regression-impact-test regression-critical regression-admin-e2e regression-evidence-build
+	regression-pyramid-check regression-contract-test regression-integration-test regression-model-test \
+	regression-property-test regression-visual-test regression-flaky-test regression-isolation-test \
+	regression-impact-test regression-critical regression-admin-e2e regression-evidence-build
 
 regression-release: regression-full regression-mutation-test regression-evidence-build
 	@:

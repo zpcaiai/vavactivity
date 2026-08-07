@@ -1,7 +1,7 @@
 .PHONY: experience-migrate experience-seed experience-sync experience-ia-check experience-route-check \
-	@./scripts/run_if_available.sh experience-task-check experience-journey-check experience-handoff-check experience-search-test \
-	@./scripts/run_if_available.sh experience-dead-end-scan experience-test experience-security-test experience-user-e2e \
-	@./scripts/run_if_available.sh experience-admin-e2e experience-evidence-build experience-frontend-test experience-verify
+	experience-task-check experience-journey-check experience-handoff-check experience-search-test \
+	experience-dead-end-scan experience-test experience-security-test experience-user-e2e \
+	experience-admin-e2e experience-evidence-build experience-frontend-test experience-verify
 
 experience-migrate:
 	@./scripts/run_if_available.sh docker compose exec -T api alembic upgrade head
@@ -56,5 +56,5 @@ experience-evidence-build:
 	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/experience/control.py evidence
 
 experience-verify: experience-sync experience-ia-check experience-route-check experience-task-check \
-	@./scripts/run_if_available.sh experience-journey-check experience-handoff-check experience-dead-end-scan experience-test \
-	@./scripts/run_if_available.sh experience-security-test experience-frontend-test experience-evidence-build
+	experience-journey-check experience-handoff-check experience-dead-end-scan experience-test \
+	experience-security-test experience-frontend-test experience-evidence-build

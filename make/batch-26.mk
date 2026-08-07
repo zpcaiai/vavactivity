@@ -1,6 +1,6 @@
 .PHONY: admin-platform-migrate admin-platform-seed admin-platform-sync admin-capability-check \
-	@./scripts/run_if_available.sh admin-masking-test admin-approval-test admin-bulk-test admin-exception-test \
-	@./scripts/run_if_available.sh admin-security-test admin-platform-test admin-platform-e2e admin-evidence-build admin-completeness-verify
+	admin-masking-test admin-approval-test admin-bulk-test admin-exception-test \
+	admin-security-test admin-platform-test admin-platform-e2e admin-evidence-build admin-completeness-verify
 
 admin-platform-migrate:
 	@./scripts/run_if_available.sh docker compose exec -T api alembic upgrade head
@@ -41,4 +41,4 @@ admin-evidence-build:
 	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/admin/control.py evidence
 
 admin-completeness-verify: admin-platform-sync admin-capability-check admin-masking-test \
-	@./scripts/run_if_available.sh admin-approval-test admin-bulk-test admin-exception-test admin-security-test admin-platform-test admin-evidence-build
+	admin-approval-test admin-bulk-test admin-exception-test admin-security-test admin-platform-test admin-evidence-build

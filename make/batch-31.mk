@@ -1,6 +1,6 @@
 .PHONY: resilience-migrate resilience-seed resilience-sync slo-check error-budget-test observability-test synthetic-monitor-test \
-	@./scripts/run_if_available.sh api-ha-test database-ha-test redis-worker-ha-test provider-resilience-test degradation-test resilience-security-test resilience-admin-e2e \
-	@./scripts/run_if_available.sh resilience-evidence-build resilience-verify batch-31 chaos-test backup-restore-test dr-game-day-test incident-management-test resilience-release
+	api-ha-test database-ha-test redis-worker-ha-test provider-resilience-test degradation-test resilience-security-test resilience-admin-e2e \
+	resilience-evidence-build resilience-verify batch-31 chaos-test backup-restore-test dr-game-day-test incident-management-test resilience-release
 
 batch-31: resilience-verify
 	@:
@@ -51,8 +51,8 @@ resilience-evidence-build:
 	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/resilience/control.py evidence
 
 resilience-verify: resilience-migrate resilience-seed resilience-sync slo-check error-budget-test observability-test \
-	@./scripts/run_if_available.sh synthetic-monitor-test api-ha-test database-ha-test redis-worker-ha-test provider-resilience-test degradation-test resilience-security-test \
-	@./scripts/run_if_available.sh incident-management-test resilience-admin-e2e resilience-evidence-build
+	synthetic-monitor-test api-ha-test database-ha-test redis-worker-ha-test provider-resilience-test degradation-test resilience-security-test \
+	incident-management-test resilience-admin-e2e resilience-evidence-build
 
 chaos-test:
 	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/resilience/control.py chaos-test

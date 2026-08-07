@@ -1,6 +1,6 @@
 .PHONY: ui-seed ui-token-build ui-token-check ui-component-test ui-storybook-build ui-storybook-test \
-	@./scripts/run_if_available.sh ui-accessibility-test ui-responsive-test ui-visual-test ui-page-audit ui-admin-e2e \
-	@./scripts/run_if_available.sh ui-evidence-build ui-verify
+	ui-accessibility-test ui-responsive-test ui-visual-test ui-page-audit ui-admin-e2e \
+	ui-evidence-build ui-verify
 
 ui-seed:
 	@./scripts/run_if_available.sh docker compose exec -T api python -m vav.cli.seed_permissions

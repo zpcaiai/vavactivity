@@ -1,7 +1,7 @@
 .PHONY: process-migrate process-seed process-sync process-manifest-check process-state-machine-check \
-	@./scripts/run_if_available.sh process-saga-test process-compensation-test process-concurrency-test process-stuck-test \
-	@./scripts/run_if_available.sh process-simulation-test process-security-test process-admin-test process-admin-e2e \
-	@./scripts/run_if_available.sh process-evidence-build process-verify
+	process-saga-test process-compensation-test process-concurrency-test process-stuck-test \
+	process-simulation-test process-security-test process-admin-test process-admin-e2e \
+	process-evidence-build process-verify
 
 process-migrate:
 	@./scripts/run_if_available.sh docker compose exec -T api alembic upgrade head
@@ -49,5 +49,5 @@ process-evidence-build:
 	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/process/control.py evidence
 
 process-verify: process-sync process-manifest-check process-state-machine-check process-saga-test \
-	@./scripts/run_if_available.sh process-compensation-test process-concurrency-test process-stuck-test process-simulation-test \
-	@./scripts/run_if_available.sh process-security-test process-admin-test process-evidence-build
+	process-compensation-test process-concurrency-test process-stuck-test process-simulation-test \
+	process-security-test process-admin-test process-evidence-build
