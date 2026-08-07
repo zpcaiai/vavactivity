@@ -96,11 +96,19 @@ jobs:
           echo "Resolved target branch: $TARGET_BRANCH"
 
           # Push source code to the resolved HF branch.
-          git push hf "HEAD:refs/heads/${TARGET_BRANCH}" --force
+          if ! git push hf "HEAD:refs/heads/${TARGET_BRANCH}" --force 2>&1 | tee /tmp/hf-push.log; then
+            echo "HF push failed:"
+            cat /tmp/hf-push.log
+            exit 1
+          fi
 
           if [ "$TARGET_BRANCH" != "$SOURCE_BRANCH" ]; then
             echo "Also mirroring to source branch ${SOURCE_BRANCH}."
-            git push hf "HEAD:refs/heads/${SOURCE_BRANCH}" --force
+            if ! git push hf "HEAD:refs/heads/${SOURCE_BRANCH}" --force 2>&1 | tee /tmp/hf-push-source.log; then
+              echo "HF mirror push failed:"
+              cat /tmp/hf-push-source.log
+              exit 1
+            fi
           fi
 
           echo "Verification (remote HEAD):"
