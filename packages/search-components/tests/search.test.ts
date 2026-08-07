@@ -1,1 +1,0 @@
-import { mount } from "@vue/test-utils"; import { expect,it } from "vitest"; import { PermissionAwareSearchBox } from "../src"; it("emits a trimmed query",async()=>{const wrapper=mount(PermissionAwareSearchBox);await wrapper.get("input").setValue("  活动  ");await wrapper.get("form").trigger("submit");expect(wrapper.emitted("search")?.[0]).toEqual(["活动"]);});
