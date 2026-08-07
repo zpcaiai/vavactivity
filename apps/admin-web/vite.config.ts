@@ -3,10 +3,10 @@ import { fileURLToPath, URL } from "node:url";
 import vue from "@vitejs/plugin-vue";
 import { defineConfig } from "vitest/config";
 
-// When deploying to Vercel the admin app lives under /admin/, so asset URLs
-// must use that base.  Set VITE_BASE_PATH=/admin/ in the build environment
-// (the scripts/vercel-build.mjs script sets this automatically).
-const base = process.env.VITE_BASE_PATH ?? "/";
+// On Vercel the admin app is served under /admin/; Vite's `base` must match
+// so that asset URLs (JS/CSS) resolve correctly.
+// VERCEL=1 is injected automatically by Vercel for every build.
+const base = process.env.VITE_BASE_PATH ?? (process.env.VERCEL === "1" ? "/admin/" : "/");
 
 export default defineConfig({
   base,

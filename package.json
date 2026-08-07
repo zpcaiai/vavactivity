@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "pnpm --recursive --if-present build",
+    "postbuild": "node scripts/vercel-merge.mjs",
     "dev": "pnpm --parallel --filter @vav/user-web --filter @vav/admin-web dev",
     "lint": "pnpm --recursive --if-present lint",
     "test": "pnpm --recursive --if-present test",
