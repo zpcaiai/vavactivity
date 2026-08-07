@@ -53,13 +53,23 @@ jobs:
           set -euo pipefail
 
           SOURCE_BRANCH="${HF_TARGET_BRANCH:-${GITHUB_REF_NAME:-$HF_TARGET_BRANCH_DEFAULT}}"
+          if [ -z "$SOURCE_BRANCH" ]; then
+            SOURCE_BRANCH="${GITHUB_REF#refs/heads/}"
+          fi
+          if [ -z "$SOURCE_BRANCH" ]; then
+            SOURCE_BRANCH="$HF_TARGET_BRANCH_DEFAULT"
+          fi
           echo "Source branch: $SOURCE_BRANCH"
           echo "HF target space: $HF_SPACE_REPO"
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git remote -v
           git remote add hf "https://huggingface:${HF_TOKEN}@huggingface.co/spaces/${HF_SPACE_REPO}.git"
-          git lfs install
-          git push hf "${SOURCE_BRANCH}:${SOURCE_BRANCH}" --force
+          git remote -v
+          git ls-remote hf "refs/heads/${SOURCE_BRANCH}" || true
+
+          git push hf "HEAD:refs/heads/${SOURCE_BRANCH}" --force
+
+          echo "Verification (remote HEAD):"
+          git ls-remote hf "refs/heads/${SOURCE_BRANCH}"
