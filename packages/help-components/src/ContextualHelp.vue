@@ -1,1 +1,0 @@
-<script setup lang="ts">defineProps<{title:string;body:string;supportHref:string}>();</script><template><aside aria-labelledby="context-help-title"><h2 id="context-help-title">{{ title }}</h2><p>{{ body }}</p><a :href="supportHref">联系支持</a></aside></template>
