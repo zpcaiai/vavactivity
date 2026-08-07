@@ -6,11 +6,6 @@ requires-python = "==3.12.*"
 members = [
     "vav-platform-api",
     "vav-platform-workspace",
-    "vav-skill-cli",
-    "vav-skill-contracts",
-    "vav-skill-runtime",
-    "vav-skill-sdk",
-    "vav-skill-testkit",
     "vav-worker",
 ]
 
@@ -1599,7 +1594,6 @@ dependencies = [
     { name = "sqlalchemy" },
     { name = "structlog" },
     { name = "uvicorn", extra = ["standard"] },
-    { name = "vav-skill-sdk" },
 ]
 
 [package.dev-dependencies]
@@ -1637,7 +1631,6 @@ requires-dist = [
     { name = "sqlalchemy", specifier = "==2.0.42" },
     { name = "structlog", specifier = "==25.4.0" },
     { name = "uvicorn", extras = ["standard"], specifier = "==0.35.0" },
-    { name = "vav-skill-sdk", editable = "packages/skill-sdk-python" },
 ]
 
 [package.metadata.requires-dev]
@@ -1667,93 +1660,6 @@ dev = [
     { name = "pip-licenses", specifier = "==5.0.0" },
     { name = "pre-commit", specifier = "==4.2.0" },
     { name = "pyyaml", specifier = "==6.0.2" },
-]
-
-[[package]]
-name = "vav-skill-cli"
-version = "1.0.0"
-source = { editable = "packages/skill-cli" }
-dependencies = [
-    { name = "cryptography" },
-    { name = "jsonschema" },
-    { name = "pyyaml" },
-    { name = "vav-skill-contracts" },
-    { name = "vav-skill-runtime" },
-    { name = "vav-skill-sdk" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "cryptography", specifier = "==50.0.0" },
-    { name = "jsonschema", specifier = "==4.25.1" },
-    { name = "pyyaml", specifier = "==6.0.2" },
-    { name = "vav-skill-contracts", editable = "packages/skill-contracts" },
-    { name = "vav-skill-runtime", editable = "services/skill-runtime" },
-    { name = "vav-skill-sdk", editable = "packages/skill-sdk-python" },
-]
-
-[[package]]
-name = "vav-skill-contracts"
-version = "1.0.0"
-source = { editable = "packages/skill-contracts" }
-dependencies = [
-    { name = "jsonschema" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "jsonschema", specifier = "==4.25.1" }]
-
-[[package]]
-name = "vav-skill-runtime"
-version = "1.0.0"
-source = { editable = "services/skill-runtime" }
-dependencies = [
-    { name = "cryptography" },
-    { name = "jsonschema" },
-    { name = "packaging" },
-    { name = "pydantic" },
-    { name = "vav-skill-sdk" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "cryptography", specifier = "==50.0.0" },
-    { name = "jsonschema", specifier = "==4.25.1" },
-    { name = "packaging", specifier = "==26.2" },
-    { name = "pydantic", specifier = "==2.11.7" },
-    { name = "vav-skill-sdk", editable = "packages/skill-sdk-python" },
-]
-
-[[package]]
-name = "vav-skill-sdk"
-version = "1.0.0"
-source = { editable = "packages/skill-sdk-python" }
-dependencies = [
-    { name = "jsonschema" },
-    { name = "pydantic" },
-    { name = "pyyaml" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "jsonschema", specifier = "==4.25.1" },
-    { name = "pydantic", specifier = "==2.11.7" },
-    { name = "pyyaml", specifier = "==6.0.2" },
-]
-
-[[package]]
-name = "vav-skill-testkit"
-version = "1.0.0"
-source = { editable = "packages/skill-testkit" }
-dependencies = [
-    { name = "jsonschema" },
-    { name = "vav-skill-sdk" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "jsonschema", specifier = "==4.25.1" },
-    { name = "vav-skill-sdk", editable = "packages/skill-sdk-python" },
 ]
 
 [[package]]
