@@ -89,13 +89,14 @@ export const useAccessStore = defineStore("access", () => {
   }
 
   async function requestAuth(path: string, init: RequestInit = {}) {
+    const requestUrl = `${baseUrl}${path}`;
     const headers = new Headers(init.headers);
     if (init.body) {
       headers.set("Content-Type", "application/json");
     }
     let response: Response;
     try {
-      response = await fetch(`${baseUrl}${path}`, {
+      response = await fetch(requestUrl, {
         ...init,
         credentials: "include",
         headers
@@ -113,14 +114,14 @@ export const useAccessStore = defineStore("access", () => {
       } catch {
         if (!response.ok) {
           if (isHtmlResponse(text, contentType)) {
-            throw new Error(`管理员认证失败：后端返回了非 JSON 响应，当前请求地址 ${baseUrl} 可能错误。`);
+            throw new Error(`管理员认证失败：后端返回了非 JSON 响应，当前请求 ${requestUrl} 可能不是真正 API。`);
           }
           throw new Error(text);
         }
         throw new Error("管理员认证返回了无效响应");
       }
     } else if (isHtmlResponse(text, contentType)) {
-      throw new Error(`管理员认证失败：后端返回了 HTML 响应，当前请求地址 ${baseUrl} 可能不是 API 域名。`);
+      throw new Error(`管理员认证失败：后端返回了 HTML 响应，当前请求 ${requestUrl} 可能不是 API 域名。`);
     }
     if (!response.ok) {
       if (result && "error" in result && result.error?.message) {
