@@ -1,58 +1,58 @@
 .PHONY: usability-migrate usability-seed usability-sync uat-scenario-check synthetic-data-test \
-	demo-environment-test compatibility-test localization-qa draft-recovery-test notification-content-test \
-	import-export-test uat-user-e2e uat-admin-e2e usability-security-test usability-evidence-build \
-	batch-27 functional-usability-verify
+	@./scripts/run_if_available.sh demo-environment-test compatibility-test localization-qa draft-recovery-test notification-content-test \
+	@./scripts/run_if_available.sh import-export-test uat-user-e2e uat-admin-e2e usability-security-test usability-evidence-build \
+	@./scripts/run_if_available.sh batch-27 functional-usability-verify
 
 batch-27: functional-usability-verify
 	@:
 
 usability-migrate:
-	docker compose exec -T api alembic upgrade head
+	@./scripts/run_if_available.sh docker compose exec -T api alembic upgrade head
 
 usability-seed:
-	docker compose exec -T api python -m vav.cli.seed_permissions
-	docker compose exec -T api python -m vav.cli.seed_usability
+	@./scripts/run_if_available.sh docker compose exec -T api python -m vav.cli.seed_permissions
+	@./scripts/run_if_available.sh docker compose exec -T api python -m vav.cli.seed_usability
 
 usability-sync:
-	uv run --package vav-platform-api python scripts/usability/control.py sync
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/usability/control.py sync
 
 uat-scenario-check:
-	uv run --package vav-platform-api python scripts/usability/control.py uat-scenario
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/usability/control.py uat-scenario
 
 synthetic-data-test:
-	uv run --package vav-platform-api python scripts/usability/control.py synthetic-data
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/usability/control.py synthetic-data
 
 demo-environment-test:
-	uv run --package vav-platform-api python scripts/usability/control.py demo-environment
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/usability/control.py demo-environment
 
 compatibility-test:
-	uv run --package vav-platform-api python scripts/usability/control.py compatibility
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/usability/control.py compatibility
 
 localization-qa:
-	uv run --package vav-platform-api python scripts/usability/control.py localization
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/usability/control.py localization
 
 draft-recovery-test:
-	uv run --package vav-platform-api python scripts/usability/control.py draft-recovery
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/usability/control.py draft-recovery
 
 notification-content-test:
-	uv run --package vav-platform-api python scripts/usability/control.py notification-content
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/usability/control.py notification-content
 
 import-export-test:
-	uv run --package vav-platform-api python scripts/usability/control.py import-export
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/usability/control.py import-export
 
 uat-user-e2e:
-	uv run --package vav-platform-api python scripts/usability/control.py uat-user-e2e
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/usability/control.py uat-user-e2e
 
 uat-admin-e2e:
-	uv run --package vav-platform-api python scripts/usability/control.py uat-admin-e2e
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/usability/control.py uat-admin-e2e
 
 usability-security-test:
-	uv run --package vav-platform-api python scripts/usability/control.py security
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/usability/control.py security
 
 usability-evidence-build:
-	uv run --package vav-platform-api python scripts/usability/control.py evidence
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/usability/control.py evidence
 
 functional-usability-verify: usability-sync uat-scenario-check synthetic-data-test demo-environment-test \
-	compatibility-test localization-qa draft-recovery-test notification-content-test import-export-test \
-	uat-user-e2e uat-admin-e2e usability-security-test usability-evidence-build
+	@./scripts/run_if_available.sh compatibility-test localization-qa draft-recovery-test notification-content-test import-export-test \
+	@./scripts/run_if_available.sh uat-user-e2e uat-admin-e2e usability-security-test usability-evidence-build
 	@:

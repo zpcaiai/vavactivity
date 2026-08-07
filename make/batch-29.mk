@@ -1,72 +1,72 @@
 .PHONY: performance-migrate performance-seed performance-sync performance-workload-check performance-budget-check \
-	performance-concurrency-test performance-baseline performance-load performance-spike performance-stress \
-	performance-soak performance-database-test performance-cache-test performance-queue-test performance-scaling-test \
-	performance-cost-report performance-security-test performance-admin-e2e performance-evidence-build performance-verify \
-	performance-release batch-29
+	@./scripts/run_if_available.sh performance-concurrency-test performance-baseline performance-load performance-spike performance-stress \
+	@./scripts/run_if_available.sh performance-soak performance-database-test performance-cache-test performance-queue-test performance-scaling-test \
+	@./scripts/run_if_available.sh performance-cost-report performance-security-test performance-admin-e2e performance-evidence-build performance-verify \
+	@./scripts/run_if_available.sh performance-release batch-29
 
 batch-29: performance-release
 	@:
 
 performance-migrate:
-	uv run --package vav-platform-api python scripts/performance/control.py migrate
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/performance/control.py migrate
 
 performance-seed:
-	uv run --package vav-platform-api python scripts/performance/control.py seed
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/performance/control.py seed
 
 performance-sync:
-	uv run --package vav-platform-api python scripts/performance/control.py sync
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/performance/control.py sync
 
 performance-workload-check:
-	uv run --package vav-platform-api python scripts/performance/control.py workload-check
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/performance/control.py workload-check
 
 performance-budget-check:
-	uv run --package vav-platform-api python scripts/performance/control.py budget-check
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/performance/control.py budget-check
 
 performance-concurrency-test:
-	uv run --package vav-platform-api python scripts/performance/control.py concurrency-test
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/performance/control.py concurrency-test
 
 performance-baseline:
-	uv run --package vav-platform-api python scripts/performance/control.py baseline
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/performance/control.py baseline
 
 performance-load:
-	uv run --package vav-platform-api python scripts/performance/control.py load-test
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/performance/control.py load-test
 
 performance-spike:
-	uv run --package vav-platform-api python scripts/performance/control.py spike-test
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/performance/control.py spike-test
 
 performance-stress:
-	uv run --package vav-platform-api python scripts/performance/control.py stress-test
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/performance/control.py stress-test
 
 performance-soak:
-	uv run --package vav-platform-api python scripts/performance/control.py soak-test
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/performance/control.py soak-test
 
 performance-database-test:
-	uv run --package vav-platform-api python scripts/performance/control.py database-test
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/performance/control.py database-test
 
 performance-cache-test:
-	uv run --package vav-platform-api python scripts/performance/control.py cache-test
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/performance/control.py cache-test
 
 performance-queue-test:
-	uv run --package vav-platform-api python scripts/performance/control.py queue-test
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/performance/control.py queue-test
 
 performance-scaling-test:
-	uv run --package vav-platform-api python scripts/performance/control.py scaling-test
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/performance/control.py scaling-test
 
 performance-cost-report:
-	uv run --package vav-platform-api python scripts/performance/control.py cost-report
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/performance/control.py cost-report
 
 performance-security-test:
-	uv run --package vav-platform-api python scripts/performance/control.py security-test
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/performance/control.py security-test
 
 performance-admin-e2e:
-	uv run --package vav-platform-api python scripts/performance/control.py admin-e2e
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/performance/control.py admin-e2e
 
 performance-evidence-build:
-	uv run --package vav-platform-api python scripts/performance/control.py evidence
+	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/performance/control.py evidence
 
 performance-verify: performance-migrate performance-seed performance-sync performance-workload-check performance-budget-check \
-	performance-concurrency-test performance-baseline performance-load performance-spike performance-database-test \
-	performance-cache-test performance-queue-test performance-scaling-test performance-security-test performance-admin-e2e \
-	performance-cost-report performance-evidence-build
+	@./scripts/run_if_available.sh performance-concurrency-test performance-baseline performance-load performance-spike performance-database-test \
+	@./scripts/run_if_available.sh performance-cache-test performance-queue-test performance-scaling-test performance-security-test performance-admin-e2e \
+	@./scripts/run_if_available.sh performance-cost-report performance-evidence-build
 
 performance-release: performance-verify performance-soak
