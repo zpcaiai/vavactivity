@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import { resolveApiBaseUrl } from "@/config/api";
 
 import { useAdminAuthStore } from "@/stores/admin-auth";
 
@@ -26,7 +27,7 @@ interface NavigationMenu {
 }
 
 const auth = useAdminAuthStore();
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
+const baseUrl = resolveApiBaseUrl();
 const menus = ref<NavigationMenu[]>([]);
 const selectedCode = ref("");
 const draft = ref<NavigationMenu | null>(null);

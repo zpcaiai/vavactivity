@@ -1,6 +1,8 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
+import { explainApiConnectionError, resolveApiBaseUrl } from "@/config/api";
+
 export interface AdminUser {
   id: string;
   email: string;
@@ -17,7 +19,7 @@ interface AuthResponse {
   };
 }
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
+const baseUrl = resolveApiBaseUrl();
 
 function csrfToken() {
   return document.cookie
@@ -53,11 +55,16 @@ export const useAccessStore = defineStore("access", () => {
     if (init.body) {
       headers.set("Content-Type", "application/json");
     }
-    const response = await fetch(`${baseUrl}${path}`, {
-      ...init,
-      credentials: "include",
-      headers
-    });
+    let response: Response;
+    try {
+      response = await fetch(`${baseUrl}${path}`, {
+        ...init,
+        credentials: "include",
+        headers
+      });
+    } catch {
+      throw new Error(explainApiConnectionError("管理员认证", baseUrl));
+    }
     const result = (await response.json()) as AuthResponse & {
       error?: { message: string };
     };

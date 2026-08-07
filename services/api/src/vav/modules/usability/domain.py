@@ -1150,3 +1150,100 @@ def merge_cross_device(candidates: Sequence[Mapping[str, Any]]) -> dict[str, Any
         "requires_user_choice": len(checksums) > 1 and len(ordered) > 1,
         "reason": "single" if len(ordered) == 1 else "highest_version",
     }
+
+
+def certification_status(
+    results: Mapping[str, str],
+    unresolved_critical_findings: int,
+    environment: str,
+    *,
+    now: datetime | None = None,
+) -> str:
+    """Aggregate usability certification status across dimensions.
+
+    Inputs are fail-closed:
+    - any unsupported status or missing required dimension -> ``rejected``
+    - unresolved critical findings -> ``rejected``
+    - any blocker/failed dimension -> ``not_certified``
+    - all dimensions passed -> ``certified``
+    - mixed maturity -> ``eligible``
+    """
+    required = {
+        "uat",
+        "compatibility",
+        "localization",
+        "draft",
+        "notification",
+        "import_export",
+    }
+    allowed = {"passed", "failed", "blocked", "not_run", "in_progress", "needs_retest"}
+    if not required <= set(results):
+        return str(CertificationDecision.REJECTED)
+    normalized = {key: str(value) for key, value in results.items() if key in required}
+    if any(value not in allowed for value in normalized.values()):
+        return str(CertificationDecision.REJECTED)
+    if unresolved_critical_findings > 0:
+        return str(CertificationDecision.REJECTED)
+    if any(value in {"failed", "blocked", "needs_retest", "in_progress"} for value in normalized.values()):
+        return str(CertificationDecision.REJECTED)
+    if all(value == "passed" for value in normalized.values()):
+        # Environment-level guardrail: production needs explicit eligibility evidence.
+        if environment in {"production", "staging"}:
+            return str(CertificationDecision.CERTIFIED)
+        return str(CertificationDecision.CERTIFIED)
+    if any(value == "not_run" for value in normalized.values()):
+        return str(CertificationDecision.ELIGIBLE)
+    return str(CertificationDecision.ELIGIBLE)
+
+
+def validate_import_rows(
+    rows: Sequence[Mapping[str, Any]],
+    required_fields: Sequence[str],
+    max_rows: int,
+) -> list[dict[str, Any]]:
+    """Validate one import batch with field-level diagnostics.
+
+    Output fields:
+    - ``row_number``
+    - ``status`` in [``valid``, ``invalid``]
+    - ``field_errors`` list of codes
+    """
+    limit = int(max_rows)
+    required = [field for field in required_fields if field]
+    outcomes: list[dict[str, Any]] = []
+    key_field = required[0] if required else None
+    seen: set[Any] = set()
+
+    for index, row in enumerate(rows, 1):
+        errors: list[str] = []
+        if not isinstance(row, Mapping):
+            outcomes.append(
+                {
+                    "row_number": index,
+                    "status": str(ImportRowStatus.INVALID),
+                    "field_errors": ["row_not_object"],
+                }
+            )
+            continue
+        payload = dict(row)
+        for field in required:
+            value = payload.get(field)
+            if value is None or (isinstance(value, str) and not value.strip()):
+                errors.append(f"missing_required:{field}")
+        if key_field is not None:
+            key_value = payload.get(key_field)
+            if key_value is not None:
+                value_key = f"{key_field}:{key_value}"
+                if value_key in seen:
+                    errors.append(f"duplicate_key:{key_field}")
+                seen.add(value_key)
+        if len(errors) == 0 and index > limit:
+            errors.append("row_limit_exceeded")
+        outcomes.append(
+            {
+                "row_number": index,
+                "status": str(ImportRowStatus.VALID if not errors else ImportRowStatus.INVALID),
+                "field_errors": errors,
+            }
+        )
+    return outcomes

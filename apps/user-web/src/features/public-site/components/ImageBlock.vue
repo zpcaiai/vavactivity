@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { resolveApiBaseUrl } from "@/config/api";
 
 const props = defineProps<{ data: Record<string, unknown> }>();
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
+const baseUrl = resolveApiBaseUrl();
 const source = computed(() =>
   props.data.media_id
     ? `${baseUrl}/public/media/${String(props.data.media_id)}?variant=medium`

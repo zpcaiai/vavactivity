@@ -2,6 +2,8 @@ import { createInternalNeonAuth } from "@neondatabase/neon-js/auth";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
+import { explainApiConnectionError, resolveApiBaseUrl } from "@/config/api";
+
 export interface CurrentUser {
   id: string;
   email: string;
@@ -27,7 +29,7 @@ interface AuthResponse {
 
 type AuthStatus = "unknown" | "authenticated" | "anonymous" | "refreshing";
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
+const baseUrl = resolveApiBaseUrl();
 const neonAuthUrl = import.meta.env.VITE_NEON_AUTH_URL?.trim();
 const neonAuth = neonAuthUrl ? createInternalNeonAuth(neonAuthUrl) : undefined;
 
@@ -70,11 +72,16 @@ export const useAuthStore = defineStore("auth", () => {
     if (init.body) {
       headers.set("Content-Type", "application/json");
     }
-    const response = await fetch(`${baseUrl}${path}`, {
-      ...init,
-      credentials: "include",
-      headers
-    });
+    let response: Response;
+    try {
+      response = await fetch(`${baseUrl}${path}`, {
+        ...init,
+        credentials: "include",
+        headers
+      });
+    } catch {
+      throw new Error(explainApiConnectionError("用户认证", baseUrl));
+    }
     const body = (await response.json()) as T & {
       error?: { code: string; message: string };
     };

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import { resolveApiBaseUrl } from "@/config/api";
 
 import { useAdminAuthStore } from "@/stores/admin-auth";
 
@@ -13,7 +14,7 @@ interface MediaItem {
 }
 
 const auth = useAdminAuthStore();
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
+const baseUrl = resolveApiBaseUrl();
 const items = ref<MediaItem[]>([]);
 const selectedFile = ref<File | null>(null);
 const altText = ref("");

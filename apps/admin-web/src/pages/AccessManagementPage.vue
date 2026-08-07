@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
+import { resolveApiBaseUrl } from "@/config/api";
 
 import { useAdminAuthStore } from "@/stores/admin-auth";
 
@@ -8,7 +9,7 @@ const route = useRoute();
 const auth = useAdminAuthStore();
 const items = ref<Record<string, unknown>[]>([]);
 const error = ref("");
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
+const baseUrl = resolveApiBaseUrl();
 const endpoint = computed(() => String(route.meta.endpoint ?? "/admin/users"));
 
 async function load() {

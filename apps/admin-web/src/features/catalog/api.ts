@@ -1,6 +1,7 @@
 import { useAdminAuthStore } from "@/stores/admin-auth";
+import { resolveApiBaseUrl } from "@/config/api";
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
+const baseUrl = resolveApiBaseUrl();
 
 export async function catalogApi<T>(
   path: string,

@@ -1,6 +1,7 @@
 import type { PublicContent } from "../types";
+import { resolveApiBaseUrl } from "@/config/api";
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
+const baseUrl = resolveApiBaseUrl();
 
 export interface PublicNavigationItem {
   id: string;

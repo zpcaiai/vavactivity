@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRoute } from "vue-router";
+import { resolveApiBaseUrl } from "@/config/api";
 
 const route = useRoute();
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
+const baseUrl = resolveApiBaseUrl();
 const startedAt = new Date().toISOString();
 const form = ref({
   name: "",

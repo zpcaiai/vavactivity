@@ -773,6 +773,35 @@ ADMIN_PLATFORM_PERMISSIONS = {
     "admin.certifications.read", "admin.certifications.certify", "admin.analytics.read", "admin.audit.read",
 }
 
+USABILITY_PERMISSIONS = {
+    "usability.dashboard.read",
+    "usability.scenarios.read",
+    "uat.scenarios.read",
+    "usability.runs.read",
+    "uat.runs.read",
+    "usability.runs.write",
+    "uat.runs.execute",
+    "usability.synthetic.read",
+    "usability.synthetic.generate",
+    "usability.compatibility.read",
+    "usability.compatibility.execute",
+    "usability.demo.read",
+    "usability.demo.launch",
+    "usability.localization.read",
+    "usability.localization.test",
+    "usability.drafts.read",
+    "usability.drafts.write",
+    "usability.drafts.discard",
+    "usability.notifications.read",
+    "usability.notifications.execute",
+    "usability.imports.read",
+    "usability.imports.preview",
+    "usability.studies.read",
+    "usability.support.read",
+    "usability.certifications.read",
+    "usability.certifications.evaluate",
+}
+
 ALL_PERMISSIONS = (
     IDENTITY_PERMISSIONS
     | CMS_PERMISSIONS
@@ -793,6 +822,7 @@ ALL_PERMISSIONS = (
     | SAFETY_PERMISSIONS
     | SYSTEM_PERMISSIONS
     | SKILL_PLATFORM_PERMISSIONS
+    | USABILITY_PERMISSIONS
     | QUALITY_PERMISSIONS
     | DESIGN_SYSTEM_PERMISSIONS
     | EXPERIENCE_PERMISSIONS

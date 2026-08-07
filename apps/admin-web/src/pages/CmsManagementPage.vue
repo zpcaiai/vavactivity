@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { resolveApiBaseUrl } from "@/config/api";
 
 import { useAdminAuthStore } from "@/stores/admin-auth";
 
@@ -17,7 +18,7 @@ interface ContentItem {
 const route = useRoute();
 const router = useRouter();
 const auth = useAdminAuthStore();
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
+const baseUrl = resolveApiBaseUrl();
 const items = ref<ContentItem[]>([]);
 const busy = ref(false);
 const error = ref("");

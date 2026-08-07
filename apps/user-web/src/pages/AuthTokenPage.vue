@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
+import { resolveApiBaseUrl } from "@/config/api";
 
 const props = defineProps<{
   mode: "verify" | "forgot" | "reset" | "pending";
 }>();
 const route = useRoute();
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
+const baseUrl = resolveApiBaseUrl();
 const email = ref("");
 const password = ref("");
 const busy = ref(false);

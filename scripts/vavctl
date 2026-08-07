@@ -3,18 +3,131 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
+seed_manifest_file="$repo_root/config/seeds/manifest.yaml"
+seed_state_file="$repo_root/.vavctl/seed-state.txt"
 
 pass() { printf 'PASS    %s\n' "$1"; }
 warn() { printf 'WARNING %s\n' "$1"; }
 fail() { printf 'FAIL    %s\n' "$1"; return 1; }
 
+is_true() {
+  case "${1,,}" in
+    1|true|yes|on|y) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+seed_parse_manifest() {
+  if [[ ! -f "$seed_manifest_file" ]]; then
+    fail "seed manifest missing: $seed_manifest_file"
+    return 1
+  fi
+  declare -gA SEED_GROUP_MAP=()
+  local group=""
+  local line module
+  while IFS= read -r line; do
+    line="${line%%#*}"
+    [[ -z "${line//[[:space:]]/}" ]] && continue
+    if [[ $line =~ ^[[:space:]]*([A-Za-z0-9_]+):[[:space:]]*$ ]]; then
+      group="${BASH_REMATCH[1]}"
+      continue
+    fi
+    if [[ $line =~ ^[[:space:]]*-[[:space:]]+([A-Za-z0-9_.]+)[[:space:]]*$ ]] && [[ -n "$group" ]]; then
+      module="${BASH_REMATCH[1]}"
+      if [[ -z "${SEED_GROUP_MAP[$group]:-}" ]]; then
+        SEED_GROUP_MAP[$group]="$module"
+      else
+        SEED_GROUP_MAP[$group]+=" $module"
+      fi
+    fi
+  done < "$seed_manifest_file"
+}
+
+seed_manifest_checksum() {
+  sha256sum "$seed_manifest_file" | awk '{print $1}'
+}
+
+seed_module_file() {
+  echo "$repo_root/services/api/src/vav/cli/${1##*.}.py"
+}
+
+seed_module_checksum() {
+  local module_name="$1"
+  local module_file
+  module_file="$(seed_module_file "$module_name")"
+  if [[ ! -f "$module_file" ]]; then
+    fail "seed command not found: $module_name"
+    return 1
+  fi
+  sha256sum "$module_file" | awk '{print $1}'
+}
+
+seed_selected_modules() {
+  local requested_groups=("$@")
+  local -A seen=()
+  local group modules module output=()
+  for group in "${requested_groups[@]}"; do
+    if [[ -z "${SEED_GROUP_MAP[$group]+x}" ]]; then
+      fail "unknown seed group in manifest: $group"
+      return 1
+    fi
+    for module in ${SEED_GROUP_MAP[$group]}; do
+      if [[ -z "${seen[$module]+x}" ]]; then
+        seen["$module"]=1
+        output+=( "$module" )
+      fi
+    done
+  done
+  printf '%s\n' "${output[@]}"
+}
+
+seed_read_state() {
+  declare -gA SEED_STATE=()
+  SEED_MANIFEST_SHA=""
+  if [[ ! -f "$seed_state_file" ]]; then
+    return 0
+  fi
+  while IFS='=' read -r key value; do
+    [[ -z "${key//[[:space:]]/}" ]] && continue
+    if [[ "$key" == "manifest_sha" ]]; then
+      SEED_MANIFEST_SHA="$value"
+      continue
+    fi
+    if [[ "$key" == module:* ]]; then
+      local module_key="${key#module:}"
+      SEED_STATE["$module_key"]="$value"
+    fi
+  done < "$seed_state_file"
+}
+
+seed_write_state() {
+  local manifest_sha="$1"
+  shift
+  local modules=("$@")
+  mkdir -p "$(dirname "$seed_state_file")"
+  {
+    echo "manifest_sha=$manifest_sha"
+    echo "updated_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    for module in "${modules[@]}"; do
+      local checksum
+      checksum="$(seed_module_checksum "$module")"
+      echo "module:$module=$checksum"
+    done
+  } > "$seed_state_file"
+}
+
 doctor() {
-  failures=0
+  local failures=0
   for command_name in git docker node corepack python3 uv openssl curl; do
-    if command -v "$command_name" >/dev/null 2>&1; then pass "$command_name available"; else fail "$command_name is required" || failures=$((failures+1)); fi
+    if command -v "$command_name" >/dev/null 2>&1; then
+      pass "$command_name available"
+    else
+      fail "$command_name is required" || failures=$((failures+1))
+    fi
   done
   if docker info >/dev/null 2>&1; then pass "Docker daemon reachable"; else fail "Docker daemon is not reachable" || failures=$((failures+1)); fi
   if docker compose version >/dev/null 2>&1; then pass "Docker Compose v2 available"; else fail "Docker Compose v2 is required" || failures=$((failures+1)); fi
+  local architecture available_kb memory_bytes
   architecture="$(uname -m)"
   case "$architecture" in arm64|aarch64|x86_64|amd64) pass "supported CPU architecture: $architecture" ;; *) warn "untested CPU architecture: $architecture" ;; esac
   available_kb="$(df -Pk . | awk 'NR==2 {print $4}')"
@@ -22,7 +135,9 @@ doctor() {
   if [[ "$(uname -s)" == "Darwin" ]]; then memory_bytes="$(sysctl -n hw.memsize)"; else memory_bytes="$(awk '/MemTotal/ {print $2 * 1024}' /proc/meminfo)"; fi
   if [[ "$memory_bytes" -ge 4294967296 ]]; then pass "at least 4 GiB system memory"; else fail "at least 4 GiB system memory is required" || failures=$((failures+1)); fi
   for port in 5432 6379 8000 5173 5174 9000 9001 8025; do
-    if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1; then warn "port $port is already in use (acceptable for an existing VAV runtime)"; fi
+    if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1; then
+      warn "port $port is already in use (acceptable for an existing VAV runtime)"
+    fi
   done
   if curl --silent --head --max-time 5 https://github.com >/dev/null 2>&1; then pass "outbound HTTPS available"; else warn "outbound HTTPS unavailable; cached dependencies are required"; fi
   [[ "$failures" -eq 0 ]] || exit 1
@@ -59,51 +174,179 @@ bootstrap() {
 
 up() {
   prepare_secrets
-  compose=(docker compose --profile full)
-  if [[ "${VAV_OBSERVABILITY:-false}" == "true" ]]; then compose+=(-f docker-compose.yml -f deploy/compose/docker-compose.observability.yml); fi
-  "${compose[@]}" up -d --build
+  local -a compose=(docker compose --profile full)
+  if [[ "${VAV_OBSERVABILITY:-false}" == "true" ]]; then
+    compose=(docker compose --profile full -f docker-compose.yml -f deploy/compose/docker-compose.observability.yml)
+  fi
+  compose+=( up -d --build )
+  "${compose[@]}"
   ./scripts/wait-for-services.sh
 }
 
 down() { docker compose -f docker-compose.yml -f deploy/compose/docker-compose.observability.yml --profile full down; }
 
 seed() {
-  environment="$(docker compose exec -T api python -c 'from vav.core.config import get_settings; print(get_settings().environment)')"
-  system_seeds=(seed_permissions seed_quality seed_notification_templates seed_privacy_inventory seed_trust_safety)
-  reference_seeds=(seed_catalog seed_courses seed_counseling seed_dating_taxonomies seed_relationships seed_memberships)
-  for module in "${system_seeds[@]}" "${reference_seeds[@]}"; do docker compose exec -T api python -m "vav.cli.$module"; done
-  if [[ "${VAV_INCLUDE_DEMO:-false}" == "true" ]]; then
-    [[ "$environment" != "production" && "$environment" != "dr" ]] || { echo "Demo seeds are forbidden in $environment" >&2; exit 2; }
-    for module in seed_cms seed_activities seed_knowledge seed_recommendation_fixtures; do docker compose exec -T api python -m "vav.cli.$module"; done
+  seed_parse_manifest
+  local include_demo include_test selected_groups env_requested
+  local -a requested_modules modules_to_run
+  local -a requested_groups=()
+  local -a trim=()
+  local environment
+  local manifest_sha
+  local force_refresh
+
+  include_demo="$(is_true "${VAV_INCLUDE_DEMO:-false}"; echo $?)"
+  include_test="$(is_true "${VAV_INCLUDE_TEST:-false}"; echo $?)"
+
+  if [[ "${VAV_SEED_GROUPS:-}" != "" ]]; then
+    IFS=',' read -r -a trim <<< "${VAV_SEED_GROUPS}"
+    for env_requested in "${trim[@]}"; do
+      requested_groups+=( "$(printf '%s' "$env_requested" | xargs)" )
+    done
+  else
+    requested_groups=(system reference)
+    if [[ "$include_demo" == "0" ]]; then requested_groups+=(demo); fi
+    if [[ "$include_test" == "0" ]]; then requested_groups+=(test); fi
   fi
+
+  environment="$(docker compose exec -T api python -c 'from vav.core.config import get_settings; print(get_settings().environment)')"
+  if [[ "$include_demo" == "0" ]] && { [[ "$environment" == "production" ]] || [[ "$environment" == "dr" ]]; }; then
+    fail "Demo seeds are forbidden in $environment"
+    exit 2
+  fi
+  if [[ "$include_test" == "0" ]] && { [[ "$environment" == "production" ]] || [[ "$environment" == "dr" ]]; }; then
+    fail "Test seeds are forbidden in $environment"
+    exit 2
+  fi
+
+  mapfile -t requested_modules < <(seed_selected_modules "${requested_groups[@]}")
+  if [[ "${#requested_modules[@]}" -eq 0 ]]; then
+    fail "No seed modules were selected"
+    return 1
+  fi
+
+  manifest_sha="$(seed_manifest_checksum)"
+  force_refresh="$(is_true "${VAV_SEED_FORCE:-false}"; echo $?)"
+  seed_read_state
+  if [[ -z "${SEED_MANIFEST_SHA:-}" || "$force_refresh" == "0" || "$manifest_sha" != "$SEED_MANIFEST_SHA" ]]; then
+    modules_to_run=( "${requested_modules[@]}" )
+    if [[ -z "${SEED_MANIFEST_SHA:-}" ]]; then
+      pass "no existing seed state found, running all selected seed modules"
+    elif [[ "$force_refresh" == "0" ]]; then
+      pass "VAV_SEED_FORCE=true, running all selected seed modules"
+    elif [[ "$manifest_sha" != "$SEED_MANIFEST_SHA" ]]; then
+      pass "seed manifest changed, running all selected seed modules"
+    fi
+  else
+    for module in "${requested_modules[@]}"; do
+      local module_checksum previous_checksum
+      module_checksum="$(seed_module_checksum "$module")"
+      previous_checksum="${SEED_STATE[$module]:-}"
+      if [[ "$module_checksum" != "$previous_checksum" ]]; then
+        modules_to_run+=( "$module" )
+      fi
+    done
+    if [[ "${#modules_to_run[@]}" -eq 0 ]]; then
+      pass "seed module checksums unchanged; skipping seed execution"
+    else
+      pass "seeding incremental modules: ${#modules_to_run[@]} modules"
+    fi
+  fi
+
+  if [[ "${#modules_to_run[@]}" -eq 0 ]]; then
+    return 0
+  fi
+
+  for module in "${modules_to_run[@]}"; do
+    local -a command=(python -m "$module")
+    if [[ "$module" == "vav.cli.seed_test_user" ]]; then
+      command+=(--confirm-insecure-test-account)
+    fi
+    printf 'running: docker compose exec -T api %s\n' "${command[*]}"
+    docker compose exec -T api "${command[@]}"
+    pass "${module} completed"
+  done
+  seed_write_state "$manifest_sha" "${requested_modules[@]}"
+  pass "seed state saved: $seed_state_file"
 }
 
 smoke() {
-  checks=(
-    "API live|http://localhost:8000/api/v1/health/live|api"
-    "API ready|http://localhost:8000/api/v1/health/ready|api"
-    "API startup|http://localhost:8000/api/v1/health/startup|api"
-    "User web|http://localhost:5173|user-web"
-    "Admin web|http://localhost:5174/admin/login|admin-web"
-    "MinIO|http://localhost:9000/minio/health/live|minio"
-    "Mailpit|http://localhost:8025/readyz|mailpit"
+  local -a checks=(
+    "API live|http://localhost:8000/api/v1/health/live|200|api|GET"
+    "API ready|http://localhost:8000/api/v1/health/ready|200|api|GET"
+    "API startup|http://localhost:8000/api/v1/health/startup|200|api|GET"
+    "User web login page|http://localhost:5173/zh-CN/auth/login|200|user-web|GET"
+    "Admin web login page|http://localhost:5174/admin/login|200|admin-web|GET"
+    "MinIO health|http://localhost:9000/minio/health/live|200|minio|GET"
+    "Mailpit|http://localhost:8025/readyz|200|mailpit|GET"
   )
+  local check name remainder url expected service method status
+
   for check in "${checks[@]}"; do
     name="${check%%|*}"
     remainder="${check#*|}"
     url="${remainder%%|*}"
-    service="${remainder##*|}"
-    if ! curl --noproxy '*' --silent --show-error --fail --max-time 10 "$url" >/dev/null 2>&1; then
-      [[ "$service" == "minio" ]] || { echo "$name HTTP check failed: $url" >&2; exit 1; }
-      container_id="$(docker compose ps -q "$service")"
-      [[ -n "$container_id" ]] || { echo "$name container is missing" >&2; exit 1; }
-      [[ "$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$container_id")" == "healthy" ]] || {
-        echo "$name is neither HTTP reachable nor container healthy" >&2
+    remainder="${remainder#*|}"
+    expected="${remainder%%|*}"
+    remainder="${remainder#*|}"
+    service="${remainder%%|*}"
+    method="${remainder##*|}"
+    status="$(curl --noproxy '*' --silent --show-error --max-time 10 -o /tmp/vavctl_smoke_body.txt -w "%{http_code}" -X "$method" "$url")" || status="000"
+    if [[ "$status" != "$expected" ]]; then
+      if [[ "$service" == "minio" ]]; then
+        container_id="$(docker compose ps -q "$service")"
+        [[ -n "$container_id" ]] || { echo "$name container is missing" >&2; exit 1; }
+        [[ "$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$container_id")" == "healthy" ]] || {
+          echo "$name is neither HTTP reachable nor container healthy" >&2
+          exit 1
+        }
+      else
+        echo "$name HTTP check failed: $url (status $status, expected $expected)" >&2
         exit 1
-      }
+      fi
     fi
     pass "$name"
   done
+
+  local status
+  if [[ "${VAV_INCLUDE_TEST:-false}" == "true" ]]; then
+    login_payload='{"email":"test@example.com","password":"test","device_name":"vavctl-smoke"}'
+    status="$(curl --noproxy '*' --silent --show-error --max-time 12 --request POST \
+      --header "Content-Type: application/json" \
+      --output /tmp/vavctl_smoke_body.txt \
+      --write-out "%{http_code}" \
+      --data "$login_payload" http://localhost:8000/api/v1/auth/login)"
+    if [[ "$status" != "200" ]]; then
+      echo "Test account login failed: $status" >&2
+      if [[ -s /tmp/vavctl_smoke_body.txt ]]; then sed -n '1,6p' /tmp/vavctl_smoke_body.txt >&2; fi
+      exit 1
+    fi
+    pass "user login with test account"
+  else
+    status="$(curl --noproxy '*' --silent --show-error --max-time 12 --request POST \
+      --header "Content-Type: application/json" \
+      --output /tmp/vavctl_smoke_body.txt \
+      --write-out "%{http_code}" \
+      --data '{"email":"test@example.com","password":"test","device_name":"vavctl-smoke"}' http://localhost:8000/api/v1/auth/login)"
+    if [[ "$status" != "401" && "$status" != "422" ]]; then
+      echo "user login endpoint returned unexpected status $status" >&2
+      exit 1
+    fi
+    pass "user login endpoint reachable"
+  fi
+
+  status="$(curl --noproxy '*' --silent --show-error --max-time 12 --request POST \
+    --header "Content-Type: application/json" \
+    --output /tmp/vavctl_smoke_body.txt \
+    --write-out "%{http_code}" \
+    --data '{"email":"admin@example.com","password":"wrong","device_name":"vavctl-smoke"}' http://localhost:8000/api/v1/admin/auth/login)"
+  if [[ "$status" != "401" && "$status" != "422" ]]; then
+    echo "admin login endpoint returned unexpected status $status" >&2
+    exit 1
+  fi
+  pass "admin login endpoint reachable"
+
+  local revision
   revision="$(docker compose exec -T api alembic current)"
   [[ "$revision" == *"(head)"* ]] || { echo "Database is not at migration head: $revision" >&2; exit 1; }
   docker compose exec -T redis redis-cli ping | grep -q PONG

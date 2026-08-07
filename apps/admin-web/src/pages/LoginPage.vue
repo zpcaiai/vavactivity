@@ -51,8 +51,8 @@ async function submit() {
           超级管理员用户名
           <el-input
             v-model="email"
-            type="email"
-            autocomplete="email"
+            type="text"
+            autocomplete="username"
           />
         </label>
         <label>

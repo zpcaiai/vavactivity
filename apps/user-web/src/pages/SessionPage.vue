@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { resolveApiBaseUrl } from "@/config/api";
 
 import { useAuthStore } from "@/stores/auth";
 
@@ -15,7 +16,7 @@ interface SessionItem {
 const auth = useAuthStore();
 const sessions = ref<SessionItem[]>([]);
 const error = ref("");
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
+const baseUrl = resolveApiBaseUrl();
 
 async function load() {
   await auth.bootstrap();

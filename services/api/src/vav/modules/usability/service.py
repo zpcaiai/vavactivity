@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import UUID
@@ -11,8 +12,16 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from vav.common.exceptions import VavError
-from vav.modules.privacy.crypto import encrypt_private
-from vav.modules.usability.domain import certification_status, checksum, validate_import_rows
+from vav.modules.privacy.crypto import decrypt_private, encrypt_private
+from vav.modules.usability.domain import (
+    DraftStatus,
+    certification_status,
+    checksum,
+    draft_expired,
+    resolve_draft_conflict,
+    validate_draft_payload,
+    validate_import_rows,
+)
 from vav.modules.usability.schemas import (
     CertificationEvaluate,
     DraftSave,
@@ -30,6 +39,77 @@ def _row(value: Any) -> dict[str, Any]:
     return dict(value._mapping)
 
 
+def _safe_int(value: Any, *, default: int = 0) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _to_sequence(value: Any) -> list[Any]:
+    if isinstance(value, (str, bytes, bytearray)):
+        return []
+    if isinstance(value, Mapping):
+        return []
+    if isinstance(value, (list, tuple, set)):
+        return list(value)
+    return []
+
+
+def _normalize_schema_definition_payload(value: Any) -> dict[str, Any]:
+    if isinstance(value, Mapping):
+        return dict(value)
+    if isinstance(value, (str, bytes, bytearray)):
+        text = value.decode() if isinstance(value, (bytes, bytearray)) else str(value)
+        try:
+            payload = json.loads(text)
+        except json.JSONDecodeError:
+            return {}
+        if isinstance(payload, Mapping):
+            return dict(payload)
+    return {}
+
+
+def _safe_required_fields(value: Any) -> list[str]:
+    payload = _normalize_schema_definition_payload(value)
+    fields = payload.get("required", [])
+    if isinstance(fields, (list, tuple, set)):
+        return [str(item) for item in fields if str(item)]
+    if fields:
+        return [str(fields)]
+    return []
+
+
+def _decrypt_encrypted_payload(raw: Any) -> dict[str, Any]:
+    if isinstance(raw, Mapping):
+        ciphertext = raw.get("ciphertext")
+        if isinstance(ciphertext, str):
+            decrypted = decrypt_private(ciphertext)
+        elif isinstance(ciphertext, (bytes, bytearray)):
+            decrypted = decrypt_private(str(ciphertext.decode()))
+        else:
+            return {}
+    elif isinstance(raw, (str, bytes, bytearray)):
+        text = raw.decode() if isinstance(raw, (bytes, bytearray)) else str(raw)
+        candidate: Any = text
+        if text.startswith("{") and text.endswith("}"):
+            try:
+                candidate = json.loads(text)
+            except json.JSONDecodeError:
+                candidate = text
+        if isinstance(candidate, Mapping):
+            wrapped = candidate.get("ciphertext", text)
+            if isinstance(wrapped, (str, bytes, bytearray)):
+                decrypted = decrypt_private(str(wrapped))
+            else:
+                return {}
+        else:
+            decrypted = decrypt_private(text)
+    else:
+        return {}
+    return dict(decrypted) if isinstance(decrypted, Mapping) else {}
+
+
 async def dashboard(session: AsyncSession) -> dict[str, Any]:
     row = (
         await session.execute(
@@ -43,7 +123,7 @@ async def dashboard(session: AsyncSession) -> dict[str, Any]:
 
 async def list_section(session: AsyncSession, section: str) -> list[dict[str, Any]]:
     queries = {
-        "scenarios": "SELECT * FROM usability_uat_scenarios ORDER BY business_domain,scenario_code LIMIT 500",
+        "scenarios": "SELECT * FROM usability_uat_scenarios WHERE lifecycle_status='active' ORDER BY business_domain,scenario_code LIMIT 500",
         "runs": "SELECT r.*,s.scenario_code FROM usability_uat_runs r JOIN usability_uat_scenarios s ON s.id=r.scenario_id ORDER BY r.created_at DESC LIMIT 500",
         "synthetic-data": "SELECT r.*,b.blueprint_code FROM usability_synthetic_runs r JOIN usability_synthetic_blueprints b ON b.id=r.blueprint_id ORDER BY r.created_at DESC LIMIT 500",
         "demo": "SELECT * FROM usability_demo_environments ORDER BY environment_code",
@@ -62,6 +142,61 @@ async def list_section(session: AsyncSession, section: str) -> list[dict[str, An
             "USABILITY_SECTION_NOT_FOUND", "Usability section not found.", status_code=404
         )
     return [dict(row) for row in (await session.execute(text(queries[section]))).mappings()]
+
+
+async def list_user_drafts(
+    session: AsyncSession,
+    user_id: UUID,
+    *,
+    definition_code: str | None = None,
+    include_expired: bool = False,
+    limit: int = 500,
+) -> list[dict[str, Any]]:
+    if definition_code:
+        query = """
+            SELECT d.id,d.definition_id,dd.draft_code,d.entity_id,d.schema_version,d.client_version,d.status,d.expires_at,d.created_at,d.updated_at
+            FROM usability_user_drafts d
+            JOIN usability_draft_definitions dd ON dd.id=d.definition_id
+            WHERE d.user_id=:user AND dd.draft_code=:code
+            ORDER BY d.updated_at DESC
+            LIMIT :limit
+        """
+        params = {"user": user_id, "code": definition_code, "limit": int(limit)}
+    else:
+        query = """
+            SELECT d.id,d.definition_id,dd.draft_code,d.entity_id,d.schema_version,d.client_version,d.status,d.expires_at,d.created_at,d.updated_at
+            FROM usability_user_drafts d
+            JOIN usability_draft_definitions dd ON dd.id=d.definition_id
+            WHERE d.user_id=:user
+            ORDER BY d.updated_at DESC
+            LIMIT :limit
+        """
+        params = {"user": user_id, "limit": int(limit)}
+    rows = list((await session.execute(text(query), params)).mappings())
+    result: list[dict[str, Any]] = []
+    for item in rows:
+        data = _row(item)
+        if include_expired or not draft_expired(data.get("expires_at")):
+            result.append(data)
+    return result
+
+
+async def get_user_draft(session: AsyncSession, user_id: UUID, draft_id: UUID) -> dict[str, Any]:
+    row = (
+        await session.execute(
+            text(
+                "SELECT d.*,dd.schema_definition,dd.sensitive_fields FROM usability_user_drafts d JOIN usability_draft_definitions dd ON dd.id=d.definition_id WHERE d.id=:id AND d.user_id=:user"
+            ),
+            {"id": draft_id, "user": user_id},
+        )
+    ).first()
+    if not row:
+        raise VavError("USABILITY_DRAFT_NOT_FOUND", "Draft not found.", status_code=404)
+    data = _row(row)
+    data["payload"] = _decrypt_encrypted_payload(data.get("encrypted_payload"))
+    if draft_expired(data.get("expires_at")):
+        data["status"] = str(DraftStatus.EXPIRED)
+    return data
 
 
 async def start_uat(session: AsyncSession, actor: UUID, payload: UatRunCreate) -> dict[str, Any]:
@@ -109,14 +244,36 @@ async def start_uat(session: AsyncSession, actor: UUID, payload: UatRunCreate) -
 async def complete_uat(
     session: AsyncSession, run_id: UUID, payload: UatRunComplete
 ) -> dict[str, Any]:
-    record = (
+    run = (
         await session.execute(
-            text("SELECT * FROM usability_uat_runs WHERE id=:id FOR UPDATE"), {"id": run_id}
+            text(
+                "SELECT r.*,s.steps FROM usability_uat_runs r JOIN usability_uat_scenarios s ON s.id=r.scenario_id WHERE r.id=:id FOR UPDATE"
+            ),
+            {"id": run_id},
         )
     ).first()
-    if not record or _row(record)["status"] != "running":
+    if not run:
+        raise VavError("USABILITY_UAT_RUN_NOT_FOUND", "UAT run not found.", status_code=404)
+    state = _row(run)
+    if state["status"] != "running":
         raise VavError("USABILITY_UAT_RUN_NOT_ACTIVE", "UAT run is not active.", status_code=409)
+
+    step_count = len(list(state["steps"] or []))
+    if step_count and len(payload.step_results) != step_count:
+        raise VavError(
+            "USABILITY_UAT_STEP_COUNT_MISMATCH",
+            "Step results do not match scenario definition.",
+            status_code=422,
+        )
+    allowed_status = {"not_run", "passed", "failed", "blocked", "skipped"}
     for number, result in enumerate(payload.step_results, 1):
+        status = str(result.get("status", "not_run"))
+        if status not in allowed_status:
+            raise VavError(
+                "USABILITY_UAT_STEP_STATUS_INVALID",
+                "Invalid step result status.",
+                status_code=422,
+            )
         await session.execute(
             text(
                 "INSERT INTO usability_uat_step_results (run_id,step_number,status,safe_observation,error_code,duration_ms) VALUES (:run,:step,:status,:observation,:error,:duration)"
@@ -124,7 +281,7 @@ async def complete_uat(
             {
                 "run": run_id,
                 "step": number,
-                "status": result.get("status", "failed"),
+                "status": status,
                 "observation": str(result.get("observation", ""))[:2000],
                 "error": result.get("error_code"),
                 "duration": result.get("duration_ms"),
@@ -156,6 +313,19 @@ async def save_draft(session: AsyncSession, user_id: UUID, payload: DraftSave) -
             "USABILITY_DRAFT_NOT_REGISTERED", "Draft definition not found.", status_code=404
         )
     current = _row(definition)
+    payload_findings = validate_draft_payload(
+        payload.payload,
+        sensitive_fields=current.get("sensitive_fields") or (),
+        local_buffer_allowed=False,
+    )
+    if payload_findings:
+        raise VavError(
+            "USABILITY_DRAFT_VALIDATION_FAILED",
+            "Draft payload failed validation.",
+            status_code=422,
+            details=payload_findings,
+        )
+
     existing = (
         await session.execute(
             text(
@@ -164,12 +334,56 @@ async def save_draft(session: AsyncSession, user_id: UUID, payload: DraftSave) -
             {"definition": current["id"], "user": user_id, "entity": payload.entity_id},
         )
     ).first()
-    if existing and payload.client_version <= _row(existing)["client_version"]:
-        raise VavError(
-            "USABILITY_DRAFT_VERSION_CONFLICT", "Draft has a newer server version.", status_code=409
+    if existing:
+        current_row = _row(existing)
+        if draft_expired(current_row.get("expires_at")):
+            await session.execute(
+                text("DELETE FROM usability_user_drafts WHERE id=:id"), {"id": current_row["id"]}
+            )
+            existing = None
+        elif _safe_int(payload.client_version) <= _safe_int(current_row.get("client_version")):
+            raise VavError(
+                "USABILITY_DRAFT_VERSION_CONFLICT",
+                "Draft has a newer server version.",
+                status_code=409,
+            )
+
+    if existing:
+        previous = _row(existing)
+        previous_payload = {"payload": {}, "checksum": previous.get("payload_checksum"), "client_version": previous.get("client_version", 0)}
+        try:
+            raw = previous.get("encrypted_payload")
+            if isinstance(raw, Mapping):
+                previous_payload["payload"] = decrypt_private(raw.get("ciphertext", "{}"))
+        except Exception:
+            previous_payload["payload"] = {}
+        conflict = resolve_draft_conflict(
+            server={
+                "schema_version": previous.get("schema_version"),
+                "payload": previous_payload["payload"],
+                "checksum": previous_payload["checksum"],
+                "client_version": _safe_int(previous_payload["client_version"]),
+            },
+            client={
+                "schema_version": payload.schema_version,
+                "payload": payload.payload,
+                "checksum": checksum(payload.payload),
+                "client_version": _safe_int(payload.client_version),
+            },
+            policy=current["conflict_policy"],
+            high_risk_fields=current["sensitive_fields"],
+            base=None,
+            current_entity_version=current_row.get("client_version"),
         )
-    ciphertext = {"ciphertext": encrypt_private(payload.payload)}
-    expires = datetime.now(UTC) + timedelta(seconds=current["ttl_seconds"])
+        if conflict["status"] != str(DraftStatus.ACTIVE):
+            raise VavError(
+                "USABILITY_DRAFT_CONFLICT",
+                "Draft conflict requires manual merge before save.",
+                status_code=409,
+                details=conflict,
+            )
+
+    expiry = datetime.now(UTC) + timedelta(seconds=_safe_int(current["ttl_seconds"], default=3600))
     row = (
         await session.execute(
             text(
@@ -180,13 +394,28 @@ async def save_draft(session: AsyncSession, user_id: UUID, payload: DraftSave) -
                 "user": user_id,
                 "entity": payload.entity_id,
                 "schema": payload.schema_version,
-                "payload": _json(ciphertext),
+                "payload": _json({"ciphertext": encrypt_private(payload.payload)}),
                 "checksum": checksum(payload.payload),
-                "version": payload.client_version,
-                "expires": expires,
+                "version": _safe_int(payload.client_version, default=1),
+                "expires": expiry,
             },
         )
     ).first()
+    await session.commit()
+    return _row(row)
+
+
+async def discard_draft(session: AsyncSession, user_id: UUID, draft_id: UUID) -> dict[str, Any]:
+    row = (
+        await session.execute(
+            text(
+                "UPDATE usability_user_drafts SET status='discarded',updated_at=now() WHERE id=:id AND user_id=:user RETURNING id,definition_id,user_id,entity_id,schema_version,client_version,status,expires_at,created_at,updated_at"
+            ),
+            {"id": draft_id, "user": user_id},
+        )
+    ).first()
+    if not row:
+        raise VavError("USABILITY_DRAFT_NOT_FOUND", "Draft not found.", status_code=404)
     await session.commit()
     return _row(row)
 
@@ -211,9 +440,17 @@ async def preview_import(
         raise VavError(
             "USABILITY_IMPORT_DRY_RUN_REQUIRED", "Import requires Dry Run.", status_code=409
         )
-    required = set(current["schema_definition"].get("required", []))
-    results = validate_import_rows(payload.rows, required, current["maximum_rows"])
-    source_checksum = checksum(payload.rows)
+
+    rows = _to_sequence(payload.rows)
+    if _safe_int(current["maximum_rows"]) < len(rows):
+        raise VavError(
+            "USABILITY_IMPORT_TOO_MANY_ROWS",
+            "Import payload exceeds allowed size.",
+            status_code=422,
+        )
+    required = set(_safe_required_fields(current.get("schema_definition")))
+    results = validate_import_rows(rows, required, _safe_int(current["maximum_rows"], default=1))
+    source_checksum = checksum(rows)
     existing = (
         await session.execute(
             text("SELECT * FROM usability_import_jobs WHERE idempotency_key=:key"),
@@ -229,6 +466,7 @@ async def preview_import(
                 status_code=409,
             )
         return result
+
     valid = sum(item["status"] == "valid" for item in results)
     row = (
         await session.execute(

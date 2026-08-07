@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { resolveApiBaseUrl } from "@/config/api";
 import {
   computed,
   onBeforeUnmount,
@@ -52,7 +53,7 @@ interface ContentVersion {
 
 const route = useRoute();
 const auth = useAdminAuthStore();
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
+const baseUrl = resolveApiBaseUrl();
 const entry = ref<ContentEntry | null>(null);
 const versions = ref<ContentVersion[]>([]);
 const locale = ref("zh-CN");

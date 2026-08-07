@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { resolveApiBaseUrl } from "@/config/api";
 
 const route = useRoute();
 const router = useRouter();
@@ -8,7 +9,7 @@ const password = ref("");
 const accepted = ref(false);
 const busy = ref(false);
 const error = ref("");
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
+const baseUrl = resolveApiBaseUrl();
 
 async function submit() {
   if (!accepted.value) {

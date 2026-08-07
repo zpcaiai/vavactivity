@@ -36,6 +36,7 @@ tmp/
 backups/
 restore-reports/
 performance-results/
+.vavctl/
 
 # local delivery / transfer artifacts
 _to_delete/
