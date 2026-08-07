@@ -74,7 +74,8 @@ git -C "${SYNC_DIR}" commit -m "Deploy ${SOURCE_BRANCH} to Hugging Face Space" -
 
 git -C "${SYNC_DIR}" remote add hf "https://huggingface.co/spaces/${HF_SPACE_REPO}.git"
 
-GIT_TERMINAL_PROMPT=0 git -C "${SYNC_DIR}" \
+GIT_TERMINAL_PROMPT=0 GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null \
+git -C "${SYNC_DIR}" \
   -c "credential.helper=" \
   -c "credential.interactive=0" \
   -c "http.https://huggingface.co/.extraheader=Authorization: Bearer ${HF_TOKEN}" \
