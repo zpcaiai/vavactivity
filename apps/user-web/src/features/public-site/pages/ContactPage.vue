@@ -3,7 +3,7 @@ import { ref } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
 const startedAt = new Date().toISOString();
 const form = ref({
   name: "",

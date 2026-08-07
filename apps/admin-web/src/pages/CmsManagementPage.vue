@@ -17,7 +17,7 @@ interface ContentItem {
 const route = useRoute();
 const router = useRouter();
 const auth = useAdminAuthStore();
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
 const items = ref<ContentItem[]>([]);
 const busy = ref(false);
 const error = ref("");

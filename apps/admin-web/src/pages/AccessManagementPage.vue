@@ -8,7 +8,7 @@ const route = useRoute();
 const auth = useAdminAuthStore();
 const items = ref<Record<string, unknown>[]>([]);
 const error = ref("");
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
 const endpoint = computed(() => String(route.meta.endpoint ?? "/admin/users"));
 
 async function load() {

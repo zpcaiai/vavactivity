@@ -2,7 +2,7 @@
 import { computed } from "vue";
 
 const props = defineProps<{ data: Record<string, unknown> }>();
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
 const source = computed(() =>
   props.data.media_id
     ? `${baseUrl}/public/media/${String(props.data.media_id)}?variant=medium`

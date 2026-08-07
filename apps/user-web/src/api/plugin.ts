@@ -10,7 +10,7 @@ export const apiKey: InjectionKey<ApiRequest> = Symbol("vav-api-client");
 export const apiPlugin = {
   install(app: App) {
     const request = createApiClient({
-      baseUrl: import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1",
+      baseUrl: import.meta.env.VITE_API_BASE_URL ?? "/api/v1",
       getAccessToken: () => useAuthStore().accessToken,
       refreshAccessToken: () => useAuthStore().refresh()
     });

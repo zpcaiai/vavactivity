@@ -13,7 +13,7 @@ interface MediaItem {
 }
 
 const auth = useAdminAuthStore();
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
 const items = ref<MediaItem[]>([]);
 const selectedFile = ref<File | null>(null);
 const altText = ref("");

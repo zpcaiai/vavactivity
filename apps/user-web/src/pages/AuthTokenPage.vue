@@ -6,7 +6,7 @@ const props = defineProps<{
   mode: "verify" | "forgot" | "reset" | "pending";
 }>();
 const route = useRoute();
-const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
+const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
 const email = ref("");
 const password = ref("");
 const busy = ref(false);
