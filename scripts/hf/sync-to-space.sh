@@ -74,6 +74,10 @@ git -C "${SYNC_DIR}" commit -m "Deploy ${SOURCE_BRANCH} to Hugging Face Space" -
 
 git -C "${SYNC_DIR}" remote add hf "https://huggingface.co/spaces/${HF_SPACE_REPO}.git"
 
-git -C "${SYNC_DIR}" -c "http.https://huggingface.co/.extraheader=Authorization: Bearer ${HF_TOKEN}" push hf "HEAD:refs/heads/${HF_TARGET_BRANCH}" --force
+GIT_TERMINAL_PROMPT=0 git -C "${SYNC_DIR}" \
+  -c "credential.helper=" \
+  -c "credential.interactive=0" \
+  -c "http.https://huggingface.co/.extraheader=Authorization: Bearer ${HF_TOKEN}" \
+  push hf "HEAD:refs/heads/${HF_TARGET_BRANCH}" --force
 
 echo "HF sync complete to ${HF_SPACE_REPO}@${HF_TARGET_BRANCH}"

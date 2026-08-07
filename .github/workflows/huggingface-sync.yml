@@ -145,7 +145,12 @@ jobs:
           fi
 
           git -C "$HF_SYNC_DIR" remote add hf "https://huggingface.co/spaces/${HF_SPACE_REPO}.git"
-          if ! git -C "$HF_SYNC_DIR" -c "http.https://huggingface.co/.extraheader=Authorization: Bearer ${HF_TOKEN}" push hf "HEAD:refs/heads/${TARGET_BRANCH}" --force 2>&1 | tee /tmp/hf-push.log; then
+          if ! GIT_TERMINAL_PROMPT=0 \
+            git -C "$HF_SYNC_DIR" \
+            -c "credential.helper=" \
+            -c "credential.interactive=0" \
+            -c "http.https://huggingface.co/.extraheader=Authorization: Bearer ${HF_TOKEN}" \
+            push hf "HEAD:refs/heads/${TARGET_BRANCH}" --force 2>&1 | tee /tmp/hf-push.log; then
             echo "HF push failed:"
             cat /tmp/hf-push.log
             exit 1
