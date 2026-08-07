@@ -39,8 +39,15 @@ rm -f \
   "${SYNC_DIR}/_to_delete/_vav-src.tgz"
 
 if [ -f "${SYNC_DIR}/apps/user-web/src/assets/main.css" ]; then
-  sed -i 's#url("./images/vav-hero-couple.png")#none#g' "${SYNC_DIR}/apps/user-web/src/assets/main.css"
-  sed -i "s#url('./images/vav-hero-couple.png')#none#g" "${SYNC_DIR}/apps/user-web/src/assets/main.css"
+  python3 - <<PY
+from pathlib import Path
+
+css_path = Path("${SYNC_DIR}") / "apps/user-web/src/assets/main.css"
+content = css_path.read_text(encoding="utf-8")
+content = content.replace('url("./images/vav-hero-couple.png")', 'none')
+content = content.replace("url('./images/vav-hero-couple.png')", 'none')
+css_path.write_text(content, encoding="utf-8")
+PY
 fi
 
 for file in \
