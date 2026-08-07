@@ -2,7 +2,13 @@ name: Security Tests
 
 on:
   pull_request:
-    paths: ["services/**", "apps/**", "config/**", "deploy/**", "infra/**"]
+    paths:
+      - services/**
+      - apps/**
+      - config/**
+      - deploy/**
+      - infra/**
+      - ".github/workflows/security-tests.yml"
   push:
     branches: [main]
   workflow_dispatch:
@@ -12,6 +18,7 @@ permissions:
 
 jobs:
   sensitive-domains:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -36,14 +43,14 @@ jobs:
       - run: uv run --package vav-platform-api alembic -c services/api/alembic.ini upgrade head
       - run: uv run --package vav-platform-api python -m vav.cli.seed_permissions
       - name: Security, privacy and red-team suites
-        run: >-
-          uv run --package vav-platform-api pytest
-          services/api/tests/commerce/security
-          services/api/tests/privacy/security
-          services/api/tests/recommendations/security
-          services/api/tests/matchmaking_interactions/security
-          services/api/tests/relationships/security
-          services/api/tests/memberships/security
-          services/api/tests/trust_safety/security
-          services/api/tests/trust_safety/privacy
-          services/api/tests/trust_safety/red_team -q
+        run: |
+          uv run --package vav-platform-api pytest \
+            services/api/tests/commerce/security \
+            services/api/tests/privacy/security \
+            services/api/tests/recommendations/security \
+            services/api/tests/matchmaking_interactions/security \
+            services/api/tests/relationships/security \
+            services/api/tests/memberships/security \
+            services/api/tests/trust_safety/security \
+            services/api/tests/trust_safety/privacy \
+            services/api/tests/trust_safety/red_team -q
