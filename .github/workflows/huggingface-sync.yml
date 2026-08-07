@@ -70,11 +70,20 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git remote add hf "https://huggingface:${HF_TOKEN}@huggingface.co/spaces/${HF_SPACE_REPO}.git"
+          git remote add hf "https://huggingface.co/spaces/${HF_SPACE_REPO}.git"
+          git config --local "http.https://huggingface.co/.extraheader" "Authorization: Bearer ${HF_TOKEN}"
           git remote -v
-          git fetch --quiet hf
+          if ! git fetch --quiet hf 2>&1 | tee /tmp/hf-fetch.log; then
+            echo "HF fetch failed:"
+            cat /tmp/hf-fetch.log
+            exit 1
+          fi
 
-          HF_DEFAULT_BRANCH="$(git ls-remote --symref hf HEAD | awk '/^ref:/{print $2}' | sed 's#refs/heads/##' | head -n 1 || true)"
+          if ! HF_DEFAULT_BRANCH="$(git ls-remote --symref hf HEAD 2>/tmp/hf-head.log | awk '/^ref:/{print $2}' | sed 's#refs/heads/##' | head -n 1 || true)"; then
+            echo "HF remote HEAD query failed:"
+            cat /tmp/hf-head.log
+            exit 1
+          fi
           if [ -z "$HF_DEFAULT_BRANCH" ]; then
             HF_DEFAULT_BRANCH="$HF_TARGET_BRANCH_DEFAULT"
           fi
