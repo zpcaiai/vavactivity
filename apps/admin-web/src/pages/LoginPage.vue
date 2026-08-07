@@ -48,11 +48,12 @@ async function submit() {
       <h2>超级管理员登录</h2>
       <form @submit.prevent="submit">
         <label>
-          超级管理员用户名
+          超级管理员邮箱
           <el-input
             v-model="email"
             type="text"
             autocomplete="username"
+            placeholder="admin@example.com"
           />
         </label>
         <label>
