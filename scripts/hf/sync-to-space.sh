@@ -127,4 +127,30 @@ if [ -z "${REMOTE_HEAD}" ]; then
   exit 1
 fi
 
+# A Space previously configured for ZeroGPU cannot start after migrating to the
+# Docker SDK because Hugging Face only supports ZeroGPU for Gradio. Repair only
+# that exact invalid state; never overwrite a valid user-selected hardware tier.
+SPACE_STATE="$(curl --fail --silent --show-error \
+  --header "Authorization: Bearer ${HF_TOKEN}" \
+  "https://huggingface.co/api/spaces/${HF_SPACE_REPO}")"
+if printf '%s' "${SPACE_STATE}" | python3 -c '
+import json
+import sys
+
+runtime = (json.load(sys.stdin).get("runtime") or {})
+is_invalid_zero_gpu = (
+    (runtime.get("hardware") or {}).get("requested") == "zero-a10g"
+    and runtime.get("errorMessage") == "ZeroGPU is only available on Gradio SDK"
+)
+raise SystemExit(0 if is_invalid_zero_gpu else 1)
+'; then
+  echo "Repairing incompatible ZeroGPU + Docker configuration with cpu-basic hardware"
+  curl --fail --silent --show-error \
+    --request POST \
+    --header "Authorization: Bearer ${HF_TOKEN}" \
+    --header "Content-Type: application/json" \
+    --data '{"flavor":"cpu-basic"}' \
+    "https://huggingface.co/api/spaces/${HF_SPACE_REPO}/hardware" >/dev/null
+fi
+
 echo "HF sync complete to ${HF_SPACE_REPO}@${HF_TARGET_BRANCH} (${REMOTE_HEAD})"
