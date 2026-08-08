@@ -135,7 +135,9 @@ async def test_current_evidence_drives_go_and_independent_certification() -> Non
 
 
 @pytest.mark.asyncio
-async def test_production_evaluation_fails_closed_without_approved_gates_and_verified_scope() -> None:
+async def test_production_evaluation_fails_closed_without_approved_gates_and_verified_scope() -> (
+    None
+):
     actor = await _operator("production-evaluator")
     suffix = uuid4().hex[:8].lower()
     async with session_factory() as session:

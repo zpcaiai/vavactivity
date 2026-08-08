@@ -1,5 +1,8 @@
 name: vav-platform
 
 include:
-  - deploy/compose/docker-compose.base.yml
-  - deploy/compose/docker-compose.dev.yml
+  # Treat base + development as one included application model. Listing them
+  # as separate includes makes Compose reject intentional service overrides.
+  - path:
+      - deploy/compose/docker-compose.base.yml
+      - deploy/compose/docker-compose.dev.yml

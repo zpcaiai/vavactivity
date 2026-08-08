@@ -94,20 +94,33 @@ git -C "${SYNC_DIR}" commit \
 
 git -C "${SYNC_DIR}" remote add hf "https://huggingface.co/spaces/${HF_SPACE_REPO}.git"
 
+# Hugging Face's REST API accepts a Bearer token, while Git smart HTTP uses
+# HTTP Basic authentication (account name + access token as the password).
+# Resolve the account name from the token so the workflow never needs a second
+# secret and keep both credentials out of the remote URL and command output.
+HF_USERNAME="$(curl --fail --silent --show-error \
+  --header "Authorization: Bearer ${HF_TOKEN}" \
+  https://huggingface.co/api/whoami-v2 | \
+  python3 -c 'import json,sys; print(json.load(sys.stdin)["name"])')"
+if [ -z "${HF_USERNAME}" ]; then
+  echo "HF_TOKEN is valid but its account name could not be resolved." >&2
+  exit 1
+fi
+export HF_USERNAME HF_TOKEN
+HF_CREDENTIAL_HELPER='!f() { if [ "$1" = get ]; then printf "%s\n" "username=$HF_USERNAME" "password=$HF_TOKEN"; fi; }; f'
+
 GIT_TERMINAL_PROMPT=0 GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null \
 git -C "${SYNC_DIR}" \
-  -c "credential.helper=" \
+  -c "credential.helper=${HF_CREDENTIAL_HELPER}" \
   -c "credential.interactive=0" \
   -c "http.version=HTTP/1.1" \
-  -c "http.https://huggingface.co/.extraheader=Authorization: Bearer ${HF_TOKEN}" \
   push hf "HEAD:refs/heads/${HF_TARGET_BRANCH}" --force
 
 REMOTE_HEAD="$(GIT_TERMINAL_PROMPT=0 GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null \
   git -C "${SYNC_DIR}" \
-  -c "credential.helper=" \
+  -c "credential.helper=${HF_CREDENTIAL_HELPER}" \
   -c "credential.interactive=0" \
   -c "http.version=HTTP/1.1" \
-  -c "http.https://huggingface.co/.extraheader=Authorization: Bearer ${HF_TOKEN}" \
   ls-remote hf "refs/heads/${HF_TARGET_BRANCH}" | awk '{print $1}')"
 if [ -z "${REMOTE_HEAD}" ]; then
   echo "HF push completed but the remote branch could not be verified." >&2

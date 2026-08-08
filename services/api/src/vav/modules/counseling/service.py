@@ -300,14 +300,10 @@ class AvailabilityService:
                 "COUNSELING_SERVICE_NOT_FOUND", "Service was not found.", status_code=404
             )
         mentor = await session.scalar(
-            select(CounselingMentor)
-            .where(CounselingMentor.id == mentor_id)
-            .with_for_update()
+            select(CounselingMentor).where(CounselingMentor.id == mentor_id).with_for_update()
         )
         if mentor is None:
-            raise VavError(
-                "COUNSELING_MENTOR_NOT_FOUND", "Mentor was not found.", status_code=404
-            )
+            raise VavError("COUNSELING_MENTOR_NOT_FOUND", "Mentor was not found.", status_code=404)
         ends_at = starts_at + timedelta(minutes=service.duration_minutes)
         overlap_hold = await session.scalar(
             select(CounselingSlotHold).where(
