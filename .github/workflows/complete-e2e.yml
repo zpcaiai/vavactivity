@@ -29,7 +29,7 @@ jobs:
       - run: docker compose exec -T api alembic upgrade head
       - run: VAV_INCLUDE_DEMO=true ./scripts/vavctl seed
       - run: corepack pnpm exec playwright install --with-deps chromium
-      - run: PLAYWRIGHT_CHANNEL=chromium make complete-e2e
+      - run: E2E_EXTERNAL_WEBSERVERS=1 PLAYWRIGHT_CHANNEL=chromium make complete-e2e
       - if: always()
         run: docker compose logs --no-color > complete-e2e-compose.log
       - if: always()
