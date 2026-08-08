@@ -36,6 +36,13 @@ jobs:
       AI_ENABLED: "true"
       DATABASE_URL: postgresql+asyncpg://vav:vav_ci_only@localhost:5432/vav
       REDIS_URL: redis://localhost:6379/0
+      NO_PROXY: localhost,127.0.0.1
+      MEDIA_S3_ENDPOINT: http://localhost:9000
+      MEDIA_S3_PUBLIC_ENDPOINT: http://localhost:9000
+      MEDIA_S3_ACCESS_KEY: vav_minio_ci
+      MEDIA_S3_SECRET_KEY: vav_minio_ci_only
+      MEDIA_S3_BUCKET_PUBLIC: vav-public
+      MEDIA_S3_BUCKET_PRIVATE: vav-private
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
@@ -44,6 +51,29 @@ jobs:
           python-version: "3.12"
           enable-cache: true
       - run: uv sync --frozen --all-packages --all-groups
+      - name: Start deterministic object storage
+        run: |
+          docker run --detach --name vav-minio-ci \
+            --publish 9000:9000 \
+            --env MINIO_ROOT_USER=vav_minio_ci \
+            --env MINIO_ROOT_PASSWORD=vav_minio_ci_only \
+            minio/minio:RELEASE.2025-04-22T22-12-26Z server /data
+          for attempt in {1..30}; do
+            if curl --fail --silent http://localhost:9000/minio/health/live >/dev/null; then
+              break
+            fi
+            if [[ "$attempt" == "30" ]]; then
+              docker logs vav-minio-ci
+              exit 1
+            fi
+            sleep 2
+          done
+          docker run --rm --network host --entrypoint /bin/sh \
+            minio/mc:RELEASE.2025-04-16T18-13-26Z -ec '
+              mc alias set ci http://127.0.0.1:9000 vav_minio_ci vav_minio_ci_only
+              mc mb --ignore-existing ci/vav-public
+              mc mb --ignore-existing ci/vav-private
+            '
       - name: Generate ephemeral test signing keys
         run: ./scripts/generate-dev-auth-keys.sh
       - run: uv run ruff check services
@@ -63,6 +93,11 @@ jobs:
           uv run --package vav-platform-api python -m vav.cli.seed_notifications
           uv run --package vav-platform-api python -m vav.cli.seed_privacy
           uv run --package vav-platform-api python -m vav.cli.seed_privacy_inventory
+          uv run --package vav-platform-api python -m vav.cli.seed_quality
+          uv run --package vav-platform-api python -m vav.cli.seed_experience
+          uv run --package vav-platform-api python -m vav.cli.seed_process_governance
+          uv run --package vav-platform-api python -m vav.cli.seed_data_governance
+          uv run --package vav-platform-api python -m vav.cli.seed_admin_platform
           uv run --package vav-platform-api python -m vav.cli.seed_memberships
           uv run --package vav-platform-api python -m vav.cli.seed_trust_safety
       - run: uv run --package vav-platform-api pytest services/api/tests
@@ -107,6 +142,11 @@ jobs:
           uv run --package vav-platform-api python -m vav.cli.seed_notifications
           uv run --package vav-platform-api python -m vav.cli.seed_privacy
           uv run --package vav-platform-api python -m vav.cli.seed_privacy_inventory
+          uv run --package vav-platform-api python -m vav.cli.seed_quality
+          uv run --package vav-platform-api python -m vav.cli.seed_experience
+          uv run --package vav-platform-api python -m vav.cli.seed_process_governance
+          uv run --package vav-platform-api python -m vav.cli.seed_data_governance
+          uv run --package vav-platform-api python -m vav.cli.seed_admin_platform
           uv run --package vav-platform-api python -m vav.cli.seed_memberships
           uv run --package vav-platform-api python -m vav.cli.seed_trust_safety
           uv run --package vav-platform-api python -m vav.cli.seed_test_user \

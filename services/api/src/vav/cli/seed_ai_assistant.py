@@ -10,8 +10,10 @@ from vav.cli.seed_cms import SYSTEM_USER_ID, ensure_system_user
 from vav.core.config import get_settings
 from vav.core.database import session_factory
 from vav.models.ai_assistant import (
+    AiConversation,
     AiEvaluationCase,
     AiEvaluationDataset,
+    AiHumanReferral,
     AiModelProfile,
     AiModelRoute,
     AiPromptDefinition,
@@ -346,6 +348,56 @@ async def seed_evaluation_dataset() -> None:
         await session.commit()
 
 
+async def seed_synthetic_referral() -> None:
+    """Provide a redacted operations fixture without relying on test order."""
+    async with session_factory() as session:
+        conversation = await session.scalar(
+            select(AiConversation).where(
+                AiConversation.conversation_number == "AIC-SYNTHETIC-SAFETY-001"
+            )
+        )
+        if conversation is None:
+            conversation = AiConversation(
+                conversation_number="AIC-SYNTHETIC-SAFETY-001",
+                user_id=SYSTEM_USER_ID,
+                status="closed",
+                assistant_profile="hanna_v1",
+                locale="zh-CN",
+                user_timezone="UTC",
+                consent_version="synthetic-fixture-v1",
+                consented_at=datetime.now(UTC),
+                memory_consent_status="not_granted",
+                primary_topic="safety",
+                latest_risk_level="high",
+                active_graph_version="hanna-graph-v1",
+            )
+            session.add(conversation)
+            await session.flush()
+
+        existing = await session.scalar(
+            select(AiHumanReferral).where(
+                AiHumanReferral.idempotency_key == "synthetic:ai-safety-referral:v1"
+            )
+        )
+        if existing is None:
+            session.add(
+                AiHumanReferral(
+                    referral_number="AIR-SYNTHETIC-0001",
+                    conversation_id=conversation.id,
+                    user_id=SYSTEM_USER_ID,
+                    referral_type="safety_review",
+                    priority="high",
+                    risk_category="synthetic_safety_fixture",
+                    risk_level="high",
+                    status="pending_assignment",
+                    assigned_team="ai_safety",
+                    consent_status="synthetic_fixture",
+                    idempotency_key="synthetic:ai-safety-referral:v1",
+                )
+            )
+        await session.commit()
+
+
 async def seed_ai_assistant() -> None:
     if get_settings().environment not in {"development", "test"}:
         print("AI assistant fixtures skipped outside development/test.")
@@ -353,6 +405,7 @@ async def seed_ai_assistant() -> None:
     await ensure_system_user()
     await seed_registries()
     await seed_evaluation_dataset()
+    await seed_synthetic_referral()
     print(
         f"AI assistant seed complete: {len(MODEL_TASKS)} model routes, "
         f"{len(TOOL_REGISTRY)} tools, {len(EVALUATION_FIXTURES)} evaluation cases"
