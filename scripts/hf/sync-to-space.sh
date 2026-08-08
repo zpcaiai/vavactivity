@@ -145,12 +145,18 @@ is_invalid_zero_gpu = (
 raise SystemExit(0 if is_invalid_zero_gpu else 1)
 '; then
   echo "Repairing incompatible ZeroGPU + Docker configuration with cpu-basic hardware"
-  curl --fail --silent --show-error \
+  HARDWARE_RESPONSE="$(curl --silent --show-error \
     --request POST \
     --header "Authorization: Bearer ${HF_TOKEN}" \
     --header "Content-Type: application/json" \
     --data '{"flavor":"cpu-basic"}' \
-    "https://huggingface.co/api/spaces/${HF_SPACE_REPO}/hardware" >/dev/null
+    --write-out $'\n%{http_code}' \
+    "https://huggingface.co/api/spaces/${HF_SPACE_REPO}/hardware" || true)"
+  HARDWARE_STATUS="${HARDWARE_RESPONSE##*$'\n'}"
+  HARDWARE_BODY="${HARDWARE_RESPONSE%$'\n'*}"
+  if [[ "${HARDWARE_STATUS}" != 2* ]]; then
+    echo "::warning::Space code was synchronized, but cpu-basic hardware repair was rejected (HTTP ${HARDWARE_STATUS}): ${HARDWARE_BODY}"
+  fi
 fi
 
 echo "HF sync complete to ${HF_SPACE_REPO}@${HF_TARGET_BRANCH} (${REMOTE_HEAD})"
