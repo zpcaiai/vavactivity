@@ -15,6 +15,12 @@ corepack pnpm run test:e2e:batch16-17
 Set `E2E_CAPTURE_ALL=1` to retain screenshots, Trace, and video for passing
 tests as well as failures.
 
+Set `E2E_BROWSER_CHANNEL=chrome` to use an installed Google Chrome when the
+Playwright-managed Chromium binary is not present.
+
+Video is optional because it requires Playwright's ffmpeg binary. Enable it
+with `E2E_CAPTURE_VIDEO=1`; screenshots and Trace do not require ffmpeg.
+
 Playwright starts the user and admin Vite applications itself. Fixture setup
 uses `docker compose exec` by default.
 
