@@ -1,3 +1,8 @@
+---
+name: vav-batch-14-04-soft-scoring-engine
+description: "Implement Soft scoring engine for the VAV platform."
+---
+
 # Soft scoring engine
 
 Score only through the approved feature registry: code, version, group, value

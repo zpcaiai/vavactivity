@@ -1,3 +1,8 @@
+---
+name: vav-batch-14-08-recommendation-batches-exposure
+description: "Implement Batches and exposure for the VAV platform."
+---
+
 # Batches and exposure
 
 A batch is immutable and bound to the strategy, profile, preference and privacy

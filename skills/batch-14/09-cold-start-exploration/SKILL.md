@@ -1,3 +1,8 @@
+---
+name: vav-batch-14-09-cold-start-exploration
+description: "Implement Cold start and exploration for the VAV platform."
+---
+
 # Cold start and exploration
 
 Classify new users, new profiles, sparse preferences, sparse regions and no

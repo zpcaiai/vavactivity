@@ -9,6 +9,7 @@ Docker Compose v2, Node 22–26, pnpm 10.14, Python 3.12, uv 0.8, OpenSSL, curl,
 ```bash
 ./scripts/vavctl bootstrap
 ./scripts/vavctl up
+./scripts/vavctl migrate
 ./scripts/vavctl smoke
 ```
 

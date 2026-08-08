@@ -1,3 +1,8 @@
+---
+name: vav-batch-13-06-partner-preferences
+description: "Implement Hard and soft partner criteria for the VAV platform."
+---
+
 # Hard and soft partner criteria
 
 Only criteria approved by business, privacy and legal review may enter automated filtering.

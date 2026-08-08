@@ -1,3 +1,8 @@
+---
+name: vav-batch-14-05-bidirectional-compatibility
+description: "Implement Bidirectional compatibility for the VAV platform."
+---
+
 # Bidirectional compatibility
 
 Compute A→B and B→A separately and keep both. Compose with the weaker direction

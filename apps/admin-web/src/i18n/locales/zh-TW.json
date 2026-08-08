@@ -1,0 +1,39 @@
+{
+  "shell": {
+    "workspace": "營運工作台",
+    "operations": "VAV 營運",
+    "authorizedSession": "後端授權工作階段",
+    "expand": "展開",
+    "collapse": "收合導覽",
+    "language": "介面語言"
+  },
+  "menu": {
+    "dashboard": "工作台",
+    "users": "使用者",
+    "pages": "頁面",
+    "media": "媒體庫",
+    "navigation": "導覽",
+    "catalog": "服務目錄",
+    "commerce": "交易中心",
+    "activities": "活動中心",
+    "courses": "課程中心",
+    "counseling": "輔導中心",
+    "knowledge": "知識庫中心",
+    "ai": "AI 營運中心",
+    "notifications": "通知營運中心",
+    "privacy": "隱私營運中心",
+    "interactions": "互動營運中心",
+    "relationships": "關係營運中心",
+    "system": "系統維運中心",
+    "skills": "Skill 控制台",
+    "quality": "品質治理",
+    "designSystem": "設計系統治理",
+    "experience": "體驗編排",
+    "processes": "流程治理",
+    "dataGovernance": "資料完整性",
+    "adminPlatform": "統一管理平台",
+    "settings": "網站設定",
+    "admins": "管理員",
+    "audit": "稽核紀錄"
+  }
+}

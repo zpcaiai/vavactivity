@@ -47,11 +47,11 @@ def _safe_int(value: Any, *, default: int = 0) -> int:
 
 
 def _to_sequence(value: Any) -> list[Any]:
-    if isinstance(value, (str, bytes, bytearray)):
+    if isinstance(value, str | bytes | bytearray):
         return []
     if isinstance(value, Mapping):
         return []
-    if isinstance(value, (list, tuple, set)):
+    if isinstance(value, list | tuple | set):
         return list(value)
     return []
 
@@ -59,8 +59,8 @@ def _to_sequence(value: Any) -> list[Any]:
 def _normalize_schema_definition_payload(value: Any) -> dict[str, Any]:
     if isinstance(value, Mapping):
         return dict(value)
-    if isinstance(value, (str, bytes, bytearray)):
-        text = value.decode() if isinstance(value, (bytes, bytearray)) else str(value)
+    if isinstance(value, str | bytes | bytearray):
+        text = value.decode() if isinstance(value, bytes | bytearray) else str(value)
         try:
             payload = json.loads(text)
         except json.JSONDecodeError:
@@ -73,7 +73,7 @@ def _normalize_schema_definition_payload(value: Any) -> dict[str, Any]:
 def _safe_required_fields(value: Any) -> list[str]:
     payload = _normalize_schema_definition_payload(value)
     fields = payload.get("required", [])
-    if isinstance(fields, (list, tuple, set)):
+    if isinstance(fields, list | tuple | set):
         return [str(item) for item in fields if str(item)]
     if fields:
         return [str(fields)]
@@ -85,12 +85,12 @@ def _decrypt_encrypted_payload(raw: Any) -> dict[str, Any]:
         ciphertext = raw.get("ciphertext")
         if isinstance(ciphertext, str):
             decrypted = decrypt_private(ciphertext)
-        elif isinstance(ciphertext, (bytes, bytearray)):
+        elif isinstance(ciphertext, bytes | bytearray):
             decrypted = decrypt_private(str(ciphertext.decode()))
         else:
             return {}
-    elif isinstance(raw, (str, bytes, bytearray)):
-        text = raw.decode() if isinstance(raw, (bytes, bytearray)) else str(raw)
+    elif isinstance(raw, str | bytes | bytearray):
+        text = raw.decode() if isinstance(raw, bytes | bytearray) else str(raw)
         candidate: Any = text
         if text.startswith("{") and text.endswith("}"):
             try:
@@ -99,7 +99,7 @@ def _decrypt_encrypted_payload(raw: Any) -> dict[str, Any]:
                 candidate = text
         if isinstance(candidate, Mapping):
             wrapped = candidate.get("ciphertext", text)
-            if isinstance(wrapped, (str, bytes, bytearray)):
+            if isinstance(wrapped, str | bytes | bytearray):
                 decrypted = decrypt_private(str(wrapped))
             else:
                 return {}
@@ -350,7 +350,11 @@ async def save_draft(session: AsyncSession, user_id: UUID, payload: DraftSave) -
 
     if existing:
         previous = _row(existing)
-        previous_payload = {"payload": {}, "checksum": previous.get("payload_checksum"), "client_version": previous.get("client_version", 0)}
+        previous_payload = {
+            "payload": {},
+            "checksum": previous.get("payload_checksum"),
+            "client_version": previous.get("client_version", 0),
+        }
         try:
             raw = previous.get("encrypted_payload")
             if isinstance(raw, Mapping):
@@ -380,7 +384,7 @@ async def save_draft(session: AsyncSession, user_id: UUID, payload: DraftSave) -
                 "USABILITY_DRAFT_CONFLICT",
                 "Draft conflict requires manual merge before save.",
                 status_code=409,
-                details=conflict,
+                details=[conflict],
             )
 
     expiry = datetime.now(UTC) + timedelta(seconds=_safe_int(current["ttl_seconds"], default=3600))
@@ -448,7 +452,9 @@ async def preview_import(
             "Import payload exceeds allowed size.",
             status_code=422,
         )
-    required = set(_safe_required_fields(current.get("schema_definition")))
+    # Preserve schema order: the validator uses the first required field as the
+    # deterministic duplicate key for an import batch.
+    required = _safe_required_fields(current.get("schema_definition"))
     results = validate_import_rows(rows, required, _safe_int(current["maximum_rows"], default=1))
     source_checksum = checksum(rows)
     existing = (

@@ -1,3 +1,8 @@
+---
+name: vav-batch-14-11-user-admin-recommendation-web
+description: "Implement Recommendation web experience for the VAV platform."
+---
+
 # Recommendation web experience
 
 The member sees cards with an approved display name, age display, city-level

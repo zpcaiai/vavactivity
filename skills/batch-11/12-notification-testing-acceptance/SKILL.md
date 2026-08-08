@@ -1,3 +1,8 @@
+---
+name: vav-batch-11-12-notification-testing-acceptance
+description: "Implement Notification testing and acceptance for the VAV platform."
+---
+
 # Notification testing and acceptance
 
 Test event/version routing, templates, owner isolation, consent, mandatory policy, quiet hours,

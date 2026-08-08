@@ -35,7 +35,9 @@ def test_allowed_operators_are_exactly_the_published_set() -> None:
         ("none_open", True, ["open"], False),
     ],
 )
-def test_operator_semantics(operator: str, expected: object, observed: object, result: bool) -> None:
+def test_operator_semantics(
+    operator: str, expected: object, observed: object, result: bool
+) -> None:
     condition = {
         "metric": "blocker_requirement_trace_coverage",
         "operator": operator,
@@ -70,7 +72,11 @@ def test_missing_key_is_rejected() -> None:
 def test_arbitrary_operators_are_rejected(operator: str) -> None:
     with pytest.raises(QualityPolicyError) as error:
         evaluate_gate_condition(
-            {"metric": "critical_test_pass_rate", "operator": operator, "expected": 1.0},
+            {
+                "metric": "critical_test_pass_rate",
+                "operator": operator,
+                "expected": 1.0,
+            },
             1.0,
         )
     assert error.value.code == "QUALITY_GATE_OPERATOR_INVALID"
@@ -82,7 +88,9 @@ def test_arbitrary_operators_are_rejected(operator: str) -> None:
 )
 def test_metric_names_are_restricted(metric: str) -> None:
     with pytest.raises(QualityPolicyError) as error:
-        evaluate_gate_condition({"metric": metric, "operator": "eq", "expected": 1.0}, 1.0)
+        evaluate_gate_condition(
+            {"metric": metric, "operator": "eq", "expected": 1.0}, 1.0
+        )
     assert error.value.code == "QUALITY_GATE_METRIC_INVALID"
 
 
@@ -95,6 +103,10 @@ def test_incomparable_value_fails_closed_with_policy_error() -> None:
 
 
 def test_gate_results_are_reproducible() -> None:
-    condition = {"metric": "critical_journey_e2e_pass_rate", "operator": "eq", "expected": 1.0}
+    condition = {
+        "metric": "critical_journey_e2e_pass_rate",
+        "operator": "eq",
+        "expected": 1.0,
+    }
     results = {evaluate_gate_condition(condition, 1.0) for _ in range(20)}
     assert results == {True}

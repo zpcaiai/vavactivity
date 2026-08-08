@@ -479,7 +479,9 @@ def detect_write_hotspots(
     return sorted(hotspots, key=lambda item: (-item["concurrent_writers"], item["resource"]))
 
 
-def detect_lock_cycles(lock_orders: dict[str, list[str]], *, max_depth: int = 24) -> list[list[str]]:
+def detect_lock_cycles(
+    lock_orders: dict[str, list[str]], *, max_depth: int = 24
+) -> list[list[str]]:
     """Detect deadlock-prone lock-order cycles across declared transaction lock sequences."""
     edges: dict[str, set[str]] = defaultdict(set)
     for order in lock_orders.values():
@@ -530,9 +532,7 @@ def validate_idempotency_coverage(scenarios: list[dict[str, Any]]) -> list[dict[
     return sorted(findings, key=lambda item: item["scenario_code"])
 
 
-def evaluate_race_result(
-    scenario: dict[str, Any], observed: dict[str, Any]
-) -> dict[str, Any]:
+def evaluate_race_result(scenario: dict[str, Any], observed: dict[str, Any]) -> dict[str, Any]:
     """Compare an executed race schedule with the declared invariants and distribution."""
     violations: list[str] = []
     expected = scenario.get("expected_result_distribution") or {}
@@ -597,7 +597,7 @@ def evaluate_soak(
         last = ordered[-1][1]
         relative_growth = (last - first) / first if first else math.inf
         threshold = float(thresholds.get(name, 0.0))
-        leaking = slope > threshold and relative_growth > relative_growth_limit
+        is_leaking = slope > threshold and relative_growth > relative_growth_limit
         metrics.append(
             {
                 "metric": name,
@@ -606,20 +606,19 @@ def evaluate_soak(
                 "first_value": first,
                 "last_value": last,
                 "relative_growth": round(relative_growth, 6),
-                "leaking": leaking,
+                "leaking": is_leaking,
             }
         )
-    leaking = [item["metric"] for item in metrics if item["leaking"]]
+    leaking_metrics = [item["metric"] for item in metrics if item["leaking"]]
     duration_ok = duration_hours >= minimum_duration_hours
-    if not metrics or not duration_ok:
-        status = "failed"
-    else:
-        status = "failed" if leaking else "passed"
+    status = (
+        "failed" if not metrics or not duration_ok else "failed" if leaking_metrics else "passed"
+    )
     return {
         "status": status,
         "duration_hours": round(duration_hours, 4),
         "duration_sufficient": duration_ok,
-        "leaking_metrics": sorted(leaking),
+        "leaking_metrics": sorted(leaking_metrics),
         "metrics": metrics,
     }
 

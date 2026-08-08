@@ -1,3 +1,8 @@
+---
+name: vav-batch-11-07-delivery-retry-deduplication
+description: "Implement Delivery retry and deduplication for the VAV platform."
+---
+
 # Delivery retry and deduplication
 
 Lock due work with `FOR UPDATE SKIP LOCKED`, keep one delivery per channel/dedup key, classify

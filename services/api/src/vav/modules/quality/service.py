@@ -144,7 +144,9 @@ async def create_requirement(
         values,
     )
     created = _row(result.one())
-    await _audit(session, actor_id, "quality.requirement.created", "quality_requirement", created["id"])
+    await _audit(
+        session, actor_id, "quality.requirement.created", "quality_requirement", created["id"]
+    )
     await session.commit()
     return created
 
@@ -159,7 +161,9 @@ async def transition_requirement(
         )
     ).first()
     if current is None:
-        raise VavError("QUALITY_REQUIREMENT_NOT_FOUND", "Requirement was not found.", status_code=404)
+        raise VavError(
+            "QUALITY_REQUIREMENT_NOT_FOUND", "Requirement was not found.", status_code=404
+        )
     item = _row(current)
     try:
         validate_requirement_transition(item["status"], target)
@@ -231,7 +235,9 @@ async def upsert_capability(
         values,
     )
     item = _row(result.one())
-    await _audit(session, actor_id, "quality.capability.registered", "quality_capability", item["id"])
+    await _audit(
+        session, actor_id, "quality.capability.registered", "quality_capability", item["id"]
+    )
     await session.commit()
     return item
 
@@ -260,7 +266,9 @@ async def create_trace_node(
         values,
     )
     item = _row(result.one())
-    await _audit(session, actor_id, "quality.traceability.node_synced", "quality_trace_node", item["id"])
+    await _audit(
+        session, actor_id, "quality.traceability.node_synced", "quality_trace_node", item["id"]
+    )
     await session.commit()
     return item
 
@@ -291,9 +299,7 @@ async def create_trace_link(
     return item
 
 
-async def verify_trace_link(
-    session: AsyncSession, actor_id: UUID, link_id: UUID
-) -> dict[str, Any]:
+async def verify_trace_link(session: AsyncSession, actor_id: UUID, link_id: UUID) -> dict[str, Any]:
     result = await session.execute(
         text(
             "UPDATE quality_trace_links SET status='verified',verified_by=:actor,verified_at=now() "
@@ -348,7 +354,9 @@ async def create_business_flow(
         values,
     )
     item = _row(result.one())
-    await _audit(session, actor_id, "quality.business_flow.created", "quality_business_flow", item["id"])
+    await _audit(
+        session, actor_id, "quality.business_flow.created", "quality_business_flow", item["id"]
+    )
     await session.commit()
     return item
 
@@ -371,7 +379,9 @@ async def certify_business_flow(
             status_code=409,
         )
     item = _row(row)
-    await _audit(session, actor_id, "quality.business_flow.certified", "quality_business_flow", flow_id)
+    await _audit(
+        session, actor_id, "quality.business_flow.certified", "quality_business_flow", flow_id
+    )
     await session.commit()
     return item
 
@@ -483,10 +493,14 @@ async def request_waiver(
             status_code=422,
         )
     if payload.expires_at <= payload.valid_from:
-        raise VavError("QUALITY_WAIVER_EXPIRY_INVALID", "Waiver expiry is invalid.", status_code=422)
+        raise VavError(
+            "QUALITY_WAIVER_EXPIRY_INVALID", "Waiver expiry is invalid.", status_code=422
+        )
     settings = get_settings()
     if (payload.expires_at - payload.valid_from).days > settings.quality_waiver_max_days:
-        raise VavError("QUALITY_WAIVER_EXPIRY_INVALID", "Waiver duration is too long.", status_code=422)
+        raise VavError(
+            "QUALITY_WAIVER_EXPIRY_INVALID", "Waiver duration is too long.", status_code=422
+        )
     waiver_number = f"WV-{datetime.now(UTC):%Y%m%d}-{uuid4().hex[:12]}"
     values = payload.model_dump() | {
         "number": waiver_number,
@@ -590,7 +604,9 @@ async def register_evidence(
         )
     values = payload.model_dump() | {
         "type": payload.evidence_type.value,
-        "artifact": encrypt_private(payload.artifact_reference) if payload.artifact_reference else None,
+        "artifact": encrypt_private(payload.artifact_reference)
+        if payload.artifact_reference
+        else None,
         "summary_json": _json(payload.summary),
         "actor": actor_id,
     }
@@ -642,7 +658,9 @@ async def transition_evidence(
 
 
 async def list_gates(session: AsyncSession) -> list[dict[str, Any]]:
-    return await _list(session, "quality_gate_definitions", order_by="gate_code,semantic_version DESC")
+    return await _list(
+        session, "quality_gate_definitions", order_by="gate_code,semantic_version DESC"
+    )
 
 
 async def create_gate(
@@ -650,7 +668,9 @@ async def create_gate(
 ) -> dict[str, Any]:
     try:
         validate_code(payload.gate_code, GATE_CODE_PATTERN, "gate")
-        evaluate_gate_condition(payload.condition_definition, payload.condition_definition["expected"])
+        evaluate_gate_condition(
+            payload.condition_definition, payload.condition_definition["expected"]
+        )
     except QualityPolicyError as exc:
         raise _policy_error(exc) from exc
     values = payload.model_dump(mode="json") | {
@@ -728,29 +748,39 @@ async def evaluate_release(
     payload: ReleaseEvaluationRequest,
 ) -> dict[str, Any]:
     gate_rows = (
-        await session.execute(
-            text("SELECT * FROM quality_gate_definitions WHERE status='active' ORDER BY gate_code")
+        (
+            await session.execute(
+                text(
+                    "SELECT * FROM quality_gate_definitions WHERE status='active' ORDER BY gate_code"
+                )
+            )
         )
-    ).mappings().all()
+        .mappings()
+        .all()
+    )
     outcomes: list[GateOutcome] = []
     run_ids: list[str] = []
     failure_reasons: list[str] = []
     if payload.environment == "production":
         blockers = (
-            await session.execute(
-                text(
-                    "SELECT "
-                    "(SELECT count(*) FROM quality_requirements WHERE criticality IN ('blocker','critical') "
-                    "AND status<>'verified') AS requirements_unverified,"
-                    "(SELECT count(*) FROM quality_gaps WHERE severity IN ('blocker','critical') "
-                    "AND status<>'resolved') AS gaps_open,"
-                    "(SELECT count(*) FROM quality_risks WHERE severity IN ('blocker','critical') "
-                    "AND status<>'closed') AS risks_open,"
-                    "(SELECT count(*) FROM quality_business_flows WHERE criticality IN ('blocker','critical') "
-                    "AND status<>'certified') AS flows_uncertified"
+            (
+                await session.execute(
+                    text(
+                        "SELECT "
+                        "(SELECT count(*) FROM quality_requirements WHERE criticality IN ('blocker','critical') "
+                        "AND status<>'verified') AS requirements_unverified,"
+                        "(SELECT count(*) FROM quality_gaps WHERE severity IN ('blocker','critical') "
+                        "AND status<>'resolved') AS gaps_open,"
+                        "(SELECT count(*) FROM quality_risks WHERE severity IN ('blocker','critical') "
+                        "AND status<>'closed') AS risks_open,"
+                        "(SELECT count(*) FROM quality_business_flows WHERE criticality IN ('blocker','critical') "
+                        "AND status<>'certified') AS flows_uncertified"
+                    )
                 )
             )
-        ).mappings().one()
+            .mappings()
+            .one()
+        )
         for metric, value in blockers.items():
             if value:
                 outcomes.append(
@@ -767,19 +797,23 @@ async def evaluate_release(
             continue
         applicable_gate_count += 1
         evidence_rows = (
-            await session.execute(
-                text(
-                    "SELECT * FROM quality_evidence WHERE release_version=:release AND git_commit=:commit "
-                    "AND environment=:environment AND status='accepted' "
-                    "AND (expires_at IS NULL OR expires_at>now()) ORDER BY generated_at DESC"
-                ),
-                {
-                    "release": release_version,
-                    "commit": payload.git_commit,
-                    "environment": payload.environment,
-                },
+            (
+                await session.execute(
+                    text(
+                        "SELECT * FROM quality_evidence WHERE release_version=:release AND git_commit=:commit "
+                        "AND environment=:environment AND status='accepted' "
+                        "AND (expires_at IS NULL OR expires_at>now()) ORDER BY generated_at DESC"
+                    ),
+                    {
+                        "release": release_version,
+                        "commit": payload.git_commit,
+                        "environment": payload.environment,
+                    },
+                )
             )
-        ).mappings().all()
+            .mappings()
+            .all()
+        )
         allowed = set(gate["required_evidence_types"])
         evidence = [item for item in evidence_rows if item["evidence_type"] in allowed]
         condition = gate["condition_definition"]
@@ -796,11 +830,15 @@ async def evaluate_release(
                 passed = evaluate_gate_condition(condition, observed)
             except QualityPolicyError as exc:
                 reasons.append(exc.code.lower())
-        waiver_id = None if passed else await _active_waiver(
-            session, gate["id"], release_version, payload.environment
+        waiver_id = (
+            None
+            if passed
+            else await _active_waiver(session, gate["id"], release_version, payload.environment)
         )
-        status = QualityGateStatus.PASSED if passed else (
-            QualityGateStatus.WAIVED if waiver_id else QualityGateStatus.FAILED
+        status = (
+            QualityGateStatus.PASSED
+            if passed
+            else (QualityGateStatus.WAIVED if waiver_id else QualityGateStatus.FAILED)
         )
         outcome = GateOutcome(
             code=gate["gate_code"],
@@ -810,7 +848,9 @@ async def evaluate_release(
         )
         outcomes.append(outcome)
         if status is not QualityGateStatus.PASSED:
-            failure_reasons.extend(f"{gate['gate_code']}:{reason}" for reason in reasons or [status.value])
+            failure_reasons.extend(
+                f"{gate['gate_code']}:{reason}" for reason in reasons or [status.value]
+            )
         run = await session.execute(
             text(
                 "INSERT INTO quality_gate_runs "
@@ -850,9 +890,18 @@ async def evaluate_release(
         )
         failure_reasons.append("GATE-DEFINITIONS-PRESENT:no_applicable_approved_gate")
     decision = release_decision(outcomes)
-    score = round(
-        (sum(item.status is QualityGateStatus.PASSED for item in outcomes) / len(outcomes) * 100), 2
-    ) if outcomes else 0.0
+    score = (
+        round(
+            (
+                sum(item.status is QualityGateStatus.PASSED for item in outcomes)
+                / len(outcomes)
+                * 100
+            ),
+            2,
+        )
+        if outcomes
+        else 0.0
+    )
     result = await session.execute(
         text(
             "INSERT INTO quality_release_evaluations "
@@ -921,7 +970,9 @@ async def release_detail(
     )
     row = result.first()
     if row is None:
-        raise VavError("QUALITY_RELEASE_NOT_FOUND", "Release evaluation was not found.", status_code=404)
+        raise VavError(
+            "QUALITY_RELEASE_NOT_FOUND", "Release evaluation was not found.", status_code=404
+        )
     return _row(row)
 
 
@@ -942,7 +993,9 @@ async def certify_release(
         )
     ).first()
     if current is None:
-        raise VavError("QUALITY_RELEASE_NOT_FOUND", "Release evaluation was not found.", status_code=404)
+        raise VavError(
+            "QUALITY_RELEASE_NOT_FOUND", "Release evaluation was not found.", status_code=404
+        )
     release = _row(current)
     if release["decision"] != ReleaseQualityDecision.GO.value:
         raise VavError(
@@ -1005,7 +1058,9 @@ async def certify_release(
         {"evaluation": release["id"], "manifest": _json(evidence_manifest), "actor": actor_id},
     )
     item = _row(result.one())
-    await _audit(session, actor_id, "quality.release.certified", "quality_certification", item["id"])
+    await _audit(
+        session, actor_id, "quality.release.certified", "quality_certification", item["id"]
+    )
     await session.commit()
     return item
 

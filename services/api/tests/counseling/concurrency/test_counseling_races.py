@@ -77,6 +77,7 @@ async def test_two_users_cannot_hold_the_same_slot() -> None:
                 CounselingSlotHold.mentor_id == mentor_id,
                 CounselingSlotHold.starts_at == successes[0].starts_at,
                 CounselingSlotHold.status == "active",
+                CounselingSlotHold.expires_at > func.now(),
             )
         )
     assert active == 1

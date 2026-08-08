@@ -44,7 +44,9 @@ INVENTORY = ArtifactInventory(
         for index in range(1, 11)
     ),
     pages=tuple(
-        PageArtifact(code=f"PAGE-{index}", application="admin-web", route_path=f"/p/{index}")
+        PageArtifact(
+            code=f"PAGE-{index}", application="admin-web", route_path=f"/p/{index}"
+        )
         for index in range(1, 11)
     ),
     apis=tuple(
@@ -63,9 +65,7 @@ ROWS = [
     BusinessClosureRow(
         flow_code=f"FLOW-QUALITY-CASE-{index}",
         criticality=QualityCriticality.BLOCKER,
-        dimensions={
-            dimension: index % 2 == 0 for dimension in CLOSURE_DIMENSIONS
-        },
+        dimensions={dimension: index % 2 == 0 for dimension in CLOSURE_DIMENSIONS},
     )
     for index in range(1, 9)
 ]

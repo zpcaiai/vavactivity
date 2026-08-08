@@ -261,7 +261,21 @@ async def test_stuck_scan_creates_controlled_intervention_and_rejects_direct_sta
         )
         await session.commit()
         result = await service.scan_stuck(session, actor)
-        assert result["created"] == 1
+        # The scanner is intentionally global and may also remediate backlog from
+        # earlier workers or test runs.  Assert the target instance's invariant
+        # instead of assuming this database contains no other stuck processes.
+        assert result["created"] >= 1
+        task_count = await session.scalar(
+            text("SELECT count(*) FROM process_intervention_tasks WHERE process_instance_id=:id"),
+            {"id": instance["id"]},
+        )
+        assert task_count == 1
+        await service.scan_stuck(session, actor)
+        replay_task_count = await session.scalar(
+            text("SELECT count(*) FROM process_intervention_tasks WHERE process_instance_id=:id"),
+            {"id": instance["id"]},
+        )
+        assert replay_task_count == 1
         task_id = await session.scalar(
             text("SELECT id FROM process_intervention_tasks WHERE process_instance_id=:id"),
             {"id": instance["id"]},

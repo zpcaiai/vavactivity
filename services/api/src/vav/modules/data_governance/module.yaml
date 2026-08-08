@@ -1,6 +1,6 @@
 module: {code: data_governance, owner: data_platform, version: "1.0.0"}
 dependencies: {required: [identity, privacy, quality, process_governance, experience]}
-database: {revisions: [91]}
+database: {revisions: [91, 94]}
 events:
   publishes:
     - data.contract.changed.v1

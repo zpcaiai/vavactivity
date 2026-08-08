@@ -1,3 +1,8 @@
+---
+name: vav-batch-11-02-event-subscription-router
+description: "Implement Event subscription router for the VAV platform."
+---
+
 # Event subscription router
 
 Consume explicit event type/version pairs through an Inbox. Resolve recipients from current

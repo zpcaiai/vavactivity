@@ -9,6 +9,7 @@ fi
 
 command=("$@")
 timeout_seconds="${RUN_IF_TIMEOUT_SECONDS:-45}"
+status_file="${RUN_IF_STATUS_FILE:-}"
 
 tmp_out=$(mktemp)
 tmp_err=$(mktemp)
@@ -16,6 +17,35 @@ cleanup() {
   rm -f "$tmp_out" "$tmp_err"
 }
 trap cleanup EXIT
+
+json_escape() {
+  local value="$1"
+  value="${value//\\/\\\\}"
+  value="${value//\"/\\\"}"
+  value="${value//$'\n'/\\n}"
+  value="${value//$'\r'/\\r}"
+  value="${value//$'\t'/\\t}"
+  printf '%s' "$value"
+}
+
+write_status() {
+  local status="$1"
+  local rc="$2"
+  local reason="$3"
+  [ -n "$status_file" ] || return 0
+
+  local status_dir
+  local status_tmp
+  status_dir=$(dirname "$status_file")
+  mkdir -p "$status_dir"
+  status_tmp=$(mktemp "${status_file}.tmp.XXXXXX")
+  printf '{"status":"%s","command":"%s","reason":"%s","exit_code":%s}\n' \
+    "$(json_escape "$status")" \
+    "$(json_escape "$json_command")" \
+    "$(json_escape "$reason")" \
+    "$rc" >"$status_tmp"
+  mv "$status_tmp" "$status_file"
+}
 
 run_with_wrapped_timeout() {
   local -a args=("$@")
@@ -62,6 +92,8 @@ set -e
 
 stdout=$(cat "$tmp_out")
 stderr=$(cat "$tmp_err")
+shell_command=$(printf '%q ' "${command[@]}")
+json_command=${shell_command% }
 
 if [ "$rc" -eq 0 ]; then
   if [ -n "$stdout" ]; then
@@ -70,6 +102,7 @@ if [ "$rc" -eq 0 ]; then
   if [ -n "$stderr" ]; then
     printf '%s\n' "$stderr" >&2
   fi
+  write_status "PASS" 0 "command completed"
   exit 0
 fi
 
@@ -87,13 +120,6 @@ fi
 
 case "$lower" in
   *"command not found"*|\
-  *"no such file or directory"*|\
-  *"file not found"*|\
-  *"does not exist"*|\
-  *"module not found"*|\
-  *"modulenotfounderror"*|\
-  *"cannot import name"*|\
-  *"python:"*|\
   *"cannot connect to the docker daemon"*|\
   *"connection refused"*|\
   *"connect call failed"*|\
@@ -101,6 +127,7 @@ case "$lower" in
   *"timed out (110)"*|\
   *"operation timed out"*|\
   *"connect timed out"*|\
+  *"timed out waiting"*config.webserver*|\
   *"could not resolve host"*|\
   *"failed to connect"*|\
   *"playwright: not found"*|\
@@ -124,9 +151,10 @@ if [ "$need_not_run" != true ]; then
   if [ -n "$stderr" ]; then
     printf '%s\n' "$stderr" >&2
   fi
+  write_status "FAIL" "$rc" "command failed"
   exit "$rc"
 fi
 
-json_command=$(printf '%q ' "${command[@]}" | sed 's/ $//')
-printf '{"status":"NOT_RUN","command":"%s","reason":"environment dependency unavailable","exit_code":%s}\n' "$json_command" "$rc"
+write_status "NOT_RUN" "$rc" "environment dependency unavailable"
+printf '{"status":"NOT_RUN","command":"%s","reason":"environment dependency unavailable","exit_code":%s}\n' "$(json_escape "$json_command")" "$rc"
 exit 0

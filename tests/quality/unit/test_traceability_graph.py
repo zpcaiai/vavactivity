@@ -152,9 +152,9 @@ def test_dangling_link_is_detected() -> None:
 
 def test_unreachable_nodes_are_orphan_candidates() -> None:
     nodes = _nodes() + [TraceNode(code="PAGE-ORPHAN", node_type=TraceNodeType.PAGE)]
-    assert unreachable_nodes(
-        nodes, _links(), root_codes=["REQ-VAV-COMMERCE-001"]
-    ) == ("PAGE-ORPHAN",)
+    assert unreachable_nodes(nodes, _links(), root_codes=["REQ-VAV-COMMERCE-001"]) == (
+        "PAGE-ORPHAN",
+    )
 
 
 def test_unknown_relationship_is_rejected() -> None:

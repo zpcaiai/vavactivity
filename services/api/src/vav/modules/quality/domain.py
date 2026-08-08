@@ -643,9 +643,7 @@ def business_flow_complete(checks: dict[str, bool]) -> bool:
 # ---------------------------------------------------------------------------
 
 
-def _index_links(
-    links: list[TraceLink], *, reverse: bool = False
-) -> dict[str, list[TraceLink]]:
+def _index_links(links: list[TraceLink], *, reverse: bool = False) -> dict[str, list[TraceLink]]:
     adjacency: dict[str, list[TraceLink]] = {}
     for link in links:
         key = link.target if reverse else link.source
@@ -1480,9 +1478,7 @@ def closure_ratio(
     only_critical: bool = True,
 ) -> float:
     scope = [
-        item
-        for item in evaluations
-        if not only_critical or item.criticality in RELEASE_CRITICAL
+        item for item in evaluations if not only_critical or item.criticality in RELEASE_CRITICAL
     ]
     if not scope:
         return 0.0

@@ -9,6 +9,7 @@ dependencies = [
   "asyncpg==0.30.0",
   "boto3==1.39.14",
   "cryptography==50.0.0",
+  "defusedxml==0.7.1",
   "email-validator==2.2.0",
   "fastapi==0.141.1",
   "greenlet==3.2.3",
@@ -29,14 +30,17 @@ dependencies = [
   "sqlalchemy==2.0.42",
   "structlog==25.4.0",
   "uvicorn[standard]==0.35.0",
+  "vav-skill-sdk==1.0.0",
 ]
 
 [dependency-groups]
 dev = [
+  "httpx2==2.9.1",
   "mypy==1.17.0",
   "pytest==8.4.1",
   "pytest-asyncio==1.1.0",
   "ruff==0.12.7",
+  "types-defusedxml==0.7.0.20260504",
 ]
 
 [build-system]

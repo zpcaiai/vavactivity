@@ -1,3 +1,8 @@
+---
+name: vav-batch-14-10-feedback-learning-experiments
+description: "Implement Feedback, tuning and experiments for the VAV platform."
+---
+
 # Feedback, tuning and experiments
 
 Feedback events are typed and idempotent. Blocks and reports remove candidates

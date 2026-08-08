@@ -69,7 +69,9 @@ def test_mock_only_page_is_detected() -> None:
         route_path="/wallet",
         has_navigation_entry=True,
     )
-    assert detect_mock_only_pages([page])[0].detection_rule_code == "RULE-MOCK-ONLY-PAGE"
+    assert (
+        detect_mock_only_pages([page])[0].detection_rule_code == "RULE-MOCK-ONLY-PAGE"
+    )
 
 
 def test_orphan_api_requires_caller_or_declared_purpose() -> None:
@@ -146,9 +148,9 @@ def test_event_without_consumer_or_audit_purpose_is_orphan() -> None:
         code="safety.audit.recorded.v1", publishers=("trust_safety",), audit_only=True
     )
     orphan = EventArtifact(code="courses.lesson.viewed.v1", publishers=("courses",))
-    assert [item.subject for item in detect_orphan_events([consumed, audit_only, orphan])] == [
-        "courses.lesson.viewed.v1"
-    ]
+    assert [
+        item.subject for item in detect_orphan_events([consumed, audit_only, orphan])
+    ] == ["courses.lesson.viewed.v1"]
 
 
 def test_consumer_without_inbox_deduplication_is_detected() -> None:
@@ -231,7 +233,10 @@ def test_critical_capability_without_exception_scenario_is_detected() -> None:
         criticality=QualityCriticality.BLOCKER,
         admin_capabilities=("CAP-COMMERCE-REFUND",),
     )
-    assert detect_missing_exception_paths([capability])[0].severity is QualityCriticality.BLOCKER
+    assert (
+        detect_missing_exception_paths([capability])[0].severity
+        is QualityCriticality.BLOCKER
+    )
 
 
 def test_async_capability_without_metric_is_detected() -> None:
@@ -251,7 +256,10 @@ def test_critical_user_capability_without_notification_is_detected() -> None:
         admin_capabilities=("CAP-MEMBERSHIP-ADJUST",),
         exception_scenarios=("EXC-MEMBERSHIP-PAYMENT-FAILED",),
     )
-    assert detect_missing_notifications([capability])[0].gap_type is GapType.MISSING_NOTIFICATION
+    assert (
+        detect_missing_notifications([capability])[0].gap_type
+        is GapType.MISSING_NOTIFICATION
+    )
 
 
 def test_open_dead_letters_are_reported() -> None:
@@ -282,7 +290,10 @@ def test_implemented_but_unverified_requirement_is_separated() -> None:
             status=QualityRequirementStatus.APPROVED,
         ),
     ]
-    findings = {item.subject: item.gap_type for item in detect_unimplemented_requirements(requirements)}
+    findings = {
+        item.subject: item.gap_type
+        for item in detect_unimplemented_requirements(requirements)
+    }
     assert findings["REQ-VAV-COMMERCE-001"] is GapType.UNVERIFIED_REQUIREMENT
     assert findings["REQ-VAV-COMMERCE-002"] is GapType.UNIMPLEMENTED_REQUIREMENT
 
@@ -297,8 +308,18 @@ def test_detect_all_gaps_is_deterministic_and_deduplicated() -> None:
             ),
         ),
         pages=(PageArtifact(code="PAGE-X", application="admin-web", route_path="/x"),),
-        apis=(ApiArtifact(code="API-X", method="POST", path="/x", module="quality", is_command=True),),
-        events=(EventArtifact(code="quality.gap.detected.v1", publishers=("quality",)),),
+        apis=(
+            ApiArtifact(
+                code="API-X",
+                method="POST",
+                path="/x",
+                module="quality",
+                is_command=True,
+            ),
+        ),
+        events=(
+            EventArtifact(code="quality.gap.detected.v1", publishers=("quality",)),
+        ),
         permissions=(PermissionArtifact(code="quality.unused"),),
         tables=(TableArtifact(code="quality_tmp", module="quality"),),
         state_machines=(
@@ -382,7 +403,8 @@ def test_clean_inventory_produces_no_gaps() -> None:
         ),
         permissions=(
             PermissionArtifact(
-                code="quality.analytics.read", referencing_routes=("API-QUALITY-DASHBOARD",)
+                code="quality.analytics.read",
+                referencing_routes=("API-QUALITY-DASHBOARD",),
             ),
         ),
         tables=(

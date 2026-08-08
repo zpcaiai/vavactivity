@@ -156,7 +156,9 @@ async def business_flows(
 async def create_business_flow(
     payload: BusinessFlowCreate,
     request: Request,
-    principal: AuthenticatedPrincipal = Depends(require_permission("quality.business_flows.manage")),
+    principal: AuthenticatedPrincipal = Depends(
+        require_permission("quality.business_flows.manage")
+    ),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return _ok(await service.create_business_flow(session, principal.user.id, payload), request)
@@ -166,7 +168,9 @@ async def create_business_flow(
 async def certify_business_flow(
     flow_id: UUID,
     request: Request,
-    principal: AuthenticatedPrincipal = Depends(require_permission("quality.business_flows.certify")),
+    principal: AuthenticatedPrincipal = Depends(
+        require_permission("quality.business_flows.certify")
+    ),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return _ok(await service.certify_business_flow(session, principal.user.id, flow_id), request)
@@ -176,10 +180,14 @@ async def certify_business_flow(
 async def create_exception_scenario(
     payload: ExceptionScenarioCreate,
     request: Request,
-    principal: AuthenticatedPrincipal = Depends(require_permission("quality.business_flows.manage")),
+    principal: AuthenticatedPrincipal = Depends(
+        require_permission("quality.business_flows.manage")
+    ),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
-    return _ok(await service.create_exception_scenario(session, principal.user.id, payload), request)
+    return _ok(
+        await service.create_exception_scenario(session, principal.user.id, payload), request
+    )
 
 
 @router.get("/gaps")
@@ -374,9 +382,7 @@ async def gate_runs(
     _principal: AuthenticatedPrincipal = Depends(require_permission("quality.gates.read")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
-    return _ok(
-        await service.list_gate_runs(session), request
-    )
+    return _ok(await service.list_gate_runs(session), request)
 
 
 @router.post("/releases/{release_version}/evaluate")
@@ -388,7 +394,8 @@ async def evaluate_release(
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return _ok(
-        await service.evaluate_release(session, principal.user.id, release_version, payload), request
+        await service.evaluate_release(session, principal.user.id, release_version, payload),
+        request,
     )
 
 

@@ -185,6 +185,12 @@ up() {
 
 down() { docker compose -f docker-compose.yml -f deploy/compose/docker-compose.observability.yml --profile full down; }
 
+migrate() {
+  docker compose exec -T api alembic upgrade head
+  docker compose exec -T api alembic current | grep -q '(head)'
+  pass "database migrated to head"
+}
+
 seed() {
   seed_parse_manifest
   local include_demo include_test selected_groups env_requested
@@ -308,31 +314,44 @@ smoke() {
     pass "$name"
   done
 
-  local status
-  if [[ "${VAV_INCLUDE_TEST:-false}" == "true" ]]; then
-    login_payload='{"email":"test@example.com","password":"test","device_name":"vavctl-smoke"}'
-    status="$(curl --noproxy '*' --silent --show-error --max-time 12 --request POST \
-      --header "Content-Type: application/json" \
-      --output /tmp/vavctl_smoke_body.txt \
-      --write-out "%{http_code}" \
-      --data "$login_payload" http://localhost:8000/api/v1/auth/login)"
-    if [[ "$status" != "200" ]]; then
-      echo "Test account login failed: $status" >&2
-      if [[ -s /tmp/vavctl_smoke_body.txt ]]; then sed -n '1,6p' /tmp/vavctl_smoke_body.txt >&2; fi
-      exit 1
-    fi
-    pass "user login with test account"
-  else
-    status="$(curl --noproxy '*' --silent --show-error --max-time 12 --request POST \
-      --header "Content-Type: application/json" \
-      --output /tmp/vavctl_smoke_body.txt \
-      --write-out "%{http_code}" \
-      --data '{"email":"test@example.com","password":"test","device_name":"vavctl-smoke"}' http://localhost:8000/api/v1/auth/login)"
-    if [[ "$status" != "401" && "$status" != "422" ]]; then
-      echo "user login endpoint returned unexpected status $status" >&2
-      exit 1
-    fi
+  local environment login_payload status
+  environment="$(docker compose exec -T api python -c 'from vav.core.config import get_settings; print(get_settings().environment)')"
+  environment="$(printf '%s' "$environment" | tr '[:upper:]' '[:lower:]' | xargs)"
+  login_payload='{"email":"test@example.com","password":"test","device_name":"vavctl-smoke"}'
+  status="$(curl --noproxy '*' --silent --show-error --max-time 12 --request POST \
+    --header "Content-Type: application/json" \
+    --output /tmp/vavctl_smoke_body.txt \
+    --write-out "%{http_code}" \
+    --data "$login_payload" http://localhost:8000/api/v1/auth/login)"
+
+  if [[ "$status" == "200" ]]; then
+    case "$environment" in
+      production|dr)
+        fail "default test credentials are login-ready in protected environment: $environment"
+        exit 1
+        ;;
+      development|test|ci)
+        if is_true "${VAV_INCLUDE_TEST:-false}"; then
+          pass "user login with test account"
+        else
+          warn "default test fixture remains login-ready in local environment: $environment"
+          pass "user login endpoint reachable"
+        fi
+        ;;
+      *)
+        fail "default test credentials are login-ready in unrecognized environment: ${environment:-unset}"
+        exit 1
+        ;;
+    esac
+  elif is_true "${VAV_INCLUDE_TEST:-false}"; then
+    echo "Test account login failed: $status" >&2
+    if [[ -s /tmp/vavctl_smoke_body.txt ]]; then sed -n '1,6p' /tmp/vavctl_smoke_body.txt >&2; fi
+    exit 1
+  elif [[ "$status" == "401" || "$status" == "422" ]]; then
     pass "user login endpoint reachable"
+  else
+    echo "user login endpoint returned unexpected status $status" >&2
+    exit 1
   fi
 
   status="$(curl --noproxy '*' --silent --show-error --max-time 12 --request POST \
@@ -367,6 +386,7 @@ case "$command" in
   bootstrap) bootstrap "$@" ;;
   up) up "$@" ;;
   down) down "$@" ;;
+  migrate) migrate "$@" ;;
   seed) seed "$@" ;;
   smoke) smoke "$@" ;;
   verify) ./scripts/verify.sh "$@" ;;
@@ -376,5 +396,5 @@ case "$command" in
   skill) uv run vav-skill "$@" ;;
   quality) PYTHONPATH=services/api/src uv run python scripts/quality/control.py "$@" ;;
   reset-local) reset_local "$@" ;;
-  *) echo "Usage: $0 {doctor|bootstrap|up|down|seed|smoke|verify|backup|backup-verify|restore-drill|skill|quality|reset-local}" >&2; exit 2 ;;
+  *) echo "Usage: $0 {doctor|bootstrap|up|down|migrate|seed|smoke|verify|backup|backup-verify|restore-drill|skill|quality|reset-local}" >&2; exit 2 ;;
 esac

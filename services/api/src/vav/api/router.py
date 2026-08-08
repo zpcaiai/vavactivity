@@ -46,8 +46,8 @@ from vav.modules.system.admin_router import router as system_admin_router
 from vav.modules.system.router import router as system_router
 from vav.modules.trust_safety.admin_router import router as trust_safety_admin_router
 from vav.modules.trust_safety.router import router as trust_safety_router
-from vav.modules.usability.router import router as usability_router
 from vav.modules.usability.admin_router import router as usability_admin_router
+from vav.modules.usability.router import router as usability_router
 
 api_router = APIRouter()
 api_router.include_router(health_router, prefix="/health", tags=["health"])

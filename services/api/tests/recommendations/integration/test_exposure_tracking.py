@@ -33,6 +33,12 @@ async def test_a_card_impression_is_not_a_visible_exposure() -> None:
     async with session_factory() as session:
         await ensure_strategy(session)
         viewer, item = await _first_item(session)
+        total_before = await session.scalar(
+            text(
+                "SELECT total_exposures FROM recommendation_profile_exposure_stats WHERE user_id=:id"
+            ),
+            {"id": item["recommended_user_id"]},
+        )
 
         result = await batches.record_exposure(
             session, viewer_id=viewer.id, item_id=item["id"], exposure_type="card_impression"
@@ -46,7 +52,7 @@ async def test_a_card_impression_is_not_a_visible_exposure() -> None:
             ),
             {"id": item["recommended_user_id"]},
         )
-        assert stats is None or int(stats) == 0
+        assert int(stats or 0) == int(total_before or 0)
 
 
 @pytest.mark.asyncio

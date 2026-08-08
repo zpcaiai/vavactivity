@@ -41,4 +41,6 @@ performance-results/
 # local delivery / transfer artifacts
 _to_delete/
 _transfer/
+artifacts/
 *.tgz
+*.zip

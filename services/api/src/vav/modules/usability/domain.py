@@ -12,7 +12,6 @@ from typing import Any
 
 from vav.common.exceptions import VavError
 
-
 # --------------------------------------------------------------------------------------
 # Shared helpers
 # --------------------------------------------------------------------------------------
@@ -321,9 +320,7 @@ def evaluate_step_results(
     critical_failures = sorted(
         code for code in failed + blocked if bool(by_code[code].get("critical", True))
     )
-    critical_skipped = sorted(
-        code for code in skipped if bool(by_code[code].get("critical", True))
-    )
+    critical_skipped = sorted(code for code in skipped if bool(by_code[code].get("critical", True)))
     if missing or unknown or critical_skipped:
         status = UatRunStatus.BLOCKED
     elif failed:
@@ -460,13 +457,16 @@ def expand_blueprint(
                     "locale": locale,
                     "timezone": timezone,
                     "edge_case": applied,
-                    "display_name": ("N" * 180 if applied == "long_text" else f"{name}-{token[:8]}"),
+                    "display_name": (
+                        "N" * 180 if applied == "long_text" else f"{name}-{token[:8]}"
+                    ),
                     "email": f"{name}.{index:05d}@{SYNTHETIC_EMAIL_DOMAIN}",
-                    "phone": f"{SYNTHETIC_PHONE_PREFIX}{token[:9]}".replace(
-                        "a", "1"
-                    ).replace("b", "2").replace("c", "3").replace("d", "4").replace(
-                        "e", "5"
-                    ).replace("f", "6"),
+                    "phone": f"{SYNTHETIC_PHONE_PREFIX}{token[:9]}".replace("a", "1")
+                    .replace("b", "2")
+                    .replace("c", "3")
+                    .replace("d", "4")
+                    .replace("e", "5")
+                    .replace("f", "6"),
                     "attributes": {},
                     "relations": {},
                 }
@@ -507,9 +507,7 @@ def validate_reference_integrity(
 ) -> list[dict[str, str]]:
     """Detect dangling, missing or cross-namespace references in a generation plan."""
     records: Mapping[str, Sequence[Mapping[str, Any]]] = plan.get("records") or {}
-    known = {
-        name: {str(item["reference"]) for item in items} for name, items in records.items()
-    }
+    known = {name: {str(item["reference"]) for item in items} for name, items in records.items()}
     namespace = str(plan.get("namespace", ""))
     findings: list[dict[str, str]] = []
     for relation in blueprint.get("relationships") or []:
@@ -524,7 +522,9 @@ def validate_reference_integrity(
             value = item.get("relations", {}).get(field)
             if value is None:
                 if required:
-                    findings.append({"code": "missing_required_reference", "detail": f"{child}.{field}"})
+                    findings.append(
+                        {"code": "missing_required_reference", "detail": f"{child}.{field}"}
+                    )
                 continue
             if value not in known[parent]:
                 findings.append({"code": "dangling_reference", "detail": str(value)})
@@ -579,7 +579,7 @@ def _walk(value: Any, path: str = "") -> Iterable[tuple[str, str]]:
     if isinstance(value, Mapping):
         for key, item in value.items():
             yield from _walk(item, f"{path}.{key}" if path else str(key))
-    elif isinstance(value, (list, tuple)):
+    elif isinstance(value, list | tuple):
         for index, item in enumerate(value):
             yield from _walk(item, f"{path}[{index}]")
     elif value is not None:
@@ -665,8 +665,10 @@ def evaluate_demo_policy(profile: Mapping[str, Any]) -> dict[str, Any]:
             findings.append(f"provider_not_isolated:{channel}")
     for host in profile.get("egress_allowlist") or []:
         text = str(host).casefold()
-        if not any(text == suffix.lstrip(".") or text.endswith(suffix)
-                   for suffix in DEMO_EGRESS_ALLOWED_SUFFIXES):
+        if not any(
+            text == suffix.lstrip(".") or text.endswith(suffix)
+            for suffix in DEMO_EGRESS_ALLOWED_SUFFIXES
+        ):
             findings.append(f"production_egress_allowed:{text}")
     dsn = str(profile.get("database_dsn") or "").casefold()
     if any(marker in dsn for marker in DEMO_FORBIDDEN_DSN_MARKERS):
@@ -712,7 +714,13 @@ def combination_key(combination: Mapping[str, Any]) -> str:
     """Canonical key for a browser/OS/device/viewport combination."""
     return "|".join(
         str(combination.get(field) or "any")
-        for field in ("browser", "browser_version", "operating_system", "device_profile", "viewport")
+        for field in (
+            "browser",
+            "browser_version",
+            "operating_system",
+            "device_profile",
+            "viewport",
+        )
     )
 
 
@@ -771,20 +779,26 @@ def compatibility_coverage(
             "missing": sorted(cells - set(executed)),
         }
     core_browser_blockers = sorted(
-        cell for cell in blockers if not _is_mobile(required[cell]) and
-        CompatibilityTier(str(required[cell].get("tier", "tier_3"))) == CompatibilityTier.TIER_1
+        cell
+        for cell in blockers
+        if not _is_mobile(required[cell])
+        and CompatibilityTier(str(required[cell].get("tier", "tier_3"))) == CompatibilityTier.TIER_1
     )
     core_mobile_blockers = sorted(
-        cell for cell in blockers if _is_mobile(required[cell]) and
-        CompatibilityTier(str(required[cell].get("tier", "tier_3"))) == CompatibilityTier.TIER_1
+        cell
+        for cell in blockers
+        if _is_mobile(required[cell])
+        and CompatibilityTier(str(required[cell].get("tier", "tier_3"))) == CompatibilityTier.TIER_1
     )
     tier_one = tier_report[str(CompatibilityTier.TIER_1)]
     status = "passed"
-    if unknown_cells or core_browser_blockers or core_mobile_blockers:
-        status = "failed"
-    elif not all(item["meets_requirement"] for item in tier_report.values()):
-        status = "failed"
-    elif tier_one["missing"]:
+    if (
+        unknown_cells
+        or core_browser_blockers
+        or core_mobile_blockers
+        or not all(item["meets_requirement"] for item in tier_report.values())
+        or tier_one["missing"]
+    ):
         status = "failed"
     elif majors:
         status = "passed_with_warnings"
@@ -912,8 +926,7 @@ def analyze_locale(
         if text_overflow_risk(source, translated, maximum_ratio=maximum_ratio) > 1.0:
             add(key, "text_overflow_risk")
         if currency and any(
-            symbol in translated and code != currency
-            for code, symbol in CURRENCY_SYMBOLS.items()
+            symbol in translated and code != currency for code, symbol in CURRENCY_SYMBOLS.items()
         ):
             add(key, "currency_format_mismatch")
         expected_date = str(policy.get("date_format", "yyyy-MM-dd"))
@@ -921,8 +934,10 @@ def analyze_locale(
             add(key, "date_format_mismatch")
         if ISO_DATE_PATTERN.search(translated) and expected_date.startswith("MM/"):
             add(key, "date_format_mismatch")
-        if "{date}" in translated and "{timezone}" not in translated and bool(
-            entry.get("timezone_sensitive")
+        if (
+            "{date}" in translated
+            and "{timezone}" not in translated
+            and bool(entry.get("timezone_sensitive"))
         ):
             add(key, "missing_timezone_qualifier")
         risk = str(entry.get("content_risk_level", LocalizedContentRiskLevel.NORMAL))
@@ -939,9 +954,7 @@ def analyze_locale(
         "placeholder_error_count": sum(
             1 for item in findings if item["code"].startswith("placeholder_")
         ),
-        "overflow_issue_count": sum(
-            1 for item in findings if item["code"] == "text_overflow_risk"
-        ),
+        "overflow_issue_count": sum(1 for item in findings if item["code"] == "text_overflow_risk"),
         "format_issue_count": sum(
             1 for item in findings if item["code"].endswith("format_mismatch")
         ),
@@ -952,10 +965,14 @@ def analyze_locale(
             in {"unreviewed_high_risk_content", "machine_translation_without_human_review"}
         ),
     }
-    critical = counted["missing_key_count"] + counted["placeholder_error_count"] + sum(
-        1
-        for item in findings
-        if item["code"] in {"internal_key_leak", "html_injection", "direction_conflict"}
+    critical = (
+        counted["missing_key_count"]
+        + counted["placeholder_error_count"]
+        + sum(
+            1
+            for item in findings
+            if item["code"] in {"internal_key_leak", "html_injection", "direction_conflict"}
+        )
     )
     status = "failed" if critical or counted["semantic_review_failure_count"] else "passed"
     if status == "passed" and findings:
@@ -1184,7 +1201,10 @@ def certification_status(
         return str(CertificationDecision.REJECTED)
     if unresolved_critical_findings > 0:
         return str(CertificationDecision.REJECTED)
-    if any(value in {"failed", "blocked", "needs_retest", "in_progress"} for value in normalized.values()):
+    if any(
+        value in {"failed", "blocked", "needs_retest", "in_progress"}
+        for value in normalized.values()
+    ):
         return str(CertificationDecision.REJECTED)
     if all(value == "passed" for value in normalized.values()):
         # Environment-level guardrail: production needs explicit eligibility evidence.

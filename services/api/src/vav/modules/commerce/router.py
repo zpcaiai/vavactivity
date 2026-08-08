@@ -6,9 +6,9 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, Request
+from fastapi import APIRouter, Depends, Header, Query, Request
 from fastapi.security import HTTPAuthorizationCredentials
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from vav.api.dependencies import get_database_session
@@ -69,6 +69,20 @@ from vav.modules.identity.dependencies import (
 from vav.modules.identity.permissions import require_permission
 
 router = APIRouter()
+
+
+def _page_payload(
+    items: list[dict[str, object]], *, page: int, page_size: int, total: int
+) -> dict[str, object]:
+    return {
+        "items": items,
+        "pagination": {
+            "page": page,
+            "page_size": page_size,
+            "total": total,
+            "pages": (total + page_size - 1) // page_size,
+        },
+    }
 
 
 async def optional_user(
@@ -272,20 +286,31 @@ async def create_order(
 @router.get("/orders")
 async def user_orders(
     request: Request,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=200),
     principal: AuthenticatedPrincipal = Depends(require_authenticated_user),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
+    criteria = Order.user_id == principal.user.id
+    total = int(await session.scalar(select(func.count(Order.id)).where(criteria)) or 0)
     orders = list(
         (
             await session.scalars(
                 select(Order)
-                .where(Order.user_id == principal.user.id)
+                .where(criteria)
                 .order_by(Order.created_at.desc())
+                .offset((page - 1) * page_size)
+                .limit(page_size)
             )
         ).all()
     )
     return success(
-        {"items": [order_payload(order) for order in orders]},
+        _page_payload(
+            [order_payload(order) for order in orders],
+            page=page,
+            page_size=page_size,
+            total=total,
+        ),
         request_id_from_request(request),
     )
 
@@ -443,20 +468,31 @@ def _entitlement_payload(item: Entitlement) -> dict[str, object]:
 @router.get("/entitlements")
 async def user_entitlements(
     request: Request,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=200),
     principal: AuthenticatedPrincipal = Depends(require_authenticated_user),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
+    criteria = Entitlement.user_id == principal.user.id
+    total = int(await session.scalar(select(func.count(Entitlement.id)).where(criteria)) or 0)
     items = list(
         (
             await session.scalars(
                 select(Entitlement)
-                .where(Entitlement.user_id == principal.user.id)
+                .where(criteria)
                 .order_by(Entitlement.created_at.desc())
+                .offset((page - 1) * page_size)
+                .limit(page_size)
             )
         ).all()
     )
     return success(
-        {"items": [_entitlement_payload(item) for item in items]},
+        _page_payload(
+            [_entitlement_payload(item) for item in items],
+            page=page,
+            page_size=page_size,
+            total=total,
+        ),
         request_id_from_request(request),
     )
 
@@ -483,20 +519,31 @@ async def consume_entitlement(
 @router.get("/subscriptions")
 async def user_subscriptions(
     request: Request,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=200),
     principal: AuthenticatedPrincipal = Depends(require_authenticated_user),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
+    criteria = Subscription.user_id == principal.user.id
+    total = int(await session.scalar(select(func.count(Subscription.id)).where(criteria)) or 0)
     items = list(
         (
             await session.scalars(
                 select(Subscription)
-                .where(Subscription.user_id == principal.user.id)
+                .where(criteria)
                 .order_by(Subscription.created_at.desc())
+                .offset((page - 1) * page_size)
+                .limit(page_size)
             )
         ).all()
     )
     return success(
-        {"items": [_subscription_payload(item) for item in items]},
+        _page_payload(
+            [_subscription_payload(item) for item in items],
+            page=page,
+            page_size=page_size,
+            total=total,
+        ),
         request_id_from_request(request),
     )
 
@@ -567,12 +614,29 @@ async def cancel_subscription(
 @router.get("/admin/commerce/orders")
 async def admin_orders(
     request: Request,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=200),
     _: AuthenticatedPrincipal = Depends(require_permission("commerce.orders.read")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
-    items = list((await session.scalars(select(Order).order_by(Order.created_at.desc()))).all())
+    total = int(await session.scalar(select(func.count(Order.id))) or 0)
+    items = list(
+        (
+            await session.scalars(
+                select(Order)
+                .order_by(Order.created_at.desc())
+                .offset((page - 1) * page_size)
+                .limit(page_size)
+            )
+        ).all()
+    )
     return success(
-        {"items": [order_payload(item) for item in items]},
+        _page_payload(
+            [order_payload(item) for item in items],
+            page=page,
+            page_size=page_size,
+            total=total,
+        ),
         request_id_from_request(request),
     )
 
@@ -580,16 +644,29 @@ async def admin_orders(
 @router.get("/admin/commerce/payments")
 async def admin_payments(
     request: Request,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=200),
     _: AuthenticatedPrincipal = Depends(require_permission("commerce.payments.read")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
+    total = int(await session.scalar(select(func.count(PaymentAttempt.id))) or 0)
     items = list(
         (
-            await session.scalars(select(PaymentAttempt).order_by(PaymentAttempt.created_at.desc()))
+            await session.scalars(
+                select(PaymentAttempt)
+                .order_by(PaymentAttempt.created_at.desc())
+                .offset((page - 1) * page_size)
+                .limit(page_size)
+            )
         ).all()
     )
     return success(
-        {"items": [payment_service.payload(item) for item in items]},
+        _page_payload(
+            [payment_service.payload(item) for item in items],
+            page=page,
+            page_size=page_size,
+            total=total,
+        ),
         request_id_from_request(request),
     )
 
@@ -597,14 +674,29 @@ async def admin_payments(
 @router.get("/admin/commerce/subscriptions")
 async def admin_subscriptions(
     request: Request,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=200),
     _: AuthenticatedPrincipal = Depends(require_permission("commerce.subscriptions.read")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
+    total = int(await session.scalar(select(func.count(Subscription.id))) or 0)
     items = list(
-        (await session.scalars(select(Subscription).order_by(Subscription.created_at.desc()))).all()
+        (
+            await session.scalars(
+                select(Subscription)
+                .order_by(Subscription.created_at.desc())
+                .offset((page - 1) * page_size)
+                .limit(page_size)
+            )
+        ).all()
     )
     return success(
-        {"items": [_subscription_payload(item) for item in items]},
+        _page_payload(
+            [_subscription_payload(item) for item in items],
+            page=page,
+            page_size=page_size,
+            total=total,
+        ),
         request_id_from_request(request),
     )
 
@@ -612,12 +704,29 @@ async def admin_subscriptions(
 @router.get("/admin/commerce/refunds")
 async def admin_refunds(
     request: Request,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=200),
     _: AuthenticatedPrincipal = Depends(require_permission("commerce.refunds.read")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
-    items = list((await session.scalars(select(Refund).order_by(Refund.created_at.desc()))).all())
+    total = int(await session.scalar(select(func.count(Refund.id))) or 0)
+    items = list(
+        (
+            await session.scalars(
+                select(Refund)
+                .order_by(Refund.created_at.desc())
+                .offset((page - 1) * page_size)
+                .limit(page_size)
+            )
+        ).all()
+    )
     return success(
-        {"items": [_refund_payload(item) for item in items]},
+        _page_payload(
+            [_refund_payload(item) for item in items],
+            page=page,
+            page_size=page_size,
+            total=total,
+        ),
         request_id_from_request(request),
     )
 
@@ -692,19 +801,25 @@ async def submit_refund(
 @router.get("/admin/commerce/webhooks")
 async def admin_webhooks(
     request: Request,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=200),
     _: AuthenticatedPrincipal = Depends(require_permission("commerce.webhooks.read")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
+    total = int(await session.scalar(select(func.count(PaymentWebhookEvent.id))) or 0)
     items = list(
         (
             await session.scalars(
-                select(PaymentWebhookEvent).order_by(PaymentWebhookEvent.received_at.desc())
+                select(PaymentWebhookEvent)
+                .order_by(PaymentWebhookEvent.received_at.desc())
+                .offset((page - 1) * page_size)
+                .limit(page_size)
             )
         ).all()
     )
     return success(
-        {
-            "items": [
+        _page_payload(
+            [
                 {
                     "id": str(item.id),
                     "provider": item.provider,
@@ -717,8 +832,11 @@ async def admin_webhooks(
                     "payload": {"redacted": True},
                 }
                 for item in items
-            ]
-        },
+            ],
+            page=page,
+            page_size=page_size,
+            total=total,
+        ),
         request_id_from_request(request),
     )
 
@@ -761,21 +879,25 @@ async def replay_webhook(
 @router.get("/admin/commerce/reconciliation")
 async def admin_reconciliation(
     request: Request,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=200),
     _: AuthenticatedPrincipal = Depends(require_permission("commerce.reconciliation.read")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
+    total = int(await session.scalar(select(func.count(ReconciliationDiscrepancy.id))) or 0)
     items = list(
         (
             await session.scalars(
-                select(ReconciliationDiscrepancy).order_by(
-                    ReconciliationDiscrepancy.detected_at.desc()
-                )
+                select(ReconciliationDiscrepancy)
+                .order_by(ReconciliationDiscrepancy.detected_at.desc())
+                .offset((page - 1) * page_size)
+                .limit(page_size)
             )
         ).all()
     )
     return success(
-        {
-            "items": [
+        _page_payload(
+            [
                 {
                     "id": str(item.id),
                     "type": item.discrepancy_type,
@@ -785,8 +907,11 @@ async def admin_reconciliation(
                     "actual": item.actual_snapshot,
                 }
                 for item in items
-            ]
-        },
+            ],
+            page=page,
+            page_size=page_size,
+            total=total,
+        ),
         request_id_from_request(request),
     )
 
@@ -841,14 +966,29 @@ async def resolve_reconciliation(
 @router.get("/admin/commerce/entitlements")
 async def admin_entitlements(
     request: Request,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=200),
     _: AuthenticatedPrincipal = Depends(require_permission("commerce.entitlements.read")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
+    total = int(await session.scalar(select(func.count(Entitlement.id))) or 0)
     items = list(
-        (await session.scalars(select(Entitlement).order_by(Entitlement.created_at.desc()))).all()
+        (
+            await session.scalars(
+                select(Entitlement)
+                .order_by(Entitlement.created_at.desc())
+                .offset((page - 1) * page_size)
+                .limit(page_size)
+            )
+        ).all()
     )
     return success(
-        {"items": [_entitlement_payload(item) for item in items]},
+        _page_payload(
+            [_entitlement_payload(item) for item in items],
+            page=page,
+            page_size=page_size,
+            total=total,
+        ),
         request_id_from_request(request),
     )
 

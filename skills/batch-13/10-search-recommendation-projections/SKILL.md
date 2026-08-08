@@ -1,3 +1,8 @@
+---
+name: vav-batch-13-10-search-recommendation-projections
+description: "Implement Recommendation projections for the VAV platform."
+---
+
 # Recommendation projections
 
 Build projections only from the approved version, carrying normalised codes and nothing else.

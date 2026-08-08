@@ -62,11 +62,15 @@ def test_unaccepted_evidence_is_rejected() -> None:
 
 
 def test_expired_evidence_cannot_certify_a_release() -> None:
-    assert "evidence_expired" in _reasons(_evidence(expires_at=NOW - timedelta(seconds=1)))
+    assert "evidence_expired" in _reasons(
+        _evidence(expires_at=NOW - timedelta(seconds=1))
+    )
 
 
 def test_evidence_from_another_release_is_rejected() -> None:
-    assert "evidence_release_mismatch" in _reasons(_evidence(release_version="2026.07.0"))
+    assert "evidence_release_mismatch" in _reasons(
+        _evidence(release_version="2026.07.0")
+    )
 
 
 def test_evidence_from_another_commit_is_rejected() -> None:
@@ -74,7 +78,9 @@ def test_evidence_from_another_commit_is_rejected() -> None:
 
 
 def test_evidence_from_another_environment_is_rejected() -> None:
-    assert "evidence_environment_mismatch" in _reasons(_evidence(environment="production"))
+    assert "evidence_environment_mismatch" in _reasons(
+        _evidence(environment="production")
+    )
 
 
 def test_wrong_evidence_type_for_the_gate_is_rejected() -> None:
@@ -84,7 +90,9 @@ def test_wrong_evidence_type_for_the_gate_is_rejected() -> None:
 
 
 def test_tampered_evidence_is_rejected() -> None:
-    reasons = _reasons(_evidence(), recomputed_checksum=content_fingerprint({"changed": True}))
+    reasons = _reasons(
+        _evidence(), recomputed_checksum=content_fingerprint({"changed": True})
+    )
     assert "evidence_checksum_mismatch" in reasons
 
 

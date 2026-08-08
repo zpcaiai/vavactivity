@@ -1,3 +1,8 @@
+---
+name: vav-batch-11-09-operational-campaigns
+description: "Implement Operational campaigns for the VAV platform."
+---
+
 # Operational campaigns
 
 Require safe audience fields, consent/suppression filtering, a test send, separated approval and an

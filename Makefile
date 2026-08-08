@@ -36,7 +36,9 @@
 
 .PHONY: relationship-migrate relationship-seed relationship-seed-stages relationship-test \
 	relationship-concurrency-test relationship-security-test relationship-privacy-test \
-	relationship-user-e2e relationship-admin-e2e relationship-verify
+	relationship-user-e2e relationship-admin-e2e relationship-browser-local relationship-verify
+
+.PHONY: membership-browser-local
 
 .PHONY: safety-migrate safety-seed safety-seed-rules safety-test safety-concurrency-test \
 	safety-security-test safety-privacy-test safety-red-team safety-user-e2e \
@@ -67,7 +69,7 @@ reset-local:
 	./scripts/vavctl reset-local
 
 migrate:
-	docker compose exec api alembic upgrade head
+	./scripts/vavctl migrate
 
 seed:
 	./scripts/vavctl seed
@@ -536,6 +538,9 @@ relationship-user-e2e:
 relationship-admin-e2e:
 	pnpm exec playwright test e2e/admin-relationships
 
+relationship-browser-local:
+	VAV_E2E_SEED_MODE=local corepack pnpm run test:e2e:batch16
+
 relationship-verify:
 	$(MAKE) relationship-migrate
 	$(MAKE) relationship-seed
@@ -573,6 +578,9 @@ membership-user-e2e:
 
 membership-admin-e2e:
 	pnpm exec playwright test e2e/admin-memberships
+
+membership-browser-local:
+	VAV_E2E_SEED_MODE=local corepack pnpm run test:e2e:batch17
 
 membership-verify:
 	$(MAKE) membership-migrate
@@ -627,7 +635,7 @@ safety-verify:
 	$(MAKE) safety-admin-e2e
 
 .PHONY: manifest-check config-check config-diff migration-check contract-test system-test \
-	complete-e2e performance-smoke performance-baseline backup backup-verify restore-drill \
+	complete-e2e performance-smoke performance-k6-baseline backup backup-verify restore-drill \
 	restore-smoke production-readiness verify-all acceptance
 
 manifest-check:
@@ -649,12 +657,12 @@ system-test:
 	.venv/bin/pytest services/api/tests/system -q
 
 complete-e2e:
-	corepack pnpm exec playwright test --config playwright.complete.config.ts
+	corepack pnpm exec playwright test --config playwright.config.ts --workers=1
 
 performance-smoke:
 	./scripts/performance/run-k6.sh tests/performance/smoke.js
 
-performance-baseline:
+performance-k6-baseline:
 	./scripts/performance/run-k6.sh tests/performance/baseline.js
 
 backup:
@@ -676,8 +684,11 @@ verify-all: manifest-check config-check migration-check verify safety-verify con
 
 acceptance: bootstrap smoke verify-all production-readiness
 
-.PHONY: skill-sdk-test skill-schema-test skill-runtime-test skill-registry-test skill-security-test \
+.PHONY: skill-catalog-check skill-sdk-test skill-schema-test skill-runtime-test skill-registry-test skill-security-test \
 	skill-marketplace-test skill-complete-e2e skill-verify
+
+skill-catalog-check:
+	.venv/bin/python scripts/skill/validate_catalog.py
 
 skill-sdk-test:
 	.venv/bin/pytest tests/skill-sdk -q
@@ -687,7 +698,7 @@ skill-sdk-test:
 	corepack pnpm --filter @vav/skill-ui-sdk typecheck
 
 skill-schema-test:
-	.venv/bin/python scripts/skill/validate_all_schemas.py
+	PYTHONPATH=packages/skill-sdk-python/src .venv/bin/python scripts/skill/validate_all_schemas.py
 
 skill-runtime-test:
 	.venv/bin/pytest tests/skill-runtime -q

@@ -27,6 +27,7 @@ SKILL_DIRECTORIES = (
 )
 
 REQUIRED_MAKE_TARGETS = (
+    "batch-21",
     "quality-migrate",
     "quality-seed",
     "quality-sync",
@@ -34,9 +35,11 @@ REQUIRED_MAKE_TARGETS = (
     "quality-trace-check",
     "quality-closure-check",
     "quality-gap-check",
+    "quality-gate-evaluate",
     "quality-test",
     "quality-gate-test",
     "quality-security-test",
+    "quality-admin-e2e",
     "quality-evidence-build",
     "quality-release-report",
     "quality-verify",
@@ -71,7 +74,9 @@ def _root() -> Path | None:
 
 
 ROOT = _root() or Path(__file__).resolve().parents[3]
-MIGRATION = ROOT / "services/api/migrations/versions/20260806_0087_quality_governance.py"
+MIGRATION = (
+    ROOT / "services/api/migrations/versions/20260806_0087_quality_governance.py"
+)
 
 pytestmark = pytest.mark.skipif(
     _root() is None, reason="structural contract requires the repository checkout"
@@ -80,7 +85,9 @@ pytestmark = pytest.mark.skipif(
 
 def test_module_manifest_declares_quality_contract() -> None:
     manifest = yaml.safe_load(
-        (ROOT / "services/api/src/vav/modules/quality/module.yaml").read_text(encoding="utf-8")
+        (ROOT / "services/api/src/vav/modules/quality/module.yaml").read_text(
+            encoding="utf-8"
+        )
     )
     assert manifest["module"]["code"] == "quality"
     assert "identity" in manifest["dependencies"]["required"]
@@ -100,7 +107,9 @@ def test_every_quality_table_is_created_and_dropped() -> None:
     source = MIGRATION.read_text(encoding="utf-8")
     for table in QUALITY_TABLES:
         assert f"CREATE TABLE {table}" in source, table
-        assert f"DROP TABLE IF EXISTS {table}" in source or f"DROP TABLE {table}" in source, table
+        assert (
+            f"DROP TABLE IF EXISTS {table}" in source or f"DROP TABLE {table}" in source
+        ), table
 
 
 def test_skill_tree_is_complete() -> None:
@@ -121,6 +130,74 @@ def test_make_fragment_exposes_every_required_target() -> None:
     for line in fragment.splitlines():
         if line.startswith("    ") and not line.startswith("\t"):
             raise AssertionError(f"recipe line is space indented: {line!r}")
+    assert "|| true" not in fragment
+    assert "quality-gate-evaluate" in fragment.split("quality-verify:", 1)[1]
+
+
+@pytest.mark.parametrize(
+    ("batch", "aggregate"),
+    (
+        (22, "ui-verify"),
+        (23, "experience-verify"),
+        (24, "process-verify"),
+        (25, "data-integrity-verify"),
+        (26, "admin-completeness-verify"),
+    ),
+)
+def test_later_quality_batches_expose_canonical_entrypoints(
+    batch: int, aggregate: str
+) -> None:
+    fragment = (ROOT / f"make/batch-{batch}.mk").read_text(encoding="utf-8")
+    assert f"batch-{batch}: {aggregate}" in fragment
+
+
+@pytest.mark.parametrize(
+    ("batch", "aggregate", "browser_targets"),
+    (
+        (21, "quality-verify", ("quality-admin-e2e",)),
+        (
+            22,
+            "ui-verify",
+            (
+                "ui-storybook-test",
+                "ui-accessibility-test",
+                "ui-responsive-test",
+                "ui-visual-test",
+            ),
+        ),
+        (23, "experience-verify", ("experience-user-e2e", "experience-admin-e2e")),
+        (24, "process-verify", ("process-admin-e2e",)),
+        (25, "data-integrity-verify", ("data-admin-e2e",)),
+        (26, "admin-completeness-verify", ("admin-platform-e2e",)),
+    ),
+)
+def test_batch_aggregates_include_browser_gates(
+    batch: int, aggregate: str, browser_targets: tuple[str, ...]
+) -> None:
+    fragment = (ROOT / f"make/batch-{batch}.mk").read_text(encoding="utf-8")
+    aggregate_dependencies = fragment.split(f"{aggregate}:", 1)[1]
+    for target in browser_targets:
+        assert target in aggregate_dependencies
+    assert "NO_PROXY=127.0.0.1,localhost" in fragment
+    assert "RUN_IF_TIMEOUT_SECONDS=600" in fragment
+
+
+@pytest.mark.parametrize(
+    ("control", "status_files"),
+    (
+        ("quality", ("admin-e2e-status.json",)),
+        ("experience", ("user-e2e-status.json", "admin-e2e-status.json")),
+        ("process", ("admin-e2e-status.json",)),
+        ("data", ("admin-e2e-status.json",)),
+        ("admin", ("browser-e2e-status.json",)),
+    ),
+)
+def test_evidence_manifests_consume_browser_status_sidecars(
+    control: str, status_files: tuple[str, ...]
+) -> None:
+    source = (ROOT / f"scripts/{control}/control.py").read_text(encoding="utf-8")
+    for status_file in status_files:
+        assert status_file in source
 
 
 def test_quality_manifest_requirements_are_well_formed() -> None:
@@ -130,7 +207,9 @@ def test_quality_manifest_requirements_are_well_formed() -> None:
         validate_code,
     )
 
-    manifest = yaml.safe_load((ROOT / "quality-manifest.yaml").read_text(encoding="utf-8"))
+    manifest = yaml.safe_load(
+        (ROOT / "quality-manifest.yaml").read_text(encoding="utf-8")
+    )
     requirements = manifest["requirements"]
     assert requirements
     codes = [item["code"] for item in requirements]
@@ -144,7 +223,9 @@ def test_quality_manifest_requirements_are_well_formed() -> None:
 def test_constitution_declares_non_waivable_gates() -> None:
     from vav.modules.quality.domain import NON_WAIVABLE_GATE_CODES
 
-    manifest = yaml.safe_load((ROOT / "quality-manifest.yaml").read_text(encoding="utf-8"))
+    manifest = yaml.safe_load(
+        (ROOT / "quality-manifest.yaml").read_text(encoding="utf-8")
+    )
     declared = set(manifest["constitution"]["non_waivable_gates"])
     assert declared == set(NON_WAIVABLE_GATE_CODES)
     assert manifest["constitution"]["release_policy"] == "fail_closed"

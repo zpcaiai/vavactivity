@@ -16,21 +16,17 @@ from typing import Any
 import yaml
 
 from vav.modules.regression.domain import (
-    ContractCompatibility,
-    ContractComparison,
     ContractField,
     ContractSchema,
     ConsumerExpectation,
     DependencyGraph,
     ExecutionRecord,
-    FlakyTestCategory,
     ImpactRule,
     RegressionPolicyError,
     TestCaseRecord,
     TestCriticality,
     RegressionTestLevel,
     RegressionTestType,
-    RegressionTestLifecycleStatus,
     RegressionTestResultStatus,
     PyramidLayerBudget,
     classify_flake,
@@ -98,7 +94,9 @@ def _git_commit() -> str:
 def _write(name: str, payload: dict[str, Any]) -> str:
     BUILD.mkdir(parents=True, exist_ok=True)
     target = BUILD / name
-    target.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    target.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     return str(target.relative_to(ROOT))
 
 
@@ -110,8 +108,16 @@ def _registry() -> list[TestCaseRecord]:
             suite_code=f"{suite_id}-{index // 5 + 1}",
             level=level,
             test_type=RegressionTestType.FUNCTIONAL,
-            criticality=TestCriticality.BLOCKER if index < 4 else TestCriticality.CRITICAL if index < 12 else TestCriticality.MAJOR,
-            owning_module="usability" if index < 12 else "relations" if index < 20 else "data_governance",
+            criticality=TestCriticality.BLOCKER
+            if index < 4
+            else TestCriticality.CRITICAL
+            if index < 12
+            else TestCriticality.MAJOR,
+            owning_module="usability"
+            if index < 12
+            else "relations"
+            if index < 20
+            else "data_governance",
             owner_team="quality_team",
             mapped_targets=frozenset({f"REQ-VAV-{(index % 8) + 1:02d}", "INV-001"}),
             tags=frozenset({"smoke"}) if index < 2 else frozenset(),
@@ -141,12 +147,39 @@ def _registry() -> list[TestCaseRecord]:
 
 def _pyramid(counts: dict[str, int]) -> dict[str, Any]:
     budgets = (
-        PyramidLayerBudget(RegressionTestLevel.UNIT, minimum_count=5, minimum_ratio=0.25, maximum_ratio=0.8),
-        PyramidLayerBudget(RegressionTestLevel.COMPONENT, minimum_count=3, minimum_ratio=0.05, maximum_ratio=0.5),
-        PyramidLayerBudget(RegressionTestLevel.CONTRACT, minimum_count=2, minimum_ratio=0.05, maximum_ratio=0.30),
-        PyramidLayerBudget(RegressionTestLevel.MODULE_INTEGRATION, minimum_count=2, minimum_ratio=0.05, maximum_ratio=0.25),
-        PyramidLayerBudget(RegressionTestLevel.CROSS_MODULE_E2E, minimum_count=1, maximum_ratio=0.25),
-        PyramidLayerBudget(RegressionTestLevel.COMPLETE_JOURNEY, minimum_count=1, minimum_ratio=0.0, maximum_ratio=0.2),
+        PyramidLayerBudget(
+            RegressionTestLevel.UNIT,
+            minimum_count=5,
+            minimum_ratio=0.25,
+            maximum_ratio=0.8,
+        ),
+        PyramidLayerBudget(
+            RegressionTestLevel.COMPONENT,
+            minimum_count=3,
+            minimum_ratio=0.05,
+            maximum_ratio=0.5,
+        ),
+        PyramidLayerBudget(
+            RegressionTestLevel.CONTRACT,
+            minimum_count=2,
+            minimum_ratio=0.05,
+            maximum_ratio=0.30,
+        ),
+        PyramidLayerBudget(
+            RegressionTestLevel.MODULE_INTEGRATION,
+            minimum_count=2,
+            minimum_ratio=0.05,
+            maximum_ratio=0.25,
+        ),
+        PyramidLayerBudget(
+            RegressionTestLevel.CROSS_MODULE_E2E, minimum_count=1, maximum_ratio=0.25
+        ),
+        PyramidLayerBudget(
+            RegressionTestLevel.COMPLETE_JOURNEY,
+            minimum_count=1,
+            minimum_ratio=0.0,
+            maximum_ratio=0.2,
+        ),
     )
     result = evaluate_test_pyramid(counts, budgets=budgets)
     return {
@@ -164,16 +197,18 @@ def _pyramid(counts: dict[str, int]) -> dict[str, Any]:
 def _registry_analysis() -> dict[str, Any]:
     manifest = _manifest()
     selection_config = _as_dict(manifest.get("selection"))
-    default_changed_paths = (
-        "services/api/src/vav/modules/usability/admin_router.py",
-    )
+    default_changed_paths = ("services/api/src/vav/modules/usability/admin_router.py",)
     configured_changed_paths = _as_str_list(selection_config.get("changed_paths"))
     changed_paths = tuple(configured_changed_paths or list(default_changed_paths))
 
     records = _registry()
     violations = [vars(item) for item in validate_test_registry(records)]
-    coverage = detect_unmapped_requirements(records, critical_requirement_codes=("REQ-VAV-01", "REQ-VAV-03", "INV-001"))
-    dependencies = DependencyGraph.from_mapping({"usability": {"quality"}, "relations": {"quality"}, "quality": set()})
+    coverage = detect_unmapped_requirements(
+        records, critical_requirement_codes=("REQ-VAV-01", "REQ-VAV-03", "INV-001")
+    )
+    dependencies = DependencyGraph.from_mapping(
+        {"usability": {"quality"}, "relations": {"quality"}, "quality": set()}
+    )
     rule_config = _as_list(selection_config.get("impact_rules"))
     if rule_config:
         rules = []
@@ -185,15 +220,28 @@ def _registry_analysis() -> dict[str, Any]:
             rules.append(
                 ImpactRule(
                     pattern=pattern,
-                    modules=frozenset(str(module).strip() for module in _as_list(payload.get("modules")) if str(module).strip()),
+                    modules=frozenset(
+                        str(module).strip()
+                        for module in _as_list(payload.get("modules"))
+                        if str(module).strip()
+                    ),
                     reason=str(payload.get("reason", "")).strip(),
                     force_full_suite=bool(payload.get("force_full_suite")),
                 )
             )
     else:
         rules = (
-            ImpactRule(pattern=r"services/api/src/vav/modules/usability/.*", modules=frozenset({"usability"}), reason="usability changes"),
-            ImpactRule(pattern=r"services/api/src/vav/modules/data_governance/.*", modules=frozenset({"data_governance"}), reason="governance changes", force_full_suite=True),
+            ImpactRule(
+                pattern=r"services/api/src/vav/modules/usability/.*",
+                modules=frozenset({"usability"}),
+                reason="usability changes",
+            ),
+            ImpactRule(
+                pattern=r"services/api/src/vav/modules/data_governance/.*",
+                modules=frozenset({"data_governance"}),
+                reason="governance changes",
+                force_full_suite=True,
+            ),
         )
         rules = tuple(rules)
     selection = select_impacted_tests(
@@ -202,8 +250,12 @@ def _registry_analysis() -> dict[str, Any]:
         graph=dependencies,
         test_cases=records,
     )
-    unmatched = map_changed_paths(("services/api/src/vav/modules/usability/admin_router.py",), rules)
-    orphaned = detect_orphan_mappings(records, removed_test_case_codes=("REG-001", "REG-002"))
+    unmatched = map_changed_paths(
+        ("services/api/src/vav/modules/usability/admin_router.py",), rules
+    )
+    orphaned = detect_orphan_mappings(
+        records, removed_test_case_codes=("REG-001", "REG-002")
+    )
     registry_violations = len(violations)
     registry_status = "PASS" if registry_violations == 0 else "FAIL"
     return {
@@ -273,7 +325,9 @@ def _flaky() -> dict[str, Any]:
 def _contracts() -> dict[str, Any]:
     manifest = _manifest()
     contract_config = _as_dict(_as_dict(manifest.get("contracts")).get("gate"))
-    approved_breaking = frozenset(_as_str_list(contract_config.get("approved_breaking_contract_codes")))
+    approved_breaking = frozenset(
+        _as_str_list(contract_config.get("approved_breaking_contract_codes"))
+    )
     provider_v1 = ContractSchema(
         contract_code="usability.import.v1",
         version="v1",
@@ -312,7 +366,9 @@ def _contracts() -> dict[str, Any]:
             {
                 "code": comparison.contract_code,
                 "compatibility": str(comparison.compatibility),
-                "breaking_changes": [change.detail for change in comparison.breaking_changes],
+                "breaking_changes": [
+                    change.detail for change in comparison.breaking_changes
+                ],
                 "all_changes": [change.detail for change in comparison.changes],
             }
         ],
@@ -330,7 +386,9 @@ def build_snapshot() -> dict[str, Any]:
         "batch": BATCH_NUMBER,
         "generated_at": datetime.now(UTC).isoformat(),
         "git_commit": _git_commit(),
-        "skill_count": len(list((ROOT / "skills/batch-28").glob("[0-9][0-9]-*/SKILL.md"))),
+        "skill_count": len(
+            list((ROOT / "skills/batch-28").glob("[0-9][0-9]-*/SKILL.md"))
+        ),
         "pyramid": _pyramid(counts),
         "registry": _registry_analysis(),
         "flaky": _flaky(),
@@ -351,7 +409,11 @@ def run(action: str) -> int:
     if action in {"migrate", "seed"}:
         print(
             json.dumps(
-                {"command": action, "status": "NOT_EVALUATED", "reason": "offline control plane"},
+                {
+                    "command": action,
+                    "status": "NOT_EVALUATED",
+                    "reason": "offline control plane",
+                },
                 sort_keys=True,
             )
         )
@@ -365,11 +427,20 @@ def run(action: str) -> int:
         print(json.dumps(snapshot["pyramid"], sort_keys=True))
         return 0 if status == "PASS" else 1
     if action in {"impact-check", "impact-test"}:
-        status = "FAIL" if snapshot["registry"]["selection"]["escalated_to_full_suite"] else "PASS"
+        status = (
+            "FAIL"
+            if snapshot["registry"]["selection"]["escalated_to_full_suite"]
+            else "PASS"
+        )
         print(json.dumps(snapshot["registry"], sort_keys=True))
         return 0 if status == "PASS" else 1
     if action in {"flake-check", "flaky-test", "flaky-check"}:
-        status = "FAIL" if snapshot["flaky"]["stats"]["is_flaky"] and snapshot["flaky"]["signature_count"] > 1 else "PASS"
+        status = (
+            "FAIL"
+            if snapshot["flaky"]["stats"]["is_flaky"]
+            and snapshot["flaky"]["signature_count"] > 1
+            else "PASS"
+        )
         print(json.dumps(snapshot["flaky"], sort_keys=True))
         return 0 if status == "PASS" else 1
     if action == "visual-test":
@@ -430,7 +501,11 @@ def run(action: str) -> int:
     if action == "admin-e2e":
         print(
             json.dumps(
-                {"command": action, "status": "NOT_RUN", "reason": "offline control plane"},
+                {
+                    "command": action,
+                    "status": "NOT_RUN",
+                    "reason": "offline control plane",
+                },
                 sort_keys=True,
             )
         )
@@ -444,7 +519,16 @@ def run(action: str) -> int:
             and snapshot["flaky"]["signature_count"] <= 1
             else "FAIL"
         )
-        print(json.dumps({"status": status, "critical": snapshot["registry"]["registry_violations"], "components": 4}, sort_keys=True))
+        print(
+            json.dumps(
+                {
+                    "status": status,
+                    "critical": snapshot["registry"]["registry_violations"],
+                    "components": 4,
+                },
+                sort_keys=True,
+            )
+        )
         return 0 if status == "PASS" else 1
     if action in {"evidence", "release-report"}:
         critical = (
@@ -467,10 +551,16 @@ def run(action: str) -> int:
                 "frontend": "NOT_EVALUATED",
                 "api_contract": "PASS",
                 "visual_regression": "NOT_EVALUATED",
-                "registry": snapshot["registry"]["status"] if "status" in snapshot["registry"] else "PASS",
-                "flaky": "PASS" if not snapshot["flaky"]["stats"]["is_flaky"] else "FAIL",
+                "registry": snapshot["registry"]["status"]
+                if "status" in snapshot["registry"]
+                else "PASS",
+                "flaky": "PASS"
+                if not snapshot["flaky"]["stats"]["is_flaky"]
+                else "FAIL",
                 "integration": "PASS",
-                "selection": "PASS" if not snapshot["registry"]["selection"]["escalated_to_full_suite"] else "FAIL",
+                "selection": "PASS"
+                if not snapshot["registry"]["selection"]["escalated_to_full_suite"]
+                else "FAIL",
             },
             "snapshot": snapshot["checksum"],
         }
@@ -488,9 +578,7 @@ def main() -> int:
     normalized: list[str] = []
     for part in parts:
         normalized.extend(
-            token
-            for token in str(part).replace("_", "-").lower().split("-")
-            if token
+            token for token in str(part).replace("_", "-").lower().split("-") if token
         )
     if normalized and normalized[0] == "regression":
         normalized = normalized[1:]

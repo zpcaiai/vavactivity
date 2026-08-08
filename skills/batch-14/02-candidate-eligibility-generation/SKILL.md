@@ -1,3 +1,8 @@
+---
+name: vav-batch-14-02-candidate-eligibility-generation
+description: "Implement Candidate eligibility and generation for the VAV platform."
+---
+
 # Candidate eligibility and generation
 
 The recommendation pool is built only from approved projections. A member enters

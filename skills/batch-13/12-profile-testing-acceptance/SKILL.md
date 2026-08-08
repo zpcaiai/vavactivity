@@ -1,3 +1,8 @@
+---
+name: vav-batch-13-12-profile-testing-acceptance
+description: "Implement Testing and acceptance for the VAV platform."
+---
+
 # Testing and acceptance
 
 Cover the batch with unit, integration, concurrency and security suites plus member and

@@ -1,3 +1,8 @@
+---
+name: vav-batch-11-11-user-admin-notification-web
+description: "Implement User and administration web for the VAV platform."
+---
+
 # User and administration web
 
 Build localized user notification, preference and unsubscribe pages with no internal Payload leaks.

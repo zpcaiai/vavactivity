@@ -6,11 +6,13 @@ import argparse
 import hashlib
 import json
 import subprocess
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
 
 import yaml
 
+from vav.core.evidence import combined_status, command_evidence, junit_evidence
 from vav.modules.data_governance.domain import (
     contract_diff,
     validate_asset,
@@ -99,7 +101,7 @@ def _git_commit() -> str:
     ).stdout.strip()
 
 
-def main() -> None:
+def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "command",
@@ -115,34 +117,64 @@ def main() -> None:
     snapshot = _snapshot()
     if args.command == "evidence":
         BUILD.mkdir(parents=True, exist_ok=True)
+        evidence = {
+            "database_migration": command_evidence(BUILD / "migration-status.json"),
+            "permissions_seed": command_evidence(
+                BUILD / "permissions-seed-status.json"
+            ),
+            "domain_seed": command_evidence(BUILD / "domain-seed-status.json"),
+            "backend_tests": junit_evidence(
+                BUILD / "backend-junit.xml", BUILD / "backend-test-status.json"
+            ),
+            "admin_tests": command_evidence(
+                ROOT / "build/shared/admin-web-test-status.json"
+            ),
+            "admin_build": command_evidence(
+                ROOT / "build/shared/admin-web-build-status.json"
+            ),
+            "admin_e2e": command_evidence(BUILD / "admin-e2e-status.json"),
+        }
+        technical_status = combined_status(
+            [{"status": snapshot["status"]}, *evidence.values()]
+        )
         report = {
+            "schema_version": "1.0.0",
             "batch": 25,
+            "generated_at": datetime.now(UTC).isoformat(),
             "git_commit": _git_commit(),
+            "technical_status": technical_status,
             "technical_gate": snapshot,
-            "backend_tests": "PASS_IF_JUNIT_PRESENT"
-            if (BUILD / "backend-junit.xml").exists()
-            else "NOT_RUN",
-            "admin_e2e": "NOT_RUN",
+            "evidence": evidence,
             "live_event_delivery": "NOT_RUN",
             "production_backfill": "NOT_RUN",
             "production_erasure_observation": "NOT_RUN",
             "production_certification": "NOT_CERTIFIED",
+            "release_allowed": False,
         }
         target = BUILD / "data-integrity-evidence.json"
         target.write_text(
             json.dumps(report, ensure_ascii=False, indent=2, default=str) + "\n",
             encoding="utf-8",
         )
-        print(target)
-        return
+        print(
+            json.dumps(
+                {
+                    "artifact": str(target.relative_to(ROOT)),
+                    "status": technical_status,
+                },
+                sort_keys=True,
+            )
+        )
+        return 1 if technical_status == "FAIL" else 0
     print(
         json.dumps(
             {"command": args.command, **snapshot}, ensure_ascii=False, sort_keys=True
         )
     )
     if snapshot["status"] != "PASS":
-        raise SystemExit(1)
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

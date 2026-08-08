@@ -42,7 +42,9 @@ def test_unreported_dimension_scores_zero() -> None:
     del ratios["business_closure"]
     score = score_structural_completeness(ratios)
     assert score.total == 80.0
-    component = next(item for item in score.components if item.dimension == "business_closure")
+    component = next(
+        item for item in score.components if item.dimension == "business_closure"
+    )
     assert component.counted is False
     assert component.reason == "dimension_not_reported"
 
@@ -52,7 +54,9 @@ def test_unverifiable_claim_is_not_counted() -> None:
         PERFECT, verifiable={"test_and_evidence": False}
     )
     assert score.total == 85.0
-    component = next(item for item in score.components if item.dimension == "test_and_evidence")
+    component = next(
+        item for item in score.components if item.dimension == "test_and_evidence"
+    )
     assert component.points == 0.0
     assert component.reason == "no_verifiable_artifact"
 

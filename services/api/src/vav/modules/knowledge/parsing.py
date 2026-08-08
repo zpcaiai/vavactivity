@@ -9,7 +9,9 @@ from dataclasses import dataclass
 from html.parser import HTMLParser
 from io import BytesIO
 from typing import Any
-from xml.etree import ElementTree
+
+from defusedxml import ElementTree
+from defusedxml.common import DefusedXmlException
 
 from vav.common.exceptions import VavError
 
@@ -191,8 +193,15 @@ def _parse_markdown_or_text(value: str, *, markdown: bool) -> list[dict[str, Any
 
 
 def _parse_docx(payload: bytes) -> list[dict[str, Any]]:
-    with zipfile.ZipFile(BytesIO(payload)) as archive:
-        root = ElementTree.fromstring(archive.read("word/document.xml"))
+    try:
+        with zipfile.ZipFile(BytesIO(payload)) as archive:
+            root = ElementTree.fromstring(archive.read("word/document.xml"))
+    except (DefusedXmlException, ElementTree.ParseError, KeyError, zipfile.BadZipFile) as exc:
+        raise VavError(
+            "KNOWLEDGE_DOCUMENT_INVALID",
+            "The uploaded document could not be parsed safely.",
+            status_code=422,
+        ) from exc
     blocks: list[dict[str, Any]] = []
     sections: list[str] = []
     body = root.find(f"{WORD_NS}body")

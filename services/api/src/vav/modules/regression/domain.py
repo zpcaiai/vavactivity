@@ -19,12 +19,11 @@ from __future__ import annotations
 
 import hashlib
 import json
-import random
 import re
 from collections import deque
-from collections.abc import Callable, Iterable, Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from enum import StrEnum
 from typing import Any
 
@@ -290,9 +289,7 @@ DEFAULT_PYRAMID_BUDGETS: tuple[PyramidLayerBudget, ...] = (
     PyramidLayerBudget(RegressionTestLevel.UNIT, minimum_count=50, minimum_ratio=0.35),
     PyramidLayerBudget(RegressionTestLevel.COMPONENT, minimum_count=10, minimum_ratio=0.05),
     PyramidLayerBudget(RegressionTestLevel.CONTRACT, minimum_count=8, minimum_ratio=0.03),
-    PyramidLayerBudget(
-        RegressionTestLevel.MODULE_INTEGRATION, minimum_count=8, minimum_ratio=0.03
-    ),
+    PyramidLayerBudget(RegressionTestLevel.MODULE_INTEGRATION, minimum_count=8, minimum_ratio=0.03),
     PyramidLayerBudget(RegressionTestLevel.COMPLETE_JOURNEY, minimum_count=1, maximum_ratio=0.10),
     PyramidLayerBudget(RegressionTestLevel.CROSS_MODULE_E2E, maximum_ratio=0.15),
     PyramidLayerBudget(RegressionTestLevel.MODULE_E2E, maximum_ratio=0.20),
@@ -651,7 +648,9 @@ def map_changed_paths(
             if rule.reason:
                 reasons.add(f"{path} -> {rule.reason}")
             if rule.force_full_suite:
-                full_suite.add(f"{path} touches core platform surface ({rule.reason or rule.pattern})")
+                full_suite.add(
+                    f"{path} touches core platform surface ({rule.reason or rule.pattern})"
+                )
         if not matched:
             unmatched.append(path)
     return ChangedPathAnalysis(
@@ -832,20 +831,22 @@ def compute_flake_statistics(records: Sequence[ExecutionRecord]) -> FlakeStatist
         first = attempts[0]
         first_passed = first.status in PASSING_RESULT_STATUSES
         outcomes.append(first_passed)
-        if not first_passed and any(item.status in PASSING_RESULT_STATUSES for item in attempts[1:]):
+        if not first_passed and any(
+            item.status in PASSING_RESULT_STATUSES for item in attempts[1:]
+        ):
             hidden_retry_passes += 1
         for attempt in attempts:
             if attempt.failure_signature:
-                signatures[attempt.failure_signature] = signatures.get(attempt.failure_signature, 0) + 1
+                signatures[attempt.failure_signature] = (
+                    signatures.get(attempt.failure_signature, 0) + 1
+                )
             if attempt.commit_sha:
                 commits.add(attempt.commit_sha)
 
     total = len(outcomes)
     passed = sum(1 for value in outcomes if value)
     failed = total - passed
-    alternations = sum(
-        1 for index in range(1, total) if outcomes[index] != outcomes[index - 1]
-    )
+    alternations = sum(1 for index in range(1, total) if outcomes[index] != outcomes[index - 1])
 
     longest_pass = longest_fail = current_pass = current_fail = 0
     for value in outcomes:
@@ -877,14 +878,23 @@ def compute_flake_statistics(records: Sequence[ExecutionRecord]) -> FlakeStatist
 
 FLAKE_SIGNATURE_PATTERNS: tuple[tuple[str, FlakyTestCategory], ...] = (
     (r"order|previous test|leftover|pollut", FlakyTestCategory.ORDER_DEPENDENCY),
-    (r"duplicate key|already exists|shared state|unique constraint", FlakyTestCategory.SHARED_STATE),
+    (
+        r"duplicate key|already exists|shared state|unique constraint",
+        FlakyTestCategory.SHARED_STATE,
+    ),
     (r"timezone|utc offset|clock skew|daylight", FlakyTestCategory.CLOCK_TIMEZONE),
     (r"eventual|not yet visible|projection lag|stale read", FlakyTestCategory.EVENTUAL_CONSISTENCY),
     (r"timeout|timed out|deadline exceeded|wait for", FlakyTestCategory.TIMING),
     (r"seed|random|shuffle", FlakyTestCategory.RANDOMNESS),
     (r"provider|upstream|connection refused|50[23]|gateway", FlakyTestCategory.EXTERNAL_PROVIDER),
-    (r"screenshot|pixel|render|element is not visible|locator", FlakyTestCategory.BROWSER_RENDERING),
-    (r"out of memory|no space left|too many open files|resource", FlakyTestCategory.RESOURCE_EXHAUSTION),
+    (
+        r"screenshot|pixel|render|element is not visible|locator",
+        FlakyTestCategory.BROWSER_RENDERING,
+    ),
+    (
+        r"out of memory|no space left|too many open files|resource",
+        FlakyTestCategory.RESOURCE_EXHAUSTION,
+    ),
 )
 
 
@@ -917,9 +927,7 @@ QUARANTINE_TRANSITIONS: dict[QuarantineState, frozenset[QuarantineState]] = {
 }
 
 
-def advance_quarantine_state(
-    current: QuarantineState, target: QuarantineState
-) -> QuarantineState:
+def advance_quarantine_state(current: QuarantineState, target: QuarantineState) -> QuarantineState:
     """Validate one step of the quarantine lifecycle state machine."""
 
     if target not in QUARANTINE_TRANSITIONS[current]:
@@ -954,7 +962,10 @@ def recommend_quarantine_state(
         return QuarantineState.QUARANTINED
     if statistics.flake_rate > suspect_flake_rate or statistics.hidden_retry_passes:
         return QuarantineState.SUSPECT if current is QuarantineState.ACTIVE else current
-    if current is QuarantineState.SUSPECT and statistics.longest_pass_streak >= stability_runs_required:
+    if (
+        current is QuarantineState.SUSPECT
+        and statistics.longest_pass_streak >= stability_runs_required
+    ):
         return QuarantineState.ACTIVE
     return current
 
@@ -1003,13 +1014,12 @@ def evaluate_quarantine_request(
             "A quarantine request cannot be approved by its requester.",
         )
     protected = bool(tags & NON_QUARANTINABLE_TAGS)
-    if criticality in CRITICAL_CRITICALITIES or protected:
-        if not replacement_test_case_code:
-            raise RegressionPolicyError(
-                "REGRESSION_CRITICAL_QUARANTINE_FORBIDDEN",
-                "Critical or protected tests are repaired or retired behind an active "
-                "replacement test; they are never ordinarily quarantined.",
-            )
+    if (criticality in CRITICAL_CRITICALITIES or protected) and not replacement_test_case_code:
+        raise RegressionPolicyError(
+            "REGRESSION_CRITICAL_QUARANTINE_FORBIDDEN",
+            "Critical or protected tests are repaired or retired behind an active "
+            "replacement test; they are never ordinarily quarantined.",
+        )
 
 
 FLAKY_REPAIR_SLA_HOURS: dict[TestCriticality, int] = {

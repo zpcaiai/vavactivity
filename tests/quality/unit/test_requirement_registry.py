@@ -163,7 +163,9 @@ def test_breaking_change_bumps_major() -> None:
 
 
 def test_fingerprint_is_order_independent() -> None:
-    assert content_fingerprint({"a": 1, "b": 2}) == content_fingerprint({"b": 2, "a": 1})
+    assert content_fingerprint({"a": 1, "b": 2}) == content_fingerprint(
+        {"b": 2, "a": 1}
+    )
 
 
 def test_invalid_semantic_version_is_rejected() -> None:

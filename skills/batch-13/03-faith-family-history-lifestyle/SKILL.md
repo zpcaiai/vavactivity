@@ -1,3 +1,8 @@
+---
+name: vav-batch-13-03-faith-family-history-lifestyle
+description: "Implement Faith, history, family and lifestyle for the VAV platform."
+---
+
 # Faith, history, family and lifestyle
 
 Faith, marriage history, children and family data are restricted by default. Faith importance

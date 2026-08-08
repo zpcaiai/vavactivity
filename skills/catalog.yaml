@@ -1,0 +1,47 @@
+schema_version: "1.0"
+
+source:
+  document: "ChatGPT-Codex 实现项目方案.md"
+  contract: "Each batch is an independently reviewable implementation unit."
+
+delivery:
+  model: batch
+  total_batches: 32
+  parent_skill: "skills/{batch}/SKILL.md"
+  child_skill: "skills/{batch}/{number}-{slug}/SKILL.md"
+  artifact_status: present
+  runtime_status: verified_by_batch_gate
+
+batches:
+  - {id: batch-01, phase: product, title: "项目基座与可运行仓库", expected_child_skills: 10, depends_on: [], verification: "make verify"}
+  - {id: batch-02, phase: product, title: "身份认证、用户与 RBAC", expected_child_skills: 12, depends_on: [batch-01], verification: "make auth-verify"}
+  - {id: batch-03, phase: product, title: "官网、CMS、国际化与管理端框架", expected_child_skills: 12, depends_on: [batch-02], verification: "make cms-verify"}
+  - {id: batch-04, phase: product, title: "商品、价格与服务目录", expected_child_skills: 12, depends_on: [batch-03], verification: "make catalog-verify"}
+  - {id: batch-05, phase: product, title: "订单、支付、退款与权益开通", expected_child_skills: 12, depends_on: [batch-04], verification: "make commerce-verify"}
+  - {id: batch-06, phase: product, title: "活动中心", expected_child_skills: 12, depends_on: [batch-05], verification: "make activity-verify"}
+  - {id: batch-07, phase: product, title: "课程系统", expected_child_skills: 12, depends_on: [batch-06], verification: "make course-verify"}
+  - {id: batch-08, phase: product, title: "真人辅导预约", expected_child_skills: 12, depends_on: [batch-07], verification: "make counseling-verify"}
+  - {id: batch-09, phase: product, title: "AI 知识库与 RAG", expected_child_skills: 12, depends_on: [batch-08], verification: "make knowledge-verify"}
+  - {id: batch-10, phase: product, title: "哈拿老师 AI 辅导 Agent", expected_child_skills: 12, depends_on: [batch-09], verification: "make ai-verify"}
+  - {id: batch-11, phase: product, title: "通知中心", expected_child_skills: 12, depends_on: [batch-10], verification: "make notification-verify"}
+  - {id: batch-12, phase: product, title: "用户中心、隐私与数据权利", expected_child_skills: 12, depends_on: [batch-11], verification: "make privacy-verify"}
+  - {id: batch-13, phase: product, title: "婚恋档案与择偶条件", expected_child_skills: 12, depends_on: [batch-12], verification: "make dating-profile-verify"}
+  - {id: batch-14, phase: product, title: "筛选与推荐引擎", expected_child_skills: 12, depends_on: [batch-13], verification: "make recommendation-verify"}
+  - {id: batch-15, phase: product, title: "喜欢、互选与认识邀请", expected_child_skills: 12, depends_on: [batch-14], verification: "make interaction-verify"}
+  - {id: batch-16, phase: product, title: "关系状态机", expected_child_skills: 12, depends_on: [batch-15], verification: "make relationship-verify"}
+  - {id: batch-17, phase: product, title: "会员、权益和访问控制", expected_child_skills: 12, depends_on: [batch-16], verification: "make membership-verify"}
+  - {id: batch-18, phase: product, title: "审核、举报、屏蔽与运营后台", expected_child_skills: 12, depends_on: [batch-17], verification: "make safety-verify"}
+  - {id: batch-19, phase: product, title: "测试、安全、可观测性与生产部署", expected_child_skills: 12, depends_on: [batch-18], verification: "make production-readiness"}
+  - {id: batch-20, phase: product, title: "Codex Skill SDK 与完整项目验收", expected_child_skills: 12, depends_on: [batch-19], verification: "make skill-verify"}
+  - {id: batch-21, phase: quality, title: "质量宪章、需求追踪与发布门禁", expected_child_skills: 12, depends_on: [batch-20], verification: "make quality-verify"}
+  - {id: batch-22, phase: quality, title: "统一设计系统、响应式与可访问性", expected_child_skills: 12, depends_on: [batch-21], verification: "make ui-verify"}
+  - {id: batch-23, phase: quality, title: "信息架构、导航与用户旅程", expected_child_skills: 12, depends_on: [batch-22], verification: "make experience-verify"}
+  - {id: batch-24, phase: quality, title: "业务流程、状态机与 Saga 治理", expected_child_skills: 12, depends_on: [batch-23], verification: "make process-verify"}
+  - {id: batch-25, phase: quality, title: "数据契约、血缘、事件一致性与完整性", expected_child_skills: 12, depends_on: [batch-24], verification: "make data-integrity-verify"}
+  - {id: batch-26, phase: quality, title: "管理端能力注册表与统一工作台", expected_child_skills: 12, depends_on: [batch-25], verification: "make admin-completeness-verify"}
+  - {id: batch-27, phase: quality, title: "角色化 UAT、可用性与本地化 QA", expected_child_skills: 12, depends_on: [batch-26], verification: "make functional-usability-verify"}
+  - {id: batch-28, phase: quality, title: "自动化回归与测试平台", expected_child_skills: 12, depends_on: [batch-27], verification: "make regression-release"}
+  - {id: batch-29, phase: quality, title: "生产负载、性能预算与容量模型", expected_child_skills: 12, depends_on: [batch-28], verification: "make performance-release"}
+  - {id: batch-30, phase: quality, title: "威胁建模、安全测试与隐私认证", expected_child_skills: 14, depends_on: [batch-29], verification: "make security-release"}
+  - {id: batch-31, phase: quality, title: "SLO、高可用、混沌与灾难恢复", expected_child_skills: 12, depends_on: [batch-30], verification: "make resilience-verify"}
+  - {id: batch-32, phase: quality, title: "最终认证、Go/No-Go 与稳定性认证", expected_child_skills: 12, depends_on: [batch-31], verification: "make final-release-candidate"}

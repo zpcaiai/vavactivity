@@ -22,6 +22,19 @@ def docx_fixture() -> bytes:
     return output.getvalue()
 
 
+def malicious_docx_fixture() -> bytes:
+    document = b"""<?xml version="1.0"?>
+<!DOCTYPE document [<!ENTITY payload "unsafe">]>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:body><w:p><w:r><w:t>&payload;</w:t></w:r></w:p></w:body>
+</w:document>"""
+    output = BytesIO()
+    with ZipFile(output, "w", ZIP_DEFLATED) as archive:
+        archive.writestr("[Content_Types].xml", "<Types/>")
+        archive.writestr("word/document.xml", document)
+    return output.getvalue()
+
+
 def test_markdown_parser_preserves_heading_list_and_source_offsets() -> None:
     result = parse_document(b"# Boundaries\n\nRespect consent.\n\n- Pause\n- Ask", "text/markdown")
     assert [item["block_type"] for item in result.blocks] == [
@@ -45,6 +58,14 @@ def test_docx_parser_preserves_headings_paragraphs_and_tables() -> None:
     ]
     assert result.blocks[1]["section_path"] == ["Healthy Boundaries"]
     assert "Rule | Meaning" in result.blocks[2]["text"]
+
+
+def test_docx_parser_rejects_entity_declarations() -> None:
+    with pytest.raises(Exception, match="parsed safely"):
+        parse_document(
+            malicious_docx_fixture(),
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        )
 
 
 def test_html_parser_keeps_structure_without_script_content() -> None:

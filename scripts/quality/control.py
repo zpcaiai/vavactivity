@@ -15,10 +15,22 @@ from typing import Any
 
 import yaml
 
+from vav.core.evidence import combined_status, command_evidence, junit_evidence
+
 ROOT = Path(__file__).resolve().parents[2]
 BUILD = ROOT / "build" / "quality"
 MANIFEST = ROOT / "quality-manifest.yaml"
-ALLOWED_OPERATORS = {"eq", "neq", "gt", "gte", "lt", "lte", "contains", "all_passed", "none_open"}
+ALLOWED_OPERATORS = {
+    "eq",
+    "neq",
+    "gt",
+    "gte",
+    "lt",
+    "lte",
+    "contains",
+    "all_passed",
+    "none_open",
+}
 CRITICAL = {"blocker", "critical"}
 
 
@@ -35,14 +47,20 @@ def digest(path: Path) -> str:
 
 def commit() -> str:
     return subprocess.run(
-        ["git", "rev-parse", "HEAD"], cwd=ROOT, check=True, capture_output=True, text=True
+        ["git", "rev-parse", "HEAD"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
     ).stdout.strip()
 
 
 def write_report(name: str, payload: dict[str, Any]) -> Path:
     BUILD.mkdir(parents=True, exist_ok=True)
     path = BUILD / name
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     return path
 
 
@@ -53,7 +71,9 @@ def validate_manifest() -> dict[str, Any]:
     requirements = value.get("requirements", [])
     codes = [item.get("code") for item in requirements]
     if len(requirements) < 21 or len(codes) != len(set(codes)):
-        raise ValueError("project and Batches 1-20 require separate unique requirements")
+        raise ValueError(
+            "project and Batches 1-20 require separate unique requirements"
+        )
     for item in requirements:
         if not re.fullmatch(r"REQ-VAV-[A-Z0-9-]+-\d{3,}", str(item.get("code"))):
             raise ValueError(f"invalid requirement code: {item.get('code')}")
@@ -71,7 +91,9 @@ def validate_manifest() -> dict[str, Any]:
         raise ValueError("non-waivable gate definition is missing")
     skill_files = sorted((ROOT / "skills/batch-21").glob("*/SKILL.md"))
     if len(skill_files) != 12:
-        raise ValueError(f"Batch 21 must contain exactly 12 child Skills, found {len(skill_files)}")
+        raise ValueError(
+            f"Batch 21 must contain exactly 12 child Skills, found {len(skill_files)}"
+        )
     return value
 
 
@@ -108,13 +130,15 @@ def build_inventory() -> dict[str, Any]:
             "sha256": digest(path),
         }
         for app in ("user-web", "admin-web")
-        for path in sorted((ROOT / "apps" / app / "src/pages").glob("*.vue"))
+        for path in sorted((ROOT / "apps" / app / "src").glob("**/pages/*.vue"))
     ]
     tests = [
         str(path.relative_to(ROOT))
         for root in (ROOT / "services/api/tests", ROOT / "tests", ROOT / "e2e")
         if root.exists()
-        for path in sorted(root.rglob("test_*.py" if root.name != "e2e" else "*.spec.ts"))
+        for path in sorted(
+            root.rglob("test_*.py" if root.name != "e2e" else "*.spec.ts")
+        )
     ]
     return {
         "schema_version": "1.0.0",
@@ -152,7 +176,10 @@ def trace_checks(inventory: dict[str, Any]) -> list[dict[str, Any]]:
             "api_entry": (module_dir / "router.py").is_file()
             or (module_dir / "admin_router.py").is_file(),
             "database_revision": bool(module_item)
-            and all(f"_{number:04d}_" in migration_sources for number in module_item["revisions"]),
+            and all(
+                f"_{number:04d}_" in migration_sources
+                for number in module_item["revisions"]
+            ),
             "permission_owner": bool(module_item and module_item["permissions"]),
             "health_contract": bool(module_item and module_item["health"]),
             "tests": test_dir.exists(),
@@ -185,7 +212,8 @@ def closure_checks() -> list[dict[str, Any]]:
         {
             "flow_code": item.get("code"),
             "missing": sorted(required - set(item)),
-            "complete": required <= set(item) and all(item.get(key) for key in required),
+            "complete": required <= set(item)
+            and all(item.get(key) for key in required),
         }
         for item in validate_manifest()["business_flows"]
     ]
@@ -198,7 +226,9 @@ def detect_gaps(inventory: dict[str, Any]) -> list[dict[str, Any]]:
             if not passed:
                 gaps.append(
                     {
-                        "gap_code": f"GAP-{trace['requirement_code']}-{check}".upper().replace("_", "-"),
+                        "gap_code": f"GAP-{trace['requirement_code']}-{check}".upper().replace(
+                            "_", "-"
+                        ),
                         "type": f"missing_{check}",
                         "severity": trace["criticality"],
                         "requirement_code": trace["requirement_code"],
@@ -226,11 +256,28 @@ def technical_report() -> dict[str, Any]:
     flows = closure_checks()
     gaps = detect_gaps(inventory)
     critical_gaps = [item for item in gaps if item["severity"] in CRITICAL]
+    automated_tests = {
+        "database_migration": command_evidence(BUILD / "migration-status.json"),
+        "permissions_seed": command_evidence(BUILD / "permissions-seed-status.json"),
+        "domain_seed": command_evidence(BUILD / "domain-seed-status.json"),
+        "backend": junit_evidence(
+            BUILD / "backend-junit.xml", BUILD / "backend-test-status.json"
+        ),
+        "release_gates": junit_evidence(
+            BUILD / "gate-junit.xml", BUILD / "gate-test-status.json"
+        ),
+        "security": junit_evidence(
+            BUILD / "security-junit.xml", BUILD / "security-test-status.json"
+        ),
+        "admin_e2e": command_evidence(BUILD / "admin-e2e-status.json"),
+    }
+    structural = {"status": "PASS" if not critical_gaps else "FAIL"}
+    technical_status = combined_status([structural, *automated_tests.values()])
     return {
         "schema_version": "1.0.0",
         "generated_at": datetime.now(UTC).isoformat(),
         "git_commit": inventory["git_commit"],
-        "technical_status": "PASS" if not critical_gaps else "FAIL",
+        "technical_status": technical_status,
         "production_certification": "NOT_CERTIFIED",
         "release_allowed": False,
         "counts": {
@@ -243,6 +290,7 @@ def technical_report() -> dict[str, Any]:
             "complete_flows": sum(item["complete"] for item in flows),
             "critical_gaps": len(critical_gaps),
         },
+        "automated_tests": automated_tests,
         "external_evidence": {
             "penetration_test": "NOT_RUN",
             "restore_drill": "NOT_RUN",
@@ -261,28 +309,54 @@ def run(action: str) -> int:
         result = {"status": "PASS", "artifact": str(path.relative_to(ROOT))}
     elif action in {"trace-build", "trace-check"}:
         checks = trace_checks(inventory)
-        path = write_report("traceability.json", {"git_commit": commit(), "checks": checks})
-        failed = [item for item in checks if item["criticality"] in CRITICAL and not item["complete"]]
-        result = {"status": "PASS" if not failed else "FAIL", "artifact": str(path.relative_to(ROOT)), "critical_failures": len(failed)}
+        path = write_report(
+            "traceability.json", {"git_commit": commit(), "checks": checks}
+        )
+        failed = [
+            item
+            for item in checks
+            if item["criticality"] in CRITICAL and not item["complete"]
+        ]
+        result = {
+            "status": "PASS" if not failed else "FAIL",
+            "artifact": str(path.relative_to(ROOT)),
+            "critical_failures": len(failed),
+        }
     elif action == "closure-check":
         checks = closure_checks()
-        path = write_report("business-closure.json", {"git_commit": commit(), "checks": checks})
-        result = {"status": "PASS" if all(item["complete"] for item in checks) else "FAIL", "artifact": str(path.relative_to(ROOT))}
+        path = write_report(
+            "business-closure.json", {"git_commit": commit(), "checks": checks}
+        )
+        result = {
+            "status": "PASS" if all(item["complete"] for item in checks) else "FAIL",
+            "artifact": str(path.relative_to(ROOT)),
+        }
     elif action == "gap-check":
         gaps = detect_gaps(inventory)
         path = write_report("gaps.json", {"git_commit": commit(), "gaps": gaps})
         critical = [item for item in gaps if item["severity"] in CRITICAL]
-        result = {"status": "PASS" if not critical else "FAIL", "artifact": str(path.relative_to(ROOT)), "critical_gaps": len(critical)}
+        result = {
+            "status": "PASS" if not critical else "FAIL",
+            "artifact": str(path.relative_to(ROOT)),
+            "critical_gaps": len(critical),
+        }
     elif action in {"evidence-build", "release-report"}:
         report = technical_report()
         path = write_report("release-quality-report.json", report)
-        result = {"status": report["technical_status"], "production_certification": "NOT_CERTIFIED", "artifact": str(path.relative_to(ROOT))}
+        result = {
+            "status": report["technical_status"],
+            "production_certification": "NOT_CERTIFIED",
+            "artifact": str(path.relative_to(ROOT)),
+        }
     elif action == "release-certify":
-        result = {"status": "NOT_CERTIFIED", "reason": "independent production evidence and approval are required"}
+        result = {
+            "status": "NOT_CERTIFIED",
+            "reason": "independent production evidence and approval are required",
+        }
     else:
         raise ValueError(f"unsupported quality action: {action}")
     print(json.dumps(result, sort_keys=True))
-    return 0 if result["status"] in {"PASS", "NOT_CERTIFIED"} else 1
+    return 0 if result["status"] in {"PASS", "NOT_CERTIFIED", "NOT_RUN"} else 1
 
 
 def parse_action(parts: list[str]) -> str:

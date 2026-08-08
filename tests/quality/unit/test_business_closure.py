@@ -103,7 +103,9 @@ def test_invalid_flow_code_is_rejected() -> None:
 
 def test_closure_ratio_counts_only_critical_flows_by_default() -> None:
     rows = [
-        BusinessClosureRow("FLOW-AUTH-REGISTRATION", QualityCriticality.BLOCKER, _dimensions()),
+        BusinessClosureRow(
+            "FLOW-AUTH-REGISTRATION", QualityCriticality.BLOCKER, _dimensions()
+        ),
         BusinessClosureRow(
             "FLOW-COURSE-COMPLETION",
             QualityCriticality.CRITICAL,

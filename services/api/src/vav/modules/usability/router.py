@@ -14,7 +14,6 @@ from vav.modules.identity.dependencies import AuthenticatedPrincipal, require_au
 from vav.modules.usability import service
 from vav.modules.usability.schemas import DraftSave, ImportPreview
 
-
 router = APIRouter()
 
 
@@ -22,7 +21,9 @@ def _ok(value: Any, request: Request) -> dict[str, Any]:
     return success(value, request_id_from_request(request))
 
 
-def _require_permission(principal: AuthenticatedPrincipal, permission: str) -> AuthenticatedPrincipal:
+def _require_permission(
+    principal: AuthenticatedPrincipal, permission: str
+) -> AuthenticatedPrincipal:
     principal.require(permission)
     return principal
 

@@ -1,3 +1,8 @@
+---
+name: vav-batch-14-12-recommendation-testing-acceptance
+description: "Implement Recommendation testing and acceptance for the VAV platform."
+---
+
 # Recommendation testing and acceptance
 
 Cover unit, integration, concurrency, security, fairness and end-to-end levels.

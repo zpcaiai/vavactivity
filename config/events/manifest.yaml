@@ -43,3 +43,5 @@ events:
   admin.approval.changed.v1: {owner: admin_platform, sensitivity: restricted}
   admin.configuration.changed.v1: {owner: admin_platform, sensitivity: internal}
   admin.certification.changed.v1: {owner: admin_platform, sensitivity: internal}
+  usability.uat.completed.v1: {owner: usability, sensitivity: restricted}
+  usability.certification.changed.v1: {owner: usability, sensitivity: internal}

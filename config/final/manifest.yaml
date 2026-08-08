@@ -29,6 +29,11 @@ go_no_go:
   critical_findings_max: 0
 release_manifest:
   schema_version: "1.0.0"
+  non_waivable_gate_artifacts:
+    BATCH-28-REGRESSION: build/regression/regression-evidence.json
+    BATCH-29-PERFORMANCE: build/performance/performance-evidence.json
+    BATCH-30-SECURITY: build/security/security-evidence.json
+    BATCH-31-RESILIENCE: build/resilience/resilience-evidence.json
   required_artifacts:
     - build/quality/release-quality-report.json
     - build/ui/accessibility.json

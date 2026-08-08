@@ -1,3 +1,8 @@
+---
+name: vav-batch-14-07-explanation-generation
+description: "Implement Explanation generation for the VAV platform."
+---
+
 # Explanation generation
 
 Explanations come from evaluated features and approved templates. Show mutual

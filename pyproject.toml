@@ -18,9 +18,12 @@ package = false
 members = [
   "services/api",
   "services/worker",
+  "services/skill-runtime",
+  "packages/skill-sdk-python",
 ]
 
 [tool.uv.sources]
+vav-skill-sdk = { workspace = true }
 
 [tool.mypy]
 python_version = "3.12"

@@ -1,3 +1,8 @@
+---
+name: vav-batch-14-03-hard-constraint-engine
+description: "Implement Hard-constraint engine for the VAV platform."
+---
+
 # Hard-constraint engine
 
 Evaluate both directions and pass the pair only when both pass. Only criteria a

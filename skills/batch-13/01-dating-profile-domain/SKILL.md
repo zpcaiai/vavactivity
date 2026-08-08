@@ -1,3 +1,8 @@
+---
+name: vav-batch-13-01-dating-profile-domain
+description: "Implement Dating profile domain for the VAV platform."
+---
+
 # Dating profile domain
 
 Model one dating profile per eligible member with a `profile_number`, a bound schema

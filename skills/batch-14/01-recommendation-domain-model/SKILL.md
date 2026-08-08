@@ -1,3 +1,8 @@
+---
+name: vav-batch-14-01-recommendation-domain-model
+description: "Implement Recommendation domain model for the VAV platform."
+---
+
 # Recommendation domain model
 
 Model strategies, candidate pairs, scores, batches, items, exposures, feedback,

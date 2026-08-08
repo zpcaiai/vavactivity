@@ -13,6 +13,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from vav.common.exceptions import VavError
+from vav.core.config import get_settings
 from vav.modules.memberships.service import _audit, _json, _mapping, _publish
 
 
@@ -154,25 +155,35 @@ async def refresh_periodic_quotas(session: AsyncSession) -> int:
 
 
 async def ensure_free_membership(
-    session: AsyncSession, user_id: UUID, *, commit: bool = True
+    session: AsyncSession,
+    user_id: UUID,
+    *,
+    plan_code: str | None = None,
+    commit: bool = True,
 ) -> dict[str, Any]:
+    selected_plan_code = plan_code or get_settings().membership_default_free_plan
     existing = _mapping(
         await session.execute(
             text(
-                "SELECT * FROM membership_accounts WHERE user_id=:user AND source_type='free_default' AND status='active' FOR UPDATE"
+                "SELECT a.*,p.plan_code FROM membership_accounts a "
+                "JOIN membership_plans p ON p.id=a.membership_plan_id "
+                "WHERE a.user_id=:user AND a.source_type='free_default' "
+                "AND a.status='active' FOR UPDATE OF a"
             ),
             {"user": user_id},
         )
     )
-    if existing:
+    if existing and existing["plan_code"] == selected_plan_code:
         return existing
     plan = _mapping(
         await session.execute(
             text(
                 "SELECT p.id AS plan_id,p.current_version_id FROM membership_plans p "
                 "JOIN membership_plan_versions v ON v.id=p.current_version_id "
-                "WHERE p.plan_type='free' AND p.status='active' AND v.status='active' ORDER BY p.display_order LIMIT 1"
-            )
+                "WHERE p.plan_code=:plan_code AND p.plan_type='free' "
+                "AND p.status='active' AND v.status='active' LIMIT 1"
+            ),
+            {"plan_code": selected_plan_code},
         )
     )
     if plan is None:
@@ -182,6 +193,38 @@ async def ensure_free_membership(
             status_code=503,
         )
     now = datetime.now(UTC)
+    if existing:
+        await session.execute(
+            text(
+                "UPDATE membership_accounts SET status='expired',expires_at=:ended,"
+                "version=version+1,updated_at=now() WHERE id=:id"
+            ),
+            {"id": existing["id"], "ended": now},
+        )
+        await session.execute(
+            text(
+                "UPDATE membership_benefit_grants SET status='closed' "
+                "WHERE membership_account_id=:id AND status IN ('scheduled','active')"
+            ),
+            {"id": existing["id"]},
+        )
+        await session.execute(
+            text(
+                "UPDATE membership_quota_buckets SET status='expired',updated_at=now() "
+                "WHERE membership_account_id=:id AND status='active'"
+            ),
+            {"id": existing["id"]},
+        )
+        await _audit(
+            session,
+            "membership.free_account.default_changed",
+            actor_id=user_id,
+            account_id=existing["id"],
+            metadata={
+                "previous_plan_code": existing["plan_code"],
+                "selected_plan_code": selected_plan_code,
+            },
+        )
     account_id = uuid4()
     account = _mapping(
         await session.execute(

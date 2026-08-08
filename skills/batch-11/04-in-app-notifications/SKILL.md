@@ -1,3 +1,8 @@
+---
+name: vav-batch-11-04-in-app-notifications
+description: "Implement In-app notifications for the VAV platform."
+---
+
 # In-app notifications
 
 Implement owner-scoped list, detail, unread count, idempotent read, mark-all-read and archive.

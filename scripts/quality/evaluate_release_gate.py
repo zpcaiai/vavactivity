@@ -65,7 +65,11 @@ SELF_CHECK_REQUEST: dict[str, Any] = {
             }
         ],
         "pages": [
-            {"code": "PAGE-ADMIN-QUALITY", "application": "admin-web", "route_path": "/q"}
+            {
+                "code": "PAGE-ADMIN-QUALITY",
+                "application": "admin-web",
+                "route_path": "/q",
+            }
         ],
     },
     "closure_matrix": [
@@ -98,7 +102,9 @@ def _tuple(raw: dict[str, Any], key: str) -> tuple[str, ...]:
 def _requirement(raw: dict[str, Any]) -> RequirementArtifact:
     return RequirementArtifact(
         code=raw["code"],
-        criticality=_enum_field(raw, "criticality", QualityCriticality, QualityCriticality.NORMAL),
+        criticality=_enum_field(
+            raw, "criticality", QualityCriticality, QualityCriticality.NORMAL
+        ),
         status=_enum_field(
             raw, "status", QualityRequirementStatus, QualityRequirementStatus.DRAFT
         ),
@@ -113,7 +119,9 @@ def _capability(raw: dict[str, Any]) -> CapabilityArtifact:
     return CapabilityArtifact(
         code=raw["code"],
         capability_type=CapabilityType(raw.get("capability_type", "user_action")),
-        criticality=_enum_field(raw, "criticality", QualityCriticality, QualityCriticality.NORMAL),
+        criticality=_enum_field(
+            raw, "criticality", QualityCriticality, QualityCriticality.NORMAL
+        ),
         admin_capabilities=_tuple(raw, "admin_capabilities"),
         exception_scenarios=_tuple(raw, "exception_scenarios"),
         metrics=_tuple(raw, "metrics"),
@@ -130,7 +138,9 @@ def _page(raw: dict[str, Any]) -> PageArtifact:
         code=raw["code"],
         application=raw["application"],
         route_path=raw["route_path"],
-        criticality=_enum_field(raw, "criticality", QualityCriticality, QualityCriticality.NORMAL),
+        criticality=_enum_field(
+            raw, "criticality", QualityCriticality, QualityCriticality.NORMAL
+        ),
         has_navigation_entry=bool(raw.get("has_navigation_entry", False)),
         inbound_references=_tuple(raw, "inbound_references"),
         query_apis=_tuple(raw, "query_apis"),
@@ -147,7 +157,9 @@ def _api(raw: dict[str, Any]) -> ApiArtifact:
         method=raw["method"],
         path=raw["path"],
         module=raw["module"],
-        criticality=_enum_field(raw, "criticality", QualityCriticality, QualityCriticality.NORMAL),
+        criticality=_enum_field(
+            raw, "criticality", QualityCriticality, QualityCriticality.NORMAL
+        ),
         is_command=bool(raw.get("is_command", False)),
         is_public=bool(raw.get("is_public", False)),
         sensitive=bool(raw.get("sensitive", False)),
@@ -164,7 +176,9 @@ def _api(raw: dict[str, Any]) -> ApiArtifact:
 def _event(raw: dict[str, Any]) -> EventArtifact:
     return EventArtifact(
         code=raw["code"],
-        criticality=_enum_field(raw, "criticality", QualityCriticality, QualityCriticality.NORMAL),
+        criticality=_enum_field(
+            raw, "criticality", QualityCriticality, QualityCriticality.NORMAL
+        ),
         publishers=_tuple(raw, "publishers"),
         consumers=_tuple(raw, "consumers"),
         audit_only=bool(raw.get("audit_only", False)),
@@ -184,7 +198,9 @@ def _table(raw: dict[str, Any]) -> TableArtifact:
     return TableArtifact(
         code=raw["code"],
         module=raw["module"],
-        criticality=_enum_field(raw, "criticality", QualityCriticality, QualityCriticality.NORMAL),
+        criticality=_enum_field(
+            raw, "criticality", QualityCriticality, QualityCriticality.NORMAL
+        ),
         has_repository=bool(raw.get("has_repository", False)),
         retention_policy=raw.get("retention_policy"),
         data_owner=raw.get("data_owner"),
@@ -197,7 +213,9 @@ def _state_machine(raw: dict[str, Any]) -> StateMachineArtifact:
     return StateMachineArtifact(
         code=raw["code"],
         module=raw["module"],
-        criticality=_enum_field(raw, "criticality", QualityCriticality, QualityCriticality.NORMAL),
+        criticality=_enum_field(
+            raw, "criticality", QualityCriticality, QualityCriticality.NORMAL
+        ),
         states=_tuple(raw, "states"),
         tested_states=_tuple(raw, "tested_states"),
         terminal_states=_tuple(raw, "terminal_states"),
@@ -208,7 +226,9 @@ def _dead_letter(raw: dict[str, Any]) -> DeadLetterArtifact:
     return DeadLetterArtifact(
         queue=raw["queue"],
         open_count=int(raw.get("open_count", 0)),
-        criticality=_enum_field(raw, "criticality", QualityCriticality, QualityCriticality.NORMAL),
+        criticality=_enum_field(
+            raw, "criticality", QualityCriticality, QualityCriticality.NORMAL
+        ),
     )
 
 
@@ -260,11 +280,15 @@ def build_gate_outcomes(raw: list[dict[str, Any]]) -> list[GateOutcome]:
 def evaluate(request: dict[str, Any]) -> dict[str, Any]:
     inventory = build_inventory(request.get("inventory") or {})
     findings = detect_all_gaps(inventory)
-    closure = evaluate_closure_matrix(build_closure_rows(request.get("closure_matrix") or []))
+    closure = evaluate_closure_matrix(
+        build_closure_rows(request.get("closure_matrix") or [])
+    )
     ratios = structural_ratios_from_findings(inventory, findings)
     ratios["business_closure"] = closure_ratio(closure)
     outcomes = build_gate_outcomes(request.get("gate_outcomes") or [])
-    vetoes = [NonWaivableFailure(item) for item in request.get("non_waivable_failures") or []]
+    vetoes = [
+        NonWaivableFailure(item) for item in request.get("non_waivable_failures") or []
+    ]
     score = score_structural_completeness(ratios, vetoes=vetoes, gate_outcomes=outcomes)
     return {
         "release_version": request.get("release_version"),
@@ -299,6 +323,11 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="evaluate the built-in fail-closed fixture instead of a file",
     )
+    parser.add_argument(
+        "--expect-decision",
+        choices=("go", "conditional_go", "no_go"),
+        help="return success only when the evaluated decision matches this value",
+    )
     args = parser.parse_args(argv)
     if args.self_check:
         request = SELF_CHECK_REQUEST
@@ -313,6 +342,8 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({"decision": "no_go", "error": str(exc)}, sort_keys=True))
         return 1
     print(json.dumps(result, indent=2, sort_keys=True))
+    if args.expect_decision is not None:
+        return 0 if result["decision"] == args.expect_decision else 1
     return 0 if result["decision"] == "go" else 1
 
 

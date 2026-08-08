@@ -1,7 +1,9 @@
-"""Generate recommendation batches for every eligible member.
+"""Generate recommendation batches for the deterministic acceptance fixtures.
 
-Used by local acceptance runs; each member goes through the same pipeline the
-scheduled worker uses, so a fixture batch is never a special case.
+Used by local acceptance runs; each fixture member goes through the same pipeline
+the scheduled worker uses, so a fixture batch is never a special case. Limiting
+pool refreshes to fixture accounts keeps repeated E2E runs from rewriting and
+auditing every real/demo member in a developer database.
 """
 
 # ruff: noqa: E501
@@ -20,13 +22,29 @@ async def main() -> None:
     generated = 0
     skipped: dict[str, int] = {}
     async with session_factory() as session:
-        await service.rebuild_pool(session)
+        fixture_rows = (
+            await session.execute(
+                text(
+                    "SELECT p.user_id FROM dating_profile_recommendation_projections p "
+                    "JOIN users u ON u.id=p.user_id "
+                    "WHERE u.email LIKE 'recommendation-fixture-%@example.com' "
+                    "ORDER BY p.user_id"
+                )
+            )
+        ).all()
+        for (user_id,) in fixture_rows:
+            await service.rebuild_pool_entry(session, user_id)
         await session.commit()
 
     async with session_factory() as session:
         rows = (
             await session.execute(
-                text("SELECT user_id FROM recommendation_pool_entries WHERE eligible = true")
+                text(
+                    "SELECT p.user_id FROM recommendation_pool_entries p "
+                    "JOIN users u ON u.id=p.user_id "
+                    "WHERE p.eligible = true "
+                    "AND u.email LIKE 'recommendation-fixture-%@example.com'"
+                )
             )
         ).all()
 

@@ -217,9 +217,12 @@ def main() -> None:
     )
     graph, numeric = migration_inventory()
     manifests = module_inventory(numeric)
+    migration_heads = set(graph) - {
+        parent for parent in graph.values() if parent is not None
+    }
     require(
-        assembly.get("migration_head") in graph,
-        "declared migration head does not exist",
+        assembly.get("migration_head") in migration_heads,
+        "declared migration head is not the current migration head",
     )
     event_count = validate_events(manifests)
     permission_count = validate_permissions(manifests)

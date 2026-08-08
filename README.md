@@ -1,6 +1,16 @@
+---
+title: VAV Activity
+emoji: 💞
+colorFrom: pink
+colorTo: purple
+sdk: docker
+app_port: 7860
+fullWidth: true
+---
+
 # VAV 婚恋智能服务平台
 
-VAV 是一个前后端分离的 Python + Vue 平台。本仓库当前交付 Batch 1 工程基座：FastAPI 模块化单体、用户端、运营管理端、Celery、PostgreSQL/pgvector、Redis、MinIO、Mailpit、共享 OpenAPI SDK 和完整质量门禁。
+VAV 是一个前后端分离的 Python + Vue 平台。本仓库交付 Batch 1–20 的用户与运营业务闭环，并包含后续质量治理模块：FastAPI 模块化单体、用户端、运营管理端、Celery、PostgreSQL/pgvector、Redis、MinIO、Mailpit、共享 OpenAPI SDK 和完整质量门禁。
 
 ## 本地地址
 
@@ -44,7 +54,7 @@ make verify
 
 ## 产品边界
 
-阶段范围和未决政策以 `project-manifest.yaml` 为准。所有未决事项采用关闭或显式缺失配置，不能被实现为生产默认值。Batch 1 不包含真实注册、支付、AI 辅导或匹配业务。
+阶段范围和未决政策以 `project-manifest.yaml` 为准。所有未决事项采用关闭或显式缺失配置，不能被实现为生产默认值；外部支付、AI、自动审核和生产数据接入必须在部署环境显式配置并通过相应门禁。
 
 婚恋档案（Batch 13）为成年用户限定，默认严格隐私：联系方式在任何查看场景都不会自动公开，
 资料完整度只衡量填写完成度，照片需人工审核，择偶条件仅本人与推荐引擎可见。
@@ -53,6 +63,8 @@ make verify
 用户端不显示任何匹配百分比或对方对你的评分；喜欢、互选与认识邀请属于 Batch 15。
 
 更多资料见 `docs/product`、`docs/architecture`、`docs/security`、`docs/runbooks` 和 `docs/acceptance`。
+
+Hugging Face Docker Space 会在 `7860` 端口同时提供用户端 `/` 和运营端 `/admin/`。需要数据接口的页面必须在 Space Settings 中把 `VITE_API_BASE_URL` 变量设置为可公开访问的 VAV API 根地址；未配置时 `/api/*` 会明确返回 `503`，不会把 SPA HTML 误当成 JSON。
 
 提交到 `main` 的数据库迁移会在后端质量门禁通过后自动应用到 Neon。连接密钥、执行顺序和
 失败处理见 `docs/runbooks/neon-migrations.md`。

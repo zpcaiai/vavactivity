@@ -14,6 +14,8 @@ from typing import Any
 
 import yaml
 
+from vav.core.evidence import combined_status, command_evidence, junit_evidence
+
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / "config/experience"
 BUILD = ROOT / "build/experience"
@@ -119,31 +121,45 @@ def validate() -> dict[str, Any]:
     }
 
 
-def write_evidence() -> Path:
+def write_evidence() -> tuple[Path, str]:
     result = validate()
     BUILD.mkdir(parents=True, exist_ok=True)
-    junit = BUILD / "backend-junit.xml"
-    backend_passed = (
-        junit.is_file()
-        and 'failures="0"' in junit.read_text(encoding="utf-8")
-        and 'errors="0"' in junit.read_text(encoding="utf-8")
+    backend_tests = junit_evidence(
+        BUILD / "backend-junit.xml", BUILD / "backend-test-status.json"
+    )
+    security_tests = junit_evidence(
+        BUILD / "security-junit.xml", BUILD / "security-test-status.json"
+    )
+    execution_evidence = {
+        "database_migration": command_evidence(BUILD / "migration-status.json"),
+        "permissions_seed": command_evidence(BUILD / "permissions-seed-status.json"),
+        "domain_seed": command_evidence(BUILD / "domain-seed-status.json"),
+        "backend_tests": backend_tests,
+        "security_tests": security_tests,
+        "packages_test": command_evidence(BUILD / "packages-test-status.json"),
+        "packages_typecheck": command_evidence(
+            BUILD / "packages-typecheck-status.json"
+        ),
+        "apps_test": command_evidence(BUILD / "apps-test-status.json"),
+        "apps_build": command_evidence(BUILD / "apps-build-status.json"),
+        "user_e2e": command_evidence(BUILD / "user-e2e-status.json"),
+        "admin_e2e": command_evidence(BUILD / "admin-e2e-status.json"),
+    }
+    technical_status = combined_status(
+        [{"status": "PASS"}, *execution_evidence.values()]
     )
     report = {
         "schema_version": "1.0.0",
         "generated_at": datetime.now(UTC).isoformat(),
         "git_commit": git_commit(),
+        "technical_status": technical_status,
         "technical_gates": {
             "manifest": {
                 "status": "PASS",
                 "checksum_sha256": result["manifest_checksum_sha256"],
             },
             "route_graph": {"status": "PASS", "critical_dead_ends": 0},
-            "backend_tests": {
-                "status": "PASS" if backend_passed else "NOT_RUN",
-                "artifact": str(junit.relative_to(ROOT)) if junit.exists() else None,
-            },
-            "user_e2e": {"status": "NOT_RUN"},
-            "admin_e2e": {"status": "NOT_RUN"},
+            **execution_evidence,
         },
         "external_gates": {
             "role_uat": "NOT_RUN",
@@ -158,10 +174,10 @@ def write_evidence() -> Path:
     path.write_text(
         json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    return path
+    return path, technical_status
 
 
-def main() -> None:
+def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "command",
@@ -178,14 +194,17 @@ def main() -> None:
     )
     command = parser.parse_args().command
     if command == "evidence":
-        print(write_evidence())
+        path, status = write_evidence()
+        print(json.dumps({"artifact": str(path.relative_to(ROOT)), "status": status}))
+        return 1 if status == "FAIL" else 0
     else:
         print(
             json.dumps(
                 {"command": command, "status": "PASS", **validate()}, sort_keys=True
             )
         )
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

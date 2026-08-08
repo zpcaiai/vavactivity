@@ -1,3 +1,8 @@
+---
+name: vav-batch-13-05-profile-photo-management
+description: "Implement Private photo processing and review for the VAV platform."
+---
+
 # Private photo processing and review
 
 Decode, strip metadata, re-encode and thumbnail every upload before it can be reviewed. A

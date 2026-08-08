@@ -1,3 +1,8 @@
+---
+name: vav-batch-13-07-field-privacy-view-projection
+description: "Implement Viewer-specific projections for the VAV platform."
+---
+
 # Viewer-specific projections
 
 The backend decides what each viewer receives. Every context — self, admin review,

@@ -1,3 +1,8 @@
+---
+name: vav-batch-13-04-narratives-localization
+description: "Implement Multilingual narratives for the VAV platform."
+---
+
 # Multilingual narratives
 
 Store one narrative row per locale with length limits from configuration. Contact details and

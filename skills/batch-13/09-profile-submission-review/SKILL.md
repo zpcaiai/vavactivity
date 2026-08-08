@@ -1,3 +1,8 @@
+---
+name: vav-batch-13-09-profile-submission-review
+description: "Implement Submission and review workflow for the VAV platform."
+---
+
 # Submission and review workflow
 
 Submission freezes an immutable version and opens a review case. Reviewers judge what the

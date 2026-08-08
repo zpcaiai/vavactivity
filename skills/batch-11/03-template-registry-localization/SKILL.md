@@ -1,3 +1,8 @@
+---
+name: vav-batch-11-03-template-registry-localization
+description: "Implement Template registry and localization for the VAV platform."
+---
+
 # Template registry and localization
 
 Provide strict JSON-like variable schemas and immutable releases for zh-CN, zh-TW and en.

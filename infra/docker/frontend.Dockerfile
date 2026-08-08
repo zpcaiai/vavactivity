@@ -11,13 +11,21 @@ COPY packages/api-client/package.json ./packages/api-client/package.json
 COPY packages/contracts/package.json ./packages/contracts/package.json
 COPY packages/design-tokens/package.json ./packages/design-tokens/package.json
 COPY packages/eslint-config/package.json ./packages/eslint-config/package.json
-RUN --mount=type=cache,target=/corepack \
-    --mount=type=cache,target=/pnpm/store \
+COPY packages/experience-components/package.json ./packages/experience-components/package.json
+COPY packages/help-components/package.json ./packages/help-components/package.json
+COPY packages/journey-contracts/package.json ./packages/journey-contracts/package.json
+COPY packages/navigation-contracts/package.json ./packages/navigation-contracts/package.json
+COPY packages/search-components/package.json ./packages/search-components/package.json
+COPY packages/ui-admin/package.json ./packages/ui-admin/package.json
+COPY packages/ui-core/package.json ./packages/ui-core/package.json
+COPY packages/ui-user/package.json ./packages/ui-user/package.json
+RUN --mount=type=cache,target=/pnpm/store \
     corepack pnpm install --store-dir=/pnpm/store --frozen-lockfile --filter @vav/user-web... --filter @vav/admin-web...
 
 FROM dependencies AS development
 COPY apps ./apps
 COPY packages ./packages
+RUN corepack pnpm --filter @vav/design-tokens build
 CMD ["corepack", "pnpm", "--filter", "@vav/user-web", "dev"]
 
 FROM development AS build-user

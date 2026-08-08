@@ -2,7 +2,9 @@
 
 set -euo pipefail
 
-if [ -z "${HF_TOKEN:-}" ]; then
+HF_SYNC_DRY_RUN="${HF_SYNC_DRY_RUN:-0}"
+
+if [ "${HF_SYNC_DRY_RUN}" != "1" ] && [ -z "${HF_TOKEN:-}" ]; then
   echo "HF_TOKEN is required in environment." >&2
   exit 1
 fi
@@ -18,16 +20,19 @@ SYNC_DIR="$(mktemp -d)"
 trap 'rm -rf "${SYNC_DIR}"' EXIT
 
 echo "Preparing clean snapshot for ${HF_SPACE_REPO} (${HF_TARGET_BRANCH}) from ${SOURCE_BRANCH}"
-rsync -a \
-  --delete \
-  --exclude=".git" \
-  --exclude=".github" \
-  --exclude=".venv" \
-  --exclude="node_modules" \
-  --exclude="tests/ui/visual.spec.ts-snapshots" \
-  --exclude="apps/user-web/src/assets/images/vav-hero-couple.png" \
-  --exclude="_to_delete" \
-  "${REPO_ROOT}/" "${SYNC_DIR}/"
+if ! git -C "${REPO_ROOT}" rev-parse --verify "${SOURCE_BRANCH}^{commit}" >/dev/null 2>&1; then
+  echo "Source branch or commit does not exist: ${SOURCE_BRANCH}" >&2
+  exit 1
+fi
+SOURCE_COMMIT="$(git -C "${REPO_ROOT}" rev-parse "${SOURCE_BRANCH}^{commit}")"
+
+# Build the deployment from the requested committed revision. This prevents local
+# build products, transfer archives and other untracked files from leaking into
+# the Space snapshot.
+git -C "${REPO_ROOT}" archive --format=tar "${SOURCE_BRANCH}" | tar -xf - -C "${SYNC_DIR}"
+
+rm -rf "${SYNC_DIR}/.github" "${SYNC_DIR}/_to_delete" "${SYNC_DIR}/_transfer" \
+  "${SYNC_DIR}/artifacts" "${SYNC_DIR}/apps/design-system/storybook-static"
 
 rm -f \
   "${SYNC_DIR}/apps/user-web/src/assets/images/vav-hero-couple.png" \
@@ -70,7 +75,22 @@ git -C "${SYNC_DIR}" config user.name "github-actions[bot]"
 git -C "${SYNC_DIR}" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
 git -C "${SYNC_DIR}" add .
-git -C "${SYNC_DIR}" commit -m "Deploy ${SOURCE_BRANCH} to Hugging Face Space" --allow-empty
+
+BINARY_FILES="$(git -C "${SYNC_DIR}" diff --cached --numstat | awk '$1 == "-" || $2 == "-" {print $3}')"
+if [ -n "${BINARY_FILES}" ]; then
+  echo "Refusing to push binary files without Xet storage:" >&2
+  printf '%s\n' "${BINARY_FILES}" >&2
+  exit 1
+fi
+
+if [ "${HF_SYNC_DRY_RUN}" = "1" ]; then
+  echo "HF sync dry run passed for ${SOURCE_BRANCH}: $(git -C "${SYNC_DIR}" diff --cached --name-only | wc -l | tr -d ' ') files"
+  exit 0
+fi
+
+git -C "${SYNC_DIR}" commit \
+  -m "Deploy ${SOURCE_BRANCH} (${SOURCE_COMMIT}) to Hugging Face Space" \
+  --allow-empty
 
 git -C "${SYNC_DIR}" remote add hf "https://huggingface.co/spaces/${HF_SPACE_REPO}.git"
 
@@ -78,7 +98,20 @@ GIT_TERMINAL_PROMPT=0 GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null \
 git -C "${SYNC_DIR}" \
   -c "credential.helper=" \
   -c "credential.interactive=0" \
+  -c "http.version=HTTP/1.1" \
   -c "http.https://huggingface.co/.extraheader=Authorization: Bearer ${HF_TOKEN}" \
   push hf "HEAD:refs/heads/${HF_TARGET_BRANCH}" --force
 
-echo "HF sync complete to ${HF_SPACE_REPO}@${HF_TARGET_BRANCH}"
+REMOTE_HEAD="$(GIT_TERMINAL_PROMPT=0 GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null \
+  git -C "${SYNC_DIR}" \
+  -c "credential.helper=" \
+  -c "credential.interactive=0" \
+  -c "http.version=HTTP/1.1" \
+  -c "http.https://huggingface.co/.extraheader=Authorization: Bearer ${HF_TOKEN}" \
+  ls-remote hf "refs/heads/${HF_TARGET_BRANCH}" | awk '{print $1}')"
+if [ -z "${REMOTE_HEAD}" ]; then
+  echo "HF push completed but the remote branch could not be verified." >&2
+  exit 1
+fi
+
+echo "HF sync complete to ${HF_SPACE_REPO}@${HF_TARGET_BRANCH} (${REMOTE_HEAD})"

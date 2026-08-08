@@ -1,13 +1,15 @@
-.PHONY: admin-platform-migrate admin-platform-seed admin-platform-sync admin-capability-check \
+.PHONY: batch-26 admin-platform-migrate admin-platform-seed admin-platform-sync admin-capability-check \
 	admin-masking-test admin-approval-test admin-bulk-test admin-exception-test \
-	admin-security-test admin-platform-test admin-platform-e2e admin-evidence-build admin-completeness-verify
+	admin-security-test admin-backend-test admin-platform-test admin-platform-e2e admin-evidence-build admin-completeness-verify
+
+batch-26: admin-completeness-verify
 
 admin-platform-migrate:
-	@./scripts/run_if_available.sh docker compose exec -T api alembic upgrade head
+	@RUN_IF_TIMEOUT_SECONDS=180 RUN_IF_STATUS_FILE=build/admin/migration-status.json ./scripts/run_if_available.sh docker compose exec -T api alembic upgrade head
 
 admin-platform-seed:
-	@./scripts/run_if_available.sh docker compose exec -T api python -m vav.cli.seed_permissions
-	@./scripts/run_if_available.sh docker compose exec -T api python -m vav.cli.seed_admin_platform
+	@RUN_IF_TIMEOUT_SECONDS=180 RUN_IF_STATUS_FILE=build/admin/permissions-seed-status.json ./scripts/run_if_available.sh docker compose exec -T api python -m vav.cli.seed_permissions
+	@RUN_IF_TIMEOUT_SECONDS=180 RUN_IF_STATUS_FILE=build/admin/domain-seed-status.json ./scripts/run_if_available.sh docker compose exec -T api python -m vav.cli.seed_admin_platform
 
 admin-platform-sync:
 	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/admin/control.py sync
@@ -30,15 +32,18 @@ admin-exception-test:
 admin-security-test:
 	@./scripts/run_if_available.sh uv run --package vav-platform-api pytest services/api/tests/admin_platform/security -q
 
-admin-platform-test:
-	@./scripts/run_if_available.sh corepack pnpm --filter @vav/admin-web test
-	@./scripts/run_if_available.sh corepack pnpm --filter @vav/admin-web build
+admin-backend-test: admin-platform-migrate admin-platform-seed
+	@mkdir -p build/admin
+	@RUN_IF_TIMEOUT_SECONDS=300 RUN_IF_STATUS_FILE=build/admin/backend-test-status.json ./scripts/run_if_available.sh uv run --package vav-platform-api pytest services/api/tests/admin_platform --junitxml=build/admin/backend-junit.xml -q
 
-admin-platform-e2e:
-	@./scripts/run_if_available.sh corepack pnpm exec playwright test e2e/admin-platform
+admin-platform-test: shared-admin-web-verify
 
-admin-evidence-build:
+admin-platform-e2e: admin-platform-migrate admin-platform-seed
+	@mkdir -p build/admin
+	@RUN_IF_TIMEOUT_SECONDS=600 RUN_IF_STATUS_FILE=build/admin/browser-e2e-status.json ./scripts/run_if_available.sh NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost PLAYWRIGHT_HTML_OUTPUT_DIR=build/admin/playwright-report corepack pnpm exec playwright test e2e/admin-platform --output=build/admin/playwright-results
+
+admin-evidence-build: admin-platform-migrate admin-platform-seed admin-backend-test admin-platform-test admin-platform-e2e
 	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/admin/control.py evidence
 
-admin-completeness-verify: admin-platform-sync admin-capability-check admin-masking-test \
-	admin-approval-test admin-bulk-test admin-exception-test admin-security-test admin-platform-test admin-evidence-build
+admin-completeness-verify: admin-platform-migrate admin-platform-seed admin-platform-sync admin-capability-check \
+	admin-backend-test admin-security-test admin-platform-test admin-platform-e2e admin-evidence-build

@@ -1,3 +1,8 @@
+---
+name: vav-batch-13-02-profile-schema-taxonomies
+description: "Implement Profile schema and taxonomies for the VAV platform."
+---
+
 # Profile schema and taxonomies
 
 Version the field manifest and every controlled vocabulary. Value codes are the business

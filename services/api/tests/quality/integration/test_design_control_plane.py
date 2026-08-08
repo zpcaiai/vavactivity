@@ -29,7 +29,7 @@ async def _operator(label: str) -> UUID:
 async def test_token_release_requires_separation_and_complete_accepted_evidence() -> None:
     author = await _operator("author")
     reviewer = await _operator("reviewer")
-    version = f"22.0.{int(uuid4().hex[:2], 16)}"
+    version = f"22.0.{uuid4().int}"
     async with session_factory() as session:
         release = await design_service.create_token_release(session, author, TokenReleaseCreate(token_version=version, manifest_checksum_sha256="a" * 64, generated_checksum_sha256="b" * 64, change_summary="Production token release with generated artifact parity."))
         with pytest.raises(VavError, match="independent"):

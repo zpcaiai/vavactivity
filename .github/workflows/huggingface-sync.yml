@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       target_branch:
-        description: Branch to sync from GitHub to HF Space
+        description: Target branch in the Hugging Face Space
         required: false
         default: ""
         type: string
@@ -26,6 +26,7 @@ env:
 
 jobs:
   sync:
+    if: github.repository == 'zpcaiai/vavactivity'
     name: Sync to HF Space
     runs-on: ubuntu-latest
     steps:
@@ -51,110 +52,11 @@ jobs:
           HF_TARGET_BRANCH: ${{ github.event.inputs.target_branch || '' }}
         run: |
           set -euo pipefail
-
           SOURCE_BRANCH="${GITHUB_REF_NAME:-}"
-          if [ -z "$SOURCE_BRANCH" ]; then
-            if [ -n "${GITHUB_REF:-}" ]; then
-              SOURCE_BRANCH="${GITHUB_REF#refs/heads/}"
-            fi
-          fi
-          if [ -z "$SOURCE_BRANCH" ]; then
-            SOURCE_BRANCH="$HF_TARGET_BRANCH_DEFAULT"
-          fi
-          TARGET_BRANCH="${HF_TARGET_BRANCH:-$SOURCE_BRANCH}"
-
+          SOURCE_BRANCH="${SOURCE_BRANCH:-$HF_TARGET_BRANCH_DEFAULT}"
+          HF_TARGET_BRANCH="${HF_TARGET_BRANCH:-$SOURCE_BRANCH}"
+          export HF_TARGET_BRANCH
           echo "Source branch: $SOURCE_BRANCH"
-          echo "Configured target branch: $TARGET_BRANCH"
+          echo "Configured target branch: $HF_TARGET_BRANCH"
           echo "HF target space: $HF_SPACE_REPO"
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          HF_SYNC_DIR="${RUNNER_TEMP}/hf-sync-${GITHUB_RUN_ID}"
-          mkdir -p "$HF_SYNC_DIR"
-          rsync -a \
-            --delete \
-            --exclude=".git" \
-            --exclude=".github" \
-            --exclude=".venv" \
-            --exclude="node_modules" \
-            --exclude="tests/ui/visual.spec.ts-snapshots" \
-            --exclude="apps/user-web/src/assets/images/vav-hero-couple.png" \
-            --exclude="_to_delete" \
-            . "$HF_SYNC_DIR/"
-
-          # Remove any potentially added binary artifacts that should not be pushed to HF
-          rm -f \
-            "$HF_SYNC_DIR/apps/user-web/src/assets/images/vav-hero-couple.png" \
-            "$HF_SYNC_DIR/tests/ui/visual.spec.ts-snapshots/desktop-light-chromium-darwin.png" \
-            "$HF_SYNC_DIR/tests/ui/visual.spec.ts-snapshots/mobile-light-chromium-darwin.png" \
-            "$HF_SYNC_DIR/tests/ui/visual.spec.ts-snapshots/tablet-dark-chromium-darwin.png" \
-            "$HF_SYNC_DIR/tests/ui/visual.spec.ts-snapshots/wide-high-contrast-chromium-darwin.png"
-          rm -rf "$HF_SYNC_DIR/_to_delete"
-          rm -f "$HF_SYNC_DIR/_to_delete/"*_vav-*.tgz
-
-          # Fail fast if any binary artifacts are still present in the deploy snapshot.
-          OFFENDING_FILES=(
-            "$HF_SYNC_DIR/apps/user-web/src/assets/images/vav-hero-couple.png"
-            "$HF_SYNC_DIR/tests/ui/visual.spec.ts-snapshots/desktop-light-chromium-darwin.png"
-            "$HF_SYNC_DIR/tests/ui/visual.spec.ts-snapshots/mobile-light-chromium-darwin.png"
-            "$HF_SYNC_DIR/tests/ui/visual.spec.ts-snapshots/tablet-dark-chromium-darwin.png"
-            "$HF_SYNC_DIR/tests/ui/visual.spec.ts-snapshots/wide-high-contrast-chromium-darwin.png"
-            "$HF_SYNC_DIR/_to_delete/_vav-batch13.tgz"
-            "$HF_SYNC_DIR/_to_delete/_vav-src.tgz"
-          )
-          FOUND_OFFENDER=0
-          for file in "${OFFENDING_FILES[@]}"; do
-            if [ -f "$file" ]; then
-              echo "Found forbidden binary in HF sync snapshot: $file"
-              FOUND_OFFENDER=1
-            fi
-          done
-          if [ "$FOUND_OFFENDER" -ne 0 ]; then
-            echo "Refusing to push to Hugging Face with forbidden binaries."
-            exit 1
-          fi
-
-          if [ -f "$HF_SYNC_DIR/apps/user-web/src/assets/main.css" ]; then
-            SYNC_DIR="${HF_SYNC_DIR}"
-            python3 - <<PY
-            from pathlib import Path
-            css_path = Path("${SYNC_DIR}") / "apps/user-web/src/assets/main.css"
-            content = css_path.read_text(encoding="utf-8")
-            content = content.replace('url("./images/vav-hero-couple.png")', 'none')
-            content = content.replace("url('./images/vav-hero-couple.png')", 'none')
-            css_path.write_text(content, encoding="utf-8")
-            PY
-          fi
-
-          if ! git -C "$HF_SYNC_DIR" init -b "$TARGET_BRANCH"; then
-            echo "Failed to initialize temporary deploy repo."
-            exit 1
-          fi
-          git -C "$HF_SYNC_DIR" config user.name "github-actions[bot]"
-          git -C "$HF_SYNC_DIR" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          if ! git -C "$HF_SYNC_DIR" add .; then
-            echo "Failed to stage deploy snapshot."
-            exit 1
-          fi
-          if ! git -C "$HF_SYNC_DIR" commit -m "Deploy ${GITHUB_SHA} to Hugging Face Space" --allow-empty; then
-            echo "HF push failed:"
-            git -C "$HF_SYNC_DIR" status --short
-            exit 1
-          fi
-
-          git -C "$HF_SYNC_DIR" remote add hf "https://huggingface.co/spaces/${HF_SPACE_REPO}.git"
-          if ! GIT_TERMINAL_PROMPT=0 \
-            git -C "$HF_SYNC_DIR" \
-            -c "credential.helper=" \
-            -c "credential.interactive=0" \
-            -c "http.https://huggingface.co/.extraheader=Authorization: Bearer ${HF_TOKEN}" \
-            push hf "HEAD:refs/heads/${TARGET_BRANCH}" --force 2>&1 | tee /tmp/hf-push.log; then
-            echo "HF push failed:"
-            cat /tmp/hf-push.log
-            exit 1
-          fi
-
-          echo "Verification (remote HEAD):"
-          git -C "$HF_SYNC_DIR" -c "http.https://huggingface.co/.extraheader=Authorization: Bearer ${HF_TOKEN}" ls-remote hf "refs/heads/${TARGET_BRANCH}"
+          scripts/hf/sync-to-space.sh "$SOURCE_BRANCH"

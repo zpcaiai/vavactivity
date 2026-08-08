@@ -1,0 +1,8 @@
+module: {code: regression, owner: quality_engineering, version: "1.0.0"}
+dependencies: {required: [quality, system]}
+database: {revisions: []}
+events: {publishes: [], consumes: []}
+permissions: {prefixes: []}
+configuration: {prefixes: [REGRESSION_]}
+health: {checks: [pyramid, contracts, critical_paths, quarantine, determinism]}
+schema_version: "1.0"

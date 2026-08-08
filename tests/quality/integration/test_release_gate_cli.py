@@ -12,7 +12,9 @@ import pytest
 ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = ROOT / "scripts/quality/evaluate_release_gate.py"
 
-pytestmark = pytest.mark.skipif(not SCRIPT.exists(), reason="CLI requires the repository checkout")
+pytestmark = pytest.mark.skipif(
+    not SCRIPT.exists(), reason="CLI requires the repository checkout"
+)
 
 
 def _run(*args: str) -> tuple[int, dict[str, object]]:
@@ -35,6 +37,18 @@ def test_self_check_fixture_is_no_go() -> None:
 
 def test_self_check_is_reproducible() -> None:
     assert _run("--self-check") == _run("--self-check")
+
+
+def test_expected_fail_closed_decision_can_be_asserted() -> None:
+    code, payload = _run("--self-check", "--expect-decision", "no_go")
+    assert code == 0
+    assert payload["decision"] == "no_go"
+
+
+def test_wrong_expected_decision_fails() -> None:
+    code, payload = _run("--self-check", "--expect-decision", "go")
+    assert code == 1
+    assert payload["decision"] == "no_go"
 
 
 def test_clean_request_is_go(tmp_path: Path) -> None:
@@ -131,7 +145,8 @@ def test_empty_request_fails_closed(tmp_path: Path) -> None:
 def test_invalid_enum_value_fails_closed(tmp_path: Path) -> None:
     path = tmp_path / "request.json"
     path.write_text(
-        json.dumps({"non_waivable_failures": ["definitely_not_a_failure"]}), encoding="utf-8"
+        json.dumps({"non_waivable_failures": ["definitely_not_a_failure"]}),
+        encoding="utf-8",
     )
     code, payload = _run(str(path))
     assert code == 1

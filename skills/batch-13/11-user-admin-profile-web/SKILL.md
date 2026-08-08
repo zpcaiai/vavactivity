@@ -1,3 +1,8 @@
+---
+name: vav-batch-13-11-user-admin-profile-web
+description: "Implement Member and administrator surfaces for the VAV platform."
+---
+
 # Member and administrator surfaces
 
 The member journey is a ten-step stepper with save-and-exit, backend-reported completeness,

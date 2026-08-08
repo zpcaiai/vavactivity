@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 
 from sqlalchemy import select
 
+from vav.core.config import get_settings
 from vav.core.database import session_factory
 from vav.models.identity import Role, User, UserRole
 from vav.modules.identity.domain import UserStatus
@@ -14,10 +15,18 @@ from vav.modules.identity.security import PasswordHasher
 TEST_USER_EMAIL = "test@example.com"
 LEGACY_TEST_USER_EMAIL = "test@vav.local"
 TEST_USER_PASSWORD = "test"
+PROTECTED_ENVIRONMENTS = frozenset({"production", "dr"})
 
 
 async def seed_test_user() -> bool:
     """Create the non-privileged frontend test user once without rotating it later."""
+    environment = get_settings().environment
+    if environment in PROTECTED_ENVIRONMENTS:
+        raise RuntimeError(
+            "Refusing to create or preserve the insecure test/test account "
+            f"in protected environment: {environment}."
+        )
+
     async with session_factory() as session:
         existing = await session.scalar(
             select(User).where(User.email == TEST_USER_EMAIL).with_for_update()

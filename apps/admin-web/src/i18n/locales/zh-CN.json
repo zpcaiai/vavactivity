@@ -1,0 +1,39 @@
+{
+  "shell": {
+    "workspace": "运营工作台",
+    "operations": "VAV 运营",
+    "authorizedSession": "后端授权会话",
+    "expand": "展开",
+    "collapse": "收起导航",
+    "language": "界面语言"
+  },
+  "menu": {
+    "dashboard": "工作台",
+    "users": "用户",
+    "pages": "页面",
+    "media": "媒体库",
+    "navigation": "导航",
+    "catalog": "服务目录",
+    "commerce": "交易中心",
+    "activities": "活动中心",
+    "courses": "课程中心",
+    "counseling": "辅导中心",
+    "knowledge": "知识库中心",
+    "ai": "AI 运营中心",
+    "notifications": "通知运营中心",
+    "privacy": "隐私运营中心",
+    "interactions": "互动运营中心",
+    "relationships": "关系运营中心",
+    "system": "系统运维中心",
+    "skills": "Skill 控制台",
+    "quality": "质量治理",
+    "designSystem": "设计系统治理",
+    "experience": "体验编排",
+    "processes": "流程治理",
+    "dataGovernance": "数据完整性",
+    "adminPlatform": "统一管理平台",
+    "settings": "网站设置",
+    "admins": "管理员",
+    "audit": "审计日志"
+  }
+}

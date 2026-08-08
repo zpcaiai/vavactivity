@@ -84,8 +84,8 @@ async def _free_fixture() -> tuple[UUID, str]:
 async def test_free_membership_is_idempotent_and_allows_registered_capability() -> None:
     user_id, code = await _free_fixture()
     async with session_factory() as session:
-        first = await projection.ensure_free_membership(session, user_id)
-        second = await projection.ensure_free_membership(session, user_id)
+        first = await projection.ensure_free_membership(session, user_id, plan_code=code)
+        second = await projection.ensure_free_membership(session, user_id, plan_code=code)
         assert first["id"] == second["id"]
         summary = await service.membership_summary(session, user_id)
         assert summary["plan_code"] == code

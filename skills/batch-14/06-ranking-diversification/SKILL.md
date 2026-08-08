@@ -1,3 +1,8 @@
+---
+name: vav-batch-14-06-ranking-diversification
+description: "Implement Ranking and diversification for the VAV platform."
+---
+
 # Ranking and diversification
 
 Rank deterministically from a fixed seed, candidate snapshot and versioned

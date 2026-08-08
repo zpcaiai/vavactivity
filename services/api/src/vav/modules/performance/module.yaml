@@ -1,0 +1,8 @@
+module: {code: performance, owner: platform_performance, version: "1.0.0"}
+dependencies: {required: [quality, system]}
+database: {revisions: []}
+events: {publishes: [], consumes: []}
+permissions: {prefixes: []}
+configuration: {prefixes: [PERFORMANCE_]}
+health: {checks: [baseline, load, stress, endurance, capacity]}
+schema_version: "1.0"

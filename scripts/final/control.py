@@ -91,18 +91,61 @@ def _release_manifest_check(manifest: dict[str, Any]) -> dict[str, Any]:
     release = _as_dict(manifest.get("release_manifest"))
     artifacts = _as_list(release.get("required_artifacts"))
     missing = [item for item in artifacts if not (ROOT / item).is_file()]
-    missing_non_waivable = _as_list(manifest.get("non_waivable_gates"))
+    required_gates = [str(item) for item in _as_list(manifest.get("non_waivable_gates"))]
+    gate_artifacts = _as_dict(release.get("non_waivable_gate_artifacts"))
+    missing_non_waivable: list[str] = []
+    artifact_findings: dict[str, list[str]] = {}
     findings: list[str] = []
     if not artifacts:
         findings.append("required_artifacts_missing")
     if missing:
         findings.append("required_artifact_missing")
-    if not missing_non_waivable:
+    for item in artifacts:
+        path = ROOT / str(item)
+        if not path.is_file():
+            continue
+        try:
+            report = _as_dict(json.loads(path.read_text(encoding="utf-8")))
+        except (OSError, json.JSONDecodeError):
+            artifact_findings[str(item)] = ["invalid_json"]
+            continue
+        issues: list[str] = []
+        certification = report.get("production_certification")
+        if certification is not None and certification != "CERTIFIED":
+            issues.append("not_certified")
+        if report.get("release_allowed") is False:
+            issues.append("release_not_allowed")
+        if issues:
+            artifact_findings[str(item)] = issues
+    if artifact_findings:
+        findings.append("required_artifact_not_release_ready")
+    if not required_gates:
         findings.append("non_waivable_gates_missing")
+    for gate in required_gates:
+        artifact = gate_artifacts.get(gate)
+        if not isinstance(artifact, str) or not artifact:
+            missing_non_waivable.append(gate)
+            continue
+        path = ROOT / artifact
+        try:
+            report = _as_dict(json.loads(path.read_text(encoding="utf-8")))
+        except (OSError, json.JSONDecodeError):
+            missing_non_waivable.append(gate)
+            continue
+        if (
+            report.get("technical_status") != "PASS"
+            or report.get("production_certification") != "CERTIFIED"
+            or report.get("release_allowed") is not True
+        ):
+            missing_non_waivable.append(gate)
+    if missing_non_waivable:
+        findings.append("non_waivable_gate_not_certified")
     return {
         "status": "PASS" if not findings else "FAIL",
         "required_artifacts": artifacts,
         "missing_artifacts": missing,
+        "artifact_findings": artifact_findings,
+        "required_non_waivable_gates": required_gates,
         "missing_non_waivable_gates": missing_non_waivable,
         "findings": findings,
     }
@@ -247,7 +290,9 @@ def _observation_checks(manifest: dict[str, Any], key: str) -> dict[str, Any]:
     }
 
 
-def _launch_checks(manifest: dict[str, Any]) -> dict[str, Any]:
+def _launch_checks(
+    manifest: dict[str, Any], gate_statuses: dict[str, str] | None = None
+) -> dict[str, Any]:
     launch = _as_dict(manifest.get("launch"))
     findings: list[str] = []
     preconditions = _as_list(launch.get("preconditions"))
@@ -259,6 +304,9 @@ def _launch_checks(manifest: dict[str, Any]) -> dict[str, Any]:
     gate_checks = _as_list(launch.get("gate_checks"))
     if not gate_checks:
         findings.append("missing_gate_checks")
+    for gate, status in (gate_statuses or {}).items():
+        if status != "PASS":
+            findings.append(f"release_gate_not_passed:{gate}")
     return {
         "status": "PASS" if not findings else "FAIL",
         "preconditions": preconditions,
@@ -290,11 +338,23 @@ def _snapshot() -> dict[str, Any]:
     score = _score_check(manifest)
     go_no_go = _go_no_go_check(manifest, score)
     approvals = _approval_checks(manifest)
-    launch = _launch_checks(manifest)
     obs_24h = _observation_checks(manifest, "24h")
     obs_7d = _observation_checks(manifest, "7d")
     obs_30d = _observation_checks(manifest, "30d")
     security = _security_test_evidence()
+    launch = _launch_checks(
+        manifest,
+        {
+            "release_manifest": release_check["status"],
+            "score": score["status"],
+            "go_no_go": go_no_go["status"],
+            "approvals": approvals["status"],
+            "observation_24h": obs_24h["status"],
+            "observation_7d": obs_7d["status"],
+            "observation_30d": obs_30d["status"],
+            "security_evidence": security["status"],
+        },
+    )
     payload = {
         "schema_version": manifest["schema_version"],
         "batch": manifest["batch"],
@@ -370,7 +430,7 @@ def run(action: str) -> int:
         _print(snap["observation"], action)
         return 0 if all(item["status"] == "PASS" for item in (snap["observation"]["24h"], snap["observation"]["7d"], snap["observation"]["30d"])) else 1
 
-    if action in {"evidence-test", "evidence"}:
+    if action == "evidence-test":
         _print(snap["security_evidence"], action)
         return 0 if snap["security_evidence"]["status"] in {"PASS", "NOT_EVALUATED"} else 1
 
@@ -394,7 +454,7 @@ def run(action: str) -> int:
         _print(snap["observation"]["30d"], action)
         return 0 if snap["observation"]["30d"]["status"] in {"PASS", "NOT_EVALUATED"} else 1
 
-    if action in {"evidence-build", "release-candidate"}:
+    if action in {"evidence", "evidence-build", "release-candidate"}:
         report = {
             "schema_version": "1.0.0",
             "batch": BATCH_NUMBER,
@@ -428,17 +488,18 @@ def run(action: str) -> int:
         return 0 if report["technical_status"] in {"PASS", "NOT_CERTIFIED"} else 1
 
     if action == "certify":
-        status = "PASS" if snap["technical_status"] == "PASS" else "FAIL"
+        certified = snap["technical_status"] == "PASS" and snap["launch"]["status"] == "PASS"
+        status = "PASS" if certified else "NOT_CERTIFIED"
         result = {
             "command": action,
             "status": status,
             "technical_status": snap["technical_status"],
-            "production_certification": "NOT_CERTIFIED",
+            "production_certification": "CERTIFIED" if certified else "NOT_CERTIFIED",
             "observation": snap["observation"],
-            "release_allowed": snap["technical_status"] == "PASS",
+            "release_allowed": certified,
         }
         print(json.dumps(result, ensure_ascii=False, sort_keys=True))
-        return 0 if status == "PASS" else 1
+        return 0 if certified else 1
 
     raise ValueError(f"unsupported final action: {action}")
 

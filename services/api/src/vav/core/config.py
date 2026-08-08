@@ -26,6 +26,8 @@ class Settings(BaseSettings):
         default_factory=lambda: [
             AnyHttpUrl("http://localhost:5173"),
             AnyHttpUrl("http://localhost:5174"),
+            AnyHttpUrl("http://127.0.0.1:5173"),
+            AnyHttpUrl("http://127.0.0.1:5174"),
         ],
         validation_alias="APP_CORS_ORIGINS",
     )
@@ -89,7 +91,12 @@ class Settings(BaseSettings):
     auth_cookie_secure: bool = Field(default=False, validation_alias="AUTH_COOKIE_SECURE")
     auth_cookie_domain: str | None = Field(default=None, validation_alias="AUTH_COOKIE_DOMAIN")
     auth_allowed_origins: list[str] = Field(
-        default_factory=lambda: ["http://localhost:5173", "http://localhost:5174"],
+        default_factory=lambda: [
+            "http://localhost:5173",
+            "http://localhost:5174",
+            "http://127.0.0.1:5173",
+            "http://127.0.0.1:5174",
+        ],
         validation_alias="AUTH_ALLOWED_ORIGINS",
     )
     user_web_url: str = Field(default="http://localhost:5173", validation_alias="USER_WEB_URL")

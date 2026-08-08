@@ -1,3 +1,8 @@
+---
+name: vav-batch-13-08-completeness-versioning
+description: "Implement Completeness and immutable versions for the VAV platform."
+---
+
 # Completeness and immutable versions
 
 Completeness measures form completion only — never personal worth, marriage value, spiritual
