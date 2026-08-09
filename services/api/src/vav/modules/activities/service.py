@@ -369,9 +369,7 @@ async def localized_activity_payloads(
                     and current_ticket_localization.locale != locale
                 )
             ) and ticket_localization.locale in {locale, default_locale}:
-                ticket_localization_by_id[ticket_localization.ticket_type_id] = (
-                    ticket_localization
-                )
+                ticket_localization_by_id[ticket_localization.ticket_type_id] = ticket_localization
 
     sku_ids = [ticket.catalog_sku_id for ticket in tickets]
     prices_by_sku: dict[UUID, list[Price]] = defaultdict(list)
