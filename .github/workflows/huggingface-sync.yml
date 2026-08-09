@@ -31,13 +31,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           persist-credentials: false
 
       - name: Checkout frontend source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: zpcaiai/vavactivityWeb
           path: frontend-source

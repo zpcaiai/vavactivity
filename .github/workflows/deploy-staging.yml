@@ -24,15 +24,15 @@ jobs:
     runs-on: ubuntu-latest
     concurrency: {group: vav-staging, cancel-in-progress: false}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: {ref: "${{ inputs.release_commit }}"}
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: "${{ inputs.release_manifest_artifact }}"
           path: release
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           run-id: "${{ inputs.artifact_run_id }}"
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v9.0.0
         with: {version: "0.8.3", python-version: "3.12"}
       - uses: azure/setup-kubectl@v4
       - name: Require staging credentials

@@ -15,7 +15,7 @@ These cases produce executable local evidence without converting local results i
 | Penetration regression | Malformed JWT and spoofed admin header bypass attempts | `LOCAL_PASS`; independent test `NOT_EVALUATED` | Independent scoped penetration test and remediation closure |
 | Backup/restore | Encrypted backup integrity and isolated Postgres/object restore | `LOCAL_PASS` | Production backup selected and restored in approved isolated environment |
 | Chaos | API, Redis, worker, MinIO and scheduler stop/restart with recovery verification | `LOCAL_PASS` | Production-safe fault injection with SLO and customer-impact guardrails |
-| HA | API singleton is stopped and its outage is confirmed before recovery | `FAIL_SINGLE_INSTANCE_OUTAGE_CONFIRMED`; production HA remains `NOT_EVALUATED` | Load-balancer, replica, database failover and dependency failover evidence |
+| HA | Two local API instances behind an Nginx proxy; primary and peer are stopped separately while every probe must pass | `LOCAL_PASS`; production application/database HA remains `NOT_EVALUATED` | Production load-balancer, replica, database failover and dependency failover evidence |
 | DR | Isolated local restore only | `NOT_EVALUATED` for regional DR/RPO/RTO | Regional failover and measured production RPO/RTO exercise |
 | 24h/7d/30d observation | Append-only endpoint samples; start-anchor, cadence, latest-sample, clean-worktree and single-commit checks | `IN_PROGRESS` until wall-clock duration elapses | Production endpoints, deployed commit/artifact identity, required cadence, and every sample passing |
 

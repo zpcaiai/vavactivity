@@ -11,9 +11,9 @@ jobs:
     env:
       VAV_WEB_ROOT: ${{ github.workspace }}/web
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: {path: backend}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: zpcaiai/vavactivityWeb
           path: web

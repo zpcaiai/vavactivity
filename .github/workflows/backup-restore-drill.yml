@@ -13,11 +13,11 @@ jobs:
     environment: backup-drill
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Run encrypted backup and isolated restore
         env:
           BACKUP_ENCRYPTION_KEY_FILE: ${{ secrets.BACKUP_ENCRYPTION_KEY_FILE }}
           BACKUP_DESTINATION: ${{ vars.BACKUP_DESTINATION }}
         run: make backup backup-verify restore-drill restore-smoke
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with: {name: restore-drill-report, path: restore-reports/*.json, if-no-files-found: error}
