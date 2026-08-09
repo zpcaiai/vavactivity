@@ -14,7 +14,7 @@ project="$(docker inspect -f '{{ index .Config.Labels "com.docker.compose.projec
 started="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 docker compose stop "$service"
 if [[ "$service" == "api" ]]; then
-  if curl --silent --fail --max-time 2 http://localhost:8000/api/v1/health/live >/dev/null; then
+  if curl --noproxy '*' --silent --fail --max-time 2 http://127.0.0.1:8000/api/v1/health/live >/dev/null; then
     echo "API remained reachable despite stopping its only local instance" >&2
     exit 1
   fi

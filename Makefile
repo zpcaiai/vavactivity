@@ -636,7 +636,8 @@ safety-verify:
 
 .PHONY: manifest-check config-check config-diff migration-check contract-test system-test \
 	complete-e2e performance-smoke performance-k6-baseline backup backup-verify restore-drill \
-	restore-smoke production-readiness verify-all acceptance
+	restore-smoke production-readiness verify-all acceptance external-browser-uat \
+	external-performance-local external-security-local external-resilience-local external-observation-sample
 
 manifest-check:
 	PYTHONPATH=services/api/src .venv/bin/python scripts/diagnostics/validate_project_manifest.py
@@ -664,6 +665,21 @@ performance-smoke:
 
 performance-k6-baseline:
 	./scripts/performance/run-k6.sh tests/performance/baseline.js
+
+external-browser-uat:
+	cd ../vavactivityWeb && env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY NO_PROXY=127.0.0.1,localhost pnpm test:e2e:external-uat
+
+external-performance-local:
+	K6_PROFILE=local EVIDENCE_SCOPE=local_compose ./scripts/performance/run-external-suite.sh
+
+external-security-local:
+	.venv/bin/python scripts/security/run_blackbox_security.py
+
+external-resilience-local:
+	./scripts/resilience/run-local-resilience-suite.sh
+
+external-observation-sample:
+	.venv/bin/python scripts/observability/observe_release.py sample
 
 backup:
 	./scripts/vavctl backup

@@ -20,9 +20,9 @@ cleanup() {
 }
 trap cleanup EXIT
 
-.venv/bin/python scripts/backup/backup_crypto.py decrypt \
+scripts/backup/run-python.sh scripts/backup/backup_crypto.py decrypt \
   "$target/postgres.dump.vavenc" "$temporary/postgres.dump" --key-file "$key_file"
-.venv/bin/python scripts/backup/backup_crypto.py decrypt \
+scripts/backup/run-python.sh scripts/backup/backup_crypto.py decrypt \
   "$target/objects.tar.vavenc" "$temporary/objects.tar" --key-file "$key_file"
 
 docker run -d --name "$container" -e POSTGRES_DB=vav_restore \
@@ -41,7 +41,7 @@ test "$table_count" -gt 100 || { echo "Restored table inventory is incomplete" >
 tar -tf "$temporary/objects.tar" >/dev/null
 
 report="$report_root/restore-drill-$(date -u +%Y%m%dT%H%M%SZ).json"
-.venv/bin/python - "$report" "$target" "$revision" "$table_count" <<'PY'
+scripts/backup/run-python.sh - "$report" "$target" "$revision" "$table_count" <<'PY'
 import json, sys
 from datetime import UTC, datetime
 from pathlib import Path

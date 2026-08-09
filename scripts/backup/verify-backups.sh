@@ -13,13 +13,13 @@ test -n "$target" && test -d "$target" || { echo "No backup set found" >&2; exit
 case "$(cd "$target" && pwd)" in "$backup_root"/*) ;; *) echo "Backup set escapes destination" >&2; exit 2 ;; esac
 test -f "$key_file" || { echo "Missing backup encryption key file" >&2; exit 2; }
 
-.venv/bin/python "$repo_root/scripts/backup/build_manifest.py" verify "$target"
+scripts/backup/run-python.sh "$repo_root/scripts/backup/build_manifest.py" verify "$target"
 temporary="$(mktemp -d "${TMPDIR:-/tmp}/vav-backup-verify.XXXXXX")"
 cleanup() { rm -rf -- "$temporary"; }
 trap cleanup EXIT
 for encrypted in "$target"/*.vavenc; do
   output="$temporary/$(basename "$encrypted" .vavenc)"
-  .venv/bin/python "$repo_root/scripts/backup/backup_crypto.py" decrypt \
+  scripts/backup/run-python.sh "$repo_root/scripts/backup/backup_crypto.py" decrypt \
     "$encrypted" "$output" --key-file "$key_file"
   test -s "$output" || { echo "Decrypted artifact is empty: $encrypted" >&2; exit 1; }
 done

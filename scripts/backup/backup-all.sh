@@ -31,13 +31,13 @@ tar -C "$repo_root" -cf "$work/configuration.tar" \
   project-manifest.yaml release-manifest.yaml config deploy docs/runbooks docs/disaster-recovery
 
 for artifact in postgres.dump objects.tar configuration.tar; do
-  .venv/bin/python scripts/backup/backup_crypto.py encrypt \
+  scripts/backup/run-python.sh scripts/backup/backup_crypto.py encrypt \
     "$work/$artifact" "$destination/$artifact.vavenc" --key-file "$key_file"
 done
 
 revision="$(docker compose exec -T postgres psql -U "$postgres_user" -d "$postgres_db" -Atc 'SELECT version_num FROM alembic_version')"
 release="${APP_VERSION:-development}"
-.venv/bin/python scripts/backup/build_manifest.py build "$destination" \
+scripts/backup/run-python.sh scripts/backup/build_manifest.py build "$destination" \
   --revision "$revision" --release "$release"
 chmod -R go-rwx "$destination"
 printf 'backup completed: %s\n' "$destination"

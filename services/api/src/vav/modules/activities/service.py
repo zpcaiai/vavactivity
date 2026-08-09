@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import secrets
+from collections import defaultdict
 from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import UUID, uuid4
@@ -134,76 +135,32 @@ async def localized_activity_payload(
     locale: str,
     include_private_location: bool = False,
 ) -> dict[str, Any]:
-    localization = await session.scalar(
-        select(ActivityLocalization)
-        .where(
-            ActivityLocalization.activity_id == activity.id,
-            ActivityLocalization.locale.in_((locale, activity.default_locale)),
-        )
-        .order_by((ActivityLocalization.locale == locale).desc())
-        .limit(1)
+    payloads = await localized_activity_payloads(
+        session,
+        [activity],
+        locale=locale,
+        include_private_location=include_private_location,
     )
-    locations = list(
-        (
-            await session.scalars(
-                select(ActivityLocation).where(ActivityLocation.activity_id == activity.id)
-            )
-        ).all()
-    )
-    sessions = list(
-        (
-            await session.scalars(
-                select(ActivitySession)
-                .where(ActivitySession.activity_id == activity.id)
-                .order_by(ActivitySession.sort_order, ActivitySession.starts_at)
-            )
-        ).all()
-    )
-    ticket_types = list(
-        (
-            await session.scalars(
-                select(ActivityTicketType)
-                .where(
-                    ActivityTicketType.activity_id == activity.id,
-                    ActivityTicketType.status == "active",
-                )
-                .order_by(ActivityTicketType.sort_order, ActivityTicketType.id)
-            )
-        ).all()
-    )
-    ticket_localizations = {
-        value.ticket_type_id: value
-        for value in (
-            await session.scalars(
-                select(ActivityTicketTypeLocalization).where(
-                    ActivityTicketTypeLocalization.ticket_type_id.in_(
-                        [ticket.id for ticket in ticket_types]
-                    ),
-                    ActivityTicketTypeLocalization.locale.in_((locale, activity.default_locale)),
-                )
-            )
-        ).all()
-    }
-    current = now()
+    return payloads[0]
+
+
+def _serialize_activity_payload(
+    activity: Activity,
+    *,
+    localization: ActivityLocalization | None,
+    locations: list[ActivityLocation],
+    sessions: list[ActivitySession],
+    ticket_types: list[ActivityTicketType],
+    ticket_localizations: dict[UUID, ActivityTicketTypeLocalization],
+    prices_by_sku: dict[UUID, list[Price]],
+    inventory_by_sku: dict[UUID, InventoryItem],
+    form: ActivityRegistrationForm | None,
+    include_private_location: bool,
+) -> dict[str, Any]:
     ticket_payloads: list[dict[str, Any]] = []
     for ticket in ticket_types:
-        prices = list(
-            (
-                await session.scalars(
-                    select(Price)
-                    .where(
-                        Price.sku_id == ticket.catalog_sku_id,
-                        Price.status == "active",
-                        Price.valid_from <= current,
-                        or_(Price.valid_until.is_(None), Price.valid_until > current),
-                    )
-                    .order_by(Price.currency_code, Price.unit_amount_minor)
-                )
-            ).all()
-        )
-        inventory = await session.scalar(
-            select(InventoryItem).where(InventoryItem.sku_id == ticket.catalog_sku_id)
-        )
+        prices = prices_by_sku.get(ticket.catalog_sku_id, [])
+        inventory = inventory_by_sku.get(ticket.catalog_sku_id)
         available = available_quantity(inventory) if inventory else None
         if inventory is None or inventory.inventory_policy == "unlimited":
             availability: dict[str, Any] = {"status": "available", "remaining": None}
@@ -251,9 +208,6 @@ async def localized_activity_payload(
                 "availability": availability,
             }
         )
-    form = await session.scalar(
-        select(ActivityRegistrationForm).where(ActivityRegistrationForm.activity_id == activity.id)
-    )
     location_payload: list[dict[str, Any]] = []
     for item in locations:
         detail: dict[str, Any] = {
@@ -318,6 +272,149 @@ async def localized_activity_payload(
         ),
         "post_event_choice_enabled": activity.post_event_choice_enabled,
     }
+
+
+async def localized_activity_payloads(
+    session: AsyncSession,
+    activities: list[Activity],
+    *,
+    locale: str,
+    include_private_location: bool = False,
+) -> list[dict[str, Any]]:
+    """Serialize many activities with a fixed number of database queries."""
+    if not activities:
+        return []
+    activity_ids = [activity.id for activity in activities]
+    activity_by_id = {activity.id: activity for activity in activities}
+    supported_locales = {locale, *(activity.default_locale for activity in activities)}
+
+    localizations = list(
+        (
+            await session.scalars(
+                select(ActivityLocalization).where(
+                    ActivityLocalization.activity_id.in_(activity_ids),
+                    ActivityLocalization.locale.in_(supported_locales),
+                )
+            )
+        ).all()
+    )
+    localization_by_activity: dict[UUID, ActivityLocalization] = {}
+    for value in localizations:
+        current = localization_by_activity.get(value.activity_id)
+        if current is None or (value.locale == locale and current.locale != locale):
+            localization_by_activity[value.activity_id] = value
+
+    locations_by_activity: dict[UUID, list[ActivityLocation]] = defaultdict(list)
+    for value in (
+        await session.scalars(
+            select(ActivityLocation).where(ActivityLocation.activity_id.in_(activity_ids))
+        )
+    ).all():
+        locations_by_activity[value.activity_id].append(value)
+
+    sessions_by_activity: dict[UUID, list[ActivitySession]] = defaultdict(list)
+    for value in (
+        await session.scalars(
+            select(ActivitySession)
+            .where(ActivitySession.activity_id.in_(activity_ids))
+            .order_by(
+                ActivitySession.activity_id, ActivitySession.sort_order, ActivitySession.starts_at
+            )
+        )
+    ).all():
+        sessions_by_activity[value.activity_id].append(value)
+
+    tickets = list(
+        (
+            await session.scalars(
+                select(ActivityTicketType)
+                .where(
+                    ActivityTicketType.activity_id.in_(activity_ids),
+                    ActivityTicketType.status == "active",
+                )
+                .order_by(
+                    ActivityTicketType.activity_id,
+                    ActivityTicketType.sort_order,
+                    ActivityTicketType.id,
+                )
+            )
+        ).all()
+    )
+    tickets_by_activity: dict[UUID, list[ActivityTicketType]] = defaultdict(list)
+    ticket_by_id = {ticket.id: ticket for ticket in tickets}
+    for ticket in tickets:
+        tickets_by_activity[ticket.activity_id].append(ticket)
+
+    ticket_localization_by_id: dict[UUID, ActivityTicketTypeLocalization] = {}
+    if tickets:
+        for value in (
+            await session.scalars(
+                select(ActivityTicketTypeLocalization).where(
+                    ActivityTicketTypeLocalization.ticket_type_id.in_(ticket_by_id),
+                    ActivityTicketTypeLocalization.locale.in_(supported_locales),
+                )
+            )
+        ).all():
+            current = ticket_localization_by_id.get(value.ticket_type_id)
+            ticket = ticket_by_id[value.ticket_type_id]
+            default_locale = activity_by_id[ticket.activity_id].default_locale
+            if (
+                current is None or (value.locale == locale and current.locale != locale)
+            ) and value.locale in {locale, default_locale}:
+                ticket_localization_by_id[value.ticket_type_id] = value
+
+    sku_ids = [ticket.catalog_sku_id for ticket in tickets]
+    prices_by_sku: dict[UUID, list[Price]] = defaultdict(list)
+    inventory_by_sku: dict[UUID, InventoryItem] = {}
+    if sku_ids:
+        current_time = now()
+        for value in (
+            await session.scalars(
+                select(Price)
+                .where(
+                    Price.sku_id.in_(sku_ids),
+                    Price.status == "active",
+                    Price.valid_from <= current_time,
+                    or_(Price.valid_until.is_(None), Price.valid_until > current_time),
+                )
+                .order_by(Price.sku_id, Price.currency_code, Price.unit_amount_minor)
+            )
+        ).all():
+            prices_by_sku[value.sku_id].append(value)
+        inventory_by_sku = {
+            value.sku_id: value
+            for value in (
+                await session.scalars(
+                    select(InventoryItem).where(InventoryItem.sku_id.in_(sku_ids))
+                )
+            ).all()
+        }
+
+    form_by_activity = {
+        value.activity_id: value
+        for value in (
+            await session.scalars(
+                select(ActivityRegistrationForm).where(
+                    ActivityRegistrationForm.activity_id.in_(activity_ids)
+                )
+            )
+        ).all()
+    }
+    return [
+        _serialize_activity_payload(
+            activity,
+            localization=localization_by_activity.get(activity.id),
+            locations=locations_by_activity.get(activity.id, []),
+            sessions=sessions_by_activity.get(activity.id, []),
+            ticket_types=tickets_by_activity.get(activity.id, []),
+            ticket_localizations=ticket_localization_by_id,
+            prices_by_sku=prices_by_sku,
+            inventory_by_sku=inventory_by_sku,
+            form=form_by_activity.get(activity.id),
+            include_private_location=include_private_location,
+        )
+        for activity in activities
+    ]
 
 
 def transition_registration(

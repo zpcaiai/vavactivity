@@ -119,49 +119,34 @@ async def _public_product_payload(
     currency: str | None,
     at: datetime,
 ) -> dict[str, object]:
-    localized, fallback_used = await _localization(session, product.id, locale)
-    if localized is None:
+    payloads = await _public_product_payloads(
+        session, [product], locale=locale, currency=currency, at=at
+    )
+    payload = payloads.get(product.id)
+    if payload is None:
         raise VavError(
             "CATALOG_TRANSLATION_UNAVAILABLE",
             "Product translation is unavailable.",
             status_code=404,
         )
-    skus = list(
-        (
-            await session.scalars(
-                select(ProductSku)
-                .where(
-                    ProductSku.product_id == product.id,
-                    ProductSku.status == SkuStatus.ACTIVE,
-                )
-                .order_by(ProductSku.created_at, ProductSku.id)
-            )
-        ).all()
-    )
+    return payload
+
+
+def _serialize_public_product(
+    product: Product,
+    *,
+    localized: ProductLocalization,
+    fallback_used: bool,
+    skus: list[ProductSku],
+    prices_by_sku: dict[UUID, list[Price]],
+    inventory_by_sku: dict[UUID, InventoryItem],
+    at: datetime,
+) -> dict[str, object]:
     public_skus: list[dict[str, object]] = []
     for sku in skus:
         if not _window_active(sku.purchasable_from, sku.purchasable_until, at):
             continue
-        price_query = (
-            select(Price)
-            .join(PriceBook, PriceBook.id == Price.price_book_id)
-            .where(
-                Price.sku_id == sku.id,
-                Price.status == "active",
-                Price.valid_from <= at,
-                or_(Price.valid_until.is_(None), Price.valid_until > at),
-                PriceBook.status == "active",
-                or_(PriceBook.valid_from.is_(None), PriceBook.valid_from <= at),
-                or_(PriceBook.valid_until.is_(None), PriceBook.valid_until > at),
-            )
-            .order_by(Price.currency_code, Price.unit_amount_minor, Price.id)
-        )
-        if currency:
-            price_query = price_query.where(Price.currency_code == currency.upper())
-        prices = list((await session.scalars(price_query)).all())
-        inventory = await session.scalar(
-            select(InventoryItem).where(InventoryItem.sku_id == sku.id)
-        )
+        prices = prices_by_sku.get(sku.id, [])
         public_skus.append(
             {
                 "id": str(sku.id),
@@ -183,7 +168,7 @@ async def _public_product_payload(
                     }
                     for price in prices
                 ],
-                "availability": availability_payload(inventory),
+                "availability": availability_payload(inventory_by_sku.get(sku.id)),
             }
         )
     return {
@@ -209,6 +194,94 @@ async def _public_product_payload(
         "seo_description": localized.seo_description,
         "cover_media_id": (str(localized.cover_media_id) if localized.cover_media_id else None),
         "skus": public_skus,
+    }
+
+
+async def _public_product_payloads(
+    session: AsyncSession,
+    products: list[Product],
+    *,
+    locale: str,
+    currency: str | None,
+    at: datetime,
+) -> dict[UUID, dict[str, object]]:
+    if not products:
+        return {}
+    product_ids = [product.id for product in products]
+    localizations = list(
+        (
+            await session.scalars(
+                select(ProductLocalization).where(
+                    ProductLocalization.product_id.in_(product_ids),
+                    ProductLocalization.locale.in_((locale, "zh-CN")),
+                    ProductLocalization.translation_status == "ready",
+                )
+            )
+        ).all()
+    )
+    localization_by_product: dict[UUID, tuple[ProductLocalization, bool]] = {}
+    for value in localizations:
+        current = localization_by_product.get(value.product_id)
+        if current is None or (value.locale == locale and current[0].locale != locale):
+            localization_by_product[value.product_id] = (value, value.locale != locale)
+
+    skus = list(
+        (
+            await session.scalars(
+                select(ProductSku)
+                .where(
+                    ProductSku.product_id.in_(product_ids),
+                    ProductSku.status == SkuStatus.ACTIVE,
+                )
+                .order_by(ProductSku.product_id, ProductSku.created_at, ProductSku.id)
+            )
+        ).all()
+    )
+    skus_by_product: dict[UUID, list[ProductSku]] = {}
+    for sku in skus:
+        skus_by_product.setdefault(sku.product_id, []).append(sku)
+    sku_ids = [sku.id for sku in skus]
+    prices_by_sku: dict[UUID, list[Price]] = {}
+    inventory_by_sku: dict[UUID, InventoryItem] = {}
+    if sku_ids:
+        price_query = (
+            select(Price)
+            .join(PriceBook, PriceBook.id == Price.price_book_id)
+            .where(
+                Price.sku_id.in_(sku_ids),
+                Price.status == "active",
+                Price.valid_from <= at,
+                or_(Price.valid_until.is_(None), Price.valid_until > at),
+                PriceBook.status == "active",
+                or_(PriceBook.valid_from.is_(None), PriceBook.valid_from <= at),
+                or_(PriceBook.valid_until.is_(None), PriceBook.valid_until > at),
+            )
+            .order_by(Price.sku_id, Price.currency_code, Price.unit_amount_minor, Price.id)
+        )
+        if currency:
+            price_query = price_query.where(Price.currency_code == currency.upper())
+        for price in (await session.scalars(price_query)).all():
+            prices_by_sku.setdefault(price.sku_id, []).append(price)
+        inventory_by_sku = {
+            item.sku_id: item
+            for item in (
+                await session.scalars(
+                    select(InventoryItem).where(InventoryItem.sku_id.in_(sku_ids))
+                )
+            ).all()
+        }
+    return {
+        product.id: _serialize_public_product(
+            product,
+            localized=localization_by_product[product.id][0],
+            fallback_used=localization_by_product[product.id][1],
+            skus=skus_by_product.get(product.id, []),
+            prices_by_sku=prices_by_sku,
+            inventory_by_sku=inventory_by_sku,
+            at=at,
+        )
+        for product in products
+        if product.id in localization_by_product
     }
 
 
@@ -485,32 +558,31 @@ async def public_products(
             )
         ).all()
     )
+    payloads = await _public_product_payloads(
+        session, products, locale=locale, currency=currency, at=at
+    )
     items: list[dict[str, object]] = []
     for product in products:
-        try:
-            payload = await _public_product_payload(
-                session, product, locale=locale, currency=currency, at=at
-            )
-            if available_only:
-                public_skus = payload.get("skus")
-                has_availability = False
-                if isinstance(public_skus, list):
-                    for public_sku in public_skus:
-                        if not isinstance(public_sku, dict):
-                            continue
-                        availability = public_sku.get("availability")
-                        if isinstance(availability, dict) and availability.get("status") in {
-                            "available",
-                            "low_stock",
-                        }:
-                            has_availability = True
-                            break
-                if not has_availability:
-                    continue
-            items.append(payload)
-        except VavError as error:
-            if error.code != "CATALOG_TRANSLATION_UNAVAILABLE":
-                raise
+        payload = payloads.get(product.id)
+        if payload is None:
+            continue
+        if available_only:
+            public_skus = payload.get("skus")
+            has_availability = False
+            if isinstance(public_skus, list):
+                for public_sku in public_skus:
+                    if not isinstance(public_sku, dict):
+                        continue
+                    availability = public_sku.get("availability")
+                    if isinstance(availability, dict) and availability.get("status") in {
+                        "available",
+                        "low_stock",
+                    }:
+                        has_availability = True
+                        break
+            if not has_availability:
+                continue
+        items.append(payload)
     return success(
         {"items": items, "page": page, "page_size": page_size},
         request_id_from_request(request),

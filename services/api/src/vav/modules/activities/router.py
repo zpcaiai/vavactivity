@@ -61,6 +61,7 @@ from vav.modules.activities.service import (
     attendance_service,
     grouping_service,
     localized_activity_payload,
+    localized_activity_payloads,
     mutual_choice_service,
     publication_service,
     registration_payload,
@@ -134,10 +135,7 @@ async def list_public_activities(
             )
         ).all()
     )
-    data = [
-        await localized_activity_payload(session, activity, locale=locale)
-        for activity in activities
-    ]
+    data = await localized_activity_payloads(session, activities, locale=locale)
     return success({"items": data}, request_id_from_request(request))
 
 
