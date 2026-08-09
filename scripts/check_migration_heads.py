@@ -4,11 +4,12 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 
 
 def main() -> None:
     result = subprocess.run(
-        ["alembic", "heads"],
+        [sys.executable, "-m", "alembic", "heads"],
         check=True,
         capture_output=True,
         text=True,
@@ -22,4 +23,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

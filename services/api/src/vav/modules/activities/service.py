@@ -299,21 +299,23 @@ async def localized_activity_payloads(
         ).all()
     )
     localization_by_activity: dict[UUID, ActivityLocalization] = {}
-    for value in localizations:
-        current = localization_by_activity.get(value.activity_id)
-        if current is None or (value.locale == locale and current.locale != locale):
-            localization_by_activity[value.activity_id] = value
+    for localization in localizations:
+        current_localization = localization_by_activity.get(localization.activity_id)
+        if current_localization is None or (
+            localization.locale == locale and current_localization.locale != locale
+        ):
+            localization_by_activity[localization.activity_id] = localization
 
     locations_by_activity: dict[UUID, list[ActivityLocation]] = defaultdict(list)
-    for value in (
+    for location in (
         await session.scalars(
             select(ActivityLocation).where(ActivityLocation.activity_id.in_(activity_ids))
         )
     ).all():
-        locations_by_activity[value.activity_id].append(value)
+        locations_by_activity[location.activity_id].append(location)
 
     sessions_by_activity: dict[UUID, list[ActivitySession]] = defaultdict(list)
-    for value in (
+    for activity_session in (
         await session.scalars(
             select(ActivitySession)
             .where(ActivitySession.activity_id.in_(activity_ids))
@@ -322,7 +324,7 @@ async def localized_activity_payloads(
             )
         )
     ).all():
-        sessions_by_activity[value.activity_id].append(value)
+        sessions_by_activity[activity_session.activity_id].append(activity_session)
 
     tickets = list(
         (
@@ -347,7 +349,7 @@ async def localized_activity_payloads(
 
     ticket_localization_by_id: dict[UUID, ActivityTicketTypeLocalization] = {}
     if tickets:
-        for value in (
+        for ticket_localization in (
             await session.scalars(
                 select(ActivityTicketTypeLocalization).where(
                     ActivityTicketTypeLocalization.ticket_type_id.in_(ticket_by_id),
@@ -355,20 +357,28 @@ async def localized_activity_payloads(
                 )
             )
         ).all():
-            current = ticket_localization_by_id.get(value.ticket_type_id)
-            ticket = ticket_by_id[value.ticket_type_id]
+            current_ticket_localization = ticket_localization_by_id.get(
+                ticket_localization.ticket_type_id
+            )
+            ticket = ticket_by_id[ticket_localization.ticket_type_id]
             default_locale = activity_by_id[ticket.activity_id].default_locale
             if (
-                current is None or (value.locale == locale and current.locale != locale)
-            ) and value.locale in {locale, default_locale}:
-                ticket_localization_by_id[value.ticket_type_id] = value
+                current_ticket_localization is None
+                or (
+                    ticket_localization.locale == locale
+                    and current_ticket_localization.locale != locale
+                )
+            ) and ticket_localization.locale in {locale, default_locale}:
+                ticket_localization_by_id[ticket_localization.ticket_type_id] = (
+                    ticket_localization
+                )
 
     sku_ids = [ticket.catalog_sku_id for ticket in tickets]
     prices_by_sku: dict[UUID, list[Price]] = defaultdict(list)
     inventory_by_sku: dict[UUID, InventoryItem] = {}
     if sku_ids:
         current_time = now()
-        for value in (
+        for price in (
             await session.scalars(
                 select(Price)
                 .where(
@@ -380,10 +390,10 @@ async def localized_activity_payloads(
                 .order_by(Price.sku_id, Price.currency_code, Price.unit_amount_minor)
             )
         ).all():
-            prices_by_sku[value.sku_id].append(value)
+            prices_by_sku[price.sku_id].append(price)
         inventory_by_sku = {
-            value.sku_id: value
-            for value in (
+            inventory_item.sku_id: inventory_item
+            for inventory_item in (
                 await session.scalars(
                     select(InventoryItem).where(InventoryItem.sku_id.in_(sku_ids))
                 )
@@ -391,8 +401,8 @@ async def localized_activity_payloads(
         }
 
     form_by_activity = {
-        value.activity_id: value
-        for value in (
+        form.activity_id: form
+        for form in (
             await session.scalars(
                 select(ActivityRegistrationForm).where(
                     ActivityRegistrationForm.activity_id.in_(activity_ids)
