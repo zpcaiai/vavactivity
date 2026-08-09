@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v9.0.0
         with: {version: "0.8.3", python-version: "3.12", enable-cache: true}
-      - uses: azure/setup-kubectl@v4
+      - uses: azure/setup-kubectl@v5
       - run: uv sync --frozen --all-packages --all-groups
       - run: PYTHONPATH=services/api/src uv run python scripts/diagnostics/validate_project_manifest.py
       - run: PYTHONPATH=services/api/src uv run python scripts/diagnostics/validate_environment_config.py

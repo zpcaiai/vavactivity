@@ -33,7 +33,7 @@ jobs:
           run-id: "${{ inputs.artifact_run_id }}"
       - uses: astral-sh/setup-uv@v9.0.0
         with: {version: "0.8.3", python-version: "3.12"}
-      - uses: azure/setup-kubectl@v4
+      - uses: azure/setup-kubectl@v5
       - run: uv sync --frozen --all-packages --all-groups
       - run: PRODUCTION_READINESS_MODE=production READINESS_EVIDENCE_DIR=readiness-evidence PRODUCTION_RELEASE_VERSION="${{ inputs.release_version }}" PRODUCTION_RELEASE_COMMIT="${{ inputs.release_commit }}" ./scripts/release/production-readiness.sh
       - run: |
@@ -61,7 +61,7 @@ jobs:
           run-id: "${{ inputs.artifact_run_id }}"
       - uses: astral-sh/setup-uv@v9.0.0
         with: {version: "0.8.3", python-version: "3.12"}
-      - uses: azure/setup-kubectl@v4
+      - uses: azure/setup-kubectl@v5
       - name: Require production credentials
         env: {KUBE_CONFIG: "${{ secrets.PRODUCTION_KUBECONFIG }}"}
         run: test -n "$KUBE_CONFIG" && printf '%s' "$KUBE_CONFIG" | base64 -d > "$RUNNER_TEMP/kubeconfig"
