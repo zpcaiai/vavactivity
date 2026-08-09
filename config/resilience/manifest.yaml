@@ -1,6 +1,8 @@
 schema_version: "1.0.0"
 batch: 31
 name: vav-resilience-and-ha
+evidence_scope: offline_policy_and_simulation_fixture
+external_evidence_required: true
 slos:
   - code: SLO-API-P95
     objective: 0.995
@@ -119,45 +121,30 @@ degradation:
     min_user_task_throughput_ratio: 0.8
 chaos:
   allowed: true
-  approved: true
+  approval_required: true
   max_duration_seconds: 780
   tests:
     - name: pod-kill-api
-      status: passed
       severity: medium
     - name: cpu-spike-worker
-      status: passed
       severity: high
     - name: region-partition
-      status: passed
       severity: critical
 backup_restore:
-  backup_window_minutes: 20
-  restore_time_minutes: 35
-  restore_tested: true
-  consistency_checks_passed: true
+  max_backup_window_minutes: 20
+  max_restore_time_minutes: 35
+  consistency_checks_required: true
 disaster_recovery:
-  exercise_executed: true
-  rto_minutes: 115
-  rpo_minutes: 7
-  data_integrity_verified: true
+  rto_target_minutes: 180
+  rpo_target_minutes: 10
+  data_integrity_verification_required: true
 incident_management:
   requires_postmortem_sev0: true
   requires_postmortem_sev1: true
-  postmortem_examples:
-    - severity: sev2
-      completed: true
-    - severity: sev1
-      completed: true
-    - severity: sev0
-      completed: true
 security:
-  critical_findings: 0
-  auth_bypass_detected: false
-  open_incidents: 0
-  secrets_in_logs_detected: 0
+  critical_findings_max: 0
+  auth_bypass_forbidden: true
+  open_incidents_max: 0
+  secrets_in_logs_max: 0
 resilience_tests:
-  chaos_exit_codes:
-    pod-kill: 0
-    db-lag: 0
-    provider-delay: 0
+  required_scenarios: [pod-kill, db-lag, provider-delay]

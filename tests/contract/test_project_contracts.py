@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import yaml
@@ -9,8 +10,11 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_every_backend_module_declares_a_production_contract() -> None:
+    project = yaml.safe_load(
+        (ROOT / "project-manifest.yaml").read_text(encoding="utf-8")
+    )
+    declared = project["production_assembly"]["modules"]
     modules = sorted((ROOT / "services/api/src/vav/modules").glob("*/module.yaml"))
-    assert len(modules) == 25
     codes: set[str] = set()
     revisions: list[int] = []
     for path in modules:
@@ -20,8 +24,20 @@ def test_every_backend_module_declares_a_production_contract() -> None:
         assert contract["module"]["version"]
         assert contract["health"]
         revisions.extend(contract["database"]["revisions"])
-    assert len(codes) == 25
-    assert sorted(revisions) == list(range(1, 93))
+    migration_numbers = []
+    for path in sorted((ROOT / "services/api/migrations/versions").glob("*.py")):
+        match = re.search(
+            r'^revision[^=]*=\s*"[^\"]+_([0-9]+)"',
+            path.read_text(encoding="utf-8"),
+            re.MULTILINE,
+        )
+        assert match, f"missing migration revision metadata: {path.name}"
+        migration_numbers.append(int(match.group(1)))
+    assert sorted(codes) == declared
+    assert len(codes) >= 28
+    assert sorted(revisions) == sorted(migration_numbers)
+    assert sorted(migration_numbers) == list(range(1, max(migration_numbers) + 1))
+    assert len(migration_numbers) >= 94
 
 
 def test_openapi_operation_ids_and_routes_are_unique() -> None:

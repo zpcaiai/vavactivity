@@ -6,7 +6,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
+import shutil
 import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
@@ -18,6 +20,9 @@ from vav.core.evidence import combined_status, command_evidence, sha256_file
 
 ROOT = Path(__file__).resolve().parents[2]
 BUILD = ROOT / "build" / "ui"
+WEB_ROOT = Path(
+    os.environ.get("VAV_WEB_ROOT", str(ROOT.parent / "vavactivityWeb"))
+).resolve()
 
 
 def load_yaml(path: Path) -> dict[str, Any]:
@@ -41,27 +46,39 @@ def sha256(path: Path) -> str:
 
 
 def git_commit() -> str:
-    return subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
+    supplied = os.environ.get("VAV_GIT_COMMIT")
+    if supplied:
+        if not re.fullmatch(r"[0-9a-f]{40}", supplied):
+            raise ValueError("VAV_GIT_COMMIT must be a full lowercase Git commit")
+        return supplied
+    try:
+        commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise ValueError("Git commit identity is unavailable") from exc
+    if not re.fullmatch(r"[0-9a-f]{40}", commit):
+        raise ValueError("Git returned an invalid commit identity")
+    return commit
 
 
 def token_check() -> dict[str, Any]:
     config = load_yaml(ROOT / "config/ui/style-exceptions.yaml")
-    manifest = load_yaml(ROOT / "packages/design-tokens/design-token-manifest.yaml")
+    manifest = load_yaml(WEB_ROOT / "packages/design-tokens/design-token-manifest.yaml")
     categories = set(manifest.get("sources", {}))
     required = {"primitive", "semantic", "component", "layout", "motion", "density"}
     if categories != required:
         raise ValueError(
             f"token manifest categories differ: {sorted(categories ^ required)}"
         )
+    package_manager = ["corepack", "pnpm"] if shutil.which("corepack") else ["pnpm"]
     subprocess.run(
-        ["corepack", "pnpm", "--filter", "@vav/design-tokens", "build"],
-        cwd=ROOT,
+        [*package_manager, "--filter", "@vav/design-tokens", "build"],
+        cwd=WEB_ROOT,
         check=True,
     )
     patterns = {
@@ -89,7 +106,7 @@ def token_check() -> dict[str, Any]:
             )
     files = 0
     for configured in config["governed_paths"]:
-        for path in sorted((ROOT / configured).rglob("*")):
+        for path in sorted((WEB_ROOT / configured).rglob("*")):
             if path.suffix not in {".css", ".vue"}:
                 continue
             files += 1
@@ -99,7 +116,7 @@ def token_check() -> dict[str, Any]:
                     for match in pattern.finditer(line):
                         violations.append(
                             {
-                                "file": str(path.relative_to(ROOT)),
+                                "file": str(path.relative_to(WEB_ROOT)),
                                 "line": line_number,
                                 "kind": kind,
                                 "value": match.group(0),
@@ -112,7 +129,7 @@ def token_check() -> dict[str, Any]:
         "skills": len(skill_files),
         "violations": violations,
         "generated": {
-            name: sha256(ROOT / f"packages/design-tokens/generated/tokens.{name}")
+            name: sha256(WEB_ROOT / f"packages/design-tokens/generated/tokens.{name}")
             for name in ("css", "json", "ts", "scss")
         },
     }
@@ -133,7 +150,7 @@ def page_audit() -> dict[str, Any]:
     }
     audited: list[dict[str, Any]] = []
     for app in ("user-web", "admin-web"):
-        router = ROOT / "apps" / app / "src/router/index.ts"
+        router = WEB_ROOT / "apps" / app / "src/router/index.ts"
         source = router.read_text(encoding="utf-8")
         imports = {
             name: location
@@ -159,7 +176,7 @@ def page_audit() -> dict[str, Any]:
             location = imports.get(component)
             if not location:
                 continue
-            file_path = ROOT / "apps" / app / "src" / location
+            file_path = WEB_ROOT / "apps" / app / "src" / location
             body = file_path.read_text(encoding="utf-8") if file_path.exists() else ""
             page_heading = bool(
                 re.search(r"<(?:h1|UserPageLayout|ReviewWorkbench)\b", body)
@@ -171,7 +188,7 @@ def page_audit() -> dict[str, Any]:
                     "application": app,
                     "route_path": route_path,
                     "component": component,
-                    "source": str(file_path.relative_to(ROOT)),
+                    "source": str(file_path.relative_to(WEB_ROOT)),
                     "heading_contract": "page"
                     if page_heading
                     else "application_shell"
@@ -205,19 +222,19 @@ def page_audit() -> dict[str, Any]:
     catalog_stale = sorted(catalog_routes - audited_routes)
     shell_checks = {
         "user_skip_link": "<VSkipLink"
-        in (ROOT / "apps/user-web/src/layouts/PublicLayout.vue").read_text(
+        in (WEB_ROOT / "apps/user-web/src/layouts/PublicLayout.vue").read_text(
             encoding="utf-8"
         ),
         "user_main": 'id="main-content"'
-        in (ROOT / "apps/user-web/src/layouts/PublicLayout.vue").read_text(
+        in (WEB_ROOT / "apps/user-web/src/layouts/PublicLayout.vue").read_text(
             encoding="utf-8"
         ),
         "admin_skip_link": "<VSkipLink"
-        in (ROOT / "apps/admin-web/src/layouts/AdminLayout.vue").read_text(
+        in (WEB_ROOT / "apps/admin-web/src/layouts/AdminLayout.vue").read_text(
             encoding="utf-8"
         ),
         "admin_main": 'id="admin-main"'
-        in (ROOT / "apps/admin-web/src/layouts/AdminLayout.vue").read_text(
+        in (WEB_ROOT / "apps/admin-web/src/layouts/AdminLayout.vue").read_text(
             encoding="utf-8"
         ),
     }

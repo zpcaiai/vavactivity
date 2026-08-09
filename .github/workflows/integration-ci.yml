@@ -20,6 +20,9 @@ jobs:
       - name: Configure split checkout
         working-directory: backend
         run: cp .env.example .env && ./scripts/generate-dev-auth-keys.sh
+      - name: Verify frontend handoff contracts
+        working-directory: backend
+        run: python3 scripts/diagnostics/check_frontend_contracts.py
       - run: docker compose config --quiet
         working-directory: backend
       - run: docker compose up -d --build

@@ -6,6 +6,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
+import re
 import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
@@ -15,15 +17,13 @@ ROOT = Path(__file__).resolve().parents[2]
 REQUIRED_ARTIFACTS = (
     "schemas/skill-manifest.schema.json",
     "packages/skill-sdk-python/pyproject.toml",
-    "packages/skill-sdk-typescript/package.json",
-    "packages/skill-ui-sdk/package.json",
     "packages/skill-cli/pyproject.toml",
     "services/skill-runtime/pyproject.toml",
     "services/api/src/vav/modules/skills_platform/service.py",
     "services/api/src/vav/modules/skills_platform/registry_ingestion.py",
     "services/api/migrations/versions/20260806_0086_skill_registry_governance.py",
-    "extensions/vav-skills-vscode/package.json",
-    "apps/admin-web/src/pages/SkillManagementPage.vue",
+    "packages/contracts/openapi.json",
+    "config/frontend/admin-route-permissions.json",
     "registry/trust-roots.json",
     "registry/revoked-signatures.json",
 )
@@ -51,14 +51,27 @@ def digest(path: Path) -> str:
 
 
 def git_commit() -> str:
-    result = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    return result.stdout.strip()
+    supplied = os.environ.get("VAV_GIT_COMMIT")
+    if supplied:
+        if not re.fullmatch(r"[0-9a-f]{40}", supplied):
+            raise SystemExit("VAV_GIT_COMMIT must be a full lowercase Git commit")
+        return supplied
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise SystemExit(
+            "Git commit identity is unavailable; set VAV_GIT_COMMIT in hermetic runtimes"
+        ) from exc
+    commit = result.stdout.strip()
+    if not re.fullmatch(r"[0-9a-f]{40}", commit):
+        raise SystemExit("Git returned an invalid commit identity")
+    return commit
 
 
 def validate_registry() -> dict[str, str]:

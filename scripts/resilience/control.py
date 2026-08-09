@@ -7,6 +7,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
+import re
 import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
@@ -61,13 +63,75 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
 
 def _git_commit() -> str:
-    return subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
+    supplied = os.environ.get("VAV_GIT_COMMIT")
+    if supplied:
+        if not re.fullmatch(r"[0-9a-f]{40}", supplied):
+            raise ValueError("VAV_GIT_COMMIT must be a full lowercase Git commit")
+        return supplied
+    try:
+        commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise ValueError("Git commit identity is unavailable") from exc
+    if not re.fullmatch(r"[0-9a-f]{40}", commit):
+        raise ValueError("Git returned an invalid commit identity")
+    return commit
+
+
+def _external_evidence(name: str) -> dict[str, Any]:
+    directory = os.environ.get("RESILIENCE_EVIDENCE_DIR")
+    if not directory:
+        return {
+            "status": "NOT_EVALUATED",
+            "reason": "RESILIENCE_EVIDENCE_DIR is not set",
+        }
+    path = Path(directory) / f"{name}.json"
+    if not path.is_file():
+        return {
+            "status": "NOT_EVALUATED",
+            "reason": f"external evidence is missing: {path}",
+        }
+    try:
+        payload = _as_dict(json.loads(path.read_text(encoding="utf-8")))
+    except (OSError, json.JSONDecodeError) as exc:
+        return {"status": "FAIL", "reason": f"invalid external evidence: {exc}"}
+    status = str(payload.get("status", "FAIL"))
+    if status not in {"PASS", "FAIL"}:
+        return {"status": "FAIL", "reason": "external status must be PASS or FAIL"}
+    if payload.get("git_commit") != _git_commit():
+        return {"status": "FAIL", "reason": "external evidence commit mismatch"}
+    if not re.fullmatch(r"[0-9a-f]{64}", str(payload.get("artifact_sha256", ""))):
+        return {"status": "FAIL", "reason": "external evidence checksum missing"}
+    if not payload.get("completed_at"):
+        return {"status": "FAIL", "reason": "external evidence completion time missing"}
+    return {
+        "status": status,
+        "path": str(path),
+        "artifact_sha256": payload["artifact_sha256"],
+        "completed_at": payload["completed_at"],
+    }
+
+
+def _bind_external(name: str, evaluation: dict[str, Any]) -> dict[str, Any]:
+    evidence = _external_evidence(name)
+    policy_status = str(evaluation.get("status", "FAIL"))
+    if policy_status == "FAIL" or evidence["status"] == "FAIL":
+        status = "FAIL"
+    elif evidence["status"] == "PASS":
+        status = "PASS"
+    else:
+        status = "NOT_EVALUATED"
+    return {
+        **evaluation,
+        "policy_status": policy_status,
+        "status": status,
+        "external_evidence": evidence,
+    }
 
 
 def _write(name: str, payload: dict[str, Any]) -> str:
@@ -90,7 +154,9 @@ def _manifest() -> dict[str, Any]:
 
 
 def _checksum(manifest: dict[str, Any]) -> str:
-    return hashlib.sha256(json.dumps(manifest, sort_keys=True, default=str).encode("utf-8")).hexdigest()
+    return hashlib.sha256(
+        json.dumps(manifest, sort_keys=True, default=str).encode("utf-8")
+    ).hexdigest()
 
 
 def _slo_checks(manifest: dict[str, Any]) -> dict[str, Any]:
@@ -230,9 +296,14 @@ def _synthetic_monitor_checks(manifest: dict[str, Any]) -> dict[str, Any]:
     if cadence <= 0 or cadence > 60:
         checks.append("invalid_cadence")
     critical_tests = [item for item in tests if _as_bool(item.get("critical"))]
-    critical_not_covered = sum(1 for item in critical_tests if not (
-        _as_bool(item.get("covered")) or str(item.get("status", "")).lower() == "passed"
-    ))
+    critical_not_covered = sum(
+        1
+        for item in critical_tests
+        if not (
+            _as_bool(item.get("covered"))
+            or str(item.get("status", "")).lower() == "passed"
+        )
+    )
 
     if critical_not_covered:
         checks.append(f"critical_synthetic_not_covered:{critical_not_covered}")
@@ -416,26 +487,19 @@ def _chaos_checks(manifest: dict[str, Any]) -> dict[str, Any]:
     findings: list[str] = []
     if not _as_bool(chaos.get("allowed")):
         findings.append("chaos_not_allowed")
-    if not _as_bool(chaos.get("approved")):
-        findings.append("chaos_not_approved")
+    if not _as_bool(chaos.get("approval_required")):
+        findings.append("chaos_approval_not_required")
     max_duration = _as_int(chaos.get("max_duration_seconds"), 0)
     if max_duration <= 0:
         findings.append("max_duration_invalid")
-    passed_tests = [item for item in tests if str(item.get("status", "")).lower() == "passed"]
-    failed_tests = [item for item in tests if str(item.get("status", "")).lower() != "passed"]
-    if failed_tests:
-        findings.append(f"chaos_tests_failed:{len(failed_tests)}")
+    if not tests:
+        findings.append("chaos_scenarios_missing")
     return {
         "status": "PASS" if not findings else "FAIL",
         "allowed": _as_bool(chaos.get("allowed")),
-        "approved": _as_bool(chaos.get("approved")),
+        "approval_required": _as_bool(chaos.get("approval_required")),
         "max_duration_seconds": max_duration,
-        "tests": {
-            "total": len(tests),
-            "passed": len(passed_tests),
-            "failed": len(failed_tests),
-            "items": tests,
-        },
+        "planned_scenarios": tests,
         "findings": findings,
     }
 
@@ -443,19 +507,22 @@ def _chaos_checks(manifest: dict[str, Any]) -> dict[str, Any]:
 def _backup_restore_checks(manifest: dict[str, Any]) -> dict[str, Any]:
     backup = _as_dict(manifest.get("backup_restore"))
     findings: list[str] = []
-    for key in ("backup_window_minutes", "restore_time_minutes"):
+    for key in ("max_backup_window_minutes", "max_restore_time_minutes"):
         if not _as_float(backup.get(key), 0.0):
             findings.append(f"{key}_invalid")
-    if _as_bool(backup.get("restore_tested")) is False:
-        findings.append("restore_not_tested")
-    if _as_bool(backup.get("consistency_checks_passed")) is False:
-        findings.append("consistency_checks_not_passed")
+    if _as_bool(backup.get("consistency_checks_required")) is False:
+        findings.append("consistency_checks_not_required")
     return {
         "status": "PASS" if not findings else "FAIL",
-        "restore_tested": _as_bool(backup.get("restore_tested")),
-        "consistency_checks_passed": _as_bool(backup.get("consistency_checks_passed")),
-        "backup_window_minutes": _as_float(backup.get("backup_window_minutes"), 0.0),
-        "restore_time_minutes": _as_float(backup.get("restore_time_minutes"), 0.0),
+        "consistency_checks_required": _as_bool(
+            backup.get("consistency_checks_required")
+        ),
+        "max_backup_window_minutes": _as_float(
+            backup.get("max_backup_window_minutes"), 0.0
+        ),
+        "max_restore_time_minutes": _as_float(
+            backup.get("max_restore_time_minutes"), 0.0
+        ),
         "findings": findings,
     }
 
@@ -463,20 +530,19 @@ def _backup_restore_checks(manifest: dict[str, Any]) -> dict[str, Any]:
 def _disaster_recovery_checks(manifest: dict[str, Any]) -> dict[str, Any]:
     dr = _as_dict(manifest.get("disaster_recovery"))
     findings: list[str] = []
-    if _as_bool(dr.get("exercise_executed")) is False:
-        findings.append("dr_exercise_not_executed")
-    if _as_float(dr.get("rto_minutes"), 0.0) > 180:
-        findings.append("rto_exceeds_target")
-    if _as_float(dr.get("rpo_minutes"), 0.0) > 10:
-        findings.append("rpo_exceeds_target")
-    if _as_bool(dr.get("data_integrity_verified")) is False:
-        findings.append("data_integrity_not_verified")
+    if _as_float(dr.get("rto_target_minutes"), 0.0) <= 0:
+        findings.append("rto_target_missing")
+    if _as_float(dr.get("rpo_target_minutes"), 0.0) <= 0:
+        findings.append("rpo_target_missing")
+    if _as_bool(dr.get("data_integrity_verification_required")) is False:
+        findings.append("data_integrity_verification_not_required")
     return {
         "status": "PASS" if not findings else "FAIL",
-        "exercise_executed": _as_bool(dr.get("exercise_executed")),
-        "rto_minutes": _as_float(dr.get("rto_minutes"), 0.0),
-        "rpo_minutes": _as_float(dr.get("rpo_minutes"), 0.0),
-        "data_integrity_verified": _as_bool(dr.get("data_integrity_verified")),
+        "rto_target_minutes": _as_float(dr.get("rto_target_minutes"), 0.0),
+        "rpo_target_minutes": _as_float(dr.get("rpo_target_minutes"), 0.0),
+        "data_integrity_verification_required": _as_bool(
+            dr.get("data_integrity_verification_required")
+        ),
         "findings": findings,
     }
 
@@ -488,31 +554,23 @@ def _incident_management_checks(manifest: dict[str, Any]) -> dict[str, Any]:
         findings.append("sev0_postmortem_required")
     if _as_bool(incident.get("requires_postmortem_sev1")) is False:
         findings.append("sev1_postmortem_required")
-    examples = _as_list(incident.get("postmortem_examples"))
-    severity_required = {"sev0", "sev1"}
-    completed = {str(item.get("severity")) for item in examples if _as_bool(item.get("completed"))}
-    missing = sorted(severity_required - completed)
-    if missing:
-        findings.append(f"missing_postmortem:{','.join(missing)}")
     return {
         "status": "PASS" if not findings else "FAIL",
         "requires_postmortem_sev0": _as_bool(incident.get("requires_postmortem_sev0")),
         "requires_postmortem_sev1": _as_bool(incident.get("requires_postmortem_sev1")),
-        "postmortem_examples": examples,
         "findings": findings,
     }
 
 
 def _resilience_test_checks(manifest: dict[str, Any]) -> dict[str, Any]:
     resilience_tests = _as_dict(manifest.get("resilience_tests"))
-    status_map = _as_dict(resilience_tests.get("chaos_exit_codes"))
+    scenarios = _as_list(resilience_tests.get("required_scenarios"))
     findings: list[str] = []
-    for name, value in status_map.items():
-        if _as_int(value, 1) != 0:
-            findings.append(f"chaos_exit_{name}_non_zero")
+    if not scenarios:
+        findings.append("required_resilience_scenarios_missing")
     return {
         "status": "PASS" if not findings else "FAIL",
-        "chaos_exit_codes": status_map,
+        "required_scenarios": scenarios,
         "findings": findings,
     }
 
@@ -520,20 +578,17 @@ def _resilience_test_checks(manifest: dict[str, Any]) -> dict[str, Any]:
 def _security_checks(manifest: dict[str, Any]) -> dict[str, Any]:
     security = _as_dict(manifest.get("security"))
     findings: list[str] = []
-    if _as_bool(security.get("auth_bypass_detected")):
-        findings.append("auth_bypass_detected")
-    if _as_int(security.get("critical_findings"), 0) > 0:
-        findings.append("critical_findings")
-    if _as_int(security.get("open_incidents"), 0) > 0:
-        findings.append("open_incidents")
-    if _as_int(security.get("secrets_in_logs_detected"), 0) > 0:
-        findings.append("secrets_in_logs")
+    if not _as_bool(security.get("auth_bypass_forbidden")):
+        findings.append("auth_bypass_not_forbidden")
+    for key in ("critical_findings_max", "open_incidents_max", "secrets_in_logs_max"):
+        if _as_int(security.get(key), -1) < 0:
+            findings.append(f"{key}_missing")
     return {
         "status": "PASS" if not findings else "FAIL",
-        "open_incidents": _as_int(security.get("open_incidents"), 0),
-        "critical_findings": _as_int(security.get("critical_findings"), 0),
-        "auth_bypass_detected": _as_bool(security.get("auth_bypass_detected")),
-        "secrets_in_logs_detected": _as_int(security.get("secrets_in_logs_detected"), 0),
+        "open_incidents_max": _as_int(security.get("open_incidents_max"), -1),
+        "critical_findings_max": _as_int(security.get("critical_findings_max"), -1),
+        "auth_bypass_forbidden": _as_bool(security.get("auth_bypass_forbidden")),
+        "secrets_in_logs_max": _as_int(security.get("secrets_in_logs_max"), -1),
         "findings": findings,
     }
 
@@ -547,20 +602,42 @@ def _snapshot() -> dict[str, Any]:
         "git_commit": _git_commit(),
         "manifest_checksum": _checksum(manifest),
         "slo_checks": _slo_checks(manifest),
-        "error_budget_tests": _error_budget_tests(manifest),
-        "observability_tests": _observability_checks(manifest),
-        "synthetic_monitor_tests": _synthetic_monitor_checks(manifest),
-        "api_ha_tests": _ha_api(manifest),
-        "database_ha_tests": _ha_database(manifest),
-        "redis_worker_ha_tests": _ha_redis_worker(manifest),
-        "provider_resilience_tests": _provider_resilience(manifest),
-        "degradation_tests": _degradation_checks(manifest),
-        "chaos_tests": _chaos_checks(manifest),
-        "backup_restore_tests": _backup_restore_checks(manifest),
-        "disaster_recovery_tests": _disaster_recovery_checks(manifest),
-        "incident_management_tests": _incident_management_checks(manifest),
-        "resilience_test_status": _resilience_test_checks(manifest),
-        "security_integration_tests": _security_checks(manifest),
+        "error_budget_tests": _bind_external(
+            "error-budget", _error_budget_tests(manifest)
+        ),
+        "observability_tests": _bind_external(
+            "observability", _observability_checks(manifest)
+        ),
+        "synthetic_monitor_tests": _bind_external(
+            "synthetic-monitor", _synthetic_monitor_checks(manifest)
+        ),
+        "api_ha_tests": _bind_external("api-ha", _ha_api(manifest)),
+        "database_ha_tests": _bind_external("database-ha", _ha_database(manifest)),
+        "redis_worker_ha_tests": _bind_external(
+            "redis-worker-ha", _ha_redis_worker(manifest)
+        ),
+        "provider_resilience_tests": _bind_external(
+            "provider-resilience", _provider_resilience(manifest)
+        ),
+        "degradation_tests": _bind_external(
+            "degradation", _degradation_checks(manifest)
+        ),
+        "chaos_tests": _bind_external("chaos", _chaos_checks(manifest)),
+        "backup_restore_tests": _bind_external(
+            "backup-restore", _backup_restore_checks(manifest)
+        ),
+        "disaster_recovery_tests": _bind_external(
+            "dr-game-day", _disaster_recovery_checks(manifest)
+        ),
+        "incident_management_tests": _bind_external(
+            "incident-management", _incident_management_checks(manifest)
+        ),
+        "resilience_test_status": _bind_external(
+            "resilience-tests", _resilience_test_checks(manifest)
+        ),
+        "security_integration_tests": _bind_external(
+            "resilience-security", _security_checks(manifest)
+        ),
     }
     hard_failures = [
         payload["slo_checks"]["status"],
@@ -573,11 +650,22 @@ def _snapshot() -> dict[str, Any]:
         payload["provider_resilience_tests"]["status"],
         payload["degradation_tests"]["status"],
         payload["chaos_tests"]["status"],
+        payload["backup_restore_tests"]["status"],
+        payload["disaster_recovery_tests"]["status"],
         payload["incident_management_tests"]["status"],
+        payload["resilience_test_status"]["status"],
         payload["security_integration_tests"]["status"],
     ]
-    payload["technical_status"] = "PASS" if all(item == "PASS" for item in hard_failures) else "FAIL"
-    payload["skill_count"] = len(list((ROOT / "skills/batch-31").glob("[0-9][0-9]-*/SKILL.md")))
+    payload["technical_status"] = (
+        "FAIL"
+        if "FAIL" in hard_failures
+        else "NOT_EVALUATED"
+        if "NOT_EVALUATED" in hard_failures
+        else "PASS"
+    )
+    payload["skill_count"] = len(
+        list((ROOT / "skills/batch-31").glob("[0-9][0-9]-*/SKILL.md"))
+    )
     return payload
 
 
@@ -589,7 +677,16 @@ def _print(payload: dict[str, Any], action: str) -> None:
 def run(action: str) -> int:
     snap = _snapshot()
     if action in {"migrate", "seed"}:
-        print(json.dumps({"command": action, "status": "NOT_RUN", "reason": "offline control plane"}, sort_keys=True))
+        print(
+            json.dumps(
+                {
+                    "command": action,
+                    "status": "NOT_RUN",
+                    "reason": "offline control plane",
+                },
+                sort_keys=True,
+            )
+        )
         return 0
 
     if action in {"sync", "resilience-sync"}:
@@ -602,58 +699,103 @@ def run(action: str) -> int:
 
     if action == "error-budget-test":
         _print(snap["error_budget_tests"], action)
-        return 0 if snap["error_budget_tests"]["status"] == "PASS" else 1
+        return (
+            0
+            if snap["error_budget_tests"]["status"] in {"PASS", "NOT_EVALUATED"}
+            else 1
+        )
 
     if action == "observability-test":
         _print(snap["observability_tests"], action)
-        return 0 if snap["observability_tests"]["status"] == "PASS" else 1
+        return (
+            0
+            if snap["observability_tests"]["status"] in {"PASS", "NOT_EVALUATED"}
+            else 1
+        )
 
     if action == "synthetic-monitor-test":
         _print(snap["synthetic_monitor_tests"], action)
-        return 0 if snap["synthetic_monitor_tests"]["status"] == "PASS" else 1
+        return (
+            0
+            if snap["synthetic_monitor_tests"]["status"] in {"PASS", "NOT_EVALUATED"}
+            else 1
+        )
 
     if action == "api-ha-test":
         _print(snap["api_ha_tests"], action)
-        return 0 if snap["api_ha_tests"]["status"] == "PASS" else 1
+        return 0 if snap["api_ha_tests"]["status"] in {"PASS", "NOT_EVALUATED"} else 1
 
     if action == "database-ha-test":
         _print(snap["database_ha_tests"], action)
-        return 0 if snap["database_ha_tests"]["status"] == "PASS" else 1
+        return (
+            0 if snap["database_ha_tests"]["status"] in {"PASS", "NOT_EVALUATED"} else 1
+        )
 
     if action == "redis-worker-ha-test":
         _print(snap["redis_worker_ha_tests"], action)
-        return 0 if snap["redis_worker_ha_tests"]["status"] == "PASS" else 1
+        return (
+            0
+            if snap["redis_worker_ha_tests"]["status"] in {"PASS", "NOT_EVALUATED"}
+            else 1
+        )
 
     if action == "provider-resilience-test":
         _print(snap["provider_resilience_tests"], action)
-        return 0 if snap["provider_resilience_tests"]["status"] == "PASS" else 1
+        return (
+            0
+            if snap["provider_resilience_tests"]["status"] in {"PASS", "NOT_EVALUATED"}
+            else 1
+        )
 
     if action == "degradation-test":
         _print(snap["degradation_tests"], action)
-        return 0 if snap["degradation_tests"]["status"] == "PASS" else 1
+        return (
+            0 if snap["degradation_tests"]["status"] in {"PASS", "NOT_EVALUATED"} else 1
+        )
 
     if action in {"resilience-security-test", "security-test"}:
         _print(snap["security_integration_tests"], action)
-        return 0 if snap["security_integration_tests"]["status"] == "PASS" else 1
+        return (
+            0
+            if snap["security_integration_tests"]["status"] in {"PASS", "NOT_EVALUATED"}
+            else 1
+        )
 
     if action == "chaos-test":
         _print(snap["chaos_tests"], action)
-        return 0 if snap["chaos_tests"]["status"] == "PASS" else 1
+        return 0 if snap["chaos_tests"]["status"] in {"PASS", "NOT_EVALUATED"} else 1
 
     if action == "backup-restore-test":
         _print(snap["backup_restore_tests"], action)
-        return 0 if snap["backup_restore_tests"]["status"] == "PASS" else 1
+        return (
+            0
+            if snap["backup_restore_tests"]["status"] in {"PASS", "NOT_EVALUATED"}
+            else 1
+        )
 
     if action == "dr-game-day-test":
         _print(snap["disaster_recovery_tests"], action)
-        return 0 if snap["disaster_recovery_tests"]["status"] == "PASS" else 1
+        return (
+            0
+            if snap["disaster_recovery_tests"]["status"] in {"PASS", "NOT_EVALUATED"}
+            else 1
+        )
 
     if action == "incident-management-test":
         _print(snap["incident_management_tests"], action)
-        return 0 if snap["incident_management_tests"]["status"] == "PASS" else 1
+        return (
+            0
+            if snap["incident_management_tests"]["status"] in {"PASS", "NOT_EVALUATED"}
+            else 1
+        )
 
     if action in {"resilience-admin-e2e", "admin-e2e"}:
-        print(json.dumps({"command": action, "status": "NOT_RUN", "reason": "offline control"}, sort_keys=True))
+        print(
+            json.dumps(
+                {"command": action, "status": "NOT_RUN", "reason": "offline control"},
+                sort_keys=True,
+            )
+        )
         return 0
 
     if action in {"evidence", "evidence-build"}:
@@ -686,7 +828,11 @@ def run(action: str) -> int:
             "frontend_tests": "NOT_RUN",
         }
         print(_write("resilience-evidence.json", report))
-        return 0 if report["technical_status"] in {"PASS", "NOT_CERTIFIED"} else 1
+        return (
+            0
+            if report["technical_status"] in {"PASS", "NOT_EVALUATED", "NOT_CERTIFIED"}
+            else 1
+        )
 
     if action == "release":
         print(
@@ -719,9 +865,7 @@ def parse_action(parts: list[str]) -> str:
     normalized: list[str] = []
     for part in parts:
         normalized.extend(
-            token
-            for token in str(part).replace("_", "-").lower().split("-")
-            if token
+            token for token in str(part).replace("_", "-").lower().split("-") if token
         )
     if normalized and normalized[0] == "resilience":
         normalized = normalized[1:]

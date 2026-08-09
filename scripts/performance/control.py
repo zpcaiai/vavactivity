@@ -7,6 +7,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
+import re
 import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
@@ -72,17 +74,86 @@ def _status_is_passed(status: str) -> bool:
 
 
 def _is_passed_result(status: str) -> bool:
-    return str(status).strip().lower() in {"pass", "passed", "passed_with_warnings", "evaluated", "PASS".lower()}
+    return str(status).strip().lower() in {
+        "pass",
+        "passed",
+        "passed_with_warnings",
+        "evaluated",
+        "PASS".lower(),
+    }
 
 
 def _git_commit() -> str:
-    return subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        cwd=ROOT,
-        check=True,
-        text=True,
-        capture_output=True,
-    ).stdout.strip()
+    supplied = os.environ.get("VAV_GIT_COMMIT")
+    if supplied:
+        if not re.fullmatch(r"[0-9a-f]{40}", supplied):
+            raise ValueError("VAV_GIT_COMMIT must be a full lowercase Git commit")
+        return supplied
+    try:
+        commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            check=True,
+            text=True,
+            capture_output=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise ValueError("Git commit identity is unavailable") from exc
+    if not re.fullmatch(r"[0-9a-f]{40}", commit):
+        raise ValueError("Git returned an invalid commit identity")
+    return commit
+
+
+def _external_evidence(name: str) -> dict[str, Any]:
+    directory = os.environ.get("PERFORMANCE_EVIDENCE_DIR")
+    if not directory:
+        return {
+            "status": "NOT_EVALUATED",
+            "reason": "PERFORMANCE_EVIDENCE_DIR is not set",
+        }
+    path = Path(directory) / f"{name}.json"
+    if not path.is_file():
+        return {
+            "status": "NOT_EVALUATED",
+            "reason": f"external evidence is missing: {path}",
+        }
+    try:
+        payload = _as_dict(json.loads(path.read_text(encoding="utf-8")))
+    except (OSError, json.JSONDecodeError) as exc:
+        return {"status": "FAIL", "reason": f"invalid external evidence: {exc}"}
+    status = str(payload.get("status", "FAIL"))
+    if status not in {"PASS", "FAIL"}:
+        return {"status": "FAIL", "reason": "external status must be PASS or FAIL"}
+    if payload.get("git_commit") != _git_commit():
+        return {"status": "FAIL", "reason": "external evidence commit mismatch"}
+    if not re.fullmatch(r"[0-9a-f]{64}", str(payload.get("artifact_sha256", ""))):
+        return {"status": "FAIL", "reason": "external evidence checksum missing"}
+    if not payload.get("completed_at"):
+        return {"status": "FAIL", "reason": "external evidence completion time missing"}
+    return {
+        "status": status,
+        "path": str(path),
+        "artifact_sha256": payload["artifact_sha256"],
+        "completed_at": payload["completed_at"],
+    }
+
+
+def _bind_external(name: str, simulation: dict[str, Any]) -> dict[str, Any]:
+    evidence = _external_evidence(name)
+    simulation_status = str(simulation.get("status", "FAIL"))
+    simulation_passed = _is_passed_result(simulation_status)
+    if not simulation_passed or evidence["status"] == "FAIL":
+        status = "FAIL"
+    elif evidence["status"] == "PASS":
+        status = "PASS"
+    else:
+        status = "NOT_EVALUATED"
+    return {
+        **simulation,
+        "simulation_status": simulation_status,
+        "status": status,
+        "external_evidence": evidence,
+    }
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -95,7 +166,10 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 def _write(name: str, payload: dict[str, Any]) -> str:
     BUILD.mkdir(parents=True, exist_ok=True)
     target = BUILD / name
-    target.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    target.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
     return str(target.relative_to(ROOT))
 
 
@@ -170,7 +244,10 @@ def _validate_cache_stampede(item: dict[str, Any]) -> bool:
     miss_ratio = _as_float(profile.get("cache_miss_ratio"), 0.0)
     if miss_ratio and miss_ratio > 0.20:
         return True
-    if _as_float(item.get("concurrent_users"), 0.0) > 0 and _as_float(item.get("cache_hit_ratio"), 0.0) < 0.65:
+    if (
+        _as_float(item.get("concurrent_users"), 0.0) > 0
+        and _as_float(item.get("cache_hit_ratio"), 0.0) < 0.65
+    ):
         return True
     return False
 
@@ -187,8 +264,13 @@ def _concurrency_profile(manifest: dict[str, Any]) -> dict[str, Any]:
     for scenario in race_scenarios:
         scenario_dict = _as_dict(scenario)
         observed = {
-            "result_distribution": _as_dict(scenario_dict.get("expected_result_distribution")).copy(),
-            "invariants": {k: v for k, v in (_as_dict(scenario_dict.get("expected_invariants"))).items()},
+            "result_distribution": _as_dict(
+                scenario_dict.get("expected_result_distribution")
+            ).copy(),
+            "invariants": {
+                k: v
+                for k, v in (_as_dict(scenario_dict.get("expected_invariants"))).items()
+            },
             "duplicate_side_effects": 0,
         }
         race_evals.append(evaluate_race_result(scenario_dict, observed))
@@ -196,9 +278,15 @@ def _concurrency_profile(manifest: dict[str, Any]) -> dict[str, Any]:
         "hotspots": hotspots,
         "lock_cycles": lock_cycles,
         "idempotency_coverage_issues": idempotency,
-        "critical_hotspots": sum(1 for item in hotspots if item.get("severity") == "critical"),
+        "critical_hotspots": sum(
+            1 for item in hotspots if item.get("severity") == "critical"
+        ),
         "race_scenarios": [
-            {"scenario_code": item["scenario_code"], "criticality": item["criticality"], "passed": item["passed"]}
+            {
+                "scenario_code": item["scenario_code"],
+                "criticality": item["criticality"],
+                "passed": item["passed"],
+            }
             for item in race_evals
         ],
         "critical_races_failed": sum(1 for item in race_evals if not item["passed"]),
@@ -219,7 +307,9 @@ def _load_profile() -> dict[str, Any]:
     }
 
 
-def _check_guarded_bounds(value: Any, minimum: float = 0.0, maximum: float | None = None) -> list[str]:
+def _check_guarded_bounds(
+    value: Any, minimum: float = 0.0, maximum: float | None = None
+) -> list[str]:
     parsed = _as_float(value)
     if parsed < minimum:
         return [f"value_below_minimum:{minimum}"]
@@ -231,11 +321,19 @@ def _check_guarded_bounds(value: Any, minimum: float = 0.0, maximum: float | Non
 def _baseline_result(manifest: dict[str, Any]) -> dict[str, Any]:
     section = _as_dict(manifest.get("baseline"))
     if not section:
-        return {"status": "FAIL", "reason": "baseline-section-missing", "issues": ["missing-baseline-manifest"]}
+        return {
+            "status": "FAIL",
+            "reason": "baseline-section-missing",
+            "issues": ["missing-baseline-manifest"],
+        }
     baseline = _as_dict(section.get("baseline"))
     candidate = _as_dict(section.get("candidate"))
     if not baseline or not candidate:
-        return {"status": "FAIL", "reason": "baseline-incomplete", "issues": ["baseline-or-candidate-missing"]}
+        return {
+            "status": "FAIL",
+            "reason": "baseline-incomplete",
+            "issues": ["baseline-or-candidate-missing"],
+        }
 
     minimum_samples = _as_int(section.get("minimum_samples"), 30)
     tolerance_ratio = _as_float(section.get("tolerance_ratio"), 0.10)
@@ -260,7 +358,9 @@ def _baseline_result(manifest: dict[str, Any]) -> dict[str, Any]:
         "regressed_metrics": diff["regressed_metrics"],
         "metrics": diff["metrics"],
         "insufficient_samples": diff["status"] == "insufficient_samples",
-        "issues": [] if passed else ["baseline_regression_detected_or_insufficient_samples"],
+        "issues": []
+        if passed
+        else ["baseline_regression_detected_or_insufficient_samples"],
     }
 
 
@@ -292,7 +392,14 @@ def _load_result(manifest: dict[str, Any]) -> dict[str, Any]:
         findings.append("achieved_rps_below_95pct_target")
     if observed_p95 > min_p95 * 1.5:
         findings.append("p95_exceeds_expected_envelope")
-    if manifest_check and manifest_check not in {"passed", "pass", "passed_with_warnings", "not_evaluated", "pass_with_warning", "pass_with_warnings"}:
+    if manifest_check and manifest_check not in {
+        "passed",
+        "pass",
+        "passed_with_warnings",
+        "not_evaluated",
+        "pass_with_warning",
+        "pass_with_warnings",
+    }:
         findings.append(f"manifest_check_status_not_passed:{manifest_check}")
 
     status = "PASS" if not findings else "FAIL"
@@ -325,7 +432,9 @@ def _spike_result(manifest: dict[str, Any]) -> dict[str, Any]:
         spike_end_seconds=spike_end_seconds,
         baseline_p95_ms=baseline_p95_ms,
         recovery_budget_seconds=recovery_budget_seconds,
-        recovery_tolerance_ratio=_as_float(section.get("recovery_tolerance_ratio"), 1.2),
+        recovery_tolerance_ratio=_as_float(
+            section.get("recovery_tolerance_ratio"), 1.2
+        ),
         max_error_rate=_as_float(section.get("max_error_rate"), 0.05),
     )
     return {
@@ -348,7 +457,9 @@ def _stress_result(manifest: dict[str, Any]) -> dict[str, Any]:
     result = evaluate_stress(
         points=points,
         data_corruption_detected=_as_bool(section.get("data_corruption_detected")),
-        authorization_bypass_detected=_as_bool(section.get("authorization_bypass_detected")),
+        authorization_bypass_detected=_as_bool(
+            section.get("authorization_bypass_detected")
+        ),
         recovered_after_stress=_as_bool(section.get("recovered_after_stress", True)),
         max_error_rate=_as_float(section.get("max_error_rate"), 0.01),
         latency_budget_ms=_as_float(section.get("latency_budget_ms"), None),
@@ -374,7 +485,9 @@ def _soak_result(manifest: dict[str, Any]) -> dict[str, Any]:
     if not series:
         return {"status": "FAIL", "reason": "soak-series-missing"}
     typed_series = {
-        key: [tuple(item) for item in _as_list(values)] for key, values in series.items() if _as_list(values)
+        key: [tuple(item) for item in _as_list(values)]
+        for key, values in series.items()
+        if _as_list(values)
     }
     result = evaluate_soak(
         typed_series,
@@ -418,7 +531,9 @@ def _database_checks(manifest: dict[str, Any]) -> dict[str, Any]:
 
     if not _as_float(lock_wait.get("max_p95_ms"), 0.0):
         findings.append("lock-wait-max-missing")
-    elif _as_float(lock_wait.get("observed_p95_ms"), 0.0) > _as_float(lock_wait.get("max_p95_ms"), 0.0):
+    elif _as_float(lock_wait.get("observed_p95_ms"), 0.0) > _as_float(
+        lock_wait.get("max_p95_ms"), 0.0
+    ):
         findings.append("lock-wait-exceeds-max")
     if _as_int(deadlock.get("cycles_detected"), 0) > 0:
         findings.append("deadlock-cycles-detected")
@@ -430,11 +545,16 @@ def _database_checks(manifest: dict[str, Any]) -> dict[str, Any]:
         "lock_wait": {
             "max_p95_ms": _as_float(lock_wait.get("max_p95_ms"), 0.0),
             "observed_p95_ms": _as_float(lock_wait.get("observed_p95_ms"), 0.0),
-            "status": "PASS" if _as_float(lock_wait.get("observed_p95_ms"), 0.0) <= _as_float(lock_wait.get("max_p95_ms"), 0.0) else "FAIL",
+            "status": "PASS"
+            if _as_float(lock_wait.get("observed_p95_ms"), 0.0)
+            <= _as_float(lock_wait.get("max_p95_ms"), 0.0)
+            else "FAIL",
         },
         "deadlock_detection": {
             "cycles_detected": _as_int(deadlock.get("cycles_detected"), 0),
-            "status": "PASS" if _as_int(deadlock.get("cycles_detected"), 0) == 0 else "FAIL",
+            "status": "PASS"
+            if _as_int(deadlock.get("cycles_detected"), 0) == 0
+            else "FAIL",
         },
         "findings": findings,
     }
@@ -443,9 +563,18 @@ def _database_checks(manifest: dict[str, Any]) -> dict[str, Any]:
 def _cache_checks(manifest: dict[str, Any]) -> dict[str, Any]:
     section = _as_dict(manifest.get("cache_checks"))
     operations = _as_list(manifest.get("endpoint_budgets"))
-    hot_resources = [op.get("endpoint_code", "unknown") for op in operations if str(op.get("criticality", "")).lower() == "critical"]
+    hot_resources = [
+        op.get("endpoint_code", "unknown")
+        for op in operations
+        if str(op.get("criticality", "")).lower() == "critical"
+    ]
     if not section:
-        return {"status": "FAIL", "findings": ["cache-checks-missing"], "hot_keys": [], "stampede_guard": "FAIL"}
+        return {
+            "status": "FAIL",
+            "findings": ["cache-checks-missing"],
+            "hot_keys": [],
+            "stampede_guard": "FAIL",
+        }
 
     miss_rate = _as_dict(section.get("miss_rate"))
     hot_keys = _as_dict(section.get("hot_key_distribution"))
@@ -473,7 +602,9 @@ def _cache_checks(manifest: dict[str, Any]) -> dict[str, Any]:
     ):
         findings.append("cache-invalid-resource-budget")
 
-    cache_stampede = any(_validate_cache_stampede(_as_dict(item)) for item in operations)
+    cache_stampede = any(
+        _validate_cache_stampede(_as_dict(item)) for item in operations
+    )
     if cache_stampede:
         findings.append("cache-contentsion-stampede")
 
@@ -507,7 +638,9 @@ def _queue_checks(manifest: dict[str, Any]) -> dict[str, Any]:
     worker_throughput = _as_float(section.get("worker_throughput_rps"), 0.0)
     target_throughput = _as_float(section.get("target_throughput_rps"), 1.0)
     oldest_unacked = _as_float(section.get("oldest_unacked_seconds"), 0.0)
-    allowed_oldest_unacked = _as_float(section.get("allowed_oldest_unacked_seconds"), 1.0)
+    allowed_oldest_unacked = _as_float(
+        section.get("allowed_oldest_unacked_seconds"), 1.0
+    )
 
     findings: list[str] = []
     if target_throughput <= 0:
@@ -586,7 +719,10 @@ def _cost_model(manifest: dict[str, Any]) -> dict[str, Any]:
 
 
 def _security_shadow() -> dict[str, Any]:
-    return {"status": "PASS", "reason": "no production load to execute, static gate only"}
+    return {
+        "status": "PASS",
+        "reason": "no production load to execute, static gate only",
+    }
 
 
 def snapshot() -> dict[str, Any]:
@@ -594,14 +730,16 @@ def snapshot() -> dict[str, Any]:
     workload_models = _workload_models(manifest)
     workloads_with_errors = [model for model in workload_models if model["findings"]]
     budgets = _budget_profiles(manifest)
-    budget_failures = [item for item in budgets if not _status_is_passed(item["status"])]
+    budget_failures = [
+        item for item in budgets if not _status_is_passed(item["status"])
+    ]
     concurrency = _concurrency_profile(manifest)
     load_profile = _load_profile()
-    baseline = _baseline_result(manifest)
-    load = _load_result(manifest)
-    spike = _spike_result(manifest)
-    stress = _stress_result(manifest)
-    soak = _soak_result(manifest)
+    baseline = _bind_external("baseline", _baseline_result(manifest))
+    load = _bind_external("load-test", _load_result(manifest))
+    spike = _bind_external("spike-test", _spike_result(manifest))
+    stress = _bind_external("stress-test", _stress_result(manifest))
+    soak = _bind_external("soak-test", _soak_result(manifest))
     database = _database_checks(manifest)
     cache = _cache_checks(manifest)
     queue = _queue_checks(manifest)
@@ -609,7 +747,8 @@ def snapshot() -> dict[str, Any]:
     cost = _cost_model(manifest)
 
     critical_failures = [
-        item for item in (
+        item
+        for item in (
             baseline,
             load,
             spike,
@@ -649,8 +788,14 @@ def snapshot() -> dict[str, Any]:
         "scaling": scaling,
         "cost": cost,
         "security": _security_shadow(),
-        "checksum": hashlib.sha256(json.dumps(workload_models, sort_keys=True, default=str).encode("utf-8")).hexdigest(),
+        "checksum": hashlib.sha256(
+            json.dumps(workload_models, sort_keys=True, default=str).encode("utf-8")
+        ).hexdigest(),
         "critical_failures": len(critical_failures),
+        "external_evidence_pending": sum(
+            item.get("status") == "NOT_EVALUATED"
+            for item in (baseline, load, spike, stress, soak)
+        ),
     }
 
 
@@ -661,49 +806,104 @@ def run(action: str) -> int:
         print(_write("performance-snapshot.json", snap))
         return 0
     if action in {"migrate", "seed"}:
-        print(json.dumps({"command": action, "status": "NOT_RUN", "reason": "offline control plane"}, sort_keys=True))
+        print(
+            json.dumps(
+                {
+                    "command": action,
+                    "status": "NOT_RUN",
+                    "reason": "offline control plane",
+                },
+                sort_keys=True,
+            )
+        )
         return 0
 
     if action in {"workload-check", "workload"}:
-        status = "PASS" if snap["workload_status"] == "PASS" and snap["invalid_workload_count"] == 0 else "FAIL"
-        print(json.dumps({"command": "workload-check", "status": status, "checks": snap["workload_models"]}, sort_keys=True))
+        status = (
+            "PASS"
+            if snap["workload_status"] == "PASS" and snap["invalid_workload_count"] == 0
+            else "FAIL"
+        )
+        print(
+            json.dumps(
+                {
+                    "command": "workload-check",
+                    "status": status,
+                    "checks": snap["workload_models"],
+                },
+                sort_keys=True,
+            )
+        )
         return 0 if status == "PASS" else 1
 
     if action in {"budget-check", "budget"}:
         status = "PASS" if snap["critical_budget_failures"] == 0 else "FAIL"
-        print(json.dumps({"command": "budget-check", "status": status, "budgets": snap["budgets"]}, sort_keys=True))
+        print(
+            json.dumps(
+                {
+                    "command": "budget-check",
+                    "status": status,
+                    "budgets": snap["budgets"],
+                },
+                sort_keys=True,
+            )
+        )
         return 0 if status == "PASS" else 1
 
     if action in {"concurrency-test", "concurrency"}:
         status = "PASS" if snap["concurrency"]["critical_races_failed"] == 0 else "FAIL"
-        print(json.dumps({"command": "concurrency-test", "status": status, "concurrency": snap["concurrency"]}, sort_keys=True))
+        print(
+            json.dumps(
+                {
+                    "command": "concurrency-test",
+                    "status": status,
+                    "concurrency": snap["concurrency"],
+                },
+                sort_keys=True,
+            )
+        )
         return 0 if status == "PASS" else 1
 
     if action in {"baseline", "baseline-test"}:
-        result = _baseline_result(manifest)
+        result = snap["baseline"]
         status = "PASS" if result["status"] == "PASS" else "FAIL"
         print(json.dumps(result, sort_keys=True))
-        return 0 if status == "PASS" else 1
+        return 0 if status in {"PASS", "NOT_EVALUATED"} else 1
 
     if action in {"load-test", "load"}:
-        result = _load_result(manifest)
+        result = snap["load"]
         print(json.dumps(result, sort_keys=True))
-        return 0 if result["status"] == "PASS" else 1
+        return 0 if result["status"] in {"PASS", "NOT_EVALUATED"} else 1
 
     if action in {"spike-test", "spike"}:
-        result = _spike_result(manifest)
+        result = snap["spike"]
         print(json.dumps(result, sort_keys=True))
-        return 0 if _is_passed_result(result["status"]) else 1
+        return (
+            0
+            if _is_passed_result(result["status"])
+            or result["status"] == "NOT_EVALUATED"
+            else 1
+        )
 
     if action == "stress-test":
-        result = _stress_result(manifest)
+        result = snap["stress"]
         print(json.dumps(result, sort_keys=True))
-        return 0 if _is_passed_result(result["status"]) else 1
+        return (
+            0
+            if _is_passed_result(result["status"])
+            or result["status"] == "NOT_EVALUATED"
+            else 1
+        )
 
     if action == "soak-test":
-        result = _soak_result(manifest)
+        result = snap["soak"]
         print(json.dumps(result, sort_keys=True))
-        return 0 if _is_passed_result(result["status"]) else 1
+        return (
+            0
+            if _is_passed_result(result["status"])
+            or result["status"] == "NOT_EVALUATED"
+            else 1
+        )
 
     if action in {"database-test", "database"}:
         result = snap["database"]
@@ -736,7 +936,12 @@ def run(action: str) -> int:
         return 0 if result["status"] == "PASS" else 1
 
     if action in {"admin-e2e", "admin"}:
-        print(json.dumps({"command": action, "status": "NOT_RUN", "reason": "offline gate"}, sort_keys=True))
+        print(
+            json.dumps(
+                {"command": action, "status": "NOT_RUN", "reason": "offline gate"},
+                sort_keys=True,
+            )
+        )
         return 0
 
     if action in {"evidence", "evidence-build"}:
@@ -745,7 +950,11 @@ def run(action: str) -> int:
             "batch": manifest["batch"],
             "generated_at": datetime.now(UTC).isoformat(),
             "git_commit": snap["git_commit"],
-            "technical_status": "PASS" if snap["critical_failures"] == 0 else "FAIL",
+            "technical_status": "FAIL"
+            if snap["critical_failures"]
+            else "NOT_EVALUATED"
+            if snap["external_evidence_pending"]
+            else "PASS",
             "critical_failures": snap["critical_failures"],
             "backend_tests": "NOT_RUN",
             "admin_e2e": "NOT_RUN",
@@ -767,10 +976,20 @@ def run(action: str) -> int:
             },
         }
         print(_write("performance-evidence.json", report))
-        return 0 if report["technical_status"] in {"PASS", "NOT_CERTIFIED"} else 1
+        return (
+            0
+            if report["technical_status"] in {"PASS", "NOT_EVALUATED", "NOT_CERTIFIED"}
+            else 1
+        )
 
     if action == "release":
-        technical_status = "PASS" if snap["critical_failures"] == 0 else "FAIL"
+        technical_status = (
+            "FAIL"
+            if snap["critical_failures"]
+            else "NOT_EVALUATED"
+            if snap["external_evidence_pending"]
+            else "PASS"
+        )
         print(
             _write(
                 "performance-evidence.json",
@@ -795,9 +1014,7 @@ def parse_action(parts: list[str]) -> str:
     normalized: list[str] = []
     for part in parts:
         normalized.extend(
-            token
-            for token in str(part).replace("_", "-").lower().split("-")
-            if token
+            token for token in str(part).replace("_", "-").lower().split("-") if token
         )
     aliases = {
         ("migrate",): "migrate",

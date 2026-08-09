@@ -1,5 +1,7 @@
 schema_version: "1.0.0"
 batch: 29
+evidence_scope: offline_policy_and_simulation_fixture
+external_evidence_required: true
 name: vav-performance-capacity-framework
 schema_timestamp: "2026-08-07T00:00:00Z"
 workload_profiles:

@@ -412,6 +412,35 @@ production_assembly:
   architecture_version: "1.0.0"
   minimum_supported_schema_version: 83
   migration_head: "20260808_0094"
+  modules:
+    - activities
+    - admin_platform
+    - ai_assistant
+    - catalog
+    - commerce
+    - content
+    - counseling
+    - courses
+    - data_governance
+    - experience
+    - health
+    - identity
+    - knowledge
+    - matchmaking_interactions
+    - matchmaking_profiles
+    - memberships
+    - notifications
+    - performance
+    - privacy
+    - process_governance
+    - quality
+    - recommendations
+    - regression
+    - relationships
+    - skills_platform
+    - system
+    - trust_safety
+    - usability
   module_manifest_root: services/api/src/vav/modules
   event_manifest: config/events/manifest.yaml
   feature_manifest: config/features/manifest.yaml
@@ -419,8 +448,8 @@ production_assembly:
   environment_schema: config/env/env.schema.json
   release_manifest: release-manifest.yaml
   applications:
-    user-web: {path: apps/user-web, framework: vue-spa}
-    admin-web: {path: apps/admin-web, framework: vue-spa}
+    user-web: {repository: zpcaiai/vavactivityWeb, checkout_env: VAV_WEB_ROOT, path: apps/user-web, framework: vue-spa}
+    admin-web: {repository: zpcaiai/vavactivityWeb, checkout_env: VAV_WEB_ROOT, path: apps/admin-web, framework: vue-spa}
   services:
     api: {path: services/api, framework: fastapi, health: /api/v1/health/ready}
     worker: {path: services/worker, framework: celery}

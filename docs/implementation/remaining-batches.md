@@ -1,36 +1,22 @@
-# Remaining Batches — 15 to 32
+# 32-Batch Implementation and Verification Status
 
-This file fixes the order, scope and boundary of every batch still to be built, so that any
-future session can resume without guessing. It is derived from `ChatGPT-Codex 实现项目方案.md`
-in the repository root; the line numbers below point at the full specification for each batch
-in that document.
+This file preserves the order, scope and boundary of the 32-batch programme. It is derived
+from `ChatGPT-Codex 实现项目方案.md` in the repository root; the line numbers below point at
+the full specification for each batch. The current measured audit is
+`docs/acceptance/batch-01-32-implementation-audit-20260809.md`.
 
-## Verified status
+## Current status (2026-08-09)
 
-Batch 14 was committed as `feat(recommendations): complete Batch 14 bidirectional
-recommendation engine` after a clean-environment reproduction of the backend CI job
-(PostgreSQL 16 + pgvector + Redis, migrate to `20260804_0059`, then the eleven CI seed
-commands):
+All 32 parent Skills and all 384 child Skills are present and schema-valid. The implementation
+surface is present across 28 backend modules, 94 contiguous migrations, 738 permissions,
+858 OpenAPI paths and the split frontend repository. Local API, quality, Skill, contract,
+frontend test, typecheck and build gates pass.
 
-| Gate | Result |
-| --- | --- |
-| Backend pytest | 543 passed, 0 failed (195 in `recommendations`) |
-| Ruff check + format | clean over `services` |
-| mypy strict | clean, 190 source files |
-| Frontend vitest | user-web 17, admin-web 9 |
-| ESLint + vue-tsc | clean for both apps |
-| Manifest | 21 modules, 2 phases, 56 fail-closed decisions |
-| Migration heads | single head `20260804_0059` |
-| E2E | 17 recommendation specs authored, not executed (needs the Docker stack) |
-
-**543 is the real backend baseline.** Any future report that claims a larger number without a
-matching test count is wrong.
-
-Batches 1–17 are committed. Batch 17 passed the full fresh-PostgreSQL suite (580 tests),
-single-head migration gate and dependent Neon migration in run `31025708244`. Batch 18 is
-committed and passed 605 full-backend tests, 25 Trust & Safety tests, both frontend builds,
-6 live browser scenarios and the dependent Neon migration in run `31060765232`. Batches 19–32
-remain pending.
+This does **not** certify production. Browser/device UAT, real load/spike/stress/soak runs,
+external scanners/DAST/fuzz/penetration testing, HA/chaos/backup-restore/DR game days,
+release-board approvals and the 24h/7d/30d observation windows still require current,
+commit-bound external evidence. Their status remains `NOT_RUN` or `NOT_EVALUATED`; Batch 32
+therefore remains `NOT_CERTIFIED` with `release_allowed=false`.
 
 ## The roadmap is 32 batches, not 33
 

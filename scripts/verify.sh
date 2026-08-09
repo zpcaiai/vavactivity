@@ -56,4 +56,6 @@ if [[ "$contract_hash_before" != "$contract_hash_after" ]]; then
   exit 1
 fi
 
+VAV_WEB_ROOT="$web_root" python3 scripts/diagnostics/check_frontend_contracts.py
+
 echo "Platform acceptance passed"

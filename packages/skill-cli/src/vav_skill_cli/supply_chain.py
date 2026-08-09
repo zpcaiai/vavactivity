@@ -89,9 +89,16 @@ def generate_sbom(root: str | Path, destination: str | Path) -> dict[str, Any]:
 
 
 def _git(root: Path, *args: str) -> str:
-    result = subprocess.run(
-        ["git", "-C", str(root), *args], capture_output=True, text=True, check=False, timeout=10
-    )
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), *args],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return "unknown"
     return result.stdout.strip() if result.returncode == 0 else "unknown"
 
 

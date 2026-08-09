@@ -5,6 +5,14 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$repo_root"
 PYTHONPATH=services/api/src .venv/bin/python scripts/diagnostics/validate_project_manifest.py
 .venv/bin/python scripts/check_migration_heads.py
+expected_head="$(.venv/bin/python - <<'PY'
+import yaml
+from pathlib import Path
+
+manifest = yaml.safe_load(Path("project-manifest.yaml").read_text(encoding="utf-8"))
+print(manifest["production_assembly"]["migration_head"])
+PY
+)"
 
 container="vav-migration-gate-$$"
 cleanup() { docker rm -f "$container" >/dev/null 2>&1 || true; }
@@ -28,8 +36,8 @@ DATABASE_URL="$snapshot_url" .venv/bin/alembic -c services/api/alembic.ini upgra
 
 for database in vav_snapshot vav_empty; do
   revision="$(docker exec "$container" psql -U vav_gate -d "$database" -Atc 'SELECT version_num FROM alembic_version')"
-  [[ "$revision" == "20260806_0085" ]] || { echo "$database stopped at $revision" >&2; exit 1; }
+  [[ "$revision" == "$expected_head" ]] || { echo "$database stopped at $revision; expected $expected_head" >&2; exit 1; }
   tables="$(docker exec "$container" psql -U vav_gate -d "$database" -Atc "SELECT count(*) FROM information_schema.tables WHERE table_schema='public'")"
   [[ "$tables" -gt 100 ]] || { echo "$database has incomplete schema: $tables tables" >&2; exit 1; }
 done
-echo "migration gate PASS: single head, empty database, and revision-0082 snapshot upgrade through Batch 20 governance contracts"
+echo "migration gate PASS: single head $expected_head, empty database, and revision-0082 snapshot upgrade through the declared production assembly"

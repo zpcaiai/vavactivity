@@ -7,6 +7,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
 from datetime import UTC, datetime
@@ -20,6 +21,9 @@ from vav.core.evidence import combined_status, command_evidence, junit_evidence
 ROOT = Path(__file__).resolve().parents[2]
 BUILD = ROOT / "build" / "quality"
 MANIFEST = ROOT / "quality-manifest.yaml"
+WEB_ROOT = Path(
+    os.environ.get("VAV_WEB_ROOT", str(ROOT.parent / "vavactivityWeb"))
+).resolve()
 ALLOWED_OPERATORS = {
     "eq",
     "neq",
@@ -46,13 +50,24 @@ def digest(path: Path) -> str:
 
 
 def commit() -> str:
-    return subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
+    supplied = os.environ.get("VAV_GIT_COMMIT")
+    if supplied:
+        if not re.fullmatch(r"[0-9a-f]{40}", supplied):
+            raise ValueError("VAV_GIT_COMMIT must be a full lowercase Git commit")
+        return supplied
+    try:
+        value = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise ValueError("Git commit identity is unavailable") from exc
+    if not re.fullmatch(r"[0-9a-f]{40}", value):
+        raise ValueError("Git returned an invalid commit identity")
+    return value
 
 
 def write_report(name: str, payload: dict[str, Any]) -> Path:
@@ -126,15 +141,20 @@ def build_inventory() -> dict[str, Any]:
     ]
     pages = [
         {
-            "path": str(path.relative_to(ROOT)),
+            "path": str(path.relative_to(WEB_ROOT)),
             "sha256": digest(path),
         }
         for app in ("user-web", "admin-web")
-        for path in sorted((ROOT / "apps" / app / "src").glob("**/pages/*.vue"))
+        for path in sorted((WEB_ROOT / "apps" / app / "src").glob("**/pages/*.vue"))
     ]
     tests = [
-        str(path.relative_to(ROOT))
-        for root in (ROOT / "services/api/tests", ROOT / "tests", ROOT / "e2e")
+        str(path.relative_to(source_root))
+        for source_root in (ROOT, WEB_ROOT)
+        for root in (
+            (ROOT / "services/api/tests", ROOT / "tests")
+            if source_root == ROOT
+            else (WEB_ROOT / "e2e",)
+        )
         if root.exists()
         for path in sorted(
             root.rglob("test_*.py" if root.name != "e2e" else "*.spec.ts")

@@ -10,15 +10,6 @@ non_waivable_gates:
   - BATCH-30-SECURITY
   - BATCH-31-RESILIENCE
 quality_scores:
-  functional: 0.97
-  usability: 0.94
-  admin_operability: 0.93
-  security_privacy: 0.96
-  performance: 0.92
-  resilience: 0.95
-  observability: 0.98
-  data_integrity: 0.99
-  project_governance: 0.94
   minimum_overall_threshold: 0.94
 go_no_go:
   threshold: 0.94
@@ -58,42 +49,24 @@ launch:
 approvals:
   production_owner:
     required: true
-    approved: true
-    approver: "VP Engineering"
-    approved_at: "2026-08-06T09:20:00Z"
   security_owner:
     required: true
-    approved: true
-    approver: "Security Lead"
-    approved_at: "2026-08-06T09:30:00Z"
   data_governance_owner:
     required: true
-    approved: true
-    approver: "DPO"
-    approved_at: "2026-08-06T09:50:00Z"
 observation_windows:
   24h:
-    starts_at: "2026-08-05T10:00:00+00:00"
-    expected_ends_at: "2026-08-06T10:00:00+00:00"
-    current_production_time: "2026-08-06T11:30:00+00:00"
+    required_hours: 24
     policy: allow_stable_rollover
-    critical_events_detected: 0
   7d:
-    starts_at: "2026-07-30T10:00:00+00:00"
-    expected_ends_at: "2026-08-06T10:00:00+00:00"
-    current_production_time: "2026-08-06T11:30:00+00:00"
+    required_hours: 168
     policy: gated_review
-    critical_events_detected: 0
   30d:
-    starts_at: "2026-07-07T10:00:00+00:00"
-    expected_ends_at: "2026-08-06T10:00:00+00:00"
-    current_production_time: "2026-08-06T11:30:00+00:00"
+    required_hours: 720
     policy: stable_certification_hold
-    critical_events_detected: 0
 security_posture:
-  external_pen_test_last: "2026-08-01"
-  critical_open_findings: 0
-  unresolved_sev1_findings: 0
+  external_pen_test_required: true
+  critical_open_findings_max: 0
+  unresolved_sev1_findings_max: 0
   launch_gates:
     - no_unauthorized_admin_action
     - no_runtime_privilege_escalation

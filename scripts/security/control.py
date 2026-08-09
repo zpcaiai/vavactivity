@@ -7,6 +7,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
+import re
 import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
@@ -21,6 +23,57 @@ CONFIG = ROOT / "config" / "security"
 BUILD = ROOT / "build" / "security"
 MANIFEST_PATH = CONFIG / "manifest.yaml"
 BATCH_NUMBER = 30
+
+
+def _external_evidence(name: str) -> dict[str, Any]:
+    directory = os.environ.get("SECURITY_EVIDENCE_DIR")
+    if not directory:
+        return {
+            "status": "NOT_EVALUATED",
+            "reason": "SECURITY_EVIDENCE_DIR is not set",
+        }
+    path = Path(directory) / f"{name}.json"
+    if not path.is_file():
+        return {
+            "status": "NOT_EVALUATED",
+            "reason": f"external evidence is missing: {path}",
+        }
+    try:
+        payload = _as_dict(json.loads(path.read_text(encoding="utf-8")))
+    except (OSError, json.JSONDecodeError) as exc:
+        return {"status": "FAIL", "reason": f"invalid external evidence: {exc}"}
+    status = str(payload.get("status", "FAIL"))
+    if status not in {"PASS", "FAIL"}:
+        return {"status": "FAIL", "reason": "external status must be PASS or FAIL"}
+    if payload.get("git_commit") != _git_commit():
+        return {"status": "FAIL", "reason": "external evidence commit mismatch"}
+    if not re.fullmatch(r"[0-9a-f]{64}", str(payload.get("artifact_sha256", ""))):
+        return {"status": "FAIL", "reason": "external evidence checksum missing"}
+    if not payload.get("completed_at"):
+        return {"status": "FAIL", "reason": "external evidence completion time missing"}
+    return {
+        "status": status,
+        "path": str(path),
+        "artifact_sha256": payload["artifact_sha256"],
+        "completed_at": payload["completed_at"],
+    }
+
+
+def _bind_external(name: str, evaluation: dict[str, Any]) -> dict[str, Any]:
+    evidence = _external_evidence(name)
+    policy_status = str(evaluation.get("status", "FAIL"))
+    if policy_status == "FAIL" or evidence["status"] == "FAIL":
+        status = "FAIL"
+    elif evidence["status"] == "PASS":
+        status = "PASS"
+    else:
+        status = "NOT_EVALUATED"
+    return {
+        **evaluation,
+        "policy_status": policy_status,
+        "status": status,
+        "external_evidence": evidence,
+    }
 
 
 def _as_list(value: Any) -> list[Any]:
@@ -63,13 +116,24 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
 
 def _git_commit() -> str:
-    return subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
+    supplied = os.environ.get("VAV_GIT_COMMIT")
+    if supplied:
+        if not re.fullmatch(r"[0-9a-f]{40}", supplied):
+            raise ValueError("VAV_GIT_COMMIT must be a full lowercase Git commit")
+        return supplied
+    try:
+        commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise ValueError("Git commit identity is unavailable") from exc
+    if not re.fullmatch(r"[0-9a-f]{40}", commit):
+        raise ValueError("Git returned an invalid commit identity")
+    return commit
 
 
 def _write(name: str, payload: dict[str, Any]) -> str:
@@ -103,12 +167,16 @@ def _condition_entries(item: dict[str, Any]) -> list[dict[str, Any]]:
         if isinstance(conditions, dict):
             return [conditions]
         if isinstance(conditions, list):
-            return [condition for condition in conditions if isinstance(condition, dict)]
+            return [
+                condition for condition in conditions if isinstance(condition, dict)
+            ]
         return []
     return []
 
 
-def _security_signals(manifest: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+def _security_signals(
+    manifest: dict[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
     texts = _as_list(manifest.get("adversarial_texts"))
     text_findings: list[dict[str, Any]] = []
     counts: dict[str, int] = {
@@ -239,7 +307,9 @@ def _authorization_matrix_check(manifest: dict[str, Any]) -> dict[str, Any]:
 def _threat_models(manifest: dict[str, Any], signals: dict[str, Any]) -> dict[str, Any]:
     models = []
     critical_failures = 0
-    for index, item in enumerate(_as_list(manifest.get("threat_models", manifest.get("threat_model", [])))):
+    for index, item in enumerate(
+        _as_list(manifest.get("threat_models", manifest.get("threat_model", [])))
+    ):
         record = _as_dict(item)
         code = str(record.get("code", f"TM-UNKNOWN-{index + 1:03d}"))
         severity = str(record.get("severity", "")).lower()
@@ -260,7 +330,10 @@ def _threat_models(manifest: dict[str, Any], signals: dict[str, Any]) -> dict[st
             findings.append("untrusted_boundary_invalid")
         record["_signal_context"] = model_signals
         findings.extend(_collect_conditions(record, f"threat-model:{code}"))
-        if _as_dict(record).get("trust_level") in {"critical", "high"} and len(controls) < 2:
+        if (
+            _as_dict(record).get("trust_level") in {"critical", "high"}
+            and len(controls) < 2
+        ):
             findings.append("insufficient_control_depth")
         status = "PASS" if not findings else "FAIL"
         if status == "FAIL":
@@ -307,7 +380,9 @@ def _collect_conditions(
     return issues
 
 
-def _attack_surfaces(manifest: dict[str, Any], base_signals: dict[str, Any]) -> dict[str, Any]:
+def _attack_surfaces(
+    manifest: dict[str, Any], base_signals: dict[str, Any]
+) -> dict[str, Any]:
     raw_items = manifest.get("attack_surfaces", manifest.get("attack_surface", []))
     results = []
     critical_failures = 0
@@ -323,7 +398,10 @@ def _attack_surfaces(manifest: dict[str, Any], base_signals: dict[str, Any]) -> 
             failures.append("unsupported_protocol")
         if protocol == "http":
             failures.append("must_not_use_http")
-        if not isinstance(record.get("auth_modes"), list) and record.get("auth_required") is True:
+        if (
+            not isinstance(record.get("auth_modes"), list)
+            and record.get("auth_required") is True
+        ):
             failures.append("auth_modes_missing")
         if record.get("auth_required") not in (True, False):
             failures.append("auth_required_invalid")
@@ -348,7 +426,9 @@ def _attack_surfaces(manifest: dict[str, Any], base_signals: dict[str, Any]) -> 
                 failures.append("upload_size_limit_missing")
         if "WEBHOOK" in code.upper():
             required_signature_modes = {"hmac_signature"}
-            auth_modes = {str(mode).lower() for mode in _as_list(record.get("auth_modes"))}
+            auth_modes = {
+                str(mode).lower() for mode in _as_list(record.get("auth_modes"))
+            }
             if not required_signature_modes & auth_modes:
                 failures.append("webhook_signature_required")
             if not _as_bool(input_validation.get("file_type_allowed")):
@@ -401,7 +481,9 @@ def _auth_checks(manifest: dict[str, Any]) -> dict[str, Any]:
         "findings": findings,
         "mfa_required_roles": _as_list(auth.get("mfa_required_roles")),
         "token_rotation_hours": _as_int(auth.get("token_rotation_hours"), 0),
-        "session_revocation_supported": _as_bool(auth.get("session_revocation_supported")),
+        "session_revocation_supported": _as_bool(
+            auth.get("session_revocation_supported")
+        ),
     }
 
 
@@ -433,7 +515,9 @@ def _injection_checks(manifest: dict[str, Any]) -> dict[str, Any]:
     return {
         "status": "PASS" if not findings else "FAIL",
         "findings": findings,
-        "parameterized_queries_required": _as_bool(injection.get("parameterized_queries_required")),
+        "parameterized_queries_required": _as_bool(
+            injection.get("parameterized_queries_required")
+        ),
         "template_rendering": template_rendering,
     }
 
@@ -487,7 +571,9 @@ def _webhook_checks(manifest: dict[str, Any]) -> dict[str, Any]:
         "findings": findings,
         "signature_required": _as_bool(webhook.get("signature_required")),
         "replay_window_seconds": _as_int(webhook.get("replay_window_seconds"), 0),
-        "timestamp_tolerance_seconds": _as_int(webhook.get("timestamp_tolerance_seconds"), 0),
+        "timestamp_tolerance_seconds": _as_int(
+            webhook.get("timestamp_tolerance_seconds"), 0
+        ),
     }
 
 
@@ -592,31 +678,18 @@ def _skill_security_checks(manifest: dict[str, Any]) -> dict[str, Any]:
 def _penetration(manifest: dict[str, Any]) -> dict[str, Any]:
     value = _as_dict(manifest.get("penetration"))
     required = _as_bool(value.get("required"))
-    critical = _as_int(value.get("critical_findings"), 0)
-    high = _as_int(value.get("high_findings"), 0)
-    medium = _as_int(value.get("medium_findings"), 0)
     if not required:
         return {
-            "status": "NOT_EVALUATED",
+            "status": "FAIL",
             "required": False,
-            "critical_findings": critical,
-            "high_findings": high,
-            "medium_findings": medium,
-            "last_tested_at": value.get("last_tested_at"),
+            "failures": ["penetration_test_not_required"],
         }
-    failures = []
-    if critical > 0:
-        failures.append("critical_findings_non_zero")
-    if high > 1:
-        failures.append("high_findings_over_limit")
     return {
-        "status": "PASS" if not failures else "FAIL",
+        "status": "PASS",
         "required": True,
-        "critical_findings": critical,
-        "high_findings": high,
-        "medium_findings": medium,
-        "failures": failures,
-        "last_tested_at": value.get("last_tested_at"),
+        "critical_findings_max": _as_int(value.get("critical_findings_max"), 0),
+        "high_findings_max": _as_int(value.get("high_findings_max"), 0),
+        "failures": [],
     }
 
 
@@ -627,7 +700,9 @@ def _api_dast(manifest: dict[str, Any]) -> dict[str, Any]:
         "status": "PASS" if required else "NOT_EVALUATED",
         "red_team_required": required,
         "ai_tool_confirm_required": _as_bool(checks.get("ai_tool_confirm_required")),
-        "sandbox_escape_attempts_seen": _as_int(checks.get("sandbox_escape_attempts_seen"), 0),
+        "sandbox_escape_attempts_seen": _as_int(
+            checks.get("sandbox_escape_attempts_seen"), 0
+        ),
     }
 
 
@@ -645,11 +720,56 @@ def snapshot() -> dict[str, Any]:
     signals, text_evidence = _security_signals(manifest)
     threat_models = _threat_models(manifest, signals)
     attack_surfaces = _attack_surfaces(manifest, signals)
-    sast = _scan_summary("sast", manifest.get("sast"), critical_limit=0, high_limit=1, require_findings_status=True)
-    sca = _scan_summary("sca", manifest.get("sca"), critical_limit=0, high_limit=0, require_findings_status=True)
-    secret_scan = _scan_summary("secret_scan", manifest.get("secret_scan"), critical_limit=0, high_limit=0, require_findings_status=False)
-    iac_scan = _scan_summary("iac", manifest.get("iac"), critical_limit=0, high_limit=0, require_findings_status=False)
-    container_scan = _scan_summary("container", manifest.get("container"), critical_limit=0, high_limit=0, require_findings_status=False)
+    sast = _bind_external(
+        "sast",
+        _scan_summary(
+            "sast",
+            manifest.get("sast"),
+            critical_limit=0,
+            high_limit=1,
+            require_findings_status=True,
+        ),
+    )
+    sca = _bind_external(
+        "sca",
+        _scan_summary(
+            "sca",
+            manifest.get("sca"),
+            critical_limit=0,
+            high_limit=0,
+            require_findings_status=True,
+        ),
+    )
+    secret_scan = _bind_external(
+        "secret-scan",
+        _scan_summary(
+            "secret_scan",
+            manifest.get("secret_scan"),
+            critical_limit=0,
+            high_limit=0,
+            require_findings_status=False,
+        ),
+    )
+    iac_scan = _bind_external(
+        "iac-scan",
+        _scan_summary(
+            "iac",
+            manifest.get("iac"),
+            critical_limit=0,
+            high_limit=0,
+            require_findings_status=False,
+        ),
+    )
+    container_scan = _bind_external(
+        "container-scan",
+        _scan_summary(
+            "container",
+            manifest.get("container"),
+            critical_limit=0,
+            high_limit=0,
+            require_findings_status=False,
+        ),
+    )
     auth = _auth_checks(manifest)
     authorization = _authorization_checks(manifest)
     injection = _injection_checks(manifest)
@@ -659,7 +779,7 @@ def snapshot() -> dict[str, Any]:
     privacy = _privacy_checks(manifest)
     ai = _ai_checks(manifest, signals)
     skill = _skill_security_checks(manifest)
-    pen = _penetration(manifest)
+    pen = _bind_external("penetration-test", _penetration(manifest))
     matrix = _authorization_matrix_check(manifest)
 
     return {
@@ -690,14 +810,16 @@ def snapshot() -> dict[str, Any]:
         "ai_safety": ai,
         "skill_sandbox": skill,
         "penetration": pen,
-        "api_dast": _api_dast(manifest),
-        "api_fuzz": _api_fuzz(manifest),
+        "api_dast": _bind_external("api-dast", _api_dast(manifest)),
+        "api_fuzz": _bind_external("api-fuzz", _api_fuzz(manifest)),
         "threat_text_evidence": text_evidence,
     }
 
 
 def manifest_checksum(manifest: dict[str, Any]) -> str:
-    return hashlib.sha256(json.dumps(manifest, sort_keys=True, default=str).encode("utf-8")).hexdigest()
+    return hashlib.sha256(
+        json.dumps(manifest, sort_keys=True, default=str).encode("utf-8")
+    ).hexdigest()
 
 
 def _overall_technical_status(snap: dict[str, Any]) -> str:
@@ -719,13 +841,15 @@ def _overall_technical_status(snap: dict[str, Any]) -> str:
         snap["privacy"]["status"],
         snap["ai_safety"]["status"],
         snap["skill_sandbox"]["status"],
-        snap["penetration"]["status"] if snap["penetration"]["status"] != "NOT_EVALUATED" else "PASS",
+        snap["penetration"]["status"],
+        snap["api_dast"]["status"],
+        snap["api_fuzz"]["status"],
     ]
-    return (
-        "PASS"
-        if all(item in {"PASS", "NOT_EVALUATED"} for item in hard_checks)
-        else "FAIL"
-    )
+    if "FAIL" in hard_checks:
+        return "FAIL"
+    if "NOT_EVALUATED" in hard_checks:
+        return "NOT_EVALUATED"
+    return "PASS"
 
 
 def _technical_report() -> dict[str, Any]:
@@ -756,7 +880,8 @@ def _technical_report() -> dict[str, Any]:
         "technical_status": technical_status,
         "production_certification": "NOT_CERTIFIED",
         "release_allowed": False,
-        "critical_findings": snap["penetration"].get("critical_findings", 0) + snap["threat_models"].get("critical_failure_count", 0),
+        "critical_findings": snap["penetration"].get("critical_findings", 0)
+        + snap["threat_models"].get("critical_failure_count", 0),
         "evidence": {
             "threat_models": snap["threat_models"]["status"],
             "attack_surfaces": snap["attack_surfaces"]["status"],
@@ -767,9 +892,7 @@ def _technical_report() -> dict[str, Any]:
                 "iac": snap["iac_scan"]["status"],
                 "container": snap["container_scan"]["status"],
             },
-            "api_security": (
-                api_guard
-            ),
+            "api_security": (api_guard),
             "api_controls": {
                 "auth": snap["auth"]["status"],
                 "authorization": snap["authorization"]["status"],
@@ -783,10 +906,14 @@ def _technical_report() -> dict[str, Any]:
             "threat_text_evidence": {
                 "signals": snap["threat_text_evidence"]["signal_summary"],
                 "sample_size": len(snap["threat_text_evidence"]["texts"]),
-                "status": "PASS" if snap["threat_text_evidence"]["texts"] else "NOT_EVALUATED",
+                "status": "PASS"
+                if snap["threat_text_evidence"]["texts"]
+                else "NOT_EVALUATED",
             },
             "ai_safety": snap["ai_safety"]["status"],
             "skill_sandbox": snap["skill_sandbox"]["status"],
+            "api_dast": snap["api_dast"]["status"],
+            "api_fuzz": snap["api_fuzz"]["status"],
             "penetration": snap["penetration"]["status"],
         },
         "backend_tests": "NOT_RUN",
@@ -805,7 +932,14 @@ def run(action: str) -> int:
     snap = snapshot()
 
     if action in {"migrate", "seed"}:
-        _status_print({"status": "NOT_RUN", "batch": BATCH_NUMBER, "reason": "offline control plane"}, action)
+        _status_print(
+            {
+                "status": "NOT_RUN",
+                "batch": BATCH_NUMBER,
+                "reason": "offline control plane",
+            },
+            action,
+        )
         return 0
 
     if action in {"sync", "security-sync"}:
@@ -825,27 +959,27 @@ def run(action: str) -> int:
     if action == "sast":
         status = snap["sast"]["status"]
         _status_print(snap["sast"], action)
-        return 0 if status == "PASS" else 1
+        return 0 if status in {"PASS", "NOT_EVALUATED"} else 1
 
     if action == "sca":
         status = snap["sca"]["status"]
         _status_print(snap["sca"], action)
-        return 0 if status == "PASS" else 1
+        return 0 if status in {"PASS", "NOT_EVALUATED"} else 1
 
     if action == "secret-scan":
         status = snap["secret_scan"]["status"]
         _status_print(snap["secret_scan"], action)
-        return 0 if status == "PASS" else 1
+        return 0 if status in {"PASS", "NOT_EVALUATED"} else 1
 
     if action == "iac-scan":
         status = snap["iac_scan"]["status"]
         _status_print(snap["iac_scan"], action)
-        return 0 if status == "PASS" else 1
+        return 0 if status in {"PASS", "NOT_EVALUATED"} else 1
 
     if action == "container-scan":
         status = snap["container_scan"]["status"]
         _status_print(snap["container_scan"], action)
-        return 0 if status == "PASS" else 1
+        return 0 if status in {"PASS", "NOT_EVALUATED"} else 1
 
     if action == "api-dast":
         status = snap["api_dast"]["status"]
@@ -915,7 +1049,11 @@ def run(action: str) -> int:
         report = _technical_report()
         path = _write("security-evidence.json", report)
         print(path)
-        return 0 if report["technical_status"] in {"PASS", "NOT_CERTIFIED"} else 1
+        return (
+            0
+            if report["technical_status"] in {"PASS", "NOT_EVALUATED", "NOT_CERTIFIED"}
+            else 1
+        )
 
     raise ValueError(f"unsupported security action: {action}")
 

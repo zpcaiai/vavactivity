@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -13,7 +14,7 @@ def test_architecture_certification_is_honest_and_checksums_artifacts(
     output = tmp_path / "skill-platform.json"
     subprocess.run(
         [
-            str(ROOT / ".venv/bin/python"),
+            sys.executable,
             str(ROOT / "scripts/certification/skill_platform.py"),
             "--output",
             str(output),
@@ -35,7 +36,7 @@ def test_production_certification_requires_complete_commit_bound_evidence(
 ) -> None:
     result = subprocess.run(
         [
-            str(ROOT / ".venv/bin/python"),
+            sys.executable,
             str(ROOT / "scripts/certification/skill_platform.py"),
             "--mode",
             "production",

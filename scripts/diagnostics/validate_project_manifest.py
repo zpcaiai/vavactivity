@@ -16,6 +16,9 @@ ROOT = Path(__file__).resolve().parents[2]
 API_SOURCE = ROOT / "services" / "api" / "src"
 MODULE_ROOT = API_SOURCE / "vav" / "modules"
 MIGRATION_ROOT = ROOT / "services" / "api" / "migrations" / "versions"
+FRONTEND_PERMISSION_CONTRACT = (
+    ROOT / "config" / "frontend" / "admin-route-permissions.json"
+)
 sys.path.insert(0, str(API_SOURCE))
 
 from vav.core.deployment_config import load_deployment_configuration  # noqa: E402
@@ -140,13 +143,61 @@ def validate_permissions(manifests: dict[str, dict[str, Any]]) -> int:
         if not any(permission.startswith(prefix) for prefix in prefixes)
     )
     require(not uncovered, f"permissions are missing module ownership: {uncovered[:5]}")
-    router_source = (ROOT / "apps/admin-web/src/router/index.ts").read_text(
-        encoding="utf-8"
+    frontend_contract = json.loads(
+        FRONTEND_PERMISSION_CONTRACT.read_text(encoding="utf-8")
     )
-    route_permissions = set(re.findall(r'permission:\s*"([a-z0-9_.]+)"', router_source))
+    require(
+        frontend_contract.get("schema_version") == "1.0.0",
+        "frontend permission contract version missing",
+    )
+    source = frontend_contract.get("source", {})
+    require(
+        source.get("repository") and source.get("path"),
+        "frontend permission source identity is incomplete",
+    )
+    declared = frontend_contract.get("permissions")
+    require(
+        isinstance(declared, list) and bool(declared),
+        "frontend route permissions must be a non-empty list",
+    )
+    require(
+        declared == sorted(set(declared)),
+        "frontend route permissions must be sorted and unique",
+    )
+    route_permissions = set(declared)
     unknown = sorted(route_permissions - ALL_PERMISSIONS)
     require(not unknown, f"admin routes reference unknown permissions: {unknown[:5]}")
     return len(ALL_PERMISSIONS)
+
+
+def validate_assembly(
+    assembly: dict[str, Any], manifests: dict[str, dict[str, Any]]
+) -> None:
+    declared_modules = assembly.get("modules")
+    require(
+        isinstance(declared_modules, list) and bool(declared_modules),
+        "production module inventory is missing",
+    )
+    require(
+        declared_modules == sorted(set(declared_modules)),
+        "production module inventory must be sorted and unique",
+    )
+    require(
+        set(declared_modules) == set(manifests),
+        "production module inventory does not match module manifests",
+    )
+    applications = assembly.get("applications", {})
+    require(set(applications) == {"user-web", "admin-web"}, "web applications missing")
+    for name, application in applications.items():
+        require(
+            application.get("repository") == "zpcaiai/vavactivityWeb",
+            f"{name} must reference the split frontend repository",
+        )
+        require(
+            application.get("checkout_env") == "VAV_WEB_ROOT",
+            f"{name} must declare the split checkout environment",
+        )
+        require(application.get("path"), f"{name} path missing")
 
 
 def validate_environment_files() -> int:
@@ -217,6 +268,7 @@ def main() -> None:
     )
     graph, numeric = migration_inventory()
     manifests = module_inventory(numeric)
+    validate_assembly(assembly, manifests)
     migration_heads = set(graph) - {
         parent for parent in graph.values() if parent is not None
     }

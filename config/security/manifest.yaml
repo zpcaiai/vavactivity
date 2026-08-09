@@ -1,6 +1,8 @@
 schema_version: "1.0.0"
 batch: 30
 name: vav-security-certification
+evidence_scope: offline_policy_and_simulation_fixture
+external_evidence_required: true
 threat_models:
   - code: TM-APP-CORE
     owner: platform
@@ -159,11 +161,8 @@ skill_security:
     network: strict
 penetration:
   required: true
-  status: passed
-  last_tested_at: "2026-08-01T12:00:00Z"
-  critical_findings: 0
-  high_findings: 0
-  medium_findings: 1
+  critical_findings_max: 0
+  high_findings_max: 0
 authorization_matrix:
   required_roles:
     - code: admin
