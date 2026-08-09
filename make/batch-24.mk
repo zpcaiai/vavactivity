@@ -48,7 +48,7 @@ process-admin-test: shared-admin-web-verify
 
 process-admin-e2e: process-migrate process-seed
 	@mkdir -p build/process
-	@RUN_IF_TIMEOUT_SECONDS=600 RUN_IF_STATUS_FILE=build/process/admin-e2e-status.json ./scripts/run_if_available.sh NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost PLAYWRIGHT_HTML_OUTPUT_DIR=build/process/playwright-report corepack pnpm exec playwright test e2e/process/process.admin.spec.ts --output=build/process/playwright-results
+	@RUN_IF_TIMEOUT_SECONDS=600 RUN_IF_STATUS_FILE=build/process/admin-e2e-status.json ./scripts/run_if_available.sh NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost PLAYWRIGHT_HTML_OUTPUT_DIR=build/process/playwright-report ./scripts/web-pnpm exec playwright test e2e/process/process.admin.spec.ts --output=build/process/playwright-results
 
 process-evidence-build: process-migrate process-seed process-backend-test process-admin-test process-admin-e2e
 	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/process/control.py evidence

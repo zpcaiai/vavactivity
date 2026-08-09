@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+backend_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=scripts/lib/frontend-workspace.sh
+source "${backend_root}/scripts/lib/frontend-workspace.sh"
+web_root="$(vav_frontend_root "${backend_root}")"
+
+# Release make targets retain their evidence beneath the backend build tree even
+# though Playwright and the web sources now live in the sibling repository.
+if [[ -n "${PLAYWRIGHT_HTML_OUTPUT_DIR:-}" && "${PLAYWRIGHT_HTML_OUTPUT_DIR}" != /* ]]; then
+  export PLAYWRIGHT_HTML_OUTPUT_DIR="${backend_root}/${PLAYWRIGHT_HTML_OUTPUT_DIR}"
+fi
+
+translated=()
+for argument in "$@"; do
+  case "${argument}" in
+    --output=build/*)
+      translated+=("--output=${backend_root}/${argument#--output=}")
+      ;;
+    build/*)
+      translated+=("${backend_root}/${argument}")
+      ;;
+    *)
+      translated+=("${argument}")
+      ;;
+  esac
+done
+
+cd "${web_root}"
+exec "${translated[@]}"

@@ -6,7 +6,7 @@ from datetime import timedelta
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -119,22 +119,29 @@ async def dashboard(
 @router.get("/admin/privacy/requests")
 async def list_requests(
     request: Request,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
     _: AuthenticatedPrincipal = Depends(require_permission("privacy.requests.read")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
+    total = int(await session.scalar(text("SELECT count(*) FROM data_subject_requests")) or 0)
     rows = [
         dict(row)
         for row in (
             await session.execute(
                 text(
-                    "SELECT id,request_number,('user-'||left(user_id::text,8)) AS user_anonymous_id,request_type,status,identity_verification_level,identity_verified_at,submitted_at,due_at,assigned_to,decision_code,decision_reason_safe,completed_at FROM data_subject_requests ORDER BY created_at DESC LIMIT 500"
-                )
+                    "SELECT id,request_number,('user-'||left(user_id::text,8)) AS user_anonymous_id,request_type,status,identity_verification_level,identity_verified_at,submitted_at,due_at,assigned_to,decision_code,decision_reason_safe,completed_at FROM data_subject_requests ORDER BY created_at DESC LIMIT :limit OFFSET :offset"
+                ),
+                {"limit": page_size, "offset": (page - 1) * page_size},
             )
         )
         .mappings()
         .all()
     ]
-    return success({"items": rows}, request_id_from_request(request))
+    return success(
+        {"items": rows, "page": page, "page_size": page_size, "total": total},
+        request_id_from_request(request),
+    )
 
 
 @router.get("/admin/privacy/requests/{privacy_request_id}")

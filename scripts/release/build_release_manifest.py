@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -18,6 +19,12 @@ def immutable_digest(value: str) -> str:
     return value
 
 
+def git_commit(value: str) -> str:
+    if not re.fullmatch(r"[0-9a-f]{40}", value):
+        raise argparse.ArgumentTypeError("commit must be a full lowercase 40-character SHA")
+    return value
+
+
 def checksum(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -25,7 +32,8 @@ def checksum(path: Path) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--version", required=True)
-    parser.add_argument("--commit", required=True)
+    parser.add_argument("--commit", required=True, type=git_commit)
+    parser.add_argument("--frontend-commit", required=True, type=git_commit)
     parser.add_argument("--api", required=True, type=immutable_digest)
     parser.add_argument("--worker", required=True, type=immutable_digest)
     parser.add_argument("--user-web", required=True, type=immutable_digest)
@@ -39,6 +47,7 @@ def main() -> None:
         "release": {
             "version": args.version,
             "git_commit": args.commit,
+            "frontend_git_commit": args.frontend_commit,
             "built_at": datetime.now(UTC).isoformat(),
         },
         "images": {

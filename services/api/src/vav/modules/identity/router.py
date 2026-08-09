@@ -576,6 +576,7 @@ async def list_users(
     page_size: int = Query(default=20, ge=1, le=100),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
+    total = int(await session.scalar(select(func.count()).select_from(User)) or 0)
     users = (
         await session.scalars(
             select(User)
@@ -598,6 +599,7 @@ async def list_users(
             ],
             "page": page,
             "page_size": page_size,
+            "total": total,
         },
         request_id_from_request(request),
     )
@@ -898,11 +900,19 @@ async def invite_admin(
 @router.get("/admin/admins/invitations")
 async def list_invitations(
     request: Request,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
     _: AuthenticatedPrincipal = Depends(require_permission("admins.read")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
+    total = int(await session.scalar(select(func.count()).select_from(AdminInvitation)) or 0)
     invitations = (
-        await session.scalars(select(AdminInvitation).order_by(AdminInvitation.created_at.desc()))
+        await session.scalars(
+            select(AdminInvitation)
+            .order_by(AdminInvitation.created_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
     ).all()
     return success(
         {
@@ -915,7 +925,10 @@ async def list_invitations(
                     "revoked_at": item.revoked_at.isoformat() if item.revoked_at else None,
                 }
                 for item in invitations
-            ]
+            ],
+            "page": page,
+            "page_size": page_size,
+            "total": total,
         },
         request_id_from_request(request),
     )
@@ -1029,16 +1042,31 @@ async def accept_invitation(
 @router.get("/admin/admins")
 async def list_admins(
     request: Request,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
     _: AuthenticatedPrincipal = Depends(require_permission("admins.read")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
+    filters = (UserRole.revoked_at.is_(None), Role.code != "member")
+    total = int(
+        await session.scalar(
+            select(func.count(func.distinct(User.id)))
+            .select_from(User)
+            .join(UserRole, UserRole.user_id == User.id)
+            .join(Role, Role.id == UserRole.role_id)
+            .where(*filters)
+        )
+        or 0
+    )
     statement = (
         select(User)
         .join(UserRole, UserRole.user_id == User.id)
         .join(Role, Role.id == UserRole.role_id)
-        .where(UserRole.revoked_at.is_(None), Role.code != "member")
+        .where(*filters)
         .distinct()
         .order_by(User.created_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
     )
     admins = (await session.scalars(statement)).all()
     return success(
@@ -1046,7 +1074,10 @@ async def list_admins(
             "items": [
                 {"id": str(admin.id), "email": admin.display_email, "status": admin.status}
                 for admin in admins
-            ]
+            ],
+            "page": page,
+            "page_size": page_size,
+            "total": total,
         },
         request_id_from_request(request),
     )
@@ -1100,8 +1131,11 @@ async def list_security_events(
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     statement = select(SecurityAuditEvent)
+    count_statement = select(func.count()).select_from(SecurityAuditEvent)
     if event_type:
         statement = statement.where(SecurityAuditEvent.event_type == event_type)
+        count_statement = count_statement.where(SecurityAuditEvent.event_type == event_type)
+    total = int(await session.scalar(count_statement) or 0)
     events = (
         await session.scalars(
             statement.order_by(SecurityAuditEvent.occurred_at.desc())
@@ -1125,7 +1159,10 @@ async def list_security_events(
                     "occurred_at": event.occurred_at.isoformat(),
                 }
                 for event in events
-            ]
+            ],
+            "page": page,
+            "page_size": page_size,
+            "total": total,
         },
         request_id_from_request(request),
     )

@@ -36,6 +36,13 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Checkout frontend source
+        uses: actions/checkout@v4
+        with:
+          repository: zpcaiai/vavactivityWeb
+          path: frontend-source
+          persist-credentials: false
+
       - name: Validate Hugging Face token
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -56,6 +63,7 @@ jobs:
           SOURCE_BRANCH="${SOURCE_BRANCH:-$HF_TARGET_BRANCH_DEFAULT}"
           HF_TARGET_BRANCH="${HF_TARGET_BRANCH:-$SOURCE_BRANCH}"
           export HF_TARGET_BRANCH
+          export VAV_WEB_ROOT="$GITHUB_WORKSPACE/frontend-source"
           echo "Source branch: $SOURCE_BRANCH"
           echo "Configured target branch: $HF_TARGET_BRANCH"
           echo "HF target space: $HF_SPACE_REPO"

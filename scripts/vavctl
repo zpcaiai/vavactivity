@@ -3,6 +3,7 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
+source "$repo_root/scripts/lib/frontend-workspace.sh"
 seed_manifest_file="$repo_root/config/seeds/manifest.yaml"
 seed_state_file="$repo_root/.vavctl/seed-state.txt"
 
@@ -118,7 +119,7 @@ seed_write_state() {
 
 doctor() {
   local failures=0
-  for command_name in git docker node corepack python3 uv openssl curl; do
+  for command_name in git docker node python3 uv openssl curl; do
     if command -v "$command_name" >/dev/null 2>&1; then
       pass "$command_name available"
     else
@@ -127,6 +128,8 @@ doctor() {
   done
   if docker info >/dev/null 2>&1; then pass "Docker daemon reachable"; else fail "Docker daemon is not reachable" || failures=$((failures+1)); fi
   if docker compose version >/dev/null 2>&1; then pass "Docker Compose v2 available"; else fail "Docker Compose v2 is required" || failures=$((failures+1)); fi
+  if command -v corepack >/dev/null 2>&1 || command -v pnpm >/dev/null 2>&1; then pass "pnpm available"; else fail "pnpm is required" || failures=$((failures+1)); fi
+  if vav_frontend_root "$repo_root" >/dev/null; then pass "frontend checkout available"; else fail "frontend checkout is required" || failures=$((failures+1)); fi
   local architecture available_kb memory_bytes
   architecture="$(uname -m)"
   case "$architecture" in arm64|aarch64|x86_64|amd64) pass "supported CPU architecture: $architecture" ;; *) warn "untested CPU architecture: $architecture" ;; esac
@@ -154,9 +157,11 @@ prepare_secrets() {
 
 bootstrap() {
   doctor
+  local web_root
+  web_root="$(vav_frontend_root "$repo_root")"
   [[ -f .env ]] || cp .env.example .env
   prepare_secrets
-  corepack pnpm install --frozen-lockfile
+  (cd "$web_root" && vav_pnpm install --frozen-lockfile)
   uv sync --frozen --all-packages --all-groups
   docker compose build api worker user-web admin-web
   docker compose up -d postgres redis minio minio-init mailpit api
@@ -193,7 +198,7 @@ migrate() {
 
 seed() {
   seed_parse_manifest
-  local include_demo include_test selected_groups env_requested
+  local include_demo include_test env_requested
   local -a requested_modules modules_to_run
   local -a requested_groups=()
   local -a trim=()
@@ -379,9 +384,9 @@ reset_local() {
   docker compose down -v
 }
 
-command="${1:-help}"
+vav_command="${1:-help}"
 shift || true
-case "$command" in
+case "$vav_command" in
   doctor) doctor "$@" ;;
   bootstrap) bootstrap "$@" ;;
   up) up "$@" ;;

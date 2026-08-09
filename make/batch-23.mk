@@ -45,18 +45,18 @@ experience-security-test: experience-migrate experience-seed
 	@RUN_IF_TIMEOUT_SECONDS=180 RUN_IF_STATUS_FILE=build/experience/security-test-status.json ./scripts/run_if_available.sh uv run --package vav-platform-api pytest services/api/tests/experience/security --junitxml=build/experience/security-junit.xml -q
 
 experience-frontend-test:
-	@RUN_IF_TIMEOUT_SECONDS=300 RUN_IF_STATUS_FILE=build/experience/packages-test-status.json ./scripts/run_if_available.sh corepack pnpm --filter @vav/navigation-contracts --filter @vav/journey-contracts --filter @vav/experience-components --filter @vav/search-components --filter @vav/help-components test
-	@RUN_IF_TIMEOUT_SECONDS=300 RUN_IF_STATUS_FILE=build/experience/packages-typecheck-status.json ./scripts/run_if_available.sh corepack pnpm --filter @vav/navigation-contracts --filter @vav/journey-contracts --filter @vav/experience-components --filter @vav/search-components --filter @vav/help-components typecheck
-	@RUN_IF_TIMEOUT_SECONDS=300 RUN_IF_STATUS_FILE=build/experience/apps-test-status.json ./scripts/run_if_available.sh corepack pnpm --filter @vav/user-web --filter @vav/admin-web test
-	@RUN_IF_TIMEOUT_SECONDS=300 RUN_IF_STATUS_FILE=build/experience/apps-build-status.json ./scripts/run_if_available.sh corepack pnpm --filter @vav/user-web --filter @vav/admin-web build
+	@RUN_IF_TIMEOUT_SECONDS=300 RUN_IF_STATUS_FILE=build/experience/packages-test-status.json ./scripts/run_if_available.sh ./scripts/web-pnpm --filter @vav/navigation-contracts --filter @vav/journey-contracts --filter @vav/experience-components --filter @vav/search-components --filter @vav/help-components test
+	@RUN_IF_TIMEOUT_SECONDS=300 RUN_IF_STATUS_FILE=build/experience/packages-typecheck-status.json ./scripts/run_if_available.sh ./scripts/web-pnpm --filter @vav/navigation-contracts --filter @vav/journey-contracts --filter @vav/experience-components --filter @vav/search-components --filter @vav/help-components typecheck
+	@RUN_IF_TIMEOUT_SECONDS=300 RUN_IF_STATUS_FILE=build/experience/apps-test-status.json ./scripts/run_if_available.sh ./scripts/web-pnpm --filter @vav/user-web --filter @vav/admin-web test
+	@RUN_IF_TIMEOUT_SECONDS=300 RUN_IF_STATUS_FILE=build/experience/apps-build-status.json ./scripts/run_if_available.sh ./scripts/web-pnpm --filter @vav/user-web --filter @vav/admin-web build
 
 experience-user-e2e: experience-migrate experience-seed
 	@mkdir -p build/experience
-	@RUN_IF_TIMEOUT_SECONDS=600 RUN_IF_STATUS_FILE=build/experience/user-e2e-status.json ./scripts/run_if_available.sh NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost PLAYWRIGHT_HTML_OUTPUT_DIR=build/experience/user-playwright-report corepack pnpm exec playwright test e2e/experience/experience.user.spec.ts --output=build/experience/user-playwright-results
+	@RUN_IF_TIMEOUT_SECONDS=600 RUN_IF_STATUS_FILE=build/experience/user-e2e-status.json ./scripts/run_if_available.sh NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost PLAYWRIGHT_HTML_OUTPUT_DIR=build/experience/user-playwright-report ./scripts/web-pnpm exec playwright test e2e/experience/experience.user.spec.ts --output=build/experience/user-playwright-results
 
 experience-admin-e2e: experience-migrate experience-seed
 	@mkdir -p build/experience
-	@RUN_IF_TIMEOUT_SECONDS=600 RUN_IF_STATUS_FILE=build/experience/admin-e2e-status.json ./scripts/run_if_available.sh NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost PLAYWRIGHT_HTML_OUTPUT_DIR=build/experience/admin-playwright-report corepack pnpm exec playwright test e2e/experience/experience.admin.spec.ts --output=build/experience/admin-playwright-results
+	@RUN_IF_TIMEOUT_SECONDS=600 RUN_IF_STATUS_FILE=build/experience/admin-e2e-status.json ./scripts/run_if_available.sh NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost PLAYWRIGHT_HTML_OUTPUT_DIR=build/experience/admin-playwright-report ./scripts/web-pnpm exec playwright test e2e/experience/experience.admin.spec.ts --output=build/experience/admin-playwright-results
 
 experience-evidence-build: experience-migrate experience-seed experience-test experience-security-test experience-frontend-test experience-user-e2e experience-admin-e2e
 	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/experience/control.py evidence

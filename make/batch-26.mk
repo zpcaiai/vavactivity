@@ -40,7 +40,7 @@ admin-platform-test: shared-admin-web-verify
 
 admin-platform-e2e: admin-platform-migrate admin-platform-seed
 	@mkdir -p build/admin
-	@RUN_IF_TIMEOUT_SECONDS=600 RUN_IF_STATUS_FILE=build/admin/browser-e2e-status.json ./scripts/run_if_available.sh NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost PLAYWRIGHT_HTML_OUTPUT_DIR=build/admin/playwright-report corepack pnpm exec playwright test e2e/admin-platform --output=build/admin/playwright-results
+	@RUN_IF_TIMEOUT_SECONDS=600 RUN_IF_STATUS_FILE=build/admin/browser-e2e-status.json ./scripts/run_if_available.sh NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost PLAYWRIGHT_HTML_OUTPUT_DIR=build/admin/playwright-report ./scripts/web-pnpm exec playwright test e2e/admin-platform --output=build/admin/playwright-results
 
 admin-evidence-build: admin-platform-migrate admin-platform-seed admin-backend-test admin-platform-test admin-platform-e2e
 	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/admin/control.py evidence

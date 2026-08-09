@@ -5,6 +5,19 @@ on:
     branches: [main]
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      frontend_commit:
+        description: Full vavactivityWeb commit used for the frontend images
+        required: false
+        type: string
+      user_web_image:
+        description: Immutable user-web image reference including @sha256 digest
+        required: false
+        type: string
+      admin_web_image:
+        description: Immutable admin-web image reference including @sha256 digest
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -21,8 +34,6 @@ jobs:
         include:
           - {name: api, dockerfile: infra/docker/backend.Dockerfile, target: production}
           - {name: worker, dockerfile: infra/docker/backend.Dockerfile, target: production}
-          - {name: user-web, dockerfile: infra/docker/frontend.Dockerfile, target: user-production}
-          - {name: admin-web, dockerfile: infra/docker/frontend.Dockerfile, target: admin-production}
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -55,6 +66,11 @@ jobs:
         with: {name: "${{ matrix.name }}-image", path: "${{ matrix.name }}.image", retention-days: 30}
 
   release-manifest:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      inputs.frontend_commit != '' &&
+      inputs.user_web_image != '' &&
+      inputs.admin_web_image != ''
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -72,10 +88,11 @@ jobs:
           uv run --with pyyaml python scripts/release/build_release_manifest.py \
             --version "$release_version" \
             --commit "$GITHUB_SHA" \
+            --frontend-commit "${{ inputs.frontend_commit }}" \
             --api "$(<image-identities/api.image)" \
             --worker "$(<image-identities/worker.image)" \
-            --user-web "$(<image-identities/user-web.image)" \
-            --admin-web "$(<image-identities/admin-web.image)" \
+            --user-web "${{ inputs.user_web_image }}" \
+            --admin-web "${{ inputs.admin_web_image }}" \
             --configuration-fingerprint "$configuration_fingerprint" \
             --output release-manifest.yaml
       - uses: actions/upload-artifact@v4

@@ -105,7 +105,7 @@ auth-security-test:
 	docker compose exec -T api pytest tests/identity/security -q
 
 auth-e2e:
-	corepack pnpm exec playwright test e2e/auth.user.spec.ts e2e/auth.admin.spec.ts
+	./scripts/web-pnpm exec playwright test e2e/auth.user.spec.ts e2e/auth.admin.spec.ts
 
 auth-verify: auth-migrate auth-seed auth-test auth-security-test auth-e2e
 	$(MAKE) verify
@@ -123,13 +123,13 @@ cms-security-test:
 	docker compose exec -T api pytest tests/content/security -q
 
 cms-user-e2e:
-	corepack pnpm exec playwright test e2e/cms.spec.ts
+	./scripts/web-pnpm exec playwright test e2e/cms.spec.ts
 
 cms-admin-e2e:
-	corepack pnpm exec playwright test e2e/cms.admin.spec.ts e2e/media.admin.spec.ts e2e/navigation.admin.spec.ts
+	./scripts/web-pnpm exec playwright test e2e/cms.admin.spec.ts e2e/media.admin.spec.ts e2e/navigation.admin.spec.ts
 
 i18n-check:
-	corepack pnpm --recursive --if-present i18n:check
+	./scripts/web-pnpm --recursive --if-present i18n:check
 
 cms-verify: cms-migrate cms-seed i18n-check cms-test cms-security-test cms-user-e2e cms-admin-e2e
 	$(MAKE) auth-verify
@@ -150,10 +150,10 @@ catalog-security-test:
 	docker compose exec -T api pytest tests/catalog/security -q
 
 catalog-user-e2e:
-	corepack pnpm exec playwright test e2e/catalog.spec.ts
+	./scripts/web-pnpm exec playwright test e2e/catalog.spec.ts
 
 catalog-admin-e2e:
-	corepack pnpm exec playwright test e2e/catalog.spec.ts
+	./scripts/web-pnpm exec playwright test e2e/catalog.spec.ts
 
 catalog-verify: catalog-migrate catalog-seed catalog-test catalog-concurrency-test catalog-security-test catalog-user-e2e catalog-admin-e2e
 	$(MAKE) cms-verify
@@ -178,10 +178,10 @@ commerce-security-test:
 	docker compose exec -T api pytest tests/commerce/security -q
 
 commerce-user-e2e:
-	corepack pnpm exec playwright test e2e/commerce.user.spec.ts
+	./scripts/web-pnpm exec playwright test e2e/commerce.user.spec.ts
 
 commerce-admin-e2e:
-	corepack pnpm exec playwright test e2e/commerce.admin.spec.ts
+	./scripts/web-pnpm exec playwright test e2e/commerce.admin.spec.ts
 
 commerce-reconcile:
 	docker compose exec -T api python -m vav.cli.reconcile_payments
@@ -207,10 +207,10 @@ activity-security-test:
 	docker compose exec -T api pytest tests/activities/security -q
 
 activity-user-e2e:
-	corepack pnpm exec playwright test e2e/activities.user.spec.ts
+	./scripts/web-pnpm exec playwright test e2e/activities.user.spec.ts
 
 activity-admin-e2e:
-	corepack pnpm exec playwright test e2e/activities.admin.spec.ts
+	./scripts/web-pnpm exec playwright test e2e/activities.admin.spec.ts
 
 activity-verify: activity-migrate activity-seed activity-test activity-concurrency-test activity-security-test activity-user-e2e activity-admin-e2e
 	$(MAKE) commerce-verify
@@ -233,10 +233,10 @@ course-security-test:
 	docker compose exec -T api pytest tests/courses/security -q
 
 course-user-e2e:
-	corepack pnpm exec playwright test e2e/courses.user.spec.ts
+	./scripts/web-pnpm exec playwright test e2e/courses.user.spec.ts
 
 course-admin-e2e:
-	corepack pnpm exec playwright test e2e/courses.admin.spec.ts
+	./scripts/web-pnpm exec playwright test e2e/courses.admin.spec.ts
 
 course-verify: course-migrate course-seed course-test course-concurrency-test course-security-test course-user-e2e course-admin-e2e
 	$(MAKE) activity-verify
@@ -259,10 +259,10 @@ counseling-security-test:
 	docker compose exec -T api pytest tests/counseling/security -q
 
 counseling-user-e2e:
-	corepack pnpm exec playwright test e2e/counseling.user.spec.ts
+	./scripts/web-pnpm exec playwright test e2e/counseling.user.spec.ts
 
 counseling-admin-e2e:
-	corepack pnpm exec playwright test e2e/counseling.admin.spec.ts
+	./scripts/web-pnpm exec playwright test e2e/counseling.admin.spec.ts
 
 counseling-verify: counseling-migrate counseling-seed counseling-test counseling-concurrency-test counseling-security-test counseling-user-e2e counseling-admin-e2e
 	$(MAKE) course-verify
@@ -293,7 +293,7 @@ knowledge-eval:
 	docker compose exec -T api python -m vav.cli.run_knowledge_evaluation
 
 knowledge-admin-e2e:
-	corepack pnpm exec playwright test e2e/knowledge.admin.spec.ts
+	./scripts/web-pnpm exec playwright test e2e/knowledge.admin.spec.ts
 
 knowledge-verify: knowledge-migrate knowledge-seed knowledge-ingest-fixtures knowledge-build-index knowledge-test knowledge-retrieval-test knowledge-security-test knowledge-eval knowledge-admin-e2e
 	$(MAKE) counseling-verify
@@ -318,10 +318,10 @@ ai-eval:
 	docker compose exec -T api python -m vav.cli.run_ai_evaluation
 
 ai-user-e2e:
-	corepack pnpm exec playwright test e2e/ai.user.spec.ts
+	./scripts/web-pnpm exec playwright test e2e/ai.user.spec.ts
 
 ai-admin-e2e:
-	corepack pnpm exec playwright test e2e/ai.admin.spec.ts
+	./scripts/web-pnpm exec playwright test e2e/ai.admin.spec.ts
 
 ai-verify: ai-migrate ai-seed ai-test ai-safety-test ai-concurrency-test ai-eval ai-user-e2e ai-admin-e2e
 	$(MAKE) knowledge-verify
@@ -349,10 +349,10 @@ notification-provider-test:
 	docker compose exec -T api pytest tests/notifications/providers -q
 
 notification-user-e2e:
-	corepack pnpm exec playwright test e2e/notifications.user.spec.ts
+	./scripts/web-pnpm exec playwright test e2e/notifications.user.spec.ts
 
 notification-admin-e2e:
-	corepack pnpm exec playwright test e2e/notifications.admin.spec.ts
+	./scripts/web-pnpm exec playwright test e2e/notifications.admin.spec.ts
 
 notification-verify: notification-migrate notification-seed-templates notification-seed notification-test notification-concurrency-test notification-security-test notification-provider-test notification-user-e2e notification-admin-e2e
 	$(MAKE) ai-verify
@@ -380,10 +380,10 @@ privacy-retention-test:
 	docker compose exec -T api pytest tests/privacy/retention -q
 
 privacy-user-e2e:
-	pnpm exec playwright test e2e/user-privacy
+	./scripts/web-pnpm exec playwright test e2e/user-privacy
 
 privacy-admin-e2e:
-	pnpm exec playwright test e2e/admin-privacy
+	./scripts/web-pnpm exec playwright test e2e/admin-privacy
 
 privacy-verify: privacy-migrate privacy-seed privacy-seed-inventory privacy-test privacy-security-test privacy-concurrency-test privacy-retention-test privacy-user-e2e privacy-admin-e2e
 	$(MAKE) notification-verify
@@ -408,10 +408,10 @@ dating-profile-security-test:
 	docker compose exec -T api pytest tests/matchmaking_profiles/security -q
 
 dating-profile-user-e2e:
-	pnpm exec playwright test e2e/user-dating-profile
+	./scripts/web-pnpm exec playwright test e2e/user-dating-profile
 
 dating-profile-admin-e2e:
-	pnpm exec playwright test e2e/admin-dating-profile
+	./scripts/web-pnpm exec playwright test e2e/admin-dating-profile
 
 dating-profile-verify:
 	$(MAKE) dating-profile-migrate
@@ -456,10 +456,10 @@ recommendation-eval:
 	docker compose exec -T api python -m vav.cli.run_recommendation_evaluation
 
 recommendation-user-e2e:
-	pnpm exec playwright test e2e/user-recommendations
+	./scripts/web-pnpm exec playwright test e2e/user-recommendations
 
 recommendation-admin-e2e:
-	pnpm exec playwright test e2e/admin-recommendations
+	./scripts/web-pnpm exec playwright test e2e/admin-recommendations
 
 recommendation-verify:
 	$(MAKE) recommendation-migrate
@@ -495,10 +495,10 @@ interaction-privacy-test:
 	docker compose exec -T api pytest tests/matchmaking_interactions/privacy -q
 
 interaction-user-e2e:
-	pnpm exec playwright test e2e/user-matchmaking-interactions
+	./scripts/web-pnpm exec playwright test e2e/user-matchmaking-interactions
 
 interaction-admin-e2e:
-	pnpm exec playwright test e2e/admin-matchmaking-interactions
+	./scripts/web-pnpm exec playwright test e2e/admin-matchmaking-interactions
 
 interaction-verify:
 	$(MAKE) interaction-migrate
@@ -533,13 +533,13 @@ relationship-privacy-test:
 	docker compose exec -T api pytest tests/relationships/privacy -q
 
 relationship-user-e2e:
-	pnpm exec playwright test e2e/user-relationships
+	./scripts/web-pnpm exec playwright test e2e/user-relationships
 
 relationship-admin-e2e:
-	pnpm exec playwright test e2e/admin-relationships
+	./scripts/web-pnpm exec playwright test e2e/admin-relationships
 
 relationship-browser-local:
-	VAV_E2E_SEED_MODE=local corepack pnpm run test:e2e:batch16
+	VAV_E2E_SEED_MODE=local ./scripts/web-pnpm run test:e2e:batch16
 
 relationship-verify:
 	$(MAKE) relationship-migrate
@@ -574,13 +574,13 @@ membership-reconciliation-test:
 	docker compose exec -T api pytest tests/memberships/reconciliation -q
 
 membership-user-e2e:
-	pnpm exec playwright test e2e/user-memberships
+	./scripts/web-pnpm exec playwright test e2e/user-memberships
 
 membership-admin-e2e:
-	pnpm exec playwright test e2e/admin-memberships
+	./scripts/web-pnpm exec playwright test e2e/admin-memberships
 
 membership-browser-local:
-	VAV_E2E_SEED_MODE=local corepack pnpm run test:e2e:batch17
+	VAV_E2E_SEED_MODE=local ./scripts/web-pnpm run test:e2e:batch17
 
 membership-verify:
 	$(MAKE) membership-migrate
@@ -617,10 +617,10 @@ safety-red-team:
 	docker compose exec api pytest tests/trust_safety/red_team -q
 
 safety-user-e2e:
-	pnpm exec playwright test e2e/user-trust-safety
+	./scripts/web-pnpm exec playwright test e2e/user-trust-safety
 
 safety-admin-e2e:
-	pnpm exec playwright test e2e/admin-trust-safety
+	./scripts/web-pnpm exec playwright test e2e/admin-trust-safety
 
 safety-verify:
 	$(MAKE) safety-migrate
@@ -657,7 +657,7 @@ system-test:
 	.venv/bin/pytest services/api/tests/system -q
 
 complete-e2e:
-	corepack pnpm exec playwright test --config playwright.config.ts --workers=1
+	./scripts/web-pnpm exec playwright test --config playwright.config.ts --workers=1
 
 performance-smoke:
 	./scripts/performance/run-k6.sh tests/performance/smoke.js
@@ -692,10 +692,10 @@ skill-catalog-check:
 
 skill-sdk-test:
 	.venv/bin/pytest tests/skill-sdk -q
-	corepack pnpm --filter @vav/skill-sdk test
-	corepack pnpm --filter @vav/skill-sdk typecheck
-	corepack pnpm --filter @vav/skill-ui-sdk test
-	corepack pnpm --filter @vav/skill-ui-sdk typecheck
+	./scripts/web-pnpm --filter @vav/skill-sdk test
+	./scripts/web-pnpm --filter @vav/skill-sdk typecheck
+	./scripts/web-pnpm --filter @vav/skill-ui-sdk test
+	./scripts/web-pnpm --filter @vav/skill-ui-sdk typecheck
 
 skill-schema-test:
 	PYTHONPATH=packages/skill-sdk-python/src .venv/bin/python scripts/skill/validate_all_schemas.py
@@ -714,7 +714,7 @@ skill-marketplace-test:
 	.venv/bin/pytest tests/skill-marketplace -q
 
 skill-complete-e2e:
-	corepack pnpm exec playwright test e2e/skills.admin.spec.ts
+	./scripts/web-pnpm exec playwright test e2e/skills.admin.spec.ts
 
 skill-verify: skill-sdk-test skill-schema-test skill-runtime-test skill-registry-test skill-security-test skill-marketplace-test skill-complete-e2e
 

@@ -53,7 +53,7 @@ quality-gate-evaluate:
 
 quality-admin-e2e: quality-migrate quality-seed
 	@mkdir -p build/quality
-	@RUN_IF_TIMEOUT_SECONDS=600 RUN_IF_STATUS_FILE=build/quality/admin-e2e-status.json ./scripts/run_if_available.sh NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost PLAYWRIGHT_HTML_OUTPUT_DIR=build/quality/playwright-report corepack pnpm exec playwright test e2e/admin-quality --output=build/quality/playwright-results
+	@RUN_IF_TIMEOUT_SECONDS=600 RUN_IF_STATUS_FILE=build/quality/admin-e2e-status.json ./scripts/run_if_available.sh NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost PLAYWRIGHT_HTML_OUTPUT_DIR=build/quality/playwright-report ./scripts/web-pnpm exec playwright test e2e/admin-quality --output=build/quality/playwright-results
 
 quality-evidence-build: quality-migrate quality-seed quality-test quality-gate-test quality-security-test quality-admin-e2e
 	@./scripts/run_if_available.sh PYTHONPATH=services/api/src .venv/bin/python scripts/quality/control.py evidence-build

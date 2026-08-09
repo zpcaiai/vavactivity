@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
 from typing import Any, cast
 from uuid import uuid4
 
@@ -21,7 +22,13 @@ def request_fixture() -> Request:
 
 
 @pytest.mark.asyncio
-async def test_write_tool_requires_matching_single_use_user_confirmation() -> None:
+async def test_write_tool_requires_matching_single_use_user_confirmation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "vav.modules.ai_assistant.router.get_settings",
+        lambda: SimpleNamespace(ai_enabled=True),
+    )
     async with session_factory() as session:
         user = await session.get(User, SYSTEM_USER_ID)
         assert user is not None

@@ -48,7 +48,7 @@ data-admin-test: shared-admin-web-verify
 
 data-admin-e2e: data-migrate data-seed
 	@mkdir -p build/data
-	@RUN_IF_TIMEOUT_SECONDS=600 RUN_IF_STATUS_FILE=build/data/admin-e2e-status.json ./scripts/run_if_available.sh NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost PLAYWRIGHT_HTML_OUTPUT_DIR=build/data/playwright-report corepack pnpm exec playwright test e2e/data/data-governance.admin.spec.ts --output=build/data/playwright-results
+	@RUN_IF_TIMEOUT_SECONDS=600 RUN_IF_STATUS_FILE=build/data/admin-e2e-status.json ./scripts/run_if_available.sh NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost PLAYWRIGHT_HTML_OUTPUT_DIR=build/data/playwright-report ./scripts/web-pnpm exec playwright test e2e/data/data-governance.admin.spec.ts --output=build/data/playwright-results
 
 data-evidence-build: data-migrate data-seed data-backend-test data-admin-test data-admin-e2e
 	@./scripts/run_if_available.sh uv run --package vav-platform-api python scripts/data/control.py evidence

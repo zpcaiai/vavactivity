@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+backend_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if command -v corepack >/dev/null 2>&1; then
+  pnpm_command=(corepack pnpm)
+elif command -v pnpm >/dev/null 2>&1; then
+  pnpm_command=(pnpm)
+else
+  echo "pnpm is required (directly or through corepack)." >&2
+  exit 127
+fi
+
+exec "${backend_root}/scripts/web-exec" "${pnpm_command[@]}" "$@"

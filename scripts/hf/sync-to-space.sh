@@ -15,6 +15,8 @@ SOURCE_BRANCH="${1:-${GITHUB_REF_NAME:-main}}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+source "${REPO_ROOT}/scripts/lib/frontend-workspace.sh"
+WEB_ROOT="$(vav_frontend_root "${REPO_ROOT}")"
 
 SYNC_DIR="$(mktemp -d)"
 trap 'rm -rf "${SYNC_DIR}"' EXIT
@@ -30,6 +32,9 @@ SOURCE_COMMIT="$(git -C "${REPO_ROOT}" rev-parse "${SOURCE_BRANCH}^{commit}")"
 # build products, transfer archives and other untracked files from leaking into
 # the Space snapshot.
 git -C "${REPO_ROOT}" archive --format=tar "${SOURCE_BRANCH}" | tar -xf - -C "${SYNC_DIR}"
+WEB_COMMIT="$(git -C "${WEB_ROOT}" rev-parse HEAD)"
+git -C "${WEB_ROOT}" archive --format=tar "${WEB_COMMIT}" | tar -xf - -C "${SYNC_DIR}"
+printf '%s\n' "backend=${SOURCE_COMMIT}" "frontend=${WEB_COMMIT}" > "${SYNC_DIR}/SOURCE_COMMITS"
 
 rm -rf "${SYNC_DIR}/.github" "${SYNC_DIR}/_to_delete" "${SYNC_DIR}/_transfer" \
   "${SYNC_DIR}/artifacts" "${SYNC_DIR}/apps/design-system/storybook-static"
@@ -107,6 +112,7 @@ if [ -z "${HF_USERNAME}" ]; then
   exit 1
 fi
 export HF_USERNAME HF_TOKEN
+# shellcheck disable=SC2016 # Variables must expand when Git invokes the helper.
 HF_CREDENTIAL_HELPER='!f() { if [ "$1" = get ]; then printf "%s\n" "username=$HF_USERNAME" "password=$HF_TOKEN"; fi; }; f'
 
 GIT_TERMINAL_PROMPT=0 GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null \

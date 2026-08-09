@@ -189,23 +189,29 @@ async def create_complete_profile(
 
 def sample_image_bytes(
     *,
-    size: tuple[int, int] = (900, 900),
+    size: tuple[int, int] = (640, 640),
     fmt: str = "JPEG",
     with_exif: bool = False,
     seed: int = 0,
 ) -> bytes:
     """Build a deterministic non-uniform test image; ``seed`` varies the checksum."""
-    image = Image.new("RGB", size)
+    # Generate a compact deterministic texture in Python, then let Pillow's C
+    # implementation scale it. Building 810,000 Python tuples for every photo
+    # made the complete backend suite spend most of its time in fixture setup.
+    texture_size = (min(size[0], 64), min(size[1], 64))
+    image = Image.new("RGB", texture_size)
     pixels = [
         (
             (x * 7 + y * 3 + seed) % 200 + 30,
             (x * 3 + y * 11 + seed * 3) % 200 + 30,
             (x * 13 + y * 5 + seed * 7) % 200 + 30,
         )
-        for y in range(size[1])
-        for x in range(size[0])
+        for y in range(texture_size[1])
+        for x in range(texture_size[0])
     ]
     image.putdata(pixels)
+    if image.size != size:
+        image = image.resize(size, Image.Resampling.BICUBIC)
     buffer = io.BytesIO()
     if with_exif and fmt == "JPEG":
         exif = image.getexif()

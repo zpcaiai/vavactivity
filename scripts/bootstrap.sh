@@ -3,8 +3,10 @@ set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$project_root"
+source "$project_root/scripts/lib/frontend-workspace.sh"
+web_root="$(vav_frontend_root "$project_root")"
 
-for command_name in uv node corepack; do
+for command_name in uv node; do
   if ! command -v "$command_name" >/dev/null 2>&1; then
     echo "Missing required command: $command_name" >&2
     exit 1
@@ -17,7 +19,7 @@ if [[ ! -f .env ]]; then
 fi
 
 ./scripts/generate-dev-auth-keys.sh
-corepack pnpm install
+(cd "$web_root" && vav_pnpm install --frozen-lockfile)
 uv sync --all-packages --all-groups
 ./scripts/generate-openapi-client.sh
 python3 scripts/validate_manifest.py

@@ -13,7 +13,7 @@ import hashlib
 import io
 from typing import Any
 
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, ImageStat, UnidentifiedImageError
 
 from vav.common.exceptions import VavError
 from vav.core.config import get_settings
@@ -85,7 +85,7 @@ def process_image(content: bytes, declared_mime_type: str) -> dict[str, Any]:
     # A fresh image built from raw pixel data carries no EXIF, GPS, ICC or
     # XMP metadata from the original file.
     sanitised = Image.new("RGB", converted.size)
-    sanitised.putdata(list(converted.getdata()))
+    sanitised.paste(converted)
 
     buffer = io.BytesIO()
     sanitised.save(buffer, format="JPEG", quality=88, optimize=True)
@@ -112,7 +112,7 @@ def process_image(content: bytes, declared_mime_type: str) -> dict[str, Any]:
     raw_extrema = greyscale.getextrema()
     # A single-band image always yields a (min, max) pair.
     extrema: tuple[int, int] = (int(raw_extrema[0]), int(raw_extrema[1]))  # type: ignore[arg-type]
-    mean_luminance = sum(greyscale.getdata()) / (width * height)
+    mean_luminance = float(ImageStat.Stat(greyscale).mean[0])
 
     report: dict[str, Any] = {
         "decoded": True,

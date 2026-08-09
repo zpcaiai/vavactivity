@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import hashlib
 import re
 import subprocess
@@ -8,6 +9,7 @@ from pathlib import Path
 import pytest
 import yaml
 
+from scripts.release.build_release_manifest import git_commit
 from scripts.release.render_deployment import render
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -77,6 +79,35 @@ def test_image_security_gate_scans_high_and_critical_findings() -> None:
     assert trivy["with"]["exit-code"] == "1"
     assert trivy["with"]["ignore-unfixed"] is True
     assert "HIGH" not in trivy["with"]
+
+
+def test_split_release_builds_only_owned_images_and_requires_frontend_handoff() -> None:
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows/build-images.yml").read_text(encoding="utf-8")
+    )
+    matrix = workflow["jobs"]["build"]["strategy"]["matrix"]["include"]
+    assert {item["name"] for item in matrix} == {"api", "worker"}
+    release_job = workflow["jobs"]["release-manifest"]
+    condition = release_job["if"]
+    assert "frontend_commit" in condition
+    assert "user_web_image" in condition
+    assert "admin_web_image" in condition
+    command = next(
+        step["run"]
+        for step in release_job["steps"]
+        if step.get("name") == "Build checksummed release manifest"
+    )
+    assert "--frontend-commit" in command
+    assert "inputs.user_web_image" in command
+    assert "inputs.admin_web_image" in command
+
+
+def test_release_manifest_requires_full_backend_and_frontend_commit_identities() -> None:
+    commit = "a" * 40
+    assert git_commit(commit) == commit
+    for invalid in ("abc123", "A" * 40, "g" * 40, "a" * 64):
+        with pytest.raises(argparse.ArgumentTypeError, match="full lowercase"):
+            git_commit(invalid)
 
 
 def test_release_manifest_renders_every_workload_with_immutable_images(

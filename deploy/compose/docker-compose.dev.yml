@@ -148,7 +148,7 @@ services:
 
   user-web:
     build:
-      context: ../..
+      context: ${VAV_WEB_ROOT:-../../../vavactivityWeb}
       dockerfile: infra/docker/frontend.Dockerfile
       target: development
     command: [corepack, pnpm, --filter, "@vav/user-web", dev]
@@ -166,7 +166,7 @@ services:
 
   admin-web:
     build:
-      context: ../..
+      context: ${VAV_WEB_ROOT:-../../../vavactivityWeb}
       dockerfile: infra/docker/frontend.Dockerfile
       target: development
     command: [corepack, pnpm, --filter, "@vav/admin-web", dev]
