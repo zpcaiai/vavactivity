@@ -13,6 +13,11 @@ scripts/backup/verify-backups.sh | tee "$result_dir/backup-verify.log"
 RESTORE_REPORT_DESTINATION="$result_dir" scripts/restore/run-restore-drill.sh \
   | tee "$result_dir/restore-drill.log"
 
+HA_CONFIRM=local-vav-compose-only \
+  RESILIENCE_HA_REPORT="$result_dir/api-ha.json" \
+  scripts/resilience/run-local-api-ha-drill.sh \
+  | tee "$result_dir/api-ha.log"
+
 for service in api redis worker minio scheduler; do
   SERVICE="$service" CHAOS_CONFIRM=local-vav-compose-only \
     scripts/disaster-recovery/inject-compose-failure.sh \

@@ -21,14 +21,14 @@ PAYPAL_CLIENT_ID="architecture-placeholder-paypal" PAYPAL_CLIENT_SECRET="archite
 PAYPAL_WEBHOOK_ID="architecture-placeholder-paypal-hook" \
 NOTIFICATION_EMAIL_PROVIDER_WEBHOOK_SECRET="architecture-placeholder-email-hook" \
   docker compose -f deploy/compose/docker-compose.prod.yml config --quiet
-if rg -n 'image:\s*[^#\n]*:latest|privileged:\s*true' deploy infra/docker; then
+if grep -REn 'image:[[:space:]]*[^#[:space:]]*:latest|privileged:[[:space:]]*true' deploy infra/docker; then
   echo "Mutable or privileged production image configuration found" >&2
   exit 1
 fi
-rg -q 'read_only: true' deploy/compose/docker-compose.prod.yml
-rg -q 'cap_drop: \[ALL\]' deploy/compose/docker-compose.prod.yml
-rg -q 'no-new-privileges:true' deploy/compose/docker-compose.prod.yml
-rg -q '^USER 10001:10001' infra/docker/backend.Dockerfile
+grep -Eq 'read_only: true' deploy/compose/docker-compose.prod.yml
+grep -Eq 'cap_drop: \[ALL\]' deploy/compose/docker-compose.prod.yml
+grep -Eq 'no-new-privileges:true' deploy/compose/docker-compose.prod.yml
+grep -Eq '^USER 10001:10001' infra/docker/backend.Dockerfile
 kubectl kustomize deploy/kubernetes/overlays/production >/dev/null
 
 if [[ "$mode" == "architecture" ]]; then

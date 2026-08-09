@@ -9,6 +9,46 @@ run_id="$(date -u +%Y%m%dT%H%M%SZ)"
 result_dir="${PERFORMANCE_RESULT_DIR:-$repo_root/performance-results/external-$run_id}"
 mkdir -p "$result_dir"
 
+restore_development_api=false
+restore_api() {
+  if [[ "$restore_development_api" != "true" ]]; then
+    return
+  fi
+  docker compose up -d --no-deps --force-recreate api >/dev/null
+  for attempt in $(seq 1 60); do
+    if curl --noproxy '*' --silent --fail --max-time 2 \
+      http://127.0.0.1:8000/api/v1/health/ready >/dev/null; then
+      return
+    fi
+    if [[ "$attempt" == "60" ]]; then
+      echo "Development API did not recover after the performance suite" >&2
+      return 1
+    fi
+    sleep 1
+  done
+}
+trap restore_api EXIT
+
+if [[ "$scope" == "local_compose" && "$profile" == "local" && \
+  "${PERFORMANCE_LOCAL_PRODUCTION_SHAPE:-true}" == "true" ]]; then
+  restore_development_api=true
+  docker compose \
+    -f docker-compose.yml \
+    -f deploy/compose/docker-compose.performance.yml \
+    up -d --no-deps --force-recreate api >/dev/null
+  for attempt in $(seq 1 60); do
+    if curl --noproxy '*' --silent --fail --max-time 2 \
+      http://127.0.0.1:8000/api/v1/health/ready >/dev/null; then
+      break
+    fi
+    if [[ "$attempt" == "60" ]]; then
+      echo "Production-shaped local API did not become ready" >&2
+      exit 1
+    fi
+    sleep 1
+  done
+fi
+
 scenario_failures=0
 for scenario in baseline load spike stress soak; do
   if ! PERFORMANCE_RESULT_DIR="$result_dir" K6_PROFILE="$profile" \

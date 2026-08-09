@@ -1,0 +1,15 @@
+services:
+  api:
+    command:
+      - uvicorn
+      - vav.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --workers
+      # Production Compose runs two replicas with two workers each. The local
+      # performance shape uses one published container with the same four
+      # aggregate worker processes so localhost does not understate capacity.
+      - "4"
+      - --no-access-log

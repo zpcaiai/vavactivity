@@ -44,8 +44,8 @@ jobs:
       MEDIA_S3_BUCKET_PUBLIC: vav-public
       MEDIA_S3_BUCKET_PRIVATE: vav-private
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v9.0.0
         with:
           version: "0.8.3"
           python-version: "3.12"
@@ -118,12 +118,12 @@ jobs:
       group: neon-production-migrations
       cancel-in-progress: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Validate Neon migration connection
         env:
           NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
         run: python scripts/validate_neon_database_url.py
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v9.0.0
         with:
           version: "0.8.3"
           python-version: "3.12"
