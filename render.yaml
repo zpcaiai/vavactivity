@@ -1,0 +1,53 @@
+# Render Blueprint Configuration (render.yaml)
+# Docs: https://render.com/docs/blueprints
+#
+# This file automates the deployment of the VAV Backend API on Render.
+# To deploy: Go to Render Dashboard -> Blueprints -> New Blueprint Instance -> Link this repo.
+
+services:
+  - type: web
+    name: vav-platform-api
+    runtime: docker
+    dockerfilePath: infra/docker/backend.Dockerfile
+    dockerContext: .
+    plan: free # Deploys on Render's free tier
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_LOG_LEVEL
+        value: INFO
+      - key: APP_CORS_ORIGINS
+        value: '["https://your-vercel-app.vercel.app"]' # Replace with your Vercel URL
+      - key: AUTH_ISSUER
+        value: vav-platform
+      - key: AUTH_USER_AUDIENCE
+        value: vav-user
+      - key: AUTH_ADMIN_AUDIENCE
+        value: vav-admin
+      - key: AUTH_ACTIVE_KEY_ID
+        value: prod-key-1
+      - key: AUTH_ACCESS_TOKEN_TTL_SECONDS
+        value: "900"
+      - key: AUTH_COOKIE_SECURE
+        value: "true"
+      - key: PAYMENT_ENVIRONMENT
+        value: test
+      - key: PAYMENT_TEST_FAKE_ENABLED
+        value: "true"
+      - key: AI_ENABLED
+        value: "false"
+      - key: QUALITY_ENABLED
+        value: "false"
+      
+      # The following sensitive variables must be filled manually in the Render Dashboard after deployment:
+      # - DATABASE_URL: (e.g. postgresql+asyncpg://...)
+      # - REDIS_URL: (e.g. redis://...)
+      # - AUTH_PRIVATE_KEY: (ED25519 private key PEM content)
+      # - AUTH_PUBLIC_KEY: (ED25519 public key PEM content)
+      # - AUTH_REFRESH_TOKEN_PEPPER: (Random string)
+      # - BACKUP_ENCRYPTION_KEY: (Random string)
+      # - PRIVACY_SEARCH_HMAC_PEPPER: (Random string)
