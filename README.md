@@ -3,9 +3,7 @@ title: VAV Activity
 emoji: 💞
 colorFrom: pink
 colorTo: purple
-sdk: docker
-app_port: 7860
-hardware: cpu-basic
+sdk: static
 fullWidth: true
 ---
 

@@ -1,11 +1,13 @@
-name: Sync GitHub to Hugging Face Space
+name: "[DISABLED] Sync GitHub to Hugging Face Space (Docker)"
+# Disabled: HuggingFace free accounts no longer support Docker Spaces.
+# Use .github/workflows/huggingface-static.yml instead (Static Space, free).
 
 on:
-  push:
-    branches:
-      - main
-      - master
   workflow_dispatch:
+    inputs:
+      _note:
+        description: "This workflow is disabled. Use huggingface-static instead."
+        required: false
     inputs:
       target_branch:
         description: Target branch in the Hugging Face Space

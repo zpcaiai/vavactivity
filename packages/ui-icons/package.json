@@ -1,0 +1,1 @@
+{"name":"@vav/ui-icons","version":"1.0.0","private":true,"type":"module","exports":{".":"./src/index.ts","./metadata":"./metadata/icons.json"},"scripts":{"test":"node --test tests/*.test.mjs","build":"node --test tests/*.test.mjs"}}

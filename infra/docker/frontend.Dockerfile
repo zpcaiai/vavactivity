@@ -40,10 +40,12 @@ RUN corepack pnpm --filter @vav/admin-web build
 
 FROM nginxinc/nginx-unprivileged:1.31.3-alpine3.24@sha256:a6c3ec0c0d249d68b0682df854d4a9e222b90fb607dc3fcf2f1d2fcbc85d347e AS user-production
 COPY infra/docker/spa.nginx.conf /etc/nginx/conf.d/default.conf
+COPY infra/docker/security-headers.conf /etc/nginx/security-headers.conf
 COPY --from=build-user /workspace/apps/user-web/dist /usr/share/nginx/html
 USER 101:101
 
 FROM nginxinc/nginx-unprivileged:1.31.3-alpine3.24@sha256:a6c3ec0c0d249d68b0682df854d4a9e222b90fb607dc3fcf2f1d2fcbc85d347e AS admin-production
 COPY infra/docker/spa.nginx.conf /etc/nginx/conf.d/default.conf
+COPY infra/docker/security-headers.conf /etc/nginx/security-headers.conf
 COPY --from=build-admin /workspace/apps/admin-web/dist /usr/share/nginx/html
 USER 101:101

@@ -1,0 +1,37 @@
+{
+  "name": "@vav/admin-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 5174",
+    "build": "vue-tsc -b && vite build",
+    "i18n:check": "node ../../scripts/check-i18n.mjs src/i18n/locales",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "typecheck": "vue-tsc -b"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "2.3.2",
+    "@vav/api-client": "workspace:*",
+    "@vav/design-tokens": "workspace:*",
+    "@vav/ui-admin": "workspace:*",
+    "@vav/ui-core": "workspace:*",
+    "element-plus": "2.10.5",
+    "pinia": "3.0.3",
+    "vue": "3.5.18",
+    "vue-router": "4.5.1"
+  },
+  "devDependencies": {
+    "@vav/eslint-config": "workspace:*",
+    "@types/node": "24.1.0",
+    "@vitejs/plugin-vue": "6.0.1",
+    "@vue/test-utils": "2.4.6",
+    "eslint": "9.32.0",
+    "jsdom": "26.1.0",
+    "typescript": "5.8.3",
+    "vite": "7.0.6",
+    "vitest": "3.2.4",
+    "vue-tsc": "3.0.4"
+  }
+}

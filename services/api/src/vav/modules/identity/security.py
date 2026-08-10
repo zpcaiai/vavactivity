@@ -105,14 +105,26 @@ class AccessTokenService:
         self.settings = settings or get_settings()
 
     def _read_key(self, path: str) -> str:
+        import os
         key_path = Path(path)
-        if not key_path.is_file():
-            raise VavError(
-                "AUTH_KEY_UNAVAILABLE",
-                "Authentication key material is unavailable.",
-                status_code=503,
-            )
-        return key_path.read_text(encoding="utf-8")
+        if key_path.is_file():
+            return key_path.read_text(encoding="utf-8")
+        
+        # Fallback to reading directly from environment variables if the file is missing
+        if "private" in path.lower() or "private" in key_path.name.lower():
+            env_val = os.getenv("AUTH_PRIVATE_KEY")
+            if env_val:
+                return env_val.strip()
+        elif "public" in path.lower() or "public" in key_path.name.lower():
+            env_val = os.getenv("AUTH_PUBLIC_KEY")
+            if env_val:
+                return env_val.strip()
+
+        raise VavError(
+            "AUTH_KEY_UNAVAILABLE",
+            "Authentication key material is unavailable.",
+            status_code=503,
+        )
 
     def issue(
         self,

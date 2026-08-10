@@ -1,0 +1,3 @@
+<script setup lang="ts">defineProps<{ items: Array<{ id: string; title: string; at: string; actor?: string; detail?: string }> }>();</script>
+<template><ol class="v-timeline"><li v-for="item in items" :key="item.id"><time :datetime="item.at">{{ item.at }}</time><strong>{{ item.title }}</strong><span v-if="item.actor">{{ item.actor }}</span><p v-if="item.detail">{{ item.detail }}</p></li></ol></template>
+<style scoped>.v-timeline{display:grid;gap:var(--vav-space-4);list-style:none;padding:0}.v-timeline li{display:grid;grid-template-columns:minmax(10rem,auto) 1fr;gap:var(--vav-space-2);border-inline-start:3px solid var(--vav-color-accent);padding-inline-start:var(--vav-space-4)}@media(max-width:48rem){.v-timeline li{grid-template-columns:1fr}}</style>

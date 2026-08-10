@@ -1,0 +1,770 @@
+import { createRouter, createWebHistory } from "vue-router";
+
+import { useAccessStore } from "@/stores/access";
+
+const AdminLayout = () => import("@/layouts/AdminLayout.vue");
+const AcceptInvitationPage = () => import("@/pages/AcceptInvitationPage.vue");
+const ActivityManagementPage = () => import("@/pages/ActivityManagementPage.vue");
+const AccessManagementPage = () => import("@/pages/AccessManagementPage.vue");
+const CatalogManagementPage = () => import("@/pages/CatalogManagementPage.vue");
+const CatalogProductEditorPage = () => import("@/pages/CatalogProductEditorPage.vue");
+const CommerceManagementPage = () => import("@/pages/CommerceManagementPage.vue");
+const CourseManagementPage = () => import("@/pages/CourseManagementPage.vue");
+const CounselingManagementPage = () => import("@/pages/CounselingManagementPage.vue");
+const CmsEditorPage = () => import("@/pages/CmsEditorPage.vue");
+const DashboardPage = () => import("@/pages/DashboardPage.vue");
+const CmsManagementPage = () => import("@/pages/CmsManagementPage.vue");
+const ErrorPage = () => import("@/pages/ErrorPage.vue");
+const LoginPage = () => import("@/pages/LoginPage.vue");
+const MediaLibraryPage = () => import("@/pages/MediaLibraryPage.vue");
+const KnowledgeManagementPage = () => import("@/pages/KnowledgeManagementPage.vue");
+const AiManagementPage = () => import("@/pages/AiManagementPage.vue");
+const NotificationManagementPage = () => import("@/pages/NotificationManagementPage.vue");
+const MatchmakingProfileManagementPage = () => import("@/pages/MatchmakingProfileManagementPage.vue");
+const PrivacyManagementPage = () => import("@/pages/PrivacyManagementPage.vue");
+const NavigationManagementPage = () => import("@/pages/NavigationManagementPage.vue");
+const PricingSimulationPage = () => import("@/pages/PricingSimulationPage.vue");
+const RecommendationManagementPage = () => import("@/pages/RecommendationManagementPage.vue");
+const MatchmakingInteractionManagementPage = () => import("@/pages/MatchmakingInteractionManagementPage.vue");
+const RelationshipManagementPage = () => import("@/pages/RelationshipManagementPage.vue");
+const MembershipManagementPage = () => import("@/pages/MembershipManagementPage.vue");
+const TrustSafetyManagementPage = () => import("@/pages/TrustSafetyManagementPage.vue");
+const SystemOperationsPage = () => import("@/pages/SystemOperationsPage.vue");
+const SkillManagementPage = () => import("@/pages/SkillManagementPage.vue");
+const QualityManagementPage = () => import("@/pages/QualityManagementPage.vue");
+const DesignSystemManagementPage = () => import("@/pages/DesignSystemManagementPage.vue");
+const ExperienceManagementPage = () => import("@/pages/ExperienceManagementPage.vue");
+const ProcessGovernancePage = () => import("@/pages/ProcessGovernancePage.vue");
+const DataGovernancePage = () => import("@/pages/DataGovernancePage.vue");
+const AdminPlatformPage = () => import("@/pages/AdminPlatformPage.vue");
+
+const modules = [
+  ["users", "用户", "账户、资料与数据权利", "users:view"],
+  ["content", "内容", "页面、文章与幸福见证", "content:view"],
+  ["activities", "活动", "发布、报名、签到与分组", "activities:view"],
+  ["courses", "课程", "课程结构、资源与进度", "courses:view"],
+  ["counseling", "辅导", "导师、预约与跟进", "counseling:view"],
+  ["catalog", "服务目录", "商品、价格与权益定义", "catalog:view"],
+  ["orders", "订单", "订单状态与售后处理", "orders:view"],
+  ["payments", "支付", "Webhook、退款与支付日志", "payments:view"],
+  ["ai", "AI 辅导", "知识库、对话风险与转介", "ai:view"],
+  ["moderation", "安全审核", "档案、照片、举报与屏蔽", "moderation:view"],
+  ["settings", "系统设置", "配置与待决策项状态", "settings:view"],
+  ["audit", "审计日志", "追加式操作记录", "audit:view"]
+] as const;
+
+const notificationSectionPermissions: Record<string, string> = {
+  dashboard: "notifications.analytics.read",
+  templates: "notifications.templates.read",
+  "template-releases": "notifications.templates.read",
+  "event-subscriptions": "notifications.subscriptions.read",
+  deliveries: "notifications.deliveries.read",
+  "dead-letters": "notifications.dead_letters.read",
+  reminders: "notifications.reminders.read",
+  campaigns: "notifications.campaigns.read",
+  providers: "notifications.providers.read",
+  "provider-events": "notifications.providers.read",
+  suppressions: "notifications.suppressions.read",
+  unsubscribes: "notifications.preferences.read",
+  audit: "notifications.audit.read"
+};
+
+const matchmakingSectionPermissions: Record<string, string> = {
+  profiles: "matchmaking.profiles.read",
+  reviews: "matchmaking.reviews.read",
+  "photo-reviews": "matchmaking.photos.read",
+  "schema-releases": "matchmaking.schemas.read",
+  taxonomies: "matchmaking.taxonomies.read",
+  projections: "matchmaking.projections.read",
+  audit: "matchmaking.audit.read"
+};
+
+export const recommendationSectionPermissions: Record<string, string> = {
+  dashboard: "recommendations.analytics.read",
+  strategies: "recommendations.strategies.read",
+  features: "recommendations.features.read",
+  constraints: "recommendations.constraints.read",
+  batches: "recommendations.batches.read",
+  candidates: "recommendations.candidates.read",
+  diagnostics: "recommendations.diagnostics.run",
+  "pair-diagnostics": "recommendations.candidates.sensitive.read",
+  exposures: "recommendations.exposures.read",
+  "cold-start": "recommendations.analytics.read",
+  feedback: "recommendations.feedback.read",
+  evaluations: "recommendations.evaluations.read",
+  experiments: "recommendations.experiments.read",
+  incidents: "recommendations.incidents.read",
+  audit: "recommendations.audit.read"
+};
+
+export const interactionSectionPermissions: Record<string, string> = {
+  dashboard: "matchmaking.analytics.read",
+  pairs: "matchmaking.interactions.read",
+  matches: "matchmaking.matches.read",
+  invitations: "matchmaking.invitations.read",
+  "contact-exchanges": "matchmaking.contact_exchange.read",
+  invalidations: "matchmaking.interactions.read",
+  "dead-letters": "matchmaking.dead_letters.resolve",
+  incidents: "matchmaking.incidents.read",
+  audit: "matchmaking.audit.read"
+};
+
+export const relationshipSectionPermissions: Record<string, string> = {
+  dashboard: "relationships.analytics.read",
+  journeys: "relationships.read",
+  stages: "relationships.stages.read",
+  proposals: "relationships.proposals.read",
+  pauses: "relationships.pauses.read",
+  endings: "relationships.endings.read",
+  milestones: "relationships.milestones.read",
+  checkins: "relationships.checkins.read",
+  reminders: "relationships.reminders.read",
+  audit: "relationships.audit.read"
+};
+
+export const membershipSectionPermissions: Record<string, string> = {
+  dashboard: "memberships.analytics.read",
+  plans: "memberships.plans.read",
+  "plan-versions": "memberships.plans.read",
+  benefits: "memberships.benefits.read",
+  "sku-mappings": "memberships.sku_mappings.read",
+  accounts: "memberships.accounts.read",
+  cycles: "memberships.accounts.read",
+  changes: "memberships.changes.read",
+  quotas: "memberships.quotas.read",
+  usage: "memberships.quotas.read",
+  adjustments: "memberships.quotas.read",
+  "manual-grants": "memberships.manual_grants.read",
+  trials: "memberships.trials.read",
+  reconciliation: "memberships.reconciliation.read",
+  incidents: "memberships.incidents.read",
+  audit: "memberships.audit.read"
+};
+
+export const safetySectionPermissions: Record<string, string> = {
+  reports: "safety.reports.read",
+  cases: "safety.cases.read",
+  moderation: "safety.moderation.read",
+  harassment: "safety.analytics.read",
+  fraud: "safety.analytics.read",
+  restrictions: "safety.restrictions.read",
+  appeals: "safety.appeals.read",
+  rules: "safety.rules.read",
+  "red-team": "safety.red_team.read",
+  audit: "safety.audit.read"
+};
+
+export const systemSectionPermissions: Record<string, string> = {
+  status: "system.status.read",
+  releases: "system.releases.read",
+  jobs: "system.jobs.read",
+  integrations: "system.status.read",
+  "dead-letters": "system.dead_letters.read",
+  "feature-flags": "system.feature_flags.read",
+  maintenance: "system.maintenance.read",
+  backups: "system.backups.read",
+  "restore-drills": "system.restore_drills.read",
+  capacity: "system.capacity.read"
+};
+
+export const skillSectionPermissions: Record<string, string> = {
+  dashboard: "skills.analytics.read",
+  catalog: "skills.registry.read",
+  installations: "skills.installations.read",
+  executions: "skills.executions.read",
+  dependencies: "skills.registry.read",
+  permissions: "skills.permissions.read",
+  configurations: "skills.installations.read",
+  publishers: "skills.publishers.read",
+  reviews: "skills.marketplace.review",
+  marketplace: "skills.marketplace.read",
+  incidents: "skills.incidents.read",
+  audit: "skills.audit.read"
+};
+
+export const qualitySectionPermissions: Record<string, string> = {
+  dashboard: "quality.analytics.read",
+  requirements: "quality.requirements.read",
+  capabilities: "quality.capabilities.read",
+  traceability: "quality.traceability.read",
+  "business-flows": "quality.business_flows.read",
+  gaps: "quality.gaps.read",
+  risks: "quality.risks.read",
+  waivers: "quality.waivers.read",
+  evidence: "quality.evidence.read",
+  gates: "quality.gates.read",
+  "gate-runs": "quality.gates.read",
+  releases: "quality.releases.read",
+  certifications: "quality.releases.read",
+  audit: "quality.audit.read"
+};
+
+export const designSystemSectionPermissions: Record<string, string> = {
+  dashboard: "design.analytics.read",
+  tokens: "design.tokens.read",
+  components: "design.components.read",
+  patterns: "design.patterns.read",
+  pages: "design.audits.read",
+  accessibility: "design.accessibility.read",
+  "responsive-audits": "design.audits.read",
+  "visual-regression": "design.audits.read",
+  baselines: "design.baselines.read",
+  evidence: "design.evidence.read",
+  releases: "design.tokens.read",
+  audit: "design.audit.read"
+};
+
+export const experienceSectionPermissions: Record<string, string> = {
+  dashboard: "experience.analytics.read",
+  ia: "experience.ia.read",
+  routes: "experience.routes.read",
+  navigation: "experience.navigation.read",
+  tasks: "experience.tasks.read",
+  journeys: "experience.journeys.read",
+  handoffs: "experience.handoffs.read",
+  "search-governance": "experience.search.read",
+  help: "experience.help.read",
+  support: "experience.support.read",
+  "dead-ends": "experience.dead_ends.read",
+  analytics: "experience.analytics.read",
+  evidence: "experience.closure.read",
+  release: "experience.closure.read",
+  audit: "experience.audit.read"
+};
+
+export const processSectionPermissions: Record<string, string> = {
+  dashboard: "process.dashboard.read",
+  definitions: "process.definitions.read",
+  "state-machines": "process.state_machines.read",
+  instances: "process.instances.read",
+  sagas: "process.sagas.read",
+  timeouts: "process.timeouts.read",
+  cancellations: "process.cancellations.read",
+  compensations: "process.compensations.read",
+  stuck: "process.stuck.read",
+  interventions: "process.interventions.read",
+  simulations: "process.simulations.read",
+  certifications: "process.certifications.read",
+  release: "process.release.read"
+};
+
+export const dataGovernanceSectionPermissions: Record<string, string> = {
+  dashboard: "data.dashboard.read", assets: "data.assets.read", contracts: "data.contracts.read", lineage: "data.lineage.read", events: "data.events.read", "event-gaps": "data.events.read", "dead-letters": "data.dead_letters.read", quality: "data.quality.read", reconciliations: "data.reconciliations.read", differences: "data.reconciliations.read", backfills: "data.backfills.read", repairs: "data.repairs.read", projections: "data.projections.read", erasures: "data.erasures.read", certifications: "data.certifications.read", release: "data.release.read"
+};
+
+export const adminPlatformSectionPermissions: Record<string, string> = {
+  dashboard: "admin.workbench.read", capabilities: "admin.capabilities.read", "work-items": "admin.workbench.read", "saved-views": "admin.saved_views.read", "bulk-jobs": "admin.bulk.read", approvals: "admin.approvals.read", exceptions: "admin.exceptions.read", configurations: "admin.configurations.read", "field-access": "admin.fields.policies.read", "reveal-history": "admin.fields.policies.read", certifications: "admin.certifications.read", releases: "admin.certifications.read", audit: "admin.audit.read"
+};
+
+const privacySectionPermissions: Record<string, string> = {
+  dashboard: "privacy.requests.read",
+  requests: "privacy.requests.read",
+  exports: "privacy.exports.read",
+  corrections: "privacy.corrections.read",
+  erasures: "privacy.erasures.read",
+  consents: "privacy.consents.read",
+  "consent-releases": "privacy.consents.read",
+  inventory: "privacy.inventory.read",
+  processing: "privacy.inventory.read",
+  classifications: "privacy.classifications.read",
+  retention: "privacy.retention.read",
+  "retention-instances": "privacy.retention.read",
+  holds: "privacy.holds.read",
+  "break-glass": "privacy.break_glass.read",
+  "access-events": "privacy.sensitive_access.read",
+  incidents: "privacy.incidents.read",
+  audit: "privacy.audit.read"
+};
+
+export const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    {
+      path: "/admin/login",
+      name: "admin-login",
+      component: LoginPage,
+      meta: { public: true, title: "超级管理员登录" }
+    },
+    {
+      path: "/admin/accept-invitation",
+      name: "admin-accept-invitation",
+      component: AcceptInvitationPage,
+      meta: { public: true, title: "接受管理员邀请" }
+    },
+    {
+      path: "/admin",
+      component: AdminLayout,
+      children: [
+        { path: "", redirect: "/admin/dashboard" },
+        {
+          path: "dashboard",
+          name: "admin-dashboard",
+          component: DashboardPage,
+          meta: { title: "工作台" }
+        },
+        {
+          path: "content/pages",
+          name: "admin-content-pages",
+          component: CmsManagementPage,
+          meta: { title: "页面管理", permission: "content.pages.read", cmsSection: "pages" }
+        },
+        {
+          path: "content/pages/:id",
+          name: "admin-content-page-edit",
+          component: CmsEditorPage,
+          meta: { title: "页面编辑", permission: "content.pages.read" }
+        },
+        {
+          path: "content/articles",
+          name: "admin-content-articles",
+          component: CmsManagementPage,
+          meta: { title: "文章管理", permission: "content.articles.read", cmsSection: "articles" }
+        },
+        {
+          path: "content/testimonials",
+          name: "admin-content-testimonials",
+          component: CmsManagementPage,
+          meta: { title: "幸福见证", permission: "content.testimonials.read", cmsSection: "testimonials" }
+        },
+        {
+          path: "content/media",
+          name: "admin-content-media",
+          component: MediaLibraryPage,
+          meta: { title: "媒体库", permission: "content.media.read" }
+        },
+        {
+          path: "content/navigation",
+          name: "admin-content-navigation",
+          component: NavigationManagementPage,
+          meta: { title: "导航管理", permission: "content.navigation.read" }
+        },
+        {
+          path: "content/settings",
+          name: "admin-content-settings",
+          component: AccessManagementPage,
+          meta: { title: "网站设置", permission: "content.settings.read", endpoint: "/admin/site-settings" }
+        },
+        {
+          path: "contact-submissions",
+          name: "admin-contact-submissions",
+          component: AccessManagementPage,
+          meta: { title: "合作联系记录", permission: "contact.submissions.read", endpoint: "/admin/contact-submissions" }
+        },
+        {
+          path: "catalog",
+          redirect: "/admin/catalog/products"
+        },
+        {
+          path: "catalog/products",
+          name: "admin-catalog-products",
+          component: CatalogManagementPage,
+          meta: { title: "商品管理", permission: "catalog.products.read", catalogSection: "products" }
+        },
+        {
+          path: "catalog/products/new",
+          name: "admin-catalog-products-new",
+          component: CatalogManagementPage,
+          meta: { title: "新建商品", permission: "catalog.products.create", catalogSection: "products" }
+        },
+        {
+          path: "catalog/products/:id",
+          name: "admin-catalog-product-edit",
+          component: CatalogProductEditorPage,
+          meta: { title: "商品编辑", permission: "catalog.products.read" }
+        },
+        {
+          path: "catalog/skus/:id",
+          name: "admin-catalog-sku-edit",
+          component: CatalogManagementPage,
+          meta: { title: "SKU 管理", permission: "catalog.skus.read", catalogSection: "products" }
+        },
+        {
+          path: "catalog/price-books",
+          name: "admin-catalog-price-books",
+          component: CatalogManagementPage,
+          meta: { title: "价格簿", permission: "catalog.price_books.read", catalogSection: "price-books" }
+        },
+        {
+          path: "catalog/prices",
+          name: "admin-catalog-prices",
+          component: CatalogManagementPage,
+          meta: { title: "价格记录", permission: "catalog.prices.read", catalogSection: "prices" }
+        },
+        {
+          path: "catalog/inventory",
+          name: "admin-catalog-inventory",
+          component: CatalogManagementPage,
+          meta: { title: "库存与名额", permission: "catalog.inventory.read", catalogSection: "inventory" }
+        },
+        {
+          path: "catalog/inventory/:skuId",
+          name: "admin-catalog-inventory-detail",
+          component: CatalogManagementPage,
+          meta: { title: "库存详情", permission: "catalog.inventory.read", catalogSection: "inventory" }
+        },
+        {
+          path: "catalog/promotions",
+          name: "admin-catalog-promotions",
+          component: CatalogManagementPage,
+          meta: { title: "优惠活动", permission: "catalog.promotions.read", catalogSection: "promotions" }
+        },
+        {
+          path: "catalog/promotions/new",
+          name: "admin-catalog-promotions-new",
+          component: CatalogManagementPage,
+          meta: { title: "新建优惠", permission: "catalog.promotions.create", catalogSection: "promotions" }
+        },
+        {
+          path: "catalog/promotions/:id",
+          name: "admin-catalog-promotion-edit",
+          component: CatalogManagementPage,
+          meta: { title: "优惠详情", permission: "catalog.promotions.read", catalogSection: "promotions" }
+        },
+        {
+          path: "catalog/coupons",
+          name: "admin-catalog-coupons",
+          component: CatalogManagementPage,
+          meta: { title: "优惠码", permission: "catalog.coupons.read", catalogSection: "coupons" }
+        },
+        {
+          path: "catalog/coupons/import",
+          name: "admin-catalog-coupons-import",
+          component: CatalogManagementPage,
+          meta: { title: "批量优惠码", permission: "catalog.coupons.create", catalogSection: "coupons" }
+        },
+        {
+          path: "catalog/pricing/simulate",
+          name: "admin-catalog-pricing-simulate",
+          component: PricingSimulationPage,
+          meta: { title: "定价模拟", permission: "catalog.pricing.simulate" }
+        },
+        ...[
+          ["orders", "订单管理", "orders", "commerce.orders.read"],
+          ["payments", "支付管理", "payments", "commerce.payments.read"],
+          ["subscriptions", "订阅管理", "subscriptions", "commerce.subscriptions.read"],
+          ["refunds", "退款审批", "refunds", "commerce.refunds.read"],
+          ["webhooks", "Webhook 日志", "webhooks", "commerce.webhooks.read"],
+          ["reconciliation", "支付对账", "reconciliation", "commerce.reconciliation.read"],
+          ["entitlements", "权益管理", "entitlements", "commerce.entitlements.read"]
+        ].map(([path, title, commerceSection, permission]) => ({
+          path: `commerce/${path}`,
+          name: `admin-commerce-${path}`,
+          component: CommerceManagementPage,
+          meta: { title, commerceSection, permission }
+        })),
+        {
+          path: "users",
+          name: "admin-users",
+          component: AccessManagementPage,
+          meta: { title: "用户管理", permission: "users.read", endpoint: "/admin/users" }
+        },
+        {
+          path: "activities",
+          name: "admin-activities",
+          component: ActivityManagementPage,
+          meta: { title: "活动中心", permission: "activities.read" }
+        },
+        {
+          path: "courses",
+          name: "admin-courses",
+          component: CourseManagementPage,
+          meta: { title: "课程中心", permission: "courses.read" }
+        },
+        {
+          path: "counseling",
+          name: "admin-counseling",
+          component: CounselingManagementPage,
+          meta: { title: "辅导中心", permission: "counseling.appointments.read" }
+        },
+        {
+          path: "knowledge",
+          name: "admin-knowledge",
+          component: KnowledgeManagementPage,
+          meta: { title: "知识库中心", permission: "knowledge.spaces.read" }
+        },
+        {
+          path: "ai",
+          name: "admin-ai",
+          component: AiManagementPage,
+          meta: { title: "AI 运营中心", permission: "ai.conversations.read" }
+        },
+        ...[
+          "dashboard",
+          "templates",
+          "template-releases",
+          "event-subscriptions",
+          "deliveries",
+          "dead-letters",
+          "reminders",
+          "campaigns",
+          "providers",
+          "provider-events",
+          "suppressions",
+          "unsubscribes",
+          "audit"
+        ].map((section) => ({
+          path: `notifications/${section}`,
+          name: `admin-notifications-${section}`,
+          component: NotificationManagementPage,
+          meta: { title: "通知运营中心", permission: notificationSectionPermissions[section], notificationSection: section }
+        })),
+        {
+          path: "notifications/templates/:templateId",
+          name: "admin-notifications-template-detail",
+          component: NotificationManagementPage,
+          meta: { title: "通知模板详情", permission: "notifications.templates.read", notificationSection: "templates" }
+        },
+        {
+          path: "notifications/deliveries/:deliveryId",
+          name: "admin-notifications-delivery-detail",
+          component: NotificationManagementPage,
+          meta: { title: "通知发送详情", permission: "notifications.deliveries.read", notificationSection: "deliveries" }
+        },
+        {
+          path: "notifications/campaigns/new",
+          name: "admin-notifications-campaign-new",
+          component: NotificationManagementPage,
+          meta: { title: "新建通知活动", permission: "notifications.campaigns.create", notificationSection: "campaigns" }
+        },
+        {
+          path: "notifications/campaigns/:campaignId",
+          name: "admin-notifications-campaign-detail",
+          component: NotificationManagementPage,
+          meta: { title: "通知活动详情", permission: "notifications.campaigns.read", notificationSection: "campaigns" }
+        },
+        ...Object.keys(matchmakingSectionPermissions).map((section) => ({
+          path: `matchmaking/${section}`,
+          name: `admin-matchmaking-${section}`,
+          component: MatchmakingProfileManagementPage,
+          meta: { title: "婚恋档案运营中心", permission: matchmakingSectionPermissions[section], matchmakingSection: section }
+        })),
+        {
+          path: "matchmaking/profiles/:profileId",
+          name: "admin-matchmaking-profile-detail",
+          component: MatchmakingProfileManagementPage,
+          meta: { title: "婚恋档案详情", permission: "matchmaking.profiles.read", matchmakingSection: "profiles" }
+        },
+        {
+          path: "matchmaking/reviews/:caseId",
+          name: "admin-matchmaking-review-detail",
+          component: MatchmakingProfileManagementPage,
+          meta: { title: "档案审核详情", permission: "matchmaking.reviews.read", matchmakingSection: "reviews" }
+        },
+        ...Object.keys(recommendationSectionPermissions).map((section) => ({
+          path: `recommendations/${section}`,
+          name: `admin-recommendations-${section}`,
+          component: RecommendationManagementPage,
+          meta: { title: "推荐运营中心", permission: recommendationSectionPermissions[section], recommendationSection: section }
+        })),
+        {
+          path: "recommendations/strategies/:id",
+          name: "admin-recommendations-strategy-detail",
+          component: RecommendationManagementPage,
+          meta: { title: "推荐策略详情", permission: "recommendations.strategies.read", recommendationSection: "strategies" }
+        },
+        {
+          path: "recommendations/batches/:id",
+          name: "admin-recommendations-batch-detail",
+          component: RecommendationManagementPage,
+          meta: { title: "推荐批次详情", permission: "recommendations.batches.read", recommendationSection: "batches" }
+        },
+        {
+          path: "recommendations/experiments/:id",
+          name: "admin-recommendations-experiment-detail",
+          component: RecommendationManagementPage,
+          meta: { title: "推荐实验详情", permission: "recommendations.experiments.read", recommendationSection: "experiments" }
+        },
+        ...Object.keys(interactionSectionPermissions).map((section) => ({
+          path: `matchmaking-interactions/${section}`,
+          name: `admin-matchmaking-interactions-${section}`,
+          component: MatchmakingInteractionManagementPage,
+          meta: { title: "互动运营中心", permission: interactionSectionPermissions[section], interactionSection: section }
+        })),
+        {
+          path: "matchmaking-interactions/pairs/:id",
+          name: "admin-matchmaking-interactions-pair-detail",
+          component: MatchmakingInteractionManagementPage,
+          meta: { title: "互动用户对诊断", permission: "matchmaking.interactions.read", interactionSection: "pairs" }
+        },
+        {
+          path: "matchmaking-interactions/contact-exchanges/:id",
+          name: "admin-matchmaking-contact-exchange-detail",
+          component: MatchmakingInteractionManagementPage,
+          meta: { title: "联系方式授权诊断", permission: "matchmaking.contact_exchange.read", interactionSection: "contact-exchanges" }
+        },
+        ...Object.keys(relationshipSectionPermissions).map((section) => ({
+          path: `relationships/${section}`,
+          name: `admin-relationships-${section}`,
+          component: RelationshipManagementPage,
+          meta: { title: "关系运营中心", permission: relationshipSectionPermissions[section], relationshipSection: section }
+        })),
+        {
+          path: "relationships/journeys/:id",
+          name: "admin-relationship-journey-detail",
+          component: RelationshipManagementPage,
+          meta: { title: "关系旅程诊断", permission: "relationships.read", relationshipSection: "journeys" }
+        },
+        ...Object.keys(membershipSectionPermissions).map((section) => ({
+          path: `memberships/${section}`,
+          name: `admin-memberships-${section}`,
+          component: MembershipManagementPage,
+          meta: { title: "会员运营中心", permission: membershipSectionPermissions[section], membershipSection: section }
+        })),
+        ...Object.keys(safetySectionPermissions).map((section) => ({
+          path: `trust-safety/${section}`,
+          name: `admin-trust-safety-${section}`,
+          component: TrustSafetyManagementPage,
+          meta: { title: "信任与安全中心", permission: safetySectionPermissions[section], safetySection: section }
+        })),
+        ...Object.keys(systemSectionPermissions).map((section) => ({
+          path: `system/${section}`,
+          name: `admin-system-${section}`,
+          component: SystemOperationsPage,
+          meta: { title: "系统运维中心", permission: systemSectionPermissions[section], systemSection: section }
+        })),
+        ...Object.keys(skillSectionPermissions).map((section) => ({
+          path: `skills/${section}`,
+          name: `admin-skills-${section}`,
+          component: SkillManagementPage,
+          meta: { title: "Skill 控制台", permission: skillSectionPermissions[section], skillSection: section }
+        })),
+        ...Object.keys(qualitySectionPermissions).map((section) => ({
+          path: `quality/${section}`,
+          name: `admin-quality-${section}`,
+          component: QualityManagementPage,
+          meta: { title: "质量治理", permission: qualitySectionPermissions[section], qualitySection: section }
+        })),
+        ...Object.keys(designSystemSectionPermissions).map((section) => ({
+          path: `design-system/${section}`,
+          name: `admin-design-system-${section}`,
+          component: DesignSystemManagementPage,
+          meta: { title: "设计系统治理", permission: designSystemSectionPermissions[section], designSystemSection: section }
+        })),
+        ...Object.keys(experienceSectionPermissions).map((section) => ({
+          path: `experience/${section}`,
+          name: `admin-experience-${section}`,
+          component: ExperienceManagementPage,
+          meta: { title: "体验编排", permission: experienceSectionPermissions[section], experienceSection: section }
+        })),
+        ...Object.keys(processSectionPermissions).map((section) => ({
+          path: `processes/${section}`,
+          name: `admin-processes-${section}`,
+          component: ProcessGovernancePage,
+          meta: { title: "流程治理", permission: processSectionPermissions[section], processSection: section }
+        })),
+        ...Object.keys(dataGovernanceSectionPermissions).map((section) => ({
+          path: `data-governance/${section}`,
+          name: `admin-data-governance-${section}`,
+          component: DataGovernancePage,
+          meta: { title: "数据治理", permission: dataGovernanceSectionPermissions[section], dataGovernanceSection: section }
+        })),
+        ...Object.keys(adminPlatformSectionPermissions).map((section) => ({
+          path: `platform/${section}`,
+          name: `admin-platform-${section}`,
+          component: AdminPlatformPage,
+          meta: { title: "统一管理平台", permission: adminPlatformSectionPermissions[section], adminPlatformSection: section }
+        })),
+        ...Object.keys(privacySectionPermissions).map((section) => ({
+          path: `privacy/${section}`,
+          name: `admin-privacy-${section}`,
+          component: PrivacyManagementPage,
+          meta: { title: "隐私运营中心", permission: privacySectionPermissions[section], privacySection: section }
+        })),
+        {
+          path: "privacy/requests/:requestId",
+          name: "admin-privacy-request-detail",
+          component: PrivacyManagementPage,
+          meta: { title: "隐私请求详情", permission: "privacy.requests.read", privacySection: "requests" }
+        },
+        {
+          path: "access/admins",
+          name: "admin-access-admins",
+          component: AccessManagementPage,
+          meta: { title: "管理员", permission: "admins.read", endpoint: "/admin/admins" }
+        },
+        {
+          path: "access/roles",
+          name: "admin-access-roles",
+          component: AccessManagementPage,
+          meta: { title: "角色权限", permission: "roles.read", endpoint: "/admin/roles" }
+        },
+        {
+          path: "access/permissions",
+          name: "admin-access-permissions",
+          component: AccessManagementPage,
+          meta: { title: "权限注册表", permission: "roles.read", endpoint: "/admin/roles" }
+        },
+        {
+          path: "access/invitations",
+          name: "admin-access-invitations",
+          component: AccessManagementPage,
+          meta: { title: "管理员邀请", permission: "admins.read", endpoint: "/admin/admins/invitations" }
+        },
+        {
+          path: "audit/auth",
+          name: "admin-audit-auth",
+          component: AccessManagementPage,
+          meta: { title: "认证审计", permission: "audit.read", endpoint: "/admin/audit/security-events" }
+        },
+        {
+          path: "audit/permissions",
+          name: "admin-audit-permissions",
+          component: AccessManagementPage,
+          meta: { title: "权限审计", permission: "audit.read", endpoint: "/admin/audit/security-events" }
+        },
+        ...[
+          ["content", "/admin/content/pages"],
+          ["orders", "/admin/commerce/orders"],
+          ["payments", "/admin/commerce/payments"],
+          ["moderation", "/admin/trust-safety/moderation"],
+          ["settings", "/admin/content/settings"],
+          ["audit", "/admin/audit/auth"]
+        ].map(([path, redirect]) => ({
+          path,
+          redirect
+        }))
+      ]
+    },
+    {
+      path: "/admin/403",
+      name: "admin-forbidden",
+      component: ErrorPage,
+      props: { status: 403 }
+    },
+    {
+      path: "/admin/500",
+      name: "admin-error",
+      component: ErrorPage,
+      props: { status: 500 }
+    },
+    {
+      path: "/admin/:pathMatch(.*)*",
+      name: "admin-not-found",
+      component: ErrorPage,
+      props: { status: 404 }
+    },
+    { path: "/:pathMatch(.*)*", redirect: "/admin/login" }
+  ]
+});
+
+router.beforeEach(async (to) => {
+  document.title = `${String(to.meta.title ?? "运营工作台")} · VAV`;
+  if (to.meta.public) {
+    return true;
+  }
+
+  const access = useAccessStore();
+  await access.bootstrap();
+  if (!access.isAuthenticated) {
+    return { name: "admin-login", query: { returnTo: to.fullPath } };
+  }
+  if (
+    typeof to.meta.permission === "string" &&
+    !access.hasPermission(to.meta.permission)
+  ) {
+    return { name: "admin-forbidden" };
+  }
+  return true;
+});
+
+export const adminModuleRoutes = modules;

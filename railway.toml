@@ -1,0 +1,17 @@
+# Railway project configuration
+# Docs: https://docs.railway.com/reference/config-as-code
+#
+# This file configures the `api` service (FastAPI).
+# Worker and Scheduler services use separate railway.toml files
+# in their own Railway service configs, pointing to their Dockerfiles.
+
+[build]
+dockerfilePath = "infra/docker/backend.Dockerfile"
+dockerBuildTarget = "production"
+
+[deploy]
+startCommand = "uvicorn vav.main:app --host 0.0.0.0 --port $PORT --workers 2"
+healthcheckPath = "/api/v1/health/ready"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
