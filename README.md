@@ -5,6 +5,7 @@ colorFrom: pink
 colorTo: purple
 sdk: docker
 app_port: 7860
+hardware: cpu-basic
 fullWidth: true
 ---
 

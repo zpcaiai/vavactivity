@@ -134,19 +134,24 @@ if [ -z "${REMOTE_HEAD}" ]; then
 fi
 
 # A Space previously configured for ZeroGPU cannot start after migrating to the
-# Docker SDK because Hugging Face only supports ZeroGPU for Gradio. Repair only
-# that exact invalid state; never overwrite a valid user-selected hardware tier.
+# Docker SDK because Hugging Face only supports ZeroGPU for Gradio. Repair
+# whenever the requested hardware is zero-a10g regardless of whether HF has
+# emitted the error message yet; README.md pins hardware: cpu-basic so after
+# one successful repair future pushes keep the correct tier automatically.
 SPACE_STATE="$(curl --fail --silent --show-error \
   --header "Authorization: Bearer ${HF_TOKEN}" \
-  "https://huggingface.co/api/spaces/${HF_SPACE_REPO}")"
+  "https://huggingface.co/api/spaces/${HF_SPACE_REPO}" || echo '{}')"
 if printf '%s' "${SPACE_STATE}" | python3 -c '
 import json
 import sys
 
-runtime = (json.load(sys.stdin).get("runtime") or {})
-is_invalid_zero_gpu = (
-    (runtime.get("hardware") or {}).get("requested") == "zero-a10g"
-    and runtime.get("errorMessage") == "ZeroGPU is only available on Gradio SDK"
+data = json.load(sys.stdin)
+runtime = (data.get("runtime") or {})
+requested_hw = (runtime.get("hardware") or {}).get("requested") or ""
+error_msg = runtime.get("errorMessage") or ""
+# Repair if ZeroGPU is requested (with or without the error message present)
+is_invalid_zero_gpu = requested_hw == "zero-a10g" or (
+    "ZeroGPU" in error_msg and "Gradio" in error_msg
 )
 raise SystemExit(0 if is_invalid_zero_gpu else 1)
 '; then
@@ -162,6 +167,8 @@ raise SystemExit(0 if is_invalid_zero_gpu else 1)
   HARDWARE_BODY="${HARDWARE_RESPONSE%$'\n'*}"
   if [[ "${HARDWARE_STATUS}" != 2* ]]; then
     echo "::warning::Space code was synchronized, but cpu-basic hardware repair was rejected (HTTP ${HARDWARE_STATUS}): ${HARDWARE_BODY}"
+  else
+    echo "Hardware successfully reset to cpu-basic (HTTP ${HARDWARE_STATUS})"
   fi
 fi
 
