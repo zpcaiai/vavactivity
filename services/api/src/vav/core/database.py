@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.pool import NullPool
 
+from vav.common.exceptions import VavError
 from vav.core.config import get_settings
 
 
@@ -62,7 +63,18 @@ def session_factory() -> AsyncSession:
 
 @lru_cache
 def get_redis() -> Redis:
-    return cast(Redis, Redis.from_url(get_settings().redis_url, decode_responses=True))
+    redis_url = get_settings().redis_url
+    if not redis_url:
+        raise VavError(
+            "REDIS_NOT_CONFIGURED",
+            "Redis-backed functionality is unavailable.",
+            status_code=503,
+        )
+    return cast(Redis, Redis.from_url(redis_url, decode_responses=True))
+
+
+def redis_is_configured() -> bool:
+    return bool(get_settings().redis_url)
 
 
 async def check_database() -> None:

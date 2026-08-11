@@ -74,8 +74,7 @@ services:
       # Existing Blueprint instances must set them in Dashboard -> Environment.
       - key: DATABASE_URL
         sync: false # postgresql+asyncpg://...?sslmode=require
-      - key: REDIS_URL
-        sync: false # rediss://...
+      # REDIS_URL is optional. Redis-backed capabilities fail closed when it is absent.
       - key: MEDIA_S3_ENDPOINT
         sync: false # HTTPS S3-compatible private endpoint.
       - key: MEDIA_S3_PUBLIC_ENDPOINT

@@ -36,8 +36,8 @@ class Settings(BaseSettings):
         validation_alias="DATABASE_URL",
         repr=False,
     )
-    redis_url: str = Field(
-        default="redis://localhost:6379/0",
+    redis_url: str | None = Field(
+        default=None,
         validation_alias="REDIS_URL",
         repr=False,
     )
@@ -1478,7 +1478,7 @@ class Settings(BaseSettings):
             raise ValueError("production cannot enable debug mode")
         if production_like and "sslmode=require" not in self.database_url:
             raise ValueError("production database connections require TLS")
-        if production_like and not self.redis_url.startswith("rediss://"):
+        if production_like and self.redis_url and not self.redis_url.startswith("rediss://"):
             raise ValueError("production Redis connections require TLS")
         if production_like and any(
             str(origin).startswith("http://") for origin in self.cors_origins

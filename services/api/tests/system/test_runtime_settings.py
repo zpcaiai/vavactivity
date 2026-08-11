@@ -62,3 +62,13 @@ def test_complete_render_production_baseline_is_accepted() -> None:
 
     assert settings.environment == "production"
     assert settings.payment_test_fake_enabled is False
+
+
+def test_production_allows_redis_to_be_omitted(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("REDIS_URL", raising=False)
+    values = production_values()
+    values.pop("REDIS_URL")
+
+    settings = Settings(_env_file=None, **values)
+
+    assert settings.redis_url is None

@@ -7,7 +7,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse, PlainTextResponse
 
 from vav.common.schemas import success
-from vav.core.database import check_database, check_redis
+from vav.core.database import check_database, check_redis, redis_is_configured
 from vav.core.metrics import registry
 from vav.core.request_context import request_id_from_request
 
@@ -34,7 +34,10 @@ async def liveness(request: Request) -> dict[str, Any]:
 
 @router.get("/ready", summary="Dependency readiness")
 async def readiness(request: Request) -> JSONResponse:
-    checks = {"postgresql": check_database, "redis": check_redis}
+    checks = {"postgresql": check_database}
+    redis_configured = redis_is_configured()
+    if redis_configured:
+        checks["redis"] = check_redis
 
     async def run_check(name: str) -> tuple[str, str]:
         try:
@@ -44,7 +47,9 @@ async def readiness(request: Request) -> JSONResponse:
             return name, "unavailable"
 
     results = dict(await asyncio.gather(*(run_check(name) for name in checks)))
-    is_ready = all(status == "ok" for status in results.values())
+    if not redis_configured:
+        results["redis"] = "disabled"
+    is_ready = all(status in {"ok", "disabled"} for status in results.values())
     body = success(
         {"status": "ok" if is_ready else "unavailable", "dependencies": results},
         request_id_from_request(request),

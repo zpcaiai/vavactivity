@@ -52,7 +52,6 @@ def test_render_blueprint_declares_fail_closed_staging_inputs() -> None:
         "PUBLIC_WEB_BASE_URL",
         "PUBLIC_API_BASE_URL",
         "DATABASE_URL",
-        "REDIS_URL",
         "MEDIA_S3_ENDPOINT",
         "MEDIA_S3_PUBLIC_ENDPOINT",
         "MEDIA_S3_ACCESS_KEY",
