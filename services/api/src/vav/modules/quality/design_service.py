@@ -338,9 +338,7 @@ async def list_audits(session: AsyncSession, audit_type: str | None = None) -> l
         parameters["audit_type"] = audit_type
     rows = (
         await session.execute(
-            text(
-                f"SELECT * FROM ui_audit_runs{audit_filter} ORDER BY started_at DESC,id"
-            ),
+            text(f"SELECT * FROM ui_audit_runs{audit_filter} ORDER BY started_at DESC,id"),
             parameters,
         )
     ).mappings()

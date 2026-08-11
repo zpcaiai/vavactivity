@@ -28,9 +28,7 @@ async def test_list_reconciliation_issues_omits_untyped_null_parameter() -> None
 async def test_list_reconciliation_issues_filters_non_null_status() -> None:
     session = _session_with_rows([{"status": "open"}])
 
-    assert await service.list_reconciliation_issues(session, "open") == [
-        {"status": "open"}
-    ]
+    assert await service.list_reconciliation_issues(session, "open") == [{"status": "open"}]
 
     statement, parameters = session.execute.await_args.args
     assert "WHERE status=:status" in str(statement)

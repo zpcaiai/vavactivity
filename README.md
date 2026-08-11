@@ -63,7 +63,11 @@ make verify
 
 更多资料见 `docs/product`、`docs/architecture`、`docs/security`、`docs/runbooks` 和 `docs/acceptance`。
 
-Hugging Face Docker Space 会在 `7860` 端口同时提供用户端 `/` 和运营端 `/admin/`。需要数据接口的页面必须在 Space Settings 中把 `VITE_API_BASE_URL` 变量设置为可公开访问的 VAV API 根地址；未配置时 `/api/*` 会明确返回 `503`，不会把 SPA HTML 误当成 JSON。
+正式发布只使用两条平台链路：后端仓库由根目录 `render.yaml` 部署到 Render 的
+`vav-platform-api` 服务；前端仓库由根目录 `vercel.json` 部署到 Vercel，同一构建产物在
+`/` 提供用户端、在 `/admin/*` 提供运营端。Render 绑定 `main`，并在 GitHub CI 检查通过后
+自动发布；Vercel 使用 Git 集成从 `main` 自动创建生产部署。前端的 `VITE_API_BASE_URL`
+必须指向公开的 Render API 根地址，后端 CORS 与认证来源必须包含实际 Vercel 生产域名。
 
 提交到 `main` 的数据库迁移会在后端质量门禁通过后自动应用到 Neon。连接密钥、执行顺序和
 失败处理见 `docs/runbooks/neon-migrations.md`。

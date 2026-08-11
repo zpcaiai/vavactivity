@@ -8,6 +8,8 @@ services:
   - type: web
     name: vav-platform-api
     runtime: docker
+    branch: main
+    autoDeployTrigger: checksPass
     dockerfilePath: infra/docker/backend.Dockerfile
     dockerContext: .
     plan: free # Deploys on Render's free tier
