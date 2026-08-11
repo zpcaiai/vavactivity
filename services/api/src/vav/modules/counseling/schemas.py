@@ -1,8 +1,9 @@
 from datetime import date, datetime, time
 from typing import Any, Literal
 from uuid import UUID
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class MentorCreateRequest(BaseModel):
@@ -61,6 +62,15 @@ class AvailabilityRuleRequest(BaseModel):
     daily_limit: int | None = Field(default=None, gt=0)
     weekly_limit: int | None = Field(default=None, gt=0)
 
+    @field_validator("timezone")
+    @classmethod
+    def valid_timezone(cls, value: str) -> str:
+        try:
+            ZoneInfo(value)
+        except ZoneInfoNotFoundError as error:
+            raise ValueError("timezone must be a valid IANA timezone") from error
+        return value
+
     @model_validator(mode="after")
     def valid_window(self) -> "AvailabilityRuleRequest":
         if self.local_end_time <= self.local_start_time:
@@ -111,6 +121,11 @@ class FollowUpCreateRequest(BaseModel):
     follow_up_type: Literal["action_item", "course", "activity", "counseling", "external_support"]
     content: dict[str, Any]
     due_at: datetime | None = None
+
+
+class FollowUpTransitionRequest(BaseModel):
+    status: Literal["open", "completed", "cancelled"]
+    reason: str = Field(min_length=2, max_length=2000)
 
 
 class SafetyReferralRequest(BaseModel):

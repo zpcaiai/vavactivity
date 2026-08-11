@@ -25,6 +25,7 @@ TRANSITIONS = {
         AppointmentStatus.APPROVED_PENDING_PAYMENT,
         AppointmentStatus.CONFIRMED,
         AppointmentStatus.REJECTED,
+        AppointmentStatus.CANCELLED,
         AppointmentStatus.MANUAL_REVIEW,
     },
     AppointmentStatus.TIME_PROPOSED: {
@@ -51,6 +52,7 @@ TRANSITIONS = {
     AppointmentStatus.MANUAL_REVIEW: {
         AppointmentStatus.PENDING_REVIEW,
         AppointmentStatus.REJECTED,
+        AppointmentStatus.CANCELLED,
     },
     AppointmentStatus.REJECTED: set(),
     AppointmentStatus.CANCELLED: set(),

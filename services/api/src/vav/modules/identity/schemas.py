@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field, PositiveInt
@@ -40,6 +41,17 @@ class PasswordChangeRequest(BaseModel):
 
 class ReasonRequest(BaseModel):
     reason: str = Field(min_length=10, max_length=2000)
+
+
+class AdminUserUpdateRequest(ReasonRequest):
+    expected_version: int = Field(ge=1)
+    email: EmailStr | None = None
+    preferred_locale: Literal["zh-CN", "zh-TW", "en"] | None = None
+    timezone: str | None = Field(default=None, min_length=3, max_length=64)
+
+
+class AdminUserDeactivateRequest(ReasonRequest):
+    expected_version: int = Field(ge=1)
 
 
 class RoleChangeRequest(ReasonRequest):

@@ -11,7 +11,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Request, Response, status
 from fastapi.responses import StreamingResponse
-from sqlalchemy import delete, select, update
+from pydantic import ValidationError
+from sqlalchemy import delete, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from vav.api.dependencies import get_database_session
@@ -35,6 +36,7 @@ from vav.models.content import (
     SiteSetting,
     TestimonialMetadata,
 )
+from vav.models.identity import SecurityAuditEvent
 from vav.modules.content.domain import ContentEntryType, ContentStatus
 from vav.modules.content.media import media_service
 from vav.modules.content.schemas import (
@@ -54,6 +56,7 @@ from vav.modules.content.schemas import (
     ReviewRequest,
     ScheduleRequest,
     SiteSettingRequest,
+    SiteSettingRollbackRequest,
     TestimonialCreateRequest,
     VersionRestoreRequest,
 )
@@ -1389,6 +1392,8 @@ async def admin_site_settings(
                     "value": setting.value,
                     "value_type": setting.value_type,
                     "is_public": setting.is_public,
+                    "group": setting.setting_key.partition(".")[0],
+                    "updated_by": str(setting.updated_by),
                     "updated_at": setting.updated_at.isoformat(),
                 }
                 for setting in settings
@@ -1414,6 +1419,25 @@ async def update_site_setting(
             status_code=409,
         )
     setting = await session.get(SiteSetting, setting_key, with_for_update=True)
+    if (
+        setting is not None
+        and payload.expected_updated_at is not None
+        and setting.updated_at != payload.expected_updated_at
+    ):
+        raise VavError(
+            "SITE_SETTING_VERSION_CONFLICT",
+            "Setting has changed; reload it before saving.",
+            status_code=409,
+        )
+    before_state = (
+        {
+            "value": deepcopy(setting.value),
+            "value_type": setting.value_type,
+            "is_public": setting.is_public,
+        }
+        if setting is not None
+        else None
+    )
     if setting is None:
         setting = SiteSetting(
             setting_key=setting_key,
@@ -1428,16 +1452,170 @@ async def update_site_setting(
         setting.value_type = payload.value_type
         setting.is_public = payload.is_public
         setting.updated_by = principal.user.id
+        setting.updated_at = datetime.now(UTC)
     record_security_event(
         session,
         event_type="content.site_setting.updated",
         actor_type="admin",
         actor_user_id=principal.user.id,
+        actor_session_id=principal.session.id,
         target_type="site_setting",
-        reason=setting_key,
+        reason=payload.reason,
+        before_state=before_state,
+        after_state={
+            "value": deepcopy(setting.value),
+            "value_type": setting.value_type,
+            "is_public": setting.is_public,
+        },
+        metadata={"setting_key": setting_key},
     )
     await session.commit()
-    return success({"status": "updated"}, request_id_from_request(request))
+    await session.refresh(setting)
+    return success(
+        {
+            "status": "updated",
+            "setting_key": setting.setting_key,
+            "value": setting.value,
+            "value_type": setting.value_type,
+            "is_public": setting.is_public,
+            "updated_at": setting.updated_at.isoformat(),
+        },
+        request_id_from_request(request),
+    )
+
+
+@router.get("/admin/site-settings/{setting_key}/history")
+async def site_setting_history(
+    setting_key: str,
+    request: Request,
+    _: AuthenticatedPrincipal = Depends(require_permission("content.settings.read")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    if await session.get(SiteSetting, setting_key) is None:
+        raise VavError("SITE_SETTING_NOT_FOUND", "Setting was not found.", status_code=404)
+    events = (
+        await session.scalars(
+            select(SecurityAuditEvent)
+            .where(
+                SecurityAuditEvent.target_type == "site_setting",
+                SecurityAuditEvent.event_type.in_(
+                    ["content.site_setting.updated", "content.site_setting.rolled_back"]
+                ),
+                or_(
+                    SecurityAuditEvent.event_metadata["setting_key"].astext == setting_key,
+                    SecurityAuditEvent.reason == setting_key,
+                ),
+            )
+            .order_by(SecurityAuditEvent.occurred_at.desc())
+            .limit(100)
+        )
+    ).all()
+    return success(
+        {
+            "items": [
+                {
+                    "id": str(event.id),
+                    "event_type": event.event_type,
+                    "actor_user_id": str(event.actor_user_id) if event.actor_user_id else None,
+                    "reason": event.reason,
+                    "before_state": event.before_state,
+                    "after_state": event.after_state,
+                    "occurred_at": event.occurred_at.isoformat(),
+                    "can_rollback": event.before_state is not None,
+                }
+                for event in events
+            ]
+        },
+        request_id_from_request(request),
+    )
+
+
+@router.post("/admin/site-settings/{setting_key}/rollback")
+async def rollback_site_setting(
+    setting_key: str,
+    payload: SiteSettingRollbackRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(require_permission("content.settings.manage")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    setting = await session.get(SiteSetting, setting_key, with_for_update=True)
+    if setting is None:
+        raise VavError("SITE_SETTING_NOT_FOUND", "Setting was not found.", status_code=404)
+    if setting.updated_at != payload.expected_updated_at:
+        raise VavError(
+            "SITE_SETTING_VERSION_CONFLICT",
+            "Setting has changed; reload it before rollback.",
+            status_code=409,
+        )
+    event = await session.get(SecurityAuditEvent, payload.audit_event_id)
+    event_key = event.event_metadata.get("setting_key") if event is not None else None
+    if (
+        event is None
+        or event.target_type != "site_setting"
+        or (event_key != setting_key and event.reason != setting_key)
+        or event.before_state is None
+    ):
+        raise VavError(
+            "SITE_SETTING_REVISION_INVALID",
+            "Setting revision cannot be rolled back.",
+            status_code=409,
+        )
+    before_state = {
+        "value": deepcopy(setting.value),
+        "value_type": setting.value_type,
+        "is_public": setting.is_public,
+    }
+    revision = event.before_state
+    try:
+        validated_revision = SiteSettingRequest.model_validate(
+            {
+                "value": revision["value"],
+                "value_type": revision["value_type"],
+                "is_public": revision["is_public"],
+                "reason": payload.reason,
+            }
+        )
+    except (KeyError, ValidationError) as error:
+        raise VavError(
+            "SITE_SETTING_REVISION_INVALID",
+            "Setting revision cannot be rolled back.",
+            status_code=409,
+        ) from error
+    setting.value = deepcopy(validated_revision.value)
+    setting.value_type = validated_revision.value_type
+    setting.is_public = validated_revision.is_public
+    setting.updated_by = principal.user.id
+    setting.updated_at = datetime.now(UTC)
+    record_security_event(
+        session,
+        event_type="content.site_setting.rolled_back",
+        severity="warning",
+        actor_type="admin",
+        actor_user_id=principal.user.id,
+        actor_session_id=principal.session.id,
+        target_type="site_setting",
+        reason=payload.reason,
+        before_state=before_state,
+        after_state={
+            "value": deepcopy(setting.value),
+            "value_type": setting.value_type,
+            "is_public": setting.is_public,
+        },
+        metadata={"setting_key": setting_key, "source_event_id": str(event.id)},
+    )
+    await session.commit()
+    await session.refresh(setting)
+    return success(
+        {
+            "status": "rolled_back",
+            "setting_key": setting.setting_key,
+            "value": setting.value,
+            "value_type": setting.value_type,
+            "is_public": setting.is_public,
+            "updated_at": setting.updated_at.isoformat(),
+        },
+        request_id_from_request(request),
+    )
 
 
 @router.post("/public/contact-submissions", status_code=status.HTTP_202_ACCEPTED)

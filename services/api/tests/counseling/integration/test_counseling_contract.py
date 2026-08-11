@@ -8,7 +8,14 @@ def test_counseling_routes_are_in_openapi(client) -> None:
     assert "/api/v1/account/counseling/appointments/{appointment_id}/join" in paths
     assert "/api/v1/account/counseling/session-access/{session_id}" in paths
     assert "/api/v1/admin/counseling/services/{service_id}/publish" in paths
+    assert "/api/v1/admin/counseling/availability-rules" in paths
+    assert "/api/v1/admin/counseling/availability-rules/{rule_id}/disable" in paths
+    assert "/api/v1/admin/counseling/appointments/{appointment_id}" in paths
     assert "/api/v1/admin/counseling/appointments/{appointment_id}/transition" in paths
+    assert "/api/v1/admin/counseling/appointments/{appointment_id}/propose-time" in paths
+    assert "/api/v1/admin/counseling/appointments/{appointment_id}/follow-ups" in paths
+    assert "/api/v1/admin/counseling/follow-ups" in paths
+    assert "/api/v1/admin/counseling/follow-ups/{followup_id}" in paths
 
 
 def test_seeded_public_service_is_scoped_and_catalog_priced(client) -> None:

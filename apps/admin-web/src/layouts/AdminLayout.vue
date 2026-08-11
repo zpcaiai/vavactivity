@@ -51,7 +51,6 @@ const menu = [
   { path: "/admin/experience/dashboard", labelKey: "menu.experience", icon: DataAnalysis },
   { path: "/admin/processes/dashboard", labelKey: "menu.processes", icon: DataAnalysis },
   { path: "/admin/data-governance/dashboard", labelKey: "menu.dataGovernance", icon: DataAnalysis },
-  { path: "/admin/platform/dashboard", labelKey: "menu.adminPlatform", icon: Setting },
   { path: "/admin/content/settings", labelKey: "menu.settings", icon: Setting },
   { path: "/admin/access/admins", labelKey: "menu.admins", icon: Lock },
   { path: "/admin/audit/auth", labelKey: "menu.audit", icon: DataAnalysis }

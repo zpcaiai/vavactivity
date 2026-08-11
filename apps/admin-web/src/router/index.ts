@@ -13,6 +13,9 @@ const CourseManagementPage = () => import("@/pages/CourseManagementPage.vue");
 const CounselingManagementPage = () => import("@/pages/CounselingManagementPage.vue");
 const CmsEditorPage = () => import("@/pages/CmsEditorPage.vue");
 const DashboardPage = () => import("@/pages/DashboardPage.vue");
+const UserManagementPage = () => import("@/pages/UserManagementPage.vue");
+const SiteSettingsPage = () => import("@/pages/SiteSettingsPage.vue");
+const AdminManagementPage = () => import("@/pages/AdminManagementPage.vue");
 const CmsManagementPage = () => import("@/pages/CmsManagementPage.vue");
 const ErrorPage = () => import("@/pages/ErrorPage.vue");
 const LoginPage = () => import("@/pages/LoginPage.vue");
@@ -306,7 +309,7 @@ export const router = createRouter({
           path: "content/pages",
           name: "admin-content-pages",
           component: CmsManagementPage,
-          meta: { title: "页面管理", permission: "content.pages.read", cmsSection: "pages" }
+          meta: { title: "内容中心", permission: "content.pages.read", cmsSection: "pages" }
         },
         {
           path: "content/pages/:id",
@@ -341,8 +344,8 @@ export const router = createRouter({
         {
           path: "content/settings",
           name: "admin-content-settings",
-          component: AccessManagementPage,
-          meta: { title: "网站设置", permission: "content.settings.read", endpoint: "/admin/site-settings" }
+          component: SiteSettingsPage,
+          meta: { title: "网站设置", permission: "content.settings.read" }
         },
         {
           path: "contact-submissions",
@@ -455,8 +458,8 @@ export const router = createRouter({
         {
           path: "users",
           name: "admin-users",
-          component: AccessManagementPage,
-          meta: { title: "用户管理", permission: "users.read", endpoint: "/admin/users" }
+          component: UserManagementPage,
+          meta: { title: "用户管理", permission: "users.read" }
         },
         {
           path: "activities",
@@ -679,8 +682,8 @@ export const router = createRouter({
         {
           path: "access/admins",
           name: "admin-access-admins",
-          component: AccessManagementPage,
-          meta: { title: "管理员", permission: "admins.read", endpoint: "/admin/admins" }
+          component: AdminManagementPage,
+          meta: { title: "管理员", permission: "admins.read" }
         },
         {
           path: "access/roles",
@@ -697,8 +700,8 @@ export const router = createRouter({
         {
           path: "access/invitations",
           name: "admin-access-invitations",
-          component: AccessManagementPage,
-          meta: { title: "管理员邀请", permission: "admins.read", endpoint: "/admin/admins/invitations" }
+          component: AdminManagementPage,
+          meta: { title: "管理员邀请", permission: "admins.read" }
         },
         {
           path: "audit/auth",

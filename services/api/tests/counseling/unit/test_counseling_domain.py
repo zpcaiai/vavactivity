@@ -16,3 +16,8 @@ def test_appointment_state_machine_allows_only_declared_transitions() -> None:
 def test_terminal_appointment_cannot_be_reopened() -> None:
     with pytest.raises(VavError):
         ensure_appointment_transition("cancelled", "confirmed")
+
+
+@pytest.mark.parametrize("status", ["requested", "pending_review", "manual_review", "confirmed"])
+def test_active_appointment_can_be_cancelled_by_operations(status: str) -> None:
+    ensure_appointment_transition(status, "cancelled")

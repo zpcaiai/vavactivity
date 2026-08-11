@@ -179,5 +179,34 @@ class NavigationMenuUpdateRequest(BaseModel):
 
 class SiteSettingRequest(BaseModel):
     value: dict[str, object] | list[object] | str | bool | None
-    value_type: str
+    value_type: Literal[
+        "string",
+        "nullable_string",
+        "boolean",
+        "array",
+        "object",
+        "decision_status",
+    ]
     is_public: bool = False
+    expected_updated_at: datetime | None = None
+    reason: str = Field(min_length=10, max_length=2000)
+
+    @model_validator(mode="after")
+    def validate_typed_value(self) -> SiteSettingRequest:
+        valid = {
+            "string": isinstance(self.value, str),
+            "nullable_string": self.value is None or isinstance(self.value, str),
+            "boolean": isinstance(self.value, bool),
+            "array": isinstance(self.value, list),
+            "object": isinstance(self.value, dict),
+            "decision_status": isinstance(self.value, str),
+        }[self.value_type]
+        if not valid:
+            raise ValueError("setting value does not match value_type")
+        return self
+
+
+class SiteSettingRollbackRequest(BaseModel):
+    audit_event_id: UUID
+    expected_updated_at: datetime
+    reason: str = Field(min_length=10, max_length=2000)

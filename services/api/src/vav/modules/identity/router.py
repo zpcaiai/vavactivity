@@ -5,9 +5,10 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
 from uuid import UUID, uuid4
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from fastapi import APIRouter, Depends, Query, Request, Response, status
-from sqlalchemy import func, select, update
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from vav.api.dependencies import get_database_session
@@ -41,6 +42,8 @@ from vav.modules.identity.permissions import require_permission
 from vav.modules.identity.schemas import (
     AdminInvitationAcceptRequest,
     AdminInvitationRequest,
+    AdminUserDeactivateRequest,
+    AdminUserUpdateRequest,
     EmailRequest,
     LoginRequest,
     PasswordChangeRequest,
@@ -578,12 +581,29 @@ async def list_users(
     request: Request,
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
+    search: str | None = Query(default=None, min_length=1, max_length=320),
+    user_status: str | None = Query(default=None, alias="status", max_length=32),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
-    total = int(await session.scalar(select(func.count()).select_from(User)) or 0)
+    filters = []
+    if search:
+        pattern = f"%{search.strip()}%"
+        filters.append(or_(User.display_email.ilike(pattern), User.email.ilike(pattern)))
+    if user_status:
+        try:
+            UserStatus(user_status)
+        except ValueError as error:
+            raise VavError(
+                "USER_STATUS_INVALID",
+                "User status is invalid.",
+                status_code=422,
+            ) from error
+        filters.append(User.status == user_status)
+    total = int(await session.scalar(select(func.count()).select_from(User).where(*filters)) or 0)
     users = (
         await session.scalars(
             select(User)
+            .where(*filters)
             .order_by(User.created_at.desc())
             .offset((page - 1) * page_size)
             .limit(page_size)
@@ -597,9 +617,314 @@ async def list_users(
                     "email": user.display_email,
                     "status": user.status,
                     "email_verified": user.email_verified_at is not None,
+                    "preferred_locale": user.preferred_locale,
+                    "timezone": user.timezone,
+                    "last_login_at": user.last_login_at.isoformat() if user.last_login_at else None,
+                    "updated_at": user.updated_at.isoformat(),
+                    "version": user.version,
                     "created_at": user.created_at.isoformat(),
                 }
                 for user in users
+            ],
+            "page": page,
+            "page_size": page_size,
+            "total": total,
+        },
+        request_id_from_request(request),
+    )
+
+
+async def _admin_user_payload(session: AsyncSession, user: User) -> dict[str, Any]:
+    roles = (
+        await session.execute(
+            select(Role.code, Role.name, UserRole.granted_at, UserRole.expires_at)
+            .join(UserRole, UserRole.role_id == Role.id)
+            .where(UserRole.user_id == user.id, UserRole.revoked_at.is_(None))
+            .order_by(Role.code)
+        )
+    ).all()
+    active_sessions = int(
+        await session.scalar(
+            select(func.count())
+            .select_from(AuthSession)
+            .where(AuthSession.user_id == user.id, AuthSession.status == SessionStatus.ACTIVE)
+        )
+        or 0
+    )
+    return {
+        "id": str(user.id),
+        "email": user.display_email,
+        "status": user.status,
+        "email_verified": user.email_verified_at is not None,
+        "preferred_locale": user.preferred_locale,
+        "timezone": user.timezone,
+        "failed_login_count": user.failed_login_count,
+        "locked_until": user.locked_until.isoformat() if user.locked_until else None,
+        "last_login_at": user.last_login_at.isoformat() if user.last_login_at else None,
+        "password_changed_at": (
+            user.password_changed_at.isoformat() if user.password_changed_at else None
+        ),
+        "deletion_requested_at": (
+            user.deletion_requested_at.isoformat() if user.deletion_requested_at else None
+        ),
+        "deleted_at": user.deleted_at.isoformat() if user.deleted_at else None,
+        "active_sessions": active_sessions,
+        "roles": [
+            {
+                "code": code,
+                "name": name,
+                "granted_at": granted_at.isoformat(),
+                "expires_at": expires_at.isoformat() if expires_at else None,
+            }
+            for code, name, granted_at, expires_at in roles
+        ],
+        "created_at": user.created_at.isoformat(),
+        "updated_at": user.updated_at.isoformat(),
+        "version": user.version,
+    }
+
+
+@router.get("/admin/users/{user_id}")
+async def get_user(
+    user_id: UUID,
+    request: Request,
+    _: AuthenticatedPrincipal = Depends(require_permission("users.read")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    user = await session.get(User, user_id)
+    if user is None:
+        raise VavError("USER_NOT_FOUND", "User was not found.", status_code=404)
+    return success(await _admin_user_payload(session, user), request_id_from_request(request))
+
+
+@router.patch("/admin/users/{user_id}")
+async def update_user(
+    user_id: UUID,
+    payload: AdminUserUpdateRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(require_permission("users.update")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    ensure_not_self(principal, user_id)
+    user = await session.get(User, user_id, with_for_update=True)
+    if user is None:
+        raise VavError("USER_NOT_FOUND", "User was not found.", status_code=404)
+    if user.version != payload.expected_version:
+        raise VavError(
+            "USER_VERSION_CONFLICT",
+            "User data has changed; reload it.",
+            status_code=409,
+        )
+    if payload.email is None and payload.preferred_locale is None and payload.timezone is None:
+        raise VavError("USER_UPDATE_EMPTY", "At least one field must be updated.", status_code=422)
+    before = {
+        "email": user.display_email,
+        "preferred_locale": user.preferred_locale,
+        "timezone": user.timezone,
+        "email_verified": user.email_verified_at is not None,
+        "version": user.version,
+    }
+    email_changed = False
+    if payload.email is not None:
+        normalized_email = str(payload.email).strip().casefold()
+        duplicate = await session.scalar(
+            select(User.id).where(User.email == normalized_email, User.id != user.id)
+        )
+        if duplicate is not None:
+            raise VavError(
+                "EMAIL_ALREADY_REGISTERED",
+                "Email is already registered.",
+                status_code=409,
+            )
+        email_changed = normalized_email != user.email.casefold()
+        if email_changed:
+            user.email = normalized_email
+            user.display_email = str(payload.email).strip()
+            user.email_verified_at = None
+            user.auth_version += 1
+            await session.execute(
+                update(AuthSession)
+                .where(AuthSession.user_id == user.id, AuthSession.status == SessionStatus.ACTIVE)
+                .values(
+                    status=SessionStatus.REVOKED,
+                    revoked_at=datetime.now(UTC),
+                    revoke_reason="admin_user_email_changed",
+                )
+            )
+    if payload.preferred_locale is not None:
+        user.preferred_locale = payload.preferred_locale
+    if payload.timezone is not None:
+        try:
+            ZoneInfo(payload.timezone)
+        except ZoneInfoNotFoundError as error:
+            raise VavError("TIMEZONE_INVALID", "Timezone is invalid.", status_code=422) from error
+        user.timezone = payload.timezone
+    user.version += 1
+    record_security_event(
+        session,
+        event_type="user.account.updated",
+        actor_type="admin",
+        actor_user_id=principal.user.id,
+        actor_session_id=principal.session.id,
+        target_type="user",
+        target_id=user.id,
+        reason=payload.reason,
+        before_state=before,
+        after_state={
+            "email": user.display_email,
+            "preferred_locale": user.preferred_locale,
+            "timezone": user.timezone,
+            "email_verified": user.email_verified_at is not None,
+            "version": user.version,
+            "sessions_revoked": email_changed,
+        },
+    )
+    await session.commit()
+    await session.refresh(user)
+    return success(await _admin_user_payload(session, user), request_id_from_request(request))
+
+
+@router.post("/admin/users/{user_id}/deactivate")
+async def deactivate_user(
+    user_id: UUID,
+    payload: AdminUserDeactivateRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(require_permission("users.update")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    ensure_not_self(principal, user_id)
+    user = await session.get(User, user_id, with_for_update=True)
+    if user is None:
+        raise VavError("USER_NOT_FOUND", "User was not found.", status_code=404)
+    if user.version != payload.expected_version:
+        raise VavError(
+            "USER_VERSION_CONFLICT",
+            "User data has changed; reload it.",
+            status_code=409,
+        )
+    if user.status in {UserStatus.DELETION_PENDING, UserStatus.DELETED}:
+        raise VavError("USER_ALREADY_DEACTIVATED", "User is already deactivated.", status_code=409)
+    before = {"status": user.status, "version": user.version}
+    changed_at = datetime.now(UTC)
+    user.status = UserStatus.DELETION_PENDING
+    user.deletion_requested_at = changed_at
+    user.auth_version += 1
+    user.version += 1
+    await session.execute(
+        update(AuthSession)
+        .where(AuthSession.user_id == user.id, AuthSession.status == SessionStatus.ACTIVE)
+        .values(
+            status=SessionStatus.REVOKED,
+            revoked_at=changed_at,
+            revoke_reason="admin_user_deactivated",
+        )
+    )
+    record_security_event(
+        session,
+        event_type="user.account.deactivation_requested",
+        severity="warning",
+        actor_type="admin",
+        actor_user_id=principal.user.id,
+        actor_session_id=principal.session.id,
+        target_type="user",
+        target_id=user.id,
+        reason=payload.reason,
+        before_state=before,
+        after_state={"status": user.status, "version": user.version},
+    )
+    await session.commit()
+    return success(
+        {"status": user.status, "version": user.version},
+        request_id_from_request(request),
+    )
+
+
+@router.post("/admin/users/{user_id}/sessions/revoke")
+async def revoke_user_sessions(
+    user_id: UUID,
+    payload: ReasonRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(require_permission("users.sessions.revoke")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    ensure_not_self(principal, user_id)
+    user = await session.get(User, user_id, with_for_update=True)
+    if user is None:
+        raise VavError("USER_NOT_FOUND", "User was not found.", status_code=404)
+    changed_at = datetime.now(UTC)
+    result = await session.execute(
+        update(AuthSession)
+        .where(
+            AuthSession.user_id == user.id,
+            AuthSession.status.in_([SessionStatus.ACTIVE, SessionStatus.REPLACED]),
+        )
+        .values(
+            status=SessionStatus.REVOKED,
+            revoked_at=changed_at,
+            revoke_reason="admin_revoked_all_sessions",
+        )
+    )
+    user.auth_version += 1
+    record_security_event(
+        session,
+        event_type="user.sessions.revoked",
+        severity="warning",
+        actor_type="admin",
+        actor_user_id=principal.user.id,
+        actor_session_id=principal.session.id,
+        target_type="user",
+        target_id=user.id,
+        reason=payload.reason,
+        metadata={"revoked_count": result.rowcount or 0},
+    )
+    await session.commit()
+    return success(
+        {"status": "revoked", "revoked_count": result.rowcount or 0},
+        request_id_from_request(request),
+    )
+
+
+@router.get("/admin/users/{user_id}/history")
+async def user_history(
+    user_id: UUID,
+    request: Request,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=200),
+    _: AuthenticatedPrincipal = Depends(require_permission("users.read")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    if await session.get(User, user_id) is None:
+        raise VavError("USER_NOT_FOUND", "User was not found.", status_code=404)
+    filters = (SecurityAuditEvent.target_type == "user", SecurityAuditEvent.target_id == user_id)
+    total = int(
+        await session.scalar(select(func.count()).select_from(SecurityAuditEvent).where(*filters))
+        or 0
+    )
+    events = (
+        await session.scalars(
+            select(SecurityAuditEvent)
+            .where(*filters)
+            .order_by(SecurityAuditEvent.occurred_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
+    ).all()
+    return success(
+        {
+            "items": [
+                {
+                    "id": str(event.id),
+                    "event_type": event.event_type,
+                    "severity": event.severity,
+                    "actor_type": event.actor_type,
+                    "actor_user_id": str(event.actor_user_id) if event.actor_user_id else None,
+                    "reason": event.reason,
+                    "before_state": event.before_state,
+                    "after_state": event.after_state,
+                    "metadata": event.event_metadata,
+                    "occurred_at": event.occurred_at.isoformat(),
+                }
+                for event in events
             ],
             "page": page,
             "page_size": page_size,
@@ -626,8 +951,11 @@ async def _change_user_status(
     before = target.status
     target.status = target_status
     target.auth_version += 1
+    target.version += 1
     if target_status == UserStatus.ACTIVE:
         target.locked_until = None
+        target.deletion_requested_at = None
+        target.deleted_at = None
     await session.execute(
         update(AuthSession)
         .where(AuthSession.user_id == target.id, AuthSession.status == SessionStatus.ACTIVE)
@@ -648,10 +976,12 @@ async def _change_user_status(
         target_id=target.id,
         reason=payload.reason,
         before_state={"status": before},
-        after_state={"status": target.status},
+        after_state={"status": target.status, "version": target.version},
     )
     await session.commit()
-    return success({"status": target.status}, request_id_from_request(request))
+    return success(
+        {"status": target.status, "version": target.version}, request_id_from_request(request)
+    )
 
 
 @router.post("/admin/users/{user_id}/suspend")
@@ -918,12 +1248,34 @@ async def list_invitations(
             .limit(page_size)
         )
     ).all()
+    role_ids = {UUID(role_id) for item in invitations for role_id in item.proposed_role_ids}
+    roles_by_id = {
+        role.id: role
+        for role in (await session.scalars(select(Role).where(Role.id.in_(role_ids)))).all()
+    }
+    now_value = datetime.now(UTC)
     return success(
         {
             "items": [
                 {
                     "id": str(item.id),
                     "email": _mask_email(item.email),
+                    "role_codes": [
+                        roles_by_id[UUID(role_id)].code
+                        for role_id in item.proposed_role_ids
+                        if UUID(role_id) in roles_by_id
+                    ],
+                    "status": (
+                        "accepted"
+                        if item.accepted_at
+                        else "revoked"
+                        if item.revoked_at
+                        else "expired"
+                        if item.expires_at <= now_value
+                        else "pending"
+                    ),
+                    "reason": item.reason,
+                    "created_at": item.created_at.isoformat(),
                     "expires_at": item.expires_at.isoformat(),
                     "accepted_at": item.accepted_at.isoformat() if item.accepted_at else None,
                     "revoked_at": item.revoked_at.isoformat() if item.revoked_at else None,
@@ -1075,10 +1427,7 @@ async def list_admins(
     admins = (await session.scalars(statement)).all()
     return success(
         {
-            "items": [
-                {"id": str(admin.id), "email": admin.display_email, "status": admin.status}
-                for admin in admins
-            ],
+            "items": [await _admin_user_payload(session, admin) for admin in admins],
             "page": page,
             "page_size": page_size,
             "total": total,

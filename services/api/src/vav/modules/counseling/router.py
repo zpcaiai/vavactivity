@@ -15,6 +15,7 @@ from vav.core.request_context import request_id_from_request
 from vav.models.catalog import Product, ProductSku
 from vav.models.counseling import (
     CounselingAppointment,
+    CounselingAppointmentHistory,
     CounselingAvailabilityRule,
     CounselingFollowUp,
     CounselingMentor,
@@ -31,6 +32,7 @@ from vav.modules.counseling.schemas import (
     AppointmentRequest,
     AvailabilityRuleRequest,
     FollowUpCreateRequest,
+    FollowUpTransitionRequest,
     MentorCreateRequest,
     MentorLocalizationRequest,
     ProposalRequest,
@@ -57,6 +59,7 @@ from vav.modules.courses.crypto import (
     issue_playback_token,
     verify_playback_token,
 )
+from vav.modules.identity.audit import record_security_event
 from vav.modules.identity.dependencies import (
     AuthenticatedPrincipal,
     require_admin_principal,
@@ -690,32 +693,191 @@ async def publish_service(
 async def create_rule(
     payload: AvailabilityRuleRequest,
     request: Request,
+    principal: AuthenticatedPrincipal = Depends(require_permission("counseling.schedules.manage")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    mentor = await session.get(CounselingMentor, payload.mentor_id)
+    service = (
+        await session.get(CounselingServiceDefinition, payload.service_id)
+        if payload.service_id
+        else None
+    )
+    if mentor is None:
+        raise VavError("COUNSELING_MENTOR_NOT_FOUND", "Mentor was not found.", status_code=404)
+    if payload.service_id is not None and service is None:
+        raise VavError("COUNSELING_SERVICE_NOT_FOUND", "Service was not found.", status_code=404)
+    value = CounselingAvailabilityRule(**payload.model_dump(), status="active")
+    session.add(value)
+    await session.flush()
+    record_security_event(
+        session,
+        event_type="counseling.schedule.created",
+        actor_type="admin",
+        actor_user_id=principal.user.id,
+        actor_session_id=principal.session.id,
+        target_type="counseling_schedule",
+        target_id=value.id,
+        after_state={
+            "mentor_id": str(value.mentor_id),
+            "service_id": str(value.service_id) if value.service_id else None,
+            "weekday": value.weekday,
+            "local_start_time": value.local_start_time.isoformat(),
+            "local_end_time": value.local_end_time.isoformat(),
+            "timezone": value.timezone,
+        },
+    )
+    await session.commit()
+    return success({"id": str(value.id), "status": value.status}, request_id_from_request(request))
+
+
+@router.get("/admin/counseling/availability-rules")
+async def admin_availability_rules(
+    request: Request,
+    mentor_id: UUID | None = None,
+    service_id: UUID | None = None,
     _: AuthenticatedPrincipal = Depends(require_permission("counseling.schedules.manage")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
-    value = CounselingAvailabilityRule(**payload.model_dump(), status="active")
-    session.add(value)
-    await session.commit()
-    await session.refresh(value)
-    return success({"id": str(value.id)}, request_id_from_request(request))
+    statement = select(CounselingAvailabilityRule)
+    if mentor_id is not None:
+        statement = statement.where(CounselingAvailabilityRule.mentor_id == mentor_id)
+    if service_id is not None:
+        statement = statement.where(CounselingAvailabilityRule.service_id == service_id)
+    values = (
+        await session.scalars(
+            statement.order_by(
+                CounselingAvailabilityRule.mentor_id,
+                CounselingAvailabilityRule.weekday,
+                CounselingAvailabilityRule.local_start_time,
+            )
+        )
+    ).all()
+    return success(
+        {
+            "items": [
+                {
+                    "id": str(value.id),
+                    "mentor_id": str(value.mentor_id),
+                    "service_id": str(value.service_id) if value.service_id else None,
+                    "timezone": value.timezone,
+                    "weekday": value.weekday,
+                    "local_start_time": value.local_start_time.isoformat(),
+                    "local_end_time": value.local_end_time.isoformat(),
+                    "valid_from": value.valid_from.isoformat(),
+                    "valid_until": value.valid_until.isoformat() if value.valid_until else None,
+                    "daily_limit": value.daily_limit,
+                    "weekly_limit": value.weekly_limit,
+                    "status": value.status,
+                }
+                for value in values
+            ]
+        },
+        request_id_from_request(request),
+    )
+
+
+@router.post("/admin/counseling/availability-rules/{rule_id}/disable")
+async def disable_availability_rule(
+    rule_id: UUID,
+    payload: ReasonRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(require_permission("counseling.schedules.manage")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    value = await session.get(CounselingAvailabilityRule, rule_id, with_for_update=True)
+    if value is None:
+        raise VavError("COUNSELING_SCHEDULE_NOT_FOUND", "Schedule was not found.", status_code=404)
+    if value.status != "inactive":
+        value.status = "inactive"
+        record_security_event(
+            session,
+            event_type="counseling.schedule.disabled",
+            severity="warning",
+            actor_type="admin",
+            actor_user_id=principal.user.id,
+            actor_session_id=principal.session.id,
+            target_type="counseling_schedule",
+            target_id=value.id,
+            reason=payload.reason,
+            after_state={"status": value.status},
+        )
+        await session.commit()
+    return success({"id": str(value.id), "status": value.status}, request_id_from_request(request))
 
 
 @router.get("/admin/counseling/appointments")
 async def admin_appointments(
     request: Request,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=200),
+    appointment_status: str | None = Query(default=None, alias="status", max_length=32),
+    mentor_id: UUID | None = None,
     _: AuthenticatedPrincipal = Depends(require_permission("counseling.appointments.read")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
+    filters = []
+    if appointment_status:
+        filters.append(CounselingAppointment.status == appointment_status)
+    if mentor_id:
+        filters.append(CounselingAppointment.mentor_id == mentor_id)
+    total = int(
+        await session.scalar(
+            select(func.count()).select_from(CounselingAppointment).where(*filters)
+        )
+        or 0
+    )
     values = list(
         (
             await session.scalars(
-                select(CounselingAppointment).order_by(CounselingAppointment.created_at.desc())
+                select(CounselingAppointment)
+                .where(*filters)
+                .order_by(CounselingAppointment.created_at.desc())
+                .offset((page - 1) * page_size)
+                .limit(page_size)
             )
         ).all()
     )
     return success(
-        {"items": [appointment_payload(item) for item in values]}, request_id_from_request(request)
+        {
+            "items": [appointment_payload(item) for item in values],
+            "page": page,
+            "page_size": page_size,
+            "total": total,
+        },
+        request_id_from_request(request),
     )
+
+
+@router.get("/admin/counseling/appointments/{appointment_id}")
+async def admin_appointment_detail(
+    appointment_id: UUID,
+    request: Request,
+    _: AuthenticatedPrincipal = Depends(require_permission("counseling.appointments.read")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    value = await session.get(CounselingAppointment, appointment_id)
+    if value is None:
+        raise VavError("APPOINTMENT_NOT_FOUND", "Appointment was not found.", status_code=404)
+    history = (
+        await session.scalars(
+            select(CounselingAppointmentHistory)
+            .where(CounselingAppointmentHistory.appointment_id == value.id)
+            .order_by(CounselingAppointmentHistory.created_at.desc())
+        )
+    ).all()
+    payload = appointment_payload(value)
+    payload["history"] = [
+        {
+            "id": str(item.id),
+            "from_status": item.from_status,
+            "to_status": item.to_status,
+            "actor_id": str(item.actor_id) if item.actor_id else None,
+            "reason": item.reason,
+            "created_at": item.created_at.isoformat(),
+        }
+        for item in history
+    ]
+    return success(payload, request_id_from_request(request))
 
 
 @router.post("/admin/counseling/appointments/{appointment_id}/transition")
@@ -763,6 +925,17 @@ async def propose_time(
         raise VavError(
             "COUNSELING_PROPOSAL_STALE", "A newer time proposal exists.", status_code=409
         )
+    if value.status not in {
+        "pending_review",
+        "time_proposed",
+        "confirmed",
+        "reschedule_requested",
+    }:
+        raise VavError(
+            "COUNSELING_RESCHEDULE_INVALID",
+            "Appointment cannot be rescheduled from its current status.",
+            status_code=409,
+        )
     service = await session.get(CounselingServiceDefinition, value.service_id)
     assert service is not None
     hold = await availability_service.hold(
@@ -786,7 +959,41 @@ async def propose_time(
             actor_id=principal.user.id,
             reason=payload.reason,
         )
+    elif value.status == "confirmed":
+        await appointment_service.transition(
+            session,
+            value,
+            target="reschedule_requested",
+            actor_id=principal.user.id,
+            reason=payload.reason,
+        )
     else:
+        value.version += 1
+        session.add(
+            CounselingAppointmentHistory(
+                appointment_id=value.id,
+                from_status=value.status,
+                to_status=value.status,
+                actor_id=principal.user.id,
+                reason=payload.reason,
+            )
+        )
+        record_security_event(
+            session,
+            event_type="counseling.appointment.time_reproposed",
+            actor_type="admin",
+            actor_user_id=principal.user.id,
+            actor_session_id=principal.session.id,
+            target_type="counseling_appointment",
+            target_id=value.id,
+            reason=payload.reason,
+            after_state={
+                "mentor_id": str(value.mentor_id),
+                "scheduled_starts_at": value.scheduled_starts_at.isoformat(),
+                "scheduled_ends_at": value.scheduled_ends_at.isoformat(),
+                "proposal_version": value.proposal_version,
+            },
+        )
         await session.commit()
     return success(appointment_payload(value), request_id_from_request(request))
 
@@ -877,9 +1084,96 @@ async def create_followup(
         content_encrypted=encrypt_sensitive(payload.content),
     )
     session.add(value)
+    await session.flush()
+    record_security_event(
+        session,
+        event_type="counseling.followup.created",
+        actor_type="admin",
+        actor_user_id=principal.user.id,
+        actor_session_id=principal.session.id,
+        target_type="counseling_followup",
+        target_id=value.id,
+        after_state={
+            "appointment_id": str(value.appointment_id),
+            "follow_up_type": value.follow_up_type,
+            "status": value.status,
+            "due_at": value.due_at.isoformat() if value.due_at else None,
+        },
+    )
     await session.commit()
     await session.refresh(value)
     return success({"id": str(value.id)}, request_id_from_request(request))
+
+
+@router.get("/admin/counseling/follow-ups")
+async def admin_followups(
+    request: Request,
+    followup_status: str | None = Query(default=None, alias="status", max_length=32),
+    appointment_id: UUID | None = None,
+    _: AuthenticatedPrincipal = Depends(require_permission("counseling.followups.manage")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    filters = []
+    if followup_status:
+        filters.append(CounselingFollowUp.status == followup_status)
+    if appointment_id:
+        filters.append(CounselingFollowUp.appointment_id == appointment_id)
+    values = (
+        await session.scalars(
+            select(CounselingFollowUp)
+            .where(*filters)
+            .order_by(CounselingFollowUp.created_at.desc())
+            .limit(200)
+        )
+    ).all()
+    return success(
+        {
+            "items": [
+                {
+                    "id": str(value.id),
+                    "appointment_id": str(value.appointment_id),
+                    "user_id": str(value.user_id),
+                    "assigned_to": str(value.assigned_to) if value.assigned_to else None,
+                    "follow_up_type": value.follow_up_type,
+                    "status": value.status,
+                    "due_at": value.due_at.isoformat() if value.due_at else None,
+                    "content": decrypt_sensitive(value.content_encrypted),
+                    "created_at": value.created_at.isoformat(),
+                }
+                for value in values
+            ]
+        },
+        request_id_from_request(request),
+    )
+
+
+@router.patch("/admin/counseling/follow-ups/{followup_id}")
+async def transition_followup(
+    followup_id: UUID,
+    payload: FollowUpTransitionRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(require_permission("counseling.followups.manage")),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    value = await session.get(CounselingFollowUp, followup_id, with_for_update=True)
+    if value is None:
+        raise VavError("COUNSELING_FOLLOWUP_NOT_FOUND", "Follow-up was not found.", status_code=404)
+    before = value.status
+    value.status = payload.status
+    record_security_event(
+        session,
+        event_type="counseling.followup.status_changed",
+        actor_type="admin",
+        actor_user_id=principal.user.id,
+        actor_session_id=principal.session.id,
+        target_type="counseling_followup",
+        target_id=value.id,
+        reason=payload.reason,
+        before_state={"status": before},
+        after_state={"status": value.status},
+    )
+    await session.commit()
+    return success({"id": str(value.id), "status": value.status}, request_id_from_request(request))
 
 
 @router.post("/admin/counseling/appointments/{appointment_id}/safety-referrals", status_code=201)
