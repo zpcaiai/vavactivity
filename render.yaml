@@ -13,7 +13,7 @@ services:
     plan: free # Deploys on Render's free tier
     envVars:
       - key: PORT
-        value: 10000
+        value: 8000
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
