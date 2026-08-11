@@ -57,7 +57,7 @@ def test_registration_verification_login_and_refresh(monkeypatch: object) -> Non
         assert login.status_code == 200
         access_token = login.json()["data"]["access_token"]
         assert access_token
-        csrf = client.cookies["vav_csrf"]
+        csrf = client.cookies["vav_user_csrf"]
         me = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {access_token}"})
         assert me.status_code == 200
         assert me.json()["data"]["email"] == email

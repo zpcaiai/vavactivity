@@ -431,6 +431,26 @@ class IdentityService:
         if user.status != UserStatus.ACTIVE:
             raise VavError("AUTH_SESSION_INVALID", "Session is invalid.", status_code=401)
         permissions = await permissions_for_user(session, user.id)
+        if audience == self.settings.auth_admin_audience and not permissions:
+            existing.status = SessionStatus.REVOKED
+            existing.revoked_at = now
+            existing.revoke_reason = "admin_access_removed"
+            record_security_event(
+                session,
+                event_type="auth.admin_access.removed",
+                severity="warning",
+                actor_type="user",
+                actor_user_id=user.id,
+                actor_session_id=existing.id,
+                target_type="session",
+                target_id=existing.id,
+            )
+            await session.commit()
+            raise VavError(
+                "ADMIN_ACCESS_REQUIRED",
+                "Administrator access is required.",
+                status_code=403,
+            )
         replacement = self._new_session(
             user=user,
             permissions=permissions,

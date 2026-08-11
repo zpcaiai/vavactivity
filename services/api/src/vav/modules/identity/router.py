@@ -84,8 +84,9 @@ def _set_session_cookies(
             else settings.auth_refresh_token_ttl_days * 86400
         ),
     )
+    csrf_cookie_name = "vav_admin_csrf" if audience == "admin" else "vav_user_csrf"
     response.set_cookie(
-        "vav_csrf",
+        csrf_cookie_name,
         result.csrf_token,
         httponly=False,
         secure=settings.auth_cookie_secure,
@@ -100,7 +101,8 @@ def _clear_session_cookies(response: Response, *, audience: Literal["user", "adm
     cookie_name = "vav_admin_refresh" if audience == "admin" else "vav_user_refresh"
     path = "/api/v1/admin/auth" if audience == "admin" else "/api/v1/auth"
     response.delete_cookie(cookie_name, path=path, domain=settings.auth_cookie_domain)
-    response.delete_cookie("vav_csrf", path="/", domain=settings.auth_cookie_domain)
+    csrf_cookie_name = "vav_admin_csrf" if audience == "admin" else "vav_user_csrf"
+    response.delete_cookie(csrf_cookie_name, path="/", domain=settings.auth_cookie_domain)
 
 
 def _auth_payload(result: AuthResult) -> dict[str, Any]:
@@ -265,7 +267,7 @@ async def _refresh(
     session: AsyncSession,
     audience: Literal["user", "admin"],
 ) -> dict[str, Any]:
-    require_csrf(request)
+    require_csrf(request, audience=audience)
     settings = get_settings()
     cookie_name = "vav_admin_refresh" if audience == "admin" else "vav_user_refresh"
     raw_token = request.cookies.get(cookie_name)
@@ -448,7 +450,7 @@ async def _logout(
     session: AsyncSession,
     audience: Literal["user", "admin"],
 ) -> dict[str, Any]:
-    require_csrf(request)
+    require_csrf(request, audience=audience)
     principal.session.status = SessionStatus.REVOKED
     principal.session.revoked_at = datetime.now(UTC)
     principal.session.revoke_reason = "logout"

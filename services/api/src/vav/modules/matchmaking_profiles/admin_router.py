@@ -319,7 +319,12 @@ async def photo_review_queue(
             await session.execute(
                 text(
                     "SELECT p.id,p.dating_profile_id,p.photo_role,p.status,p.processing_report,p.created_at,"
-                    "d.profile_number FROM dating_profile_photos p JOIN dating_profiles d ON d.id=p.dating_profile_id "
+                    "d.profile_number,review_case.id AS review_case_id "
+                    "FROM dating_profile_photos p JOIN dating_profiles d ON d.id=p.dating_profile_id "
+                    "LEFT JOIN LATERAL (SELECT c.id FROM dating_profile_review_cases c "
+                    "WHERE c.dating_profile_id=p.dating_profile_id "
+                    "AND c.status IN ('pending','assigned','in_review','escalated') "
+                    "ORDER BY c.submitted_at DESC LIMIT 1) review_case ON true "
                     "WHERE p.status='review_required' AND p.deleted_at IS NULL "
                     "ORDER BY p.created_at LIMIT :limit OFFSET :offset"
                 ),
@@ -335,6 +340,9 @@ async def photo_review_queue(
             "items": [
                 {
                     "photo_id": str(row["id"]),
+                    "review_case_id": (
+                        str(row["review_case_id"]) if row["review_case_id"] else None
+                    ),
                     "profile_number": row["profile_number"],
                     "photo_role": row["photo_role"],
                     "status": row["status"],

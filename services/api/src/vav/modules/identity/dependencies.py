@@ -94,12 +94,13 @@ async def require_admin_principal(
     return principal
 
 
-def require_csrf(request: Request) -> None:
+def require_csrf(request: Request, *, audience: str) -> None:
     settings = get_settings()
     origin = request.headers.get("origin")
     if origin not in settings.auth_allowed_origins:
         raise VavError("ORIGIN_NOT_ALLOWED", "Request origin is not allowed.", status_code=403)
-    cookie_token = request.cookies.get("vav_csrf")
+    cookie_name = "vav_admin_csrf" if audience == "admin" else "vav_user_csrf"
+    cookie_token = request.cookies.get(cookie_name)
     header_token = request.headers.get("x-csrf-token")
     if not cookie_token or not header_token or cookie_token != header_token:
         raise VavError("CSRF_VALIDATION_FAILED", "CSRF validation failed.", status_code=403)
