@@ -19,8 +19,10 @@ from vav.core.config import get_settings
 
 
 def asyncpg_engine_configuration(database_url: str) -> tuple[URL, dict[str, object]]:
-    """Translate libpq-style TLS options into asyncpg connect arguments."""
+    """Normalize platform Postgres URLs and translate TLS options for asyncpg."""
     url = make_url(database_url)
+    if url.drivername in {"postgres", "postgresql"}:
+        url = url.set(drivername="postgresql+asyncpg")
     if url.drivername != "postgresql+asyncpg":
         return url, {}
 

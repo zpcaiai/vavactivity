@@ -17,8 +17,19 @@ def test_translates_neon_tls_options_for_asyncpg() -> None:
     assert connect_args == {"ssl": "require"}
 
 
-def test_preserves_non_asyncpg_database_urls() -> None:
-    url, connect_args = asyncpg_engine_configuration("postgresql://owner:secret@localhost/vav")
+def test_normalizes_platform_postgresql_url_for_asyncpg() -> None:
+    url, connect_args = asyncpg_engine_configuration(
+        "postgresql://owner:secret@ep-example.neon.tech/vav?channel_binding=require&sslmode=require"
+    )
 
-    assert url.drivername == "postgresql"
+    assert url.drivername == "postgresql+asyncpg"
+    assert "sslmode" not in url.query
+    assert "channel_binding" not in url.query
+    assert connect_args == {"ssl": "require"}
+
+
+def test_preserves_non_postgresql_database_urls() -> None:
+    url, connect_args = asyncpg_engine_configuration("sqlite:///local.db")
+
+    assert url.drivername == "sqlite"
     assert connect_args == {}
