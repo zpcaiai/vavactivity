@@ -102,12 +102,16 @@ class IdentityService:
         if existing is not None:
             return existing, None
         now = datetime.now(UTC)
+        verification_required = self.settings.auth_email_verification_required
         user = User(
             id=uuid4(),
             email=normalized_email,
             display_email=email.strip(),
             password_hash=self.password_hasher.hash(password),
-            status=UserStatus.PENDING_VERIFICATION,
+            status=(
+                UserStatus.PENDING_VERIFICATION if verification_required else UserStatus.ACTIVE
+            ),
+            email_verified_at=None if verification_required else now,
             preferred_locale=preferred_locale,
             timezone=timezone,
             terms_version=terms_version,
@@ -117,14 +121,18 @@ class IdentityService:
         )
         session.add(user)
         await session.flush()
-        raw_token = opaque_token()
-        session.add(
-            EmailVerificationToken(
-                user_id=user.id,
-                token_hash=sha256_token(raw_token),
-                expires_at=now + timedelta(hours=self.settings.auth_email_verification_ttl_hours),
+        raw_token = None
+        if verification_required:
+            raw_token = opaque_token()
+            session.add(
+                EmailVerificationToken(
+                    user_id=user.id,
+                    token_hash=sha256_token(raw_token),
+                    expires_at=(
+                        now + timedelta(hours=self.settings.auth_email_verification_ttl_hours)
+                    ),
+                )
             )
-        )
         member_role = await session.scalar(select(Role).where(Role.code == "member"))
         if member_role is not None:
             session.add(
@@ -142,6 +150,7 @@ class IdentityService:
             actor_user_id=user.id,
             target_type="user",
             target_id=user.id,
+            metadata={"email_verification_required": verification_required},
         )
         if self.settings.membership_enabled:
             free_plan_ready = await session.scalar(
@@ -280,6 +289,44 @@ class IdentityService:
                 else UserStatus.PENDING_VERIFICATION
             )
             user.locked_until = None
+        if (
+            not self.settings.auth_email_verification_required
+            and user.status == UserStatus.PENDING_VERIFICATION
+        ):
+            user.status = UserStatus.ACTIVE
+            user.email_verified_at = user.email_verified_at or now
+            record_security_event(
+                session,
+                event_type="auth.email_verification.bypassed",
+                severity="warning",
+                actor_type="user",
+                actor_user_id=user.id,
+                target_type="user",
+                target_id=user.id,
+                metadata={"environment": self.settings.environment},
+                ip_address_hash=ip_hash,
+            )
+        if (
+            self.settings.auth_email_verification_required
+            and user.status == UserStatus.PENDING_VERIFICATION
+        ):
+            record_security_event(
+                session,
+                event_type="auth.login.failed",
+                severity="warning",
+                actor_type="user",
+                actor_user_id=user.id,
+                target_type="user",
+                target_id=user.id,
+                metadata={"reason": "email_verification_required"},
+                ip_address_hash=ip_hash,
+            )
+            await session.commit()
+            raise VavError(
+                "EMAIL_VERIFICATION_REQUIRED",
+                "Please verify your email before signing in.",
+                status_code=403,
+            )
         if user.status != UserStatus.ACTIVE:
             record_security_event(
                 session,

@@ -6,7 +6,7 @@ from uuid import uuid4
 from fastapi.testclient import TestClient
 
 from vav.main import app
-from vav.modules.identity.router import email_service
+from vav.modules.identity.router import email_service, identity_service
 
 
 def test_registration_verification_login_and_refresh(monkeypatch: object) -> None:
@@ -78,3 +78,37 @@ def test_password_forgot_response_does_not_enumerate_accounts() -> None:
         )
         assert unknown.status_code == 202
         assert "eligible" in unknown.json()["data"]["message"]
+
+
+def test_staging_policy_can_activate_an_existing_pending_registration(
+    monkeypatch: object,
+) -> None:
+    async def discard_link(**kwargs: str) -> None:
+        del kwargs
+
+    monkeypatch.setattr(email_service, "send_link", discard_link)  # type: ignore[attr-defined]
+    email = f"no-verification-{uuid4()}@example.com"
+    password = "a thoughtful passphrase"
+    with TestClient(app) as client:
+        registration = client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": email,
+                "password": password,
+                "preferred_locale": "zh-CN",
+                "timezone": "Asia/Shanghai",
+                "terms_version": "2026-07-01",
+                "privacy_version": "2026-07-01",
+            },
+        )
+        assert registration.status_code == 202
+        assert registration.json()["data"]["registration_status"] == "verification_required"
+
+        monkeypatch.setattr(identity_service.settings, "auth_email_verification_required", False)  # type: ignore[attr-defined]
+        login = client.post(
+            "/api/v1/auth/login",
+            json={"email": email, "password": password, "device_name": "Test browser"},
+        )
+
+        assert login.status_code == 200
+        assert login.json()["data"]["user"]["email_verified"] is True

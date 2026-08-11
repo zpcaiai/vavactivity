@@ -154,7 +154,9 @@ async def register(
         await _send_verification(user, raw_token)
     return success(
         {
-            "registration_status": "verification_required",
+            "registration_status": (
+                "verification_required" if user.email_verified_at is None else "active"
+            ),
             "email": _mask_email(str(payload.email)),
         },
         request_id_from_request(request),
