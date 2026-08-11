@@ -942,13 +942,18 @@ async def create_benefit(
 async def list_reconciliation_issues(
     session: AsyncSession, status: str | None = None
 ) -> list[dict[str, Any]]:
+    status_filter = ""
+    parameters: dict[str, Any] = {}
+    if status is not None:
+        status_filter = " WHERE status=:status"
+        parameters["status"] = status
     rows = (
         await session.execute(
             text(
                 "SELECT * FROM membership_reconciliation_issues "
-                "WHERE (:status IS NULL OR status=:status) ORDER BY detected_at DESC LIMIT 500"
+                f"{status_filter} ORDER BY detected_at DESC LIMIT 500"
             ),
-            {"status": status},
+            parameters,
         )
     ).mappings()
     return [dict(row) for row in rows]

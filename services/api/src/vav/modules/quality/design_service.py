@@ -331,12 +331,17 @@ async def list_pages(session: AsyncSession) -> list[dict[str, Any]]:
 
 
 async def list_audits(session: AsyncSession, audit_type: str | None = None) -> list[dict[str, Any]]:
+    audit_filter = ""
+    parameters: dict[str, Any] = {}
+    if audit_type is not None:
+        audit_filter = " WHERE audit_type=:audit_type"
+        parameters["audit_type"] = audit_type
     rows = (
         await session.execute(
             text(
-                "SELECT * FROM ui_audit_runs WHERE (:audit_type IS NULL OR audit_type=:audit_type) ORDER BY started_at DESC,id"
+                f"SELECT * FROM ui_audit_runs{audit_filter} ORDER BY started_at DESC,id"
             ),
-            {"audit_type": audit_type},
+            parameters,
         )
     ).mappings()
     return [dict(item) for item in rows]
