@@ -5,7 +5,7 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 source "$repo_root/scripts/lib/frontend-workspace.sh"
 seed_manifest_file="$repo_root/config/seeds/manifest.yaml"
-seed_state_file="$repo_root/.vavctl/seed-state.txt"
+seed_state_file="${VAV_SEED_STATE_FILE:-$repo_root/.vavctl/seed-state.txt}"
 
 pass() { printf 'PASS    %s\n' "$1"; }
 warn() { printf 'WARNING %s\n' "$1"; }
@@ -199,7 +199,7 @@ migrate() {
 seed() {
   seed_parse_manifest
   local include_demo include_test env_requested
-  local -a requested_modules modules_to_run
+  local -a requested_modules=() modules_to_run=()
   local -a requested_groups=()
   local -a trim=()
   local environment
