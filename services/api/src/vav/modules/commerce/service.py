@@ -129,6 +129,11 @@ def order_payload(order: Order, *, items: list[OrderItem] | None = None) -> dict
         "placed_at": order.placed_at.isoformat() if order.placed_at else None,
         "paid_at": order.paid_at.isoformat() if order.paid_at else None,
         "fulfilled_at": order.fulfilled_at.isoformat() if order.fulfilled_at else None,
+        # Activity registrations create their order server-side, so the user
+        # cannot recover the enabled providers from the cart preview endpoint.
+        # Keep the provider allow-list server-owned and expose it with every
+        # order projection used by the account and registration clients.
+        "available_payment_providers": list(get_settings().payment_enabled_providers),
     }
     if items is not None:
         result["items"] = [
