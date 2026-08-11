@@ -50,7 +50,7 @@ services:
       - key: PAYMENT_TEST_FAKE_ENABLED
         value: "false"
       - key: AI_ENABLED
-        value: "false"
+        value: "true"
       - key: COURSE_VIDEO_PROVIDER
         value: approved_private
       - key: COUNSELING_MEETING_PROVIDER

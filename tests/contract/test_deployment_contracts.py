@@ -33,6 +33,7 @@ def test_render_blueprint_declares_fail_closed_staging_inputs() -> None:
         "COURSE_VIDEO_PROVIDER": "approved_private",
         "COUNSELING_MEETING_PROVIDER": "approved",
         "KNOWLEDGE_EMBEDDING_PROVIDER": "approved",
+        "AI_ENABLED": "true",
         "AI_MODEL_PROVIDER": "approved",
         "AI_CONVERSATION_ENCRYPTION_ENABLED": "true",
         "NOTIFICATION_EMAIL_PROVIDER": "transactional",
