@@ -22,17 +22,17 @@ services:
       - key: APP_LOG_LEVEL
         value: INFO
       - key: APP_CORS_ORIGINS
-        sync: false # JSON array containing the deployed HTTPS web origins.
+        value: '["https://vavactivity.vercel.app"]'
       - key: AUTH_ALLOWED_ORIGINS
-        sync: false # JSON array containing the same trusted browser origins.
+        value: '["https://vavactivity.vercel.app"]'
       - key: USER_WEB_URL
-        sync: false
+        value: https://vavactivity.vercel.app
       - key: ADMIN_WEB_URL
         sync: false
       - key: PUBLIC_WEB_BASE_URL
-        sync: false
+        value: https://vavactivity.vercel.app
       - key: PUBLIC_API_BASE_URL
-        sync: false
+        value: https://vav-platform-api.onrender.com
       - key: AUTH_ISSUER
         value: vav-platform
       - key: AUTH_USER_AUDIENCE

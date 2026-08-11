@@ -44,13 +44,20 @@ def test_render_blueprint_declares_fail_closed_staging_inputs() -> None:
         for key, value in fail_closed_values.items()
     )
 
+    public_runtime_values = {
+        "APP_CORS_ORIGINS": '["https://vavactivity.vercel.app"]',
+        "AUTH_ALLOWED_ORIGINS": '["https://vavactivity.vercel.app"]',
+        "USER_WEB_URL": "https://vavactivity.vercel.app",
+        "PUBLIC_WEB_BASE_URL": "https://vavactivity.vercel.app",
+        "PUBLIC_API_BASE_URL": "https://vav-platform-api.onrender.com",
+    }
+    assert all(
+        environment[key].get("value") == value
+        for key, value in public_runtime_values.items()
+    )
+
     externally_managed = {
-        "APP_CORS_ORIGINS",
-        "AUTH_ALLOWED_ORIGINS",
-        "USER_WEB_URL",
         "ADMIN_WEB_URL",
-        "PUBLIC_WEB_BASE_URL",
-        "PUBLIC_API_BASE_URL",
         "DATABASE_URL",
         "MEDIA_S3_ENDPOINT",
         "MEDIA_S3_PUBLIC_ENDPOINT",
