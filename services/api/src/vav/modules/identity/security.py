@@ -106,10 +106,11 @@ class AccessTokenService:
 
     def _read_key(self, path: str) -> str:
         import os
+
         key_path = Path(path)
         if key_path.is_file():
             return key_path.read_text(encoding="utf-8")
-        
+
         # Fallback to reading directly from environment variables if the file is missing
         if "private" in path.lower() or "private" in key_path.name.lower():
             env_val = os.getenv("AUTH_PRIVATE_KEY")
