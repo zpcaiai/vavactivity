@@ -9,9 +9,35 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from vav.common.exceptions import VavError
+from vav.core.config import get_settings
 from vav.core.request_context import request_id_from_request
 
 logger = structlog.get_logger(__name__)
+
+
+def unexpected_error_headers(request: Request) -> dict[str, str]:
+    """Preserve browser diagnostics when ServerErrorMiddleware handles a 500."""
+
+    request_id = request_id_from_request(request)
+    headers = {
+        "X-Request-ID": request_id,
+        "Cache-Control": "no-store",
+        "Pragma": "no-cache",
+    }
+    origin = request.headers.get("origin")
+    allowed_origins = {
+        str(configured_origin).rstrip("/") for configured_origin in get_settings().cors_origins
+    }
+    if origin in allowed_origins:
+        headers.update(
+            {
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Expose-Headers": "X-Request-ID",
+                "Vary": "Origin",
+            }
+        )
+    return headers
 
 
 def error_body(
@@ -78,4 +104,5 @@ def install_exception_handlers(app: FastAPI) -> None:
                 "INTERNAL_ERROR",
                 "An unexpected error occurred",
             ),
+            headers=unexpected_error_headers(request),
         )

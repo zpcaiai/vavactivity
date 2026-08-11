@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi.testclient import TestClient
 
-from vav.main import app
+from vav.main import app, create_app
 
 
 def test_liveness(client: TestClient) -> None:
@@ -28,6 +28,31 @@ def test_browser_preflight_accepts_configured_origin(client: TestClient) -> None
     assert response.status_code == 200
     assert response.headers["Access-Control-Allow-Origin"] == "http://localhost:5173"
     assert response.headers["Access-Control-Allow-Credentials"] == "true"
+
+
+def test_unexpected_error_response_preserves_browser_diagnostics() -> None:
+    application = create_app()
+
+    @application.get("/api/v1/testing/unexpected-error")
+    async def unexpected_error() -> None:
+        raise RuntimeError("diagnostic test error")
+
+    with TestClient(application, raise_server_exceptions=False) as browser_client:
+        response = browser_client.get(
+            "/api/v1/testing/unexpected-error",
+            headers={"Origin": "http://localhost:5173"},
+        )
+        rejected_origin_response = browser_client.get(
+            "/api/v1/testing/unexpected-error",
+            headers={"Origin": "https://untrusted.example"},
+        )
+
+    assert response.status_code == 500
+    assert response.headers["Access-Control-Allow-Origin"] == "http://localhost:5173"
+    assert response.headers["Access-Control-Allow-Credentials"] == "true"
+    assert response.headers["Access-Control-Expose-Headers"] == "X-Request-ID"
+    assert response.headers["X-Request-ID"] == response.json()["meta"]["request_id"]
+    assert "Access-Control-Allow-Origin" not in rejected_origin_response.headers
 
 
 def test_readiness_reports_dependencies(
