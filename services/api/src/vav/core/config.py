@@ -1467,6 +1467,10 @@ class Settings(BaseSettings):
     def reject_development_credentials_in_production(self) -> Settings:
         production_like = self.environment in {"production", "dr"}
         if production_like and (
+            "database_url" not in self.model_fields_set or not self.database_url.strip()
+        ):
+            raise ValueError("production requires an explicit DATABASE_URL")
+        if production_like and (
             "local_development_only" in self.database_url or "localhost" in self.database_url
         ):
             raise ValueError("production cannot use development database credentials")

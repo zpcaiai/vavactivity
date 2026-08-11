@@ -15,6 +15,66 @@ from scripts.release.render_deployment import render
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def test_render_blueprint_declares_fail_closed_staging_inputs() -> None:
+    blueprint = yaml.safe_load((ROOT / "render.yaml").read_text(encoding="utf-8"))
+    api = next(
+        service
+        for service in blueprint["services"]
+        if service["name"] == "vav-platform-api"
+    )
+    environment = {item["key"]: item for item in api["envVars"]}
+
+    assert api["healthCheckPath"] == "/api/v1/health/live"
+    fail_closed_values = {
+        "APP_ENV": "staging",
+        "APP_DEBUG": "false",
+        "AUTH_COOKIE_SECURE": "true",
+        "PAYMENT_TEST_FAKE_ENABLED": "false",
+        "COURSE_VIDEO_PROVIDER": "approved_private",
+        "COUNSELING_MEETING_PROVIDER": "approved",
+        "KNOWLEDGE_EMBEDDING_PROVIDER": "approved",
+        "AI_MODEL_PROVIDER": "approved",
+        "AI_CONVERSATION_ENCRYPTION_ENABLED": "true",
+        "NOTIFICATION_EMAIL_PROVIDER": "transactional",
+        "PRIVACY_FIELD_ENCRYPTION_ENABLED": "true",
+        "PRIVACY_EXPORT_ENCRYPTION_ENABLED": "true",
+    }
+    assert all(
+        environment[key].get("value") == value
+        for key, value in fail_closed_values.items()
+    )
+
+    externally_managed = {
+        "APP_CORS_ORIGINS",
+        "AUTH_ALLOWED_ORIGINS",
+        "USER_WEB_URL",
+        "ADMIN_WEB_URL",
+        "PUBLIC_WEB_BASE_URL",
+        "PUBLIC_API_BASE_URL",
+        "DATABASE_URL",
+        "REDIS_URL",
+        "MEDIA_S3_ENDPOINT",
+        "MEDIA_S3_PUBLIC_ENDPOINT",
+        "MEDIA_S3_ACCESS_KEY",
+        "MEDIA_S3_SECRET_KEY",
+        "AUTH_PRIVATE_KEY",
+        "AUTH_PUBLIC_KEY",
+    }
+    assert all(environment[key].get("sync") is False for key in externally_managed)
+    assert all("value" not in environment[key] for key in externally_managed)
+
+    generated_secrets = {
+        "AUTH_REFRESH_TOKEN_PEPPER",
+        "BACKUP_ENCRYPTION_KEY",
+        "PRIVACY_SEARCH_HMAC_PEPPER",
+        "NOTIFICATION_EMAIL_PROVIDER_WEBHOOK_SECRET",
+    }
+    assert all(
+        environment[key].get("generateValue") is True for key in generated_secrets
+    )
+    assert all("value" not in environment[key] for key in generated_secrets)
+
+
 def test_production_compose_uses_external_state_and_immutable_images() -> None:
     path = ROOT / "deploy/compose/docker-compose.prod.yml"
     raw = path.read_text(encoding="utf-8")

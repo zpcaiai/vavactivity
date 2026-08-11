@@ -11,17 +11,28 @@ services:
     dockerfilePath: infra/docker/backend.Dockerfile
     dockerContext: .
     plan: free # Deploys on Render's free tier
+    healthCheckPath: /api/v1/health/live
     envVars:
       - key: PORT
-        value: 8000
+        value: "8000"
       - key: APP_ENV
-        value: production
+        value: staging
       - key: APP_DEBUG
         value: "false"
       - key: APP_LOG_LEVEL
         value: INFO
       - key: APP_CORS_ORIGINS
-        value: '["https://your-vercel-app.vercel.app"]' # Replace with your Vercel URL
+        sync: false # JSON array containing the deployed HTTPS web origins.
+      - key: AUTH_ALLOWED_ORIGINS
+        sync: false # JSON array containing the same trusted browser origins.
+      - key: USER_WEB_URL
+        sync: false
+      - key: ADMIN_WEB_URL
+        sync: false
+      - key: PUBLIC_WEB_BASE_URL
+        sync: false
+      - key: PUBLIC_API_BASE_URL
+        sync: false
       - key: AUTH_ISSUER
         value: vav-platform
       - key: AUTH_USER_AUDIENCE
@@ -37,17 +48,51 @@ services:
       - key: PAYMENT_ENVIRONMENT
         value: test
       - key: PAYMENT_TEST_FAKE_ENABLED
-        value: "true"
+        value: "false"
       - key: AI_ENABLED
         value: "false"
+      - key: COURSE_VIDEO_PROVIDER
+        value: approved_private
+      - key: COUNSELING_MEETING_PROVIDER
+        value: approved
+      - key: KNOWLEDGE_EMBEDDING_PROVIDER
+        value: approved
+      - key: AI_MODEL_PROVIDER
+        value: approved
+      - key: AI_CONVERSATION_ENCRYPTION_ENABLED
+        value: "true"
+      - key: NOTIFICATION_EMAIL_PROVIDER
+        value: transactional
+      - key: PRIVACY_FIELD_ENCRYPTION_ENABLED
+        value: "true"
+      - key: PRIVACY_EXPORT_ENCRYPTION_ENABLED
+        value: "true"
       - key: QUALITY_ENABLED
         value: "false"
-      
-      # The following sensitive variables must be filled manually in the Render Dashboard after deployment:
-      # - DATABASE_URL: (e.g. postgresql+asyncpg://...)
-      # - REDIS_URL: (e.g. redis://...)
-      # - AUTH_PRIVATE_KEY: (ED25519 private key PEM content)
-      # - AUTH_PUBLIC_KEY: (ED25519 public key PEM content)
-      # - AUTH_REFRESH_TOKEN_PEPPER: (Random string)
-      # - BACKUP_ENCRYPTION_KEY: (Random string)
-      # - PRIVACY_SEARCH_HMAC_PEPPER: (Random string)
+
+      # Render requests sync:false values when a Blueprint is first created.
+      # Existing Blueprint instances must set them in Dashboard -> Environment.
+      - key: DATABASE_URL
+        sync: false # postgresql+asyncpg://...?sslmode=require
+      - key: REDIS_URL
+        sync: false # rediss://...
+      - key: MEDIA_S3_ENDPOINT
+        sync: false # HTTPS S3-compatible private endpoint.
+      - key: MEDIA_S3_PUBLIC_ENDPOINT
+        sync: false # HTTPS endpoint used to create browser upload URLs.
+      - key: MEDIA_S3_ACCESS_KEY
+        sync: false
+      - key: MEDIA_S3_SECRET_KEY
+        sync: false
+      - key: AUTH_PRIVATE_KEY
+        sync: false # Ed25519 private key PEM content.
+      - key: AUTH_PUBLIC_KEY
+        sync: false # Matching Ed25519 public key PEM content.
+      - key: AUTH_REFRESH_TOKEN_PEPPER
+        generateValue: true
+      - key: BACKUP_ENCRYPTION_KEY
+        generateValue: true
+      - key: PRIVACY_SEARCH_HMAC_PEPPER
+        generateValue: true
+      - key: NOTIFICATION_EMAIL_PROVIDER_WEBHOOK_SECRET
+        generateValue: true
