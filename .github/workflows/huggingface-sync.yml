@@ -8,7 +8,6 @@ on:
       _note:
         description: "This workflow is disabled. Use huggingface-static instead."
         required: false
-    inputs:
       target_branch:
         description: Target branch in the Hugging Face Space
         required: false
