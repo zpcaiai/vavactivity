@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 .dev-secrets/
+vav-auth-*.pem
 playwright-report/
 test-results/
 .idea/
