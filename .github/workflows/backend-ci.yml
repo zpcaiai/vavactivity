@@ -134,6 +134,7 @@ jobs:
       - name: Apply pending migrations to Neon
         env:
           DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+          APP_ENV: staging
         run: |
           uv run --package vav-platform-api alembic -c services/api/alembic.ini upgrade head
           uv run --package vav-platform-api python -m vav.cli.seed_permissions
@@ -152,6 +153,8 @@ jobs:
           uv run --package vav-platform-api python -m vav.cli.seed_trust_safety
           uv run --package vav-platform-api python -m vav.cli.seed_test_user \
             --confirm-insecure-test-account
+          uv run --package vav-platform-api python -m vav.cli.seed_test_showcase \
+            --confirm-test-showcase
       - name: Verify the live Neon schema
         env:
           DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}

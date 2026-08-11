@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from typing import Any
 
 from sqlalchemy import text
 
@@ -157,8 +158,144 @@ async def seed_memberships() -> None:
             ),
             {"version": version, "plan": plan_id},
         )
+        showcase_plans: tuple[dict[str, Any], ...] = (
+            {
+                "code": "growth_monthly",
+                "internal_name": "Growth Membership",
+                "display_order": 10,
+                "featured": True,
+                "en_name": "Growth",
+                "zh_name": "成长会员",
+                "en_description": "More AI guidance and advanced recommendation controls.",
+                "zh_description": "包含更多 AI 使用额度和进阶推荐设置。",
+                "benefits": {
+                    "platform.basic_access": {"enabled": True},
+                    "ai.assistant.access": {"enabled": True},
+                    "ai.message_quota": {
+                        "limit": 100,
+                        "unit": "messages",
+                        "period": "calendar_month",
+                        "rollover": False,
+                    },
+                    "recommendation.advanced_filters": {"enabled": True},
+                    "course.catalog_access": {"scope_type": "all"},
+                },
+            },
+            {
+                "code": "companion_monthly",
+                "internal_name": "Companion Membership",
+                "display_order": 20,
+                "featured": False,
+                "en_name": "Companion",
+                "zh_name": "同行会员",
+                "en_description": "Expanded learning, activity and counseling access.",
+                "zh_description": "扩展课程、活动与成长支持服务权益。",
+                "benefits": {
+                    "platform.basic_access": {"enabled": True},
+                    "ai.assistant.access": {"enabled": True},
+                    "ai.message_quota": {
+                        "limit": 300,
+                        "unit": "messages",
+                        "period": "calendar_month",
+                        "rollover": False,
+                    },
+                    "recommendation.advanced_filters": {"enabled": True},
+                    "course.catalog_access": {"scope_type": "all"},
+                    "activity.priority_registration": {"enabled": True},
+                    "counseling.booking_access": {"enabled": True},
+                },
+            },
+        )
+        if settings.environment not in {"development", "test", "staging"}:
+            showcase_plans = ()
+        for showcase in showcase_plans:
+            showcase_plan_id = (
+                await session.execute(
+                    text(
+                        "INSERT INTO membership_plans "
+                        "(plan_code,internal_name,plan_type,status,default_locale,display_order,featured,created_by,updated_by) "
+                        "VALUES (:code,:name,'paid','draft','en',:display_order,:featured,:actor,:actor) "
+                        "ON CONFLICT (plan_code) DO UPDATE SET display_order=EXCLUDED.display_order,"
+                        "featured=EXCLUDED.featured,updated_at=now() RETURNING id"
+                    ),
+                    {
+                        "code": showcase["code"],
+                        "name": showcase["internal_name"],
+                        "display_order": showcase["display_order"],
+                        "featured": showcase["featured"],
+                        "actor": actor,
+                    },
+                )
+            ).scalar_one()
+            showcase_version = (
+                await session.execute(
+                    text(
+                        "INSERT INTO membership_plan_versions "
+                        "(membership_plan_id,version_number,semantic_version,status,benefit_manifest,access_policy_snapshot,quota_policy_snapshot,valid_from,created_by,activated_at) "
+                        "VALUES (:plan,1,'1.0.0','active',CAST(:manifest AS jsonb),CAST(:access AS jsonb),CAST(:quota AS jsonb),now(),:actor,now()) "
+                        "ON CONFLICT (membership_plan_id,version_number) DO UPDATE SET status='active' RETURNING id"
+                    ),
+                    {
+                        "plan": showcase_plan_id,
+                        "actor": actor,
+                        "manifest": json.dumps(list(showcase["benefits"])),
+                        "access": json.dumps({"safety_bypass": False, "privacy_bypass": False}),
+                        "quota": json.dumps({"rollover": False}),
+                    },
+                )
+            ).scalar_one()
+            for locale, name, description in (
+                ("en", showcase["en_name"], showcase["en_description"]),
+                ("zh-CN", showcase["zh_name"], showcase["zh_description"]),
+            ):
+                await session.execute(
+                    text(
+                        "INSERT INTO membership_plan_localizations "
+                        "(membership_plan_version_id,locale,name,short_description,benefit_summary,limitation_summary) "
+                        "VALUES (:version,:locale,:name,:description,CAST(:benefits AS jsonb),CAST(:limitations AS jsonb)) "
+                        "ON CONFLICT (membership_plan_version_id,locale) DO UPDATE SET name=EXCLUDED.name,"
+                        "short_description=EXCLUDED.short_description,benefit_summary=EXCLUDED.benefit_summary"
+                    ),
+                    {
+                        "version": showcase_version,
+                        "locale": locale,
+                        "name": name,
+                        "description": description,
+                        "benefits": json.dumps(list(showcase["benefits"])),
+                        "limitations": json.dumps(
+                            [
+                                "A paid entitlement is required",
+                                "Safety and privacy rules always apply",
+                            ]
+                        ),
+                    },
+                )
+            for order, (code, value) in enumerate(showcase["benefits"].items()):
+                await session.execute(
+                    text(
+                        "INSERT INTO membership_plan_benefits "
+                        "(membership_plan_version_id,benefit_definition_id,benefit_value,sort_order) "
+                        "VALUES (:version,:definition,CAST(:value AS jsonb),:sort) "
+                        "ON CONFLICT (membership_plan_version_id,benefit_definition_id) DO UPDATE SET benefit_value=EXCLUDED.benefit_value"
+                    ),
+                    {
+                        "version": showcase_version,
+                        "definition": definition_ids[code],
+                        "value": json.dumps(value),
+                        "sort": order,
+                    },
+                )
+            await session.execute(
+                text(
+                    "UPDATE membership_plans SET status='active',current_version_id=:version,updated_at=now() WHERE id=:plan"
+                ),
+                {"version": showcase_version, "plan": showcase_plan_id},
+            )
         await session.commit()
-    print(f"Membership registry ready: {len(BENEFITS)} benefits; free plan={plan_code}")
+    print(
+        f"Membership registry ready: {len(BENEFITS)} benefits; "
+        f"{1 + len(showcase_plans)} public plans"
+    )
 
 
 if __name__ == "__main__":

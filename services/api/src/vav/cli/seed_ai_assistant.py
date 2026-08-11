@@ -399,8 +399,8 @@ async def seed_synthetic_referral() -> None:
 
 
 async def seed_ai_assistant() -> None:
-    if get_settings().environment not in {"development", "test"}:
-        print("AI assistant fixtures skipped outside development/test.")
+    if get_settings().environment not in {"development", "test", "staging"}:
+        print("AI assistant fixtures skipped outside development/test/staging.")
         return
     await ensure_system_user()
     await seed_registries()

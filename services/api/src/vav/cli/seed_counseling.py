@@ -20,8 +20,8 @@ from vav.models.counseling import (
 
 
 async def seed_counseling() -> None:
-    if get_settings().environment not in {"development", "test"}:
-        print("Counseling fixtures skipped outside development/test.")
+    if get_settings().environment not in {"development", "test", "staging"}:
+        print("Counseling fixtures skipped outside development/test/staging.")
         return
     await ensure_system_user()
     async with session_factory() as session:
@@ -197,8 +197,105 @@ async def seed_counseling() -> None:
                         status="active",
                     )
                 )
+        companion_specs = (
+            (
+                "counseling-showcase-communication",
+                "communication-practice-session",
+                "沟通练习支持会谈",
+                "聚焦倾听、表达需要与冲突后的修复练习。",
+                45,
+            ),
+            (
+                "counseling-showcase-decisions",
+                "relationship-decisions-session",
+                "关系决策梳理会谈",
+                "用结构化问题梳理价值、选择与下一步行动。",
+                50,
+            ),
+        )
+        for service_code, slug, name, summary, duration in companion_specs:
+            companion = await session.scalar(
+                select(CounselingServiceDefinition).where(
+                    CounselingServiceDefinition.service_code == service_code
+                )
+            )
+            if companion is None:
+                companion = CounselingServiceDefinition(
+                    service_code=service_code,
+                    internal_name=f"Test showcase: {name}",
+                    status="published",
+                    delivery_mode="online",
+                    participant_mode="individual",
+                    duration_minutes=duration,
+                    booking_mode="direct_booking",
+                    payment_policy="free",
+                    free_access=True,
+                    catalog_product_id=product.id,
+                    catalog_sku_id=sku.id,
+                    cancellation_policy={"mode": "manual_review"},
+                    no_show_policy={"consume_credit": False, "mode": "manual_review"},
+                    scope_policy={
+                        "therapy": False,
+                        "medical": False,
+                        "legal": False,
+                        "emergency": False,
+                    },
+                    min_notice_minutes=0,
+                    max_advance_days=120,
+                    created_by=SYSTEM_USER_ID,
+                )
+                session.add(companion)
+                await session.flush()
+                session.add(
+                    CounselingServiceLocalization(
+                        service_id=companion.id,
+                        locale="zh-CN",
+                        slug=slug,
+                        name=name,
+                        summary=summary,
+                        description_blocks=[
+                            {"type": "paragraph", "text": "本服务为 test 账户展示数据。"}
+                        ],
+                        scope_notice="本服务不替代心理治疗、医疗诊断、法律意见或紧急危机处置。",
+                        translation_status="ready",
+                    )
+                )
+            companion_link = await session.scalar(
+                select(CounselingMentorService).where(
+                    CounselingMentorService.mentor_id == mentor.id,
+                    CounselingMentorService.service_id == companion.id,
+                )
+            )
+            if companion_link is None:
+                session.add(
+                    CounselingMentorService(
+                        mentor_id=mentor.id, service_id=companion.id, status="active"
+                    )
+                )
+            for weekday in range(7):
+                companion_rule = await session.scalar(
+                    select(CounselingAvailabilityRule).where(
+                        CounselingAvailabilityRule.mentor_id == mentor.id,
+                        CounselingAvailabilityRule.service_id == companion.id,
+                        CounselingAvailabilityRule.weekday == weekday,
+                    )
+                )
+                if companion_rule is None:
+                    session.add(
+                        CounselingAvailabilityRule(
+                            mentor_id=mentor.id,
+                            service_id=companion.id,
+                            timezone="Asia/Shanghai",
+                            weekday=weekday,
+                            local_start_time=time(9),
+                            local_end_time=time(18),
+                            valid_from=date.today() - timedelta(days=1),
+                            valid_until=date.today() + timedelta(days=150),
+                            status="active",
+                        )
+                    )
         await session.commit()
-    print("Counseling seed complete.")
+    print("Counseling seed complete: 3 public services.")
 
 
 if __name__ == "__main__":

@@ -25,4 +25,5 @@ groups:
     - vav.cli.seed_recommendation_fixtures
   test:
     - vav.cli.seed_test_user
+    - vav.cli.seed_test_showcase
     - vav.cli.seed_recommendation_evaluations

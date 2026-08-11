@@ -5,10 +5,12 @@ import hashlib
 import re
 import subprocess
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 import yaml
 
+import vav.cli.seed_test_showcase as seed_test_showcase_module
 from scripts.release.build_release_manifest import git_commit
 from scripts.release.render_deployment import render
 
@@ -80,6 +82,68 @@ def test_render_blueprint_declares_fail_closed_staging_inputs() -> None:
         environment[key].get("generateValue") is True for key in generated_secrets
     )
     assert all("value" not in environment[key] for key in generated_secrets)
+
+
+def test_neon_staging_seed_populates_the_test_showcase_after_the_test_account() -> None:
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows/backend-ci.yml").read_text(encoding="utf-8")
+    )
+    steps = workflow["jobs"]["neon-migrations"]["steps"]
+    migration_step = next(
+        step for step in steps if step.get("name") == "Apply pending migrations to Neon"
+    )
+    assert migration_step["env"]["APP_ENV"] == "staging"
+
+    commands = migration_step["run"]
+    account_command = "python -m vav.cli.seed_test_user"
+    showcase_command = "python -m vav.cli.seed_test_showcase"
+    assert account_command in commands
+    assert "--confirm-insecure-test-account" in commands
+    assert showcase_command in commands
+    assert "--confirm-test-showcase" in commands
+    assert commands.index(account_command) < commands.index(showcase_command)
+
+    manifest = yaml.safe_load(
+        (ROOT / "config/seeds/manifest.yaml").read_text(encoding="utf-8")
+    )
+    assert "vav.cli.seed_test_showcase" in manifest["groups"]["test"]
+    assert "test" not in manifest["production_allowed_groups"]
+
+
+def test_showcase_ids_are_stable_and_namespaced() -> None:
+    first = seed_test_showcase_module._id("notification:1")
+    assert first == seed_test_showcase_module._id("notification:1")
+    assert first != seed_test_showcase_module._id("notification:2")
+
+
+@pytest.mark.parametrize("environment", ["production", "dr"])
+@pytest.mark.asyncio
+async def test_showcase_seed_rejects_protected_environment_before_database_access(
+    monkeypatch: pytest.MonkeyPatch,
+    environment: str,
+) -> None:
+    reference_data_accessed = False
+
+    async def forbidden_reference_data() -> None:
+        nonlocal reference_data_accessed
+        reference_data_accessed = True
+        raise AssertionError("protected seed policy must run before reference-data access")
+
+    monkeypatch.setattr(
+        seed_test_showcase_module,
+        "get_settings",
+        lambda: SimpleNamespace(environment=environment),
+    )
+    monkeypatch.setattr(
+        seed_test_showcase_module,
+        "_seed_reference_data",
+        forbidden_reference_data,
+    )
+
+    with pytest.raises(RuntimeError, match=f"protected environment: {environment}"):
+        await seed_test_showcase_module.seed_test_showcase()
+
+    assert reference_data_accessed is False
 
 
 def test_production_compose_uses_external_state_and_immutable_images() -> None:
