@@ -36,7 +36,8 @@ def test_render_blueprint_declares_fail_closed_staging_inputs() -> None:
         "COUNSELING_MEETING_PROVIDER": "approved",
         "KNOWLEDGE_EMBEDDING_PROVIDER": "approved",
         "AI_ENABLED": "true",
-        "AI_MODEL_PROVIDER": "approved",
+        "AI_MODEL_PROVIDER": "gemini",
+        "AI_MODEL_NAME": "gemini-3.6-flash",
         "AI_CONVERSATION_ENCRYPTION_ENABLED": "true",
         "NOTIFICATION_EMAIL_PROVIDER": "transactional",
         "PRIVACY_FIELD_ENCRYPTION_ENABLED": "true",
@@ -68,6 +69,7 @@ def test_render_blueprint_declares_fail_closed_staging_inputs() -> None:
         "MEDIA_S3_SECRET_KEY",
         "AUTH_PRIVATE_KEY",
         "AUTH_PUBLIC_KEY",
+        "GEMINI_API_KEY",
     }
     assert all(environment[key].get("sync") is False for key in externally_managed)
     assert all("value" not in environment[key] for key in externally_managed)
@@ -127,7 +129,9 @@ async def test_showcase_seed_rejects_protected_environment_before_database_acces
     async def forbidden_reference_data() -> None:
         nonlocal reference_data_accessed
         reference_data_accessed = True
-        raise AssertionError("protected seed policy must run before reference-data access")
+        raise AssertionError(
+            "protected seed policy must run before reference-data access"
+        )
 
     monkeypatch.setattr(
         seed_test_showcase_module,
@@ -233,7 +237,9 @@ def test_split_release_builds_only_owned_images_and_requires_frontend_handoff() 
     assert "inputs.admin_web_image" in command
 
 
-def test_release_manifest_requires_full_backend_and_frontend_commit_identities() -> None:
+def test_release_manifest_requires_full_backend_and_frontend_commit_identities() -> (
+    None
+):
     commit = "a" * 40
     assert git_commit(commit) == commit
     for invalid in ("abc123", "A" * 40, "g" * 40, "a" * 64):
@@ -326,7 +332,7 @@ def test_kubernetes_queue_arguments_remain_single_arguments() -> None:
         value for value in documents if value.get("kind") == "ExternalSecret"
     )
     references = [item["remoteRef"]["key"] for item in external_secret["spec"]["data"]]
-    assert len(references) == 15
+    assert len(references) == 16
     assert all(reference.startswith("vav/production/") for reference in references)
     backend_names = {
         "api",

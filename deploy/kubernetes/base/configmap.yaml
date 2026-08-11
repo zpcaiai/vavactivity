@@ -10,5 +10,7 @@ data:
   AUTH_PUBLIC_KEY_FILE: /run/secrets/auth-public.pem
   PAYMENT_TEST_FAKE_ENABLED: "false"
   NOTIFICATION_EMAIL_PROVIDER: transactional
-  AI_MODEL_PROVIDER: approved
+  AI_ENABLED: "true"
+  AI_MODEL_PROVIDER: gemini
+  AI_MODEL_NAME: gemini-3.6-flash
   OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.observability.svc:4318

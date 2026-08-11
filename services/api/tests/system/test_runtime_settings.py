@@ -23,7 +23,9 @@ def production_values() -> dict[str, Any]:
         "COURSE_VIDEO_PROVIDER": "approved_private",
         "COUNSELING_MEETING_PROVIDER": "approved",
         "KNOWLEDGE_EMBEDDING_PROVIDER": "approved",
-        "AI_MODEL_PROVIDER": "approved",
+        "AI_MODEL_PROVIDER": "gemini",
+        "AI_MODEL_NAME": "gemini-3.6-flash",
+        "GEMINI_API_KEY": "test-gemini-key",
         "AI_CONVERSATION_ENCRYPTION_ENABLED": True,
         "NOTIFICATION_EMAIL_PROVIDER": "transactional",
         "NOTIFICATION_EMAIL_PROVIDER_WEBHOOK_SECRET": "render-generated-webhook-secret",
@@ -62,6 +64,14 @@ def test_complete_render_production_baseline_is_accepted() -> None:
 
     assert settings.environment == "production"
     assert settings.payment_test_fake_enabled is False
+
+
+def test_production_cannot_disable_email_verification() -> None:
+    values = production_values()
+    values["AUTH_EMAIL_VERIFICATION_REQUIRED"] = False
+
+    with pytest.raises(ValidationError, match="production requires email verification"):
+        Settings(_env_file=None, **values)
 
 
 def test_production_allows_redis_to_be_omitted(monkeypatch: pytest.MonkeyPatch) -> None:

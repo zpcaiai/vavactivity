@@ -82,6 +82,9 @@ class Settings(BaseSettings):
     auth_email_verification_ttl_hours: int = Field(
         default=24, validation_alias="AUTH_EMAIL_VERIFICATION_TTL_HOURS"
     )
+    auth_email_verification_required: bool = Field(
+        default=True, validation_alias="AUTH_EMAIL_VERIFICATION_REQUIRED"
+    )
     auth_password_reset_ttl_minutes: int = Field(
         default=30, validation_alias="AUTH_PASSWORD_RESET_TTL_MINUTES"
     )
@@ -684,6 +687,12 @@ class Settings(BaseSettings):
     )
     ai_model_provider: str = Field(
         default="deterministic_local", validation_alias="AI_MODEL_PROVIDER"
+    )
+    ai_model_name: str = Field(default="gemini-3.6-flash", validation_alias="AI_MODEL_NAME")
+    ai_provider_api_key: SecretStr | None = Field(
+        default=None,
+        validation_alias=AliasChoices("GEMINI_API_KEY", "AI_PROVIDER_API_KEY"),
+        repr=False,
     )
     ai_evaluation_min_cases: int = Field(default=30, validation_alias="AI_EVALUATION_MIN_CASES")
     ai_evaluation_require_zero_privacy_leakage: bool = Field(
@@ -1493,6 +1502,8 @@ class Settings(BaseSettings):
             or not self.auth_cookie_secure
         ):
             raise ValueError("production requires a strong token pepper and secure cookies")
+        if production_like and not self.auth_email_verification_required:
+            raise ValueError("production requires email verification")
         if production_like and self.payment_test_fake_enabled:
             raise ValueError("production cannot enable the local payment fake")
         if self.payment_environment == "live" and self.environment != "production":

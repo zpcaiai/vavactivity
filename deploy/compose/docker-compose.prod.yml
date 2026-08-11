@@ -23,6 +23,7 @@ x-backend: &backend
     PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:?inject PAYPAL_CLIENT_ID}
     PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET:?inject PAYPAL_CLIENT_SECRET}
     PAYPAL_WEBHOOK_ID: ${PAYPAL_WEBHOOK_ID:?inject PAYPAL_WEBHOOK_ID}
+    GEMINI_API_KEY: ${GEMINI_API_KEY:?inject GEMINI_API_KEY}
     NOTIFICATION_EMAIL_PROVIDER_WEBHOOK_SECRET: ${NOTIFICATION_EMAIL_PROVIDER_WEBHOOK_SECRET:?inject notification webhook secret}
   secrets: [auth-private-key, auth-public-key]
   networks: [edge, internal]

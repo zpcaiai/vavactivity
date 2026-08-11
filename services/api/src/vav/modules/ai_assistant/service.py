@@ -29,7 +29,13 @@ from vav.modules.ai_assistant.graph import (
     GraphDependencies,
     build_hanna_graph,
 )
-from vav.modules.ai_assistant.providers import deterministic_provider
+from vav.modules.ai_assistant.providers import (
+    AiModelProvider,
+    AiProviderConfigurationError,
+    AiProviderContentBlockedError,
+    AiProviderError,
+    configured_provider,
+)
 from vav.modules.ai_assistant.schemas import GeneratedAgentResponse, HannaAgentState
 from vav.modules.ai_assistant.tooling import registry_version
 
@@ -206,11 +212,12 @@ async def _run_graph_with_checkpoints(
     turn: AiAgentTurn,
     state: HannaAgentState,
     user_roles: list[str],
+    provider: AiModelProvider,
 ) -> HannaAgentState:
     graph = build_hanna_graph(
         GraphDependencies(
             session=session,
-            provider=deterministic_provider,
+            provider=provider,
             current_user_id=conversation.user_id,
             user_roles=user_roles,
         )
@@ -294,6 +301,7 @@ async def _persist_turn_artifacts(
     user_content: str,
     final_state: HannaAgentState,
     response: GeneratedAgentResponse,
+    provider: AiModelProvider,
 ) -> None:
     planned_calls = final_state.get("planned_tool_calls", [])
     for sequence, result in enumerate(final_state.get("tool_results", []), 1):
@@ -385,9 +393,13 @@ async def _persist_turn_artifacts(
     if planned_calls:
         tasks.insert(2, "tool_planning")
     for task in tasks:
+        expected_provider = (
+            provider.provider_code if task == "response_generation" else "deterministic_local"
+        )
         profile = await session.scalar(
             select(AiModelProfile).where(
                 AiModelProfile.task_type == task,
+                AiModelProfile.provider == expected_provider,
                 AiModelProfile.status == "active",
             )
         )
@@ -423,6 +435,7 @@ async def _persist_conversation_summary(
     turn_number: int,
     messages: list[dict[str, Any]],
     risk_snapshot: dict[str, Any] | None,
+    provider: AiModelProvider,
 ) -> None:
     settings = get_settings()
     if (
@@ -469,8 +482,8 @@ async def _persist_conversation_summary(
             "inferred": encrypt_ai_data(
                 {"items": [], "policy": "no_inference_promoted_to_user_fact"}
             ),
-            "provider": deterministic_provider.provider_code,
-            "model": deterministic_provider.model_name,
+            "provider": provider.provider_code,
+            "model": provider.model_name,
             "prompt": conversation.active_prompt_release_id,
         },
     )
@@ -535,6 +548,14 @@ async def send_message(
             AiAgentTurn.conversation_id == conversation.id
         )
     )
+    try:
+        provider = configured_provider(get_settings())
+    except AiProviderConfigurationError as exc:
+        raise VavError(
+            "AI_PROVIDER_NOT_CONFIGURED",
+            "The AI conversation provider is not configured.",
+            status_code=503,
+        ) from exc
     turn_number = int(latest_turn or 0) + 1
     user_message = AiMessage(
         conversation_id=conversation.id,
@@ -559,9 +580,9 @@ async def send_message(
         prompt_release_manifest={"release_id": str(conversation.active_prompt_release_id)},
         model_route_manifest={
             "route_id": str(conversation.active_model_route_id),
-            "provider": deterministic_provider.provider_code,
-            "model": deterministic_provider.model_name,
-            "revision": deterministic_provider.model_revision,
+            "provider": provider.provider_code,
+            "model": provider.model_name,
+            "revision": provider.model_revision,
         },
         tool_registry_version=registry_version(),
         safety_policy_version=get_settings().ai_safety_policy_version,
@@ -586,13 +607,29 @@ async def send_message(
         "visited_nodes": [],
         "retry_count": 0,
     }
-    final_state = await _run_graph_with_checkpoints(
-        session,
-        conversation=conversation,
-        turn=turn,
-        state=initial,
-        user_roles=user_roles,
-    )
+    try:
+        final_state = await _run_graph_with_checkpoints(
+            session,
+            conversation=conversation,
+            turn=turn,
+            state=initial,
+            user_roles=user_roles,
+            provider=provider,
+        )
+    except AiProviderContentBlockedError as exc:
+        await session.rollback()
+        raise VavError(
+            "AI_PROVIDER_CONTENT_BLOCKED",
+            "The AI service could not safely answer this request.",
+            status_code=422,
+        ) from exc
+    except AiProviderError as exc:
+        await session.rollback()
+        raise VavError(
+            "AI_PROVIDER_UNAVAILABLE",
+            "The AI conversation service is temporarily unavailable.",
+            status_code=503,
+        ) from exc
     response = GeneratedAgentResponse.model_validate(final_state["generated_response"])
     assistant = AiMessage(
         conversation_id=conversation.id,
@@ -606,9 +643,9 @@ async def send_message(
         ),
         content_hash=content_hash(response.final_text),
         locale=locale,
-        model_provider=deterministic_provider.provider_code,
-        model_name=deterministic_provider.model_name,
-        model_revision=deterministic_provider.model_revision,
+        model_provider=provider.provider_code,
+        model_name=provider.model_name,
+        model_revision=provider.model_revision,
         input_tokens=max(1, len(content) // 4),
         output_tokens=max(1, len(response.final_text) // 4),
         latency_ms=0,
@@ -626,6 +663,7 @@ async def send_message(
         user_content=content,
         final_state=final_state,
         response=response,
+        provider=provider,
     )
     if final_state.get("referral"):
         await _persist_referral(
@@ -670,6 +708,7 @@ async def send_message(
             },
         ],
         risk_snapshot=final_state.get("risk_assessment"),
+        provider=provider,
     )
     await session.commit()
     return {

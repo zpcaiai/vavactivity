@@ -144,29 +144,42 @@ EVALUATION_FIXTURES = (
 
 
 async def seed_registries() -> None:
+    settings = get_settings()
     async with session_factory() as session:
         profiles: dict[str, AiModelProfile] = {}
         for task in MODEL_TASKS:
-            code = f"deterministic-local-{task}"
+            uses_gemini = task == "response_generation" and settings.ai_model_provider == "gemini"
+            provider_code = "gemini" if uses_gemini else "deterministic_local"
+            model_name = settings.ai_model_name if uses_gemini else "hanna-deterministic"
+            code = (
+                f"gemini-{model_name.replace('.', '-').replace('_', '-')}-{task}"
+                if uses_gemini
+                else f"deterministic-local-{task}"
+            )
             profile = await session.scalar(
                 select(AiModelProfile).where(AiModelProfile.profile_code == code)
             )
             if profile is None:
                 profile = AiModelProfile(
                     profile_code=code,
-                    provider="deterministic_local",
-                    model_name="hanna-deterministic",
-                    model_revision="1.0.0",
+                    provider=provider_code,
+                    model_name=model_name,
+                    model_revision=model_name if uses_gemini else "1.0.0",
                     task_type=task,
-                    context_window_tokens=32000,
+                    context_window_tokens=1_048_576 if uses_gemini else 32000,
                     maximum_output_tokens=2000,
-                    structured_output_supported=True,
-                    tool_calling_supported=True,
+                    structured_output_supported=not uses_gemini,
+                    tool_calling_supported=not uses_gemini,
                     input_cost_per_million_minor=0,
                     output_cost_per_million_minor=0,
                     cost_currency="USD",
                     status="active",
-                    configuration={"environment_scope": ["development", "test"]},
+                    configuration={
+                        "environment_scope": ["staging", "production"]
+                        if uses_gemini
+                        else ["development", "test"],
+                        "store": False,
+                    },
                 )
                 session.add(profile)
                 await session.flush()
@@ -176,19 +189,22 @@ async def seed_registries() -> None:
                 select(AiModelRoute).where(AiModelRoute.route_code == route_code)
             )
             if route is None:
-                session.add(
-                    AiModelRoute(
-                        route_code=route_code,
-                        task_type=task,
-                        primary_model_profile_id=profile.id,
-                        fallback_model_profile_ids=[],
-                        maximum_latency_ms=5000,
-                        maximum_cost_minor=0,
-                        retry_policy={"maximum_attempts": 1},
-                        routing_policy={"production_allowed": False},
-                        status="active",
-                    )
+                route = AiModelRoute(
+                    route_code=route_code,
+                    task_type=task,
+                    primary_model_profile_id=profile.id,
+                    fallback_model_profile_ids=[],
+                    maximum_latency_ms=45000 if uses_gemini else 5000,
+                    maximum_cost_minor=0,
+                    retry_policy={"maximum_attempts": 1},
+                    routing_policy={"production_allowed": uses_gemini},
+                    status="active",
                 )
+                session.add(route)
+            else:
+                route.primary_model_profile_id = profile.id
+                route.maximum_latency_ms = 45000 if uses_gemini else 5000
+                route.routing_policy = {"production_allowed": uses_gemini}
 
         prompt = await session.scalar(
             select(AiPromptDefinition).where(AiPromptDefinition.prompt_code == "hanna-core")

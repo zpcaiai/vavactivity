@@ -45,6 +45,10 @@ services:
         value: prod-key-1
       - key: AUTH_ACCESS_TOKEN_TTL_SECONDS
         value: "900"
+      # Staging intentionally permits direct sign-in while transactional email is not configured.
+      # Settings validation forbids this value in production/DR.
+      - key: AUTH_EMAIL_VERIFICATION_REQUIRED
+        value: "false"
       - key: AUTH_COOKIE_SECURE
         value: "true"
       - key: PAYMENT_ENVIRONMENT
@@ -60,7 +64,9 @@ services:
       - key: KNOWLEDGE_EMBEDDING_PROVIDER
         value: approved
       - key: AI_MODEL_PROVIDER
-        value: approved
+        value: gemini
+      - key: AI_MODEL_NAME
+        value: gemini-3.6-flash
       - key: AI_CONVERSATION_ENCRYPTION_ENABLED
         value: "true"
       - key: NOTIFICATION_EMAIL_PROVIDER
@@ -89,6 +95,8 @@ services:
         sync: false # Ed25519 private key PEM content.
       - key: AUTH_PUBLIC_KEY
         sync: false # Matching Ed25519 public key PEM content.
+      - key: GEMINI_API_KEY
+        sync: false # Restricted Gemini API auth key; never expose it to the browser.
       - key: AUTH_REFRESH_TOKEN_PEPPER
         generateValue: true
       - key: BACKUP_ENCRYPTION_KEY

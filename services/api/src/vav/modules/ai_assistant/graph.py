@@ -266,6 +266,33 @@ def build_hanna_graph(dependencies: GraphDependencies) -> Any:
         if service_lines:
             final += "\n\n当前可核对的服务：\n" + "\n".join(service_lines[:3])
         final += source_line
+        final = await dependencies.provider.generate_text(
+            task_type="response_generation",
+            input_data={
+                "locale": state["locale"],
+                "user_message": state["user_message"],
+                "recent_messages": state.get("recent_messages", [])[-12:],
+                "classification": state.get("classification"),
+                "response_plan": state.get("response_plan"),
+                "authorized_knowledge": [
+                    {
+                        "document_code": item.get("document_code"),
+                        "version_number": item.get("version_number"),
+                        "excerpt": item.get("excerpt"),
+                    }
+                    for item in knowledge_items[:8]
+                ],
+                "verified_service_context": [
+                    {
+                        "type": item.get("type"),
+                        "title": item.get("title"),
+                        "availability": item.get("availability"),
+                    }
+                    for item in recommendations[:3]
+                ],
+                "draft_response": final,
+            },
+        )
         response = GeneratedAgentResponse(
             opening_empathy="谢谢你愿意说出这个困扰。",
             understanding_summary=understanding,

@@ -63,3 +63,6 @@ patches:
       - op: replace
         path: /spec/data/14/remoteRef/key
         value: vav/staging/email-webhook-secret
+      - op: replace
+        path: /spec/data/15/remoteRef/key
+        value: vav/staging/gemini-api-key

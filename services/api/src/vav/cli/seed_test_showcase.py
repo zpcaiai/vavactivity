@@ -617,8 +617,8 @@ async def _seed_sessions_and_experience(session: AsyncSession, user_id: UUID) ->
     now = datetime.now(UTC)
     sessions = (
         ("Safari · macOS", "active", 0),
-        ("Chrome · Windows", "revoked", 12),
-        ("Mobile Safari · iPhone", "expired", 30),
+        ("Chrome · Windows", "active", 12),
+        ("Mobile Safari · iPhone", "active", 30),
     )
     for index, (device, status, age_days) in enumerate(sessions, start=1):
         session_id = _id(f"auth-session:{index}")
@@ -631,7 +631,8 @@ async def _seed_sessions_and_experience(session: AsyncSession, user_id: UUID) ->
                 "VALUES (:id,:user,:family,:hash,'user',:status,:issued,:expires,:last_used,"
                 "CASE WHEN CAST(:status AS varchar)='revoked' THEN CAST(:last_used AS timestamptz) ELSE NULL END,"
                 "CASE WHEN CAST(:status AS varchar)='revoked' THEN 'test_showcase_history' ELSE NULL END,:device,:agent,:ip) "
-                "ON CONFLICT (id) DO UPDATE SET status=EXCLUDED.status,device_name=EXCLUDED.device_name,updated_at=now()"
+                "ON CONFLICT (id) DO UPDATE SET status=EXCLUDED.status,expires_at=EXCLUDED.expires_at,"
+                "revoked_at=NULL,revoke_reason=NULL,device_name=EXCLUDED.device_name,updated_at=now()"
             ),
             {
                 "id": session_id,
@@ -705,7 +706,7 @@ async def _seed_activity_registrations(session: AsyncSession, user_id: UUID) -> 
     statuses = (
         ("confirmed", "not_checked_in"),
         ("confirmed", "not_checked_in"),
-        ("cancelled", "no_show"),
+        ("confirmed", "checked_in"),
     )
     for index, (code, (status, attendance)) in enumerate(
         zip(codes, statuses, strict=True), start=1
@@ -735,7 +736,8 @@ async def _seed_activity_registrations(session: AsyncSession, user_id: UUID) -> 
                 "CASE WHEN CAST(:status AS varchar)='confirmed' THEN now() ELSE NULL END,"
                 "CASE WHEN CAST(:status AS varchar)='cancelled' THEN now() ELSE NULL END) "
                 "ON CONFLICT (activity_id,user_id) DO UPDATE SET status=EXCLUDED.status,attendance_status=EXCLUDED.attendance_status,"
-                "form_response_encrypted=EXCLUDED.form_response_encrypted,updated_at=now()"
+                "form_response_encrypted=EXCLUDED.form_response_encrypted,confirmed_at=EXCLUDED.confirmed_at,"
+                "cancelled_at=EXCLUDED.cancelled_at,updated_at=now()"
             ),
             {
                 "id": _id(f"activity-registration:{index}"),
@@ -750,6 +752,238 @@ async def _seed_activity_registrations(session: AsyncSession, user_id: UUID) -> 
                 ),
             },
         )
+        registration_id = await session.scalar(
+            text(
+                "SELECT id FROM activity_registrations WHERE activity_id=:activity AND user_id=:user"
+            ),
+            {"activity": row["activity_id"], "user": user_id},
+        )
+        await session.execute(
+            text(
+                "INSERT INTO activity_waitlist_entries "
+                "(id,activity_id,ticket_type_id,user_id,registration_id,status,sequence_number,priority_score,joined_at,"
+                "promotion_offered_at,promotion_offer_expires_at,promoted_at) "
+                "VALUES (:id,:activity,:ticket,:user,:registration,:status,:sequence,0,"
+                "now()-CAST(:days AS integer)*interval '1 day',"
+                "CASE WHEN CAST(:status AS varchar)='offer_expired' THEN now()-interval '3 days' ELSE NULL END,"
+                "CASE WHEN CAST(:status AS varchar)='offer_expired' THEN now()-interval '2 days' ELSE NULL END,"
+                "CASE WHEN CAST(:status AS varchar)='promoted' THEN now()-interval '1 day' ELSE NULL END) "
+                "ON CONFLICT (activity_id,ticket_type_id,user_id) DO UPDATE SET status=EXCLUDED.status,"
+                "sequence_number=EXCLUDED.sequence_number,promotion_offered_at=EXCLUDED.promotion_offered_at,"
+                "promotion_offer_expires_at=EXCLUDED.promotion_offer_expires_at,promoted_at=EXCLUDED.promoted_at,updated_at=now()"
+            ),
+            {
+                "id": _id(f"activity-waitlist:{index}"),
+                "activity": row["activity_id"],
+                "ticket": row["ticket_id"],
+                "user": user_id,
+                "registration": registration_id,
+                "status": ("promoted", "declined", "offer_expired")[index - 1],
+                "sequence": index,
+                "days": index * 4,
+            },
+        )
+
+
+async def _seed_activity_experience(session: AsyncSession, user_id: UUID) -> None:
+    activity = (
+        (
+            await session.execute(
+                text(
+                    "SELECT a.id AS activity_id,t.id AS ticket_id FROM activities a "
+                    "JOIN activity_ticket_types t ON t.activity_id=a.id AND t.ticket_code='general' "
+                    "WHERE a.activity_code='activity-showcase-walk'"
+                )
+            )
+        )
+        .mappings()
+        .one()
+    )
+    activity_id = activity["activity_id"]
+    await session.execute(
+        text(
+            "UPDATE activities SET status='completed',registration_opens_at=now()-interval '40 days',"
+            "registration_closes_at=now()-interval '10 days',starts_at=now()-interval '8 days',"
+            "ends_at=now()-interval '8 days'+interval '2 hours',post_event_choice_enabled=true,"
+            "post_event_choice_opens_at=now()-interval '7 days',post_event_choice_closes_at=now()+interval '21 days',"
+            "updated_at=now() WHERE id=:activity"
+        ),
+        {"activity": activity_id},
+    )
+    targets = list(
+        (
+            await session.execute(
+                text(
+                    "SELECT id,email FROM users WHERE email=ANY(CAST(:emails AS citext[])) "
+                    "ORDER BY array_position(CAST(:emails AS citext[]),email)"
+                ),
+                {
+                    "emails": [
+                        "recommendation-fixture-jonathan@example.com",
+                        "recommendation-fixture-daniel@example.com",
+                        "recommendation-fixture-peter@example.com",
+                    ]
+                },
+            )
+        ).mappings()
+    )
+    if len(targets) != 3:
+        raise RuntimeError("Three activity-experience fixture members are required.")
+    test_registration_id = await session.scalar(
+        text("SELECT id FROM activity_registrations WHERE activity_id=:activity AND user_id=:user"),
+        {"activity": activity_id, "user": user_id},
+    )
+    participant_rows: list[tuple[UUID, UUID, str]] = [
+        (user_id, cast(UUID, test_registration_id), "Test 用户")
+    ]
+    for index, target in enumerate(targets, start=1):
+        target_id = cast(UUID, target["id"])
+        registration_id = _id(f"activity-experience-registration:{index}")
+        await session.execute(
+            text(
+                "INSERT INTO activity_registrations "
+                "(id,registration_number,activity_id,ticket_type_id,user_id,status,attendance_status,form_schema_version,"
+                "form_response_encrypted,review_status,confirmed_at) "
+                "VALUES (:id,:number,:activity,:ticket,:user,'confirmed','checked_in',1,:response,'approved',now()-interval '20 days') "
+                "ON CONFLICT (activity_id,user_id) DO UPDATE SET status='confirmed',attendance_status='checked_in',"
+                "form_response_encrypted=EXCLUDED.form_response_encrypted,cancelled_at=NULL,updated_at=now()"
+            ),
+            {
+                "id": registration_id,
+                "number": f"REG-TEST-EXPERIENCE-{index:03d}",
+                "activity": activity_id,
+                "ticket": activity["ticket_id"],
+                "user": target_id,
+                "response": encrypt_service({"synthetic": True, "role": "showcase participant"}),
+            },
+        )
+        actual_registration_id = await session.scalar(
+            text(
+                "SELECT id FROM activity_registrations WHERE activity_id=:activity AND user_id=:user"
+            ),
+            {"activity": activity_id, "user": target_id},
+        )
+        participant_rows.append(
+            (target_id, cast(UUID, actual_registration_id), str(target["email"]).split("@")[0])
+        )
+    for index, (participant_id, registration_id, display_name) in enumerate(
+        participant_rows, start=0
+    ):
+        await session.execute(
+            text(
+                "INSERT INTO activity_participant_profiles "
+                "(id,activity_id,registration_id,user_id,display_name,brief_introduction,visibility_status) "
+                "VALUES (:id,:activity,:registration,:user,:name,:intro,'visible') "
+                "ON CONFLICT (activity_id,user_id) DO UPDATE SET registration_id=EXCLUDED.registration_id,"
+                "display_name=EXCLUDED.display_name,brief_introduction=EXCLUDED.brief_introduction,visibility_status='visible',updated_at=now()"
+            ),
+            {
+                "id": _id(f"activity-participant-profile:{index}"),
+                "activity": activity_id,
+                "registration": registration_id,
+                "user": participant_id,
+                "name": display_name,
+                "intro": "喜欢真诚交流、城市漫步与共同成长的测试参与者。",
+            },
+        )
+    plan_id = _id("activity-grouping-plan")
+    group_id = _id("activity-group")
+    await session.execute(
+        text(
+            "INSERT INTO activity_grouping_plans "
+            "(id,activity_id,plan_name,grouping_method,target_group_size,target_group_count,grouping_rules,random_seed,status,created_by) "
+            "VALUES (:id,:activity,'Test 展示分组','manual',4,1,'{\"fixture\"\\:true}'::jsonb,'test-showcase','published',:user) "
+            "ON CONFLICT (id) DO UPDATE SET status='published',target_group_size=4,updated_at=now()"
+        ),
+        {"id": plan_id, "activity": activity_id, "user": user_id},
+    )
+    await session.execute(
+        text(
+            "INSERT INTO activity_groups (id,grouping_plan_id,group_code,display_name,capacity) "
+            "VALUES (:id,:plan,'TEST-A','同行成长 A 组',4) "
+            "ON CONFLICT (grouping_plan_id,group_code) DO UPDATE SET display_name=EXCLUDED.display_name,capacity=4"
+        ),
+        {"id": group_id, "plan": plan_id},
+    )
+    actual_group_id = await session.scalar(
+        text("SELECT id FROM activity_groups WHERE grouping_plan_id=:plan AND group_code='TEST-A'"),
+        {"plan": plan_id},
+    )
+    for index, (_, registration_id, _) in enumerate(participant_rows, start=0):
+        await session.execute(
+            text(
+                "INSERT INTO activity_group_members "
+                "(id,grouping_plan_id,group_id,registration_id,assignment_source,assignment_reason,assigned_by,assigned_at) "
+                "VALUES (:id,:plan,:group,:registration,'manual','test_showcase',:user,now()-interval '9 days') "
+                "ON CONFLICT (id) DO UPDATE SET group_id=EXCLUDED.group_id,registration_id=EXCLUDED.registration_id,removed_at=NULL"
+            ),
+            {
+                "id": _id(f"activity-group-member:{index}"),
+                "plan": plan_id,
+                "group": actual_group_id,
+                "registration": registration_id,
+                "user": user_id,
+            },
+        )
+    for index, target in enumerate(targets, start=1):
+        target_id = cast(UUID, target["id"])
+        user_choice_id = _id(f"activity-choice:user:{index}")
+        target_choice_id = _id(f"activity-choice:target:{index}")
+        for choice_id, chooser, chosen in (
+            (user_choice_id, user_id, target_id),
+            (target_choice_id, target_id, user_id),
+        ):
+            await session.execute(
+                text(
+                    "INSERT INTO activity_post_event_choices "
+                    "(id,activity_id,chooser_user_id,chosen_user_id,choice,status,submitted_at) "
+                    "VALUES (:id,:activity,:chooser,:chosen,'interested','active',now()-CAST(:days AS integer)*interval '1 day') "
+                    "ON CONFLICT (activity_id,chooser_user_id,chosen_user_id) DO UPDATE SET choice='interested',status='active',"
+                    "submitted_at=EXCLUDED.submitted_at,withdrawn_at=NULL,version=activity_post_event_choices.version+1"
+                ),
+                {
+                    "id": choice_id,
+                    "activity": activity_id,
+                    "chooser": chooser,
+                    "chosen": chosen,
+                    "days": index,
+                },
+            )
+        actual_user_choice = await session.scalar(
+            text(
+                "SELECT id FROM activity_post_event_choices WHERE activity_id=:activity "
+                "AND chooser_user_id=:user AND chosen_user_id=:target"
+            ),
+            {"activity": activity_id, "user": user_id, "target": target_id},
+        )
+        actual_target_choice = await session.scalar(
+            text(
+                "SELECT id FROM activity_post_event_choices WHERE activity_id=:activity "
+                "AND chooser_user_id=:target AND chosen_user_id=:user"
+            ),
+            {"activity": activity_id, "user": user_id, "target": target_id},
+        )
+        low, high = _canonical_pair(user_id, target_id)
+        first_choice = actual_user_choice if low == user_id else actual_target_choice
+        second_choice = actual_target_choice if low == user_id else actual_user_choice
+        await session.execute(
+            text(
+                "INSERT INTO activity_mutual_choices "
+                "(id,activity_id,user_a_id,user_b_id,first_choice_id,second_choice_id,status,matched_at) "
+                "VALUES (:id,:activity,:low,:high,:first,:second,'matched_private',now()-CAST(:days AS integer)*interval '1 day') "
+                "ON CONFLICT (activity_id,user_a_id,user_b_id) DO UPDATE SET first_choice_id=EXCLUDED.first_choice_id,"
+                "second_choice_id=EXCLUDED.second_choice_id,status='matched_private',matched_at=EXCLUDED.matched_at"
+            ),
+            {
+                "id": _id(f"activity-mutual-choice:{index}"),
+                "activity": activity_id,
+                "low": low,
+                "high": high,
+                "first": first_choice,
+                "second": second_choice,
+                "days": index,
+            },
+        )
 
 
 async def _seed_course_learning(session: AsyncSession, user_id: UUID) -> None:
@@ -758,7 +992,7 @@ async def _seed_course_learning(session: AsyncSession, user_id: UUID) -> None:
         "course-showcase-communication",
         "course-showcase-growth-plan",
     )
-    progress_values = (10000, 10000, 2500)
+    progress_values = (10000, 10000, 10000)
     for index, (code, progress) in enumerate(zip(codes, progress_values, strict=True), start=1):
         course = (
             (
@@ -1100,36 +1334,40 @@ async def _seed_commerce(session: AsyncSession, user_id: UUID) -> None:
                 "created": placed_at,
             },
         )
-        if status in {"paid", "fulfilled"}:
-            entitlement_type = (
-                "course_access"
-                if row["product_type"] == "course"
-                else "activity_admission"
-                if row["product_type"] == "activity_ticket"
-                else "counseling_credits"
-            )
-            await session.execute(
-                text(
-                    "INSERT INTO entitlements "
-                    "(id,user_id,order_id,order_item_id,entitlement_type,status,resource_type,resource_id,quantity_granted,"
-                    "quantity_consumed,starts_at,expires_at,configuration_snapshot,activated_at) "
-                    "VALUES (:id,:user,:order,:item,:type,'active',:resource_type,:resource,1,0,"
-                    "CAST(:starts AS timestamptz),CAST(:starts AS timestamptz)+interval '365 days',"
-                    "'{\"fixture\"\\:true}'::jsonb,CAST(:starts AS timestamptz)) "
-                    "ON CONFLICT (order_item_id,entitlement_type) DO UPDATE SET status='active',revoked_at=NULL,updated_at=now()"
-                ),
-                {
-                    "id": _id(f"entitlement:{index}"),
-                    "user": user_id,
-                    "order": order_id,
-                    "item": order_item_id,
-                    "type": entitlement_type,
-                    "resource_type": row["product_type"],
-                    "resource": row["product_id"],
-                    "starts": placed_at,
-                },
-            )
-    for index, status in enumerate(("active", "cancelled"), start=1):
+        entitlement_type = (
+            "course_access"
+            if row["product_type"] == "course"
+            else "activity_admission"
+            if row["product_type"] == "activity_ticket"
+            else "counseling_credits"
+        )
+        entitlement_status = "active" if status in {"paid", "fulfilled"} else "revoked"
+        await session.execute(
+            text(
+                "INSERT INTO entitlements "
+                "(id,user_id,order_id,order_item_id,entitlement_type,status,resource_type,resource_id,quantity_granted,"
+                "quantity_consumed,starts_at,expires_at,configuration_snapshot,activated_at,revoked_at,revoke_reason) "
+                "VALUES (:id,:user,:order,:item,:type,:status,:resource_type,:resource,1,0,"
+                "CAST(:starts AS timestamptz),CAST(:starts AS timestamptz)+interval '365 days',"
+                "'{\"fixture\"\\:true}'::jsonb,CAST(:starts AS timestamptz),"
+                "CASE WHEN CAST(:status AS varchar)='revoked' THEN CAST(:starts AS timestamptz) ELSE NULL END,"
+                "CASE WHEN CAST(:status AS varchar)='revoked' THEN 'order_cancelled' ELSE NULL END) "
+                "ON CONFLICT (order_item_id,entitlement_type) DO UPDATE SET status=EXCLUDED.status,"
+                "revoked_at=EXCLUDED.revoked_at,revoke_reason=EXCLUDED.revoke_reason,updated_at=now()"
+            ),
+            {
+                "id": _id(f"entitlement:{index}"),
+                "user": user_id,
+                "order": order_id,
+                "item": order_item_id,
+                "type": entitlement_type,
+                "status": entitlement_status,
+                "resource_type": row["product_type"],
+                "resource": row["product_id"],
+                "starts": placed_at,
+            },
+        )
+    for index, status in enumerate(("active", "cancelled", "expired"), start=1):
         row = catalog_rows[index - 1]
         await session.execute(
             text(
@@ -1140,7 +1378,7 @@ async def _seed_commerce(session: AsyncSession, user_id: UUID) -> None:
                 "VALUES (:id,:user,:sku,'fixture','test',:provider_id,:status,:currency,:amount,'month',1,"
                 "now()-interval '10 days',now()+interval '20 days',:cancel_at,"
                 "CASE WHEN CAST(:status AS varchar)='cancelled' THEN now()-interval '5 days' ELSE NULL END,"
-                "CASE WHEN CAST(:status AS varchar)='cancelled' THEN now()-interval '5 days' ELSE NULL END,:order) "
+                "CASE WHEN CAST(:status AS varchar) IN ('cancelled','expired') THEN now()-interval '5 days' ELSE NULL END,:order) "
                 "ON CONFLICT (provider,provider_environment,provider_subscription_id) DO UPDATE SET status=EXCLUDED.status,"
                 "cancel_at_period_end=EXCLUDED.cancel_at_period_end,updated_at=now()"
             ),
@@ -1199,7 +1437,7 @@ async def _seed_membership(session: AsyncSession, user_id: UUID) -> None:
                 "consumed": consumed,
             },
         )
-    for index in range(1, 3):
+    for index in range(1, 4):
         starts = datetime.now(UTC) - timedelta(days=365 * index)
         expires = starts + timedelta(days=120)
         await session.execute(
@@ -1441,6 +1679,169 @@ async def _seed_recommendations(session: AsyncSession, user_id: UUID, profile_id
     except VavError as error:
         if error.code not in {"RECOMMENDATION_DAILY_LIMIT_REACHED"}:
             raise
+    batch = (
+        (
+            await session.execute(
+                text(
+                    "SELECT * FROM recommendation_batches WHERE user_id=:user AND status='active' "
+                    "ORDER BY batch_number DESC LIMIT 1"
+                ),
+                {"user": user_id},
+            )
+        )
+        .mappings()
+        .first()
+    )
+    if batch is None:
+        raise RuntimeError("The test account recommendation batch was not created.")
+    target_emails = (
+        "recommendation-fixture-jonathan@example.com",
+        "recommendation-fixture-daniel@example.com",
+        "recommendation-fixture-peter@example.com",
+    )
+    candidates = list(
+        (
+            await session.execute(
+                text(
+                    "SELECT u.id AS user_id,p.id AS pair_id,p.viewer_score,p.candidate_score,p.combined_score,p.confidence FROM users u "
+                    "JOIN recommendation_pool_entries pool ON pool.user_id=u.id AND pool.eligible=true "
+                    "JOIN LATERAL (SELECT cp.id,"
+                    "CASE WHEN cp.user_low_id=:viewer THEN (cp.score_snapshot->>'user_a_to_b_score_bps')::integer "
+                    "ELSE (cp.score_snapshot->>'user_b_to_a_score_bps')::integer END AS viewer_score,"
+                    "CASE WHEN cp.user_low_id=:viewer THEN (cp.score_snapshot->>'user_b_to_a_score_bps')::integer "
+                    "ELSE (cp.score_snapshot->>'user_a_to_b_score_bps')::integer END AS candidate_score,"
+                    "(cp.score_snapshot->>'combined_score_bps')::integer AS combined_score,"
+                    "(cp.score_snapshot->>'confidence_bps')::integer AS confidence "
+                    "FROM recommendation_candidate_pairs cp "
+                    "WHERE ((cp.user_low_id=:viewer AND cp.user_high_id=u.id) OR "
+                    "(cp.user_high_id=:viewer AND cp.user_low_id=u.id)) AND cp.status='eligible' "
+                    "AND cp.score_snapshot IS NOT NULL "
+                    "ORDER BY cp.generated_at DESC LIMIT 1) p ON true "
+                    "WHERE u.email=ANY(CAST(:emails AS citext[])) "
+                    "ORDER BY array_position(CAST(:emails AS citext[]),u.email)"
+                ),
+                {"viewer": user_id, "emails": list(target_emails)},
+            )
+        ).mappings()
+    )
+    for candidate in candidates:
+        existing = await session.scalar(
+            text(
+                "SELECT id FROM recommendation_items WHERE recommendation_batch_id=:batch "
+                "AND recommended_user_id=:candidate"
+            ),
+            {"batch": batch["id"], "candidate": candidate["user_id"]},
+        )
+        if existing is not None:
+            continue
+        current_size = int(
+            await session.scalar(
+                text(
+                    "SELECT count(*) FROM recommendation_items WHERE recommendation_batch_id=:batch "
+                    "AND status IN ('ready','exposed','viewed')"
+                ),
+                {"batch": batch["id"]},
+            )
+            or 0
+        )
+        if current_size >= 3:
+            break
+        candidate_entry = await recommendation_service.pool_entry(
+            session, cast(UUID, candidate["user_id"])
+        )
+        if candidate_entry is None:
+            continue
+        visible = await recommendation_batches._visible_snapshot(
+            session,
+            viewer_id=user_id,
+            candidate_user_id=cast(UUID, candidate["user_id"]),
+        )
+        await session.execute(
+            text(
+                "INSERT INTO recommendation_items "
+                "(id,recommendation_batch_id,viewer_user_id,recommended_user_id,candidate_pair_id,"
+                "candidate_projection_version,candidate_privacy_version,rank_position,viewer_to_candidate_score_bps,"
+                "candidate_to_viewer_score_bps,bidirectional_score_bps,confidence_bps,explanation_snapshot,"
+                "visible_profile_snapshot,status,available_from,expires_at) "
+                "VALUES (:id,:batch,:viewer,:candidate,:pair,:projection,:privacy,:rank,:viewer_score,:candidate_score,"
+                ":combined_score,:confidence,"
+                "CAST(:explanation AS jsonb),CAST(:visible AS jsonb),'ready',now(),:expires) "
+                "ON CONFLICT (recommendation_batch_id,recommended_user_id) DO NOTHING"
+            ),
+            {
+                "id": _id(f"recommendation-item:{candidate['user_id']}"),
+                "batch": batch["id"],
+                "viewer": user_id,
+                "candidate": candidate["user_id"],
+                "pair": candidate["pair_id"],
+                "projection": candidate_entry["profile_projection_version"],
+                "privacy": candidate_entry["privacy_settings_version"],
+                "rank": current_size + 1,
+                "viewer_score": candidate["viewer_score"],
+                "candidate_score": candidate["candidate_score"],
+                "combined_score": candidate["combined_score"],
+                "confidence": candidate["confidence"],
+                "explanation": _json(
+                    {
+                        "summary": "这位成员符合你设置的基本条件，建议通过交流进一步了解。",
+                        "mutual_strengths": [],
+                        "relevant_preferences": [],
+                        "topics_to_explore": [
+                            {
+                                "explanation_code": "showcase_conversation",
+                                "display_text": "可以从共同兴趣与生活节奏开始交流",
+                            }
+                        ],
+                        "information_gaps": [],
+                        "caveat": "推荐仅用于帮助发现可能适合认识的人，不代表结果或承诺。",
+                        "relaxation_notices": [],
+                        "explanation_policy_version": "1.0.0",
+                    }
+                ),
+                "visible": _json(visible),
+                "expires": batch["expires_at"],
+            },
+        )
+    generated_size = int(
+        await session.scalar(
+            text("SELECT count(*) FROM recommendation_items WHERE recommendation_batch_id=:batch"),
+            {"batch": batch["id"]},
+        )
+        or 0
+    )
+    await session.execute(
+        text("UPDATE recommendation_batches SET generated_size=:size WHERE id=:batch"),
+        {"size": generated_size, "batch": batch["id"]},
+    )
+    for index in range(1, 3):
+        await session.execute(
+            text(
+                "INSERT INTO recommendation_batches "
+                "(id,user_id,batch_number,batch_type,strategy_id,profile_projection_version,preference_version,"
+                "privacy_settings_version,status,requested_size,generated_size,ranking_seed,period_key,idempotency_key,"
+                "generated_at,activated_at,expires_at,generation_report,created_at) "
+                "VALUES (:id,:user,:number,'daily',:strategy,:projection,:preference,:privacy,'expired',3,3,:seed,:period,:key,"
+                "now()-CAST(:days AS integer)*interval '1 day',now()-CAST(:days AS integer)*interval '1 day',"
+                "now()-CAST(:expired_days AS integer)*interval '1 day','{\"fixture\"\\:true}'::jsonb,"
+                "now()-CAST(:days AS integer)*interval '1 day') "
+                "ON CONFLICT (user_id,idempotency_key) DO UPDATE SET status='expired',generated_size=3,"
+                "expires_at=EXCLUDED.expires_at"
+            ),
+            {
+                "id": _id(f"recommendation-history-batch:{index}"),
+                "user": user_id,
+                "number": 800000 + index,
+                "strategy": batch["strategy_id"],
+                "projection": batch["profile_projection_version"],
+                "preference": batch["preference_version"],
+                "privacy": batch["privacy_settings_version"],
+                "seed": f"{SHOWCASE_PREFIX}:history:{index}",
+                "period": f"test-showcase-history-{index}",
+                "key": f"{SHOWCASE_PREFIX}:history:{index}",
+                "days": 14 + index * 14,
+                "expired_days": 7 + index * 14,
+            },
+        )
 
 
 def _canonical_pair(first: UUID, second: UUID) -> tuple[UUID, UUID]:
@@ -1561,7 +1962,7 @@ async def _seed_matchmaking_and_relationships(session: AsyncSession, user_id: UU
             ),
             {"match": match_id, "pair": pair_id},
         )
-        accepted = index <= 2
+        accepted = True
         sender = target_id if index in {1, 3} else user_id
         recipient = user_id if sender == target_id else target_id
         invitation_id = _id(f"matchmaking-invitation:{index}")
@@ -1624,6 +2025,33 @@ async def _seed_matchmaking_and_relationships(session: AsyncSession, user_id: UU
             ),
             {"handoff": handoff_id, "invitation": invitation_id},
         )
+        for history_index, (event_type, from_stage, to_stage) in enumerate(
+            (
+                ("relationship_started", None, "introduction_accepted"),
+                ("stage_changed", "introduction_accepted", "getting_to_know"),
+                ("milestone_created", "getting_to_know", "getting_to_know"),
+            ),
+            start=1,
+        ):
+            await session.execute(
+                text(
+                    "INSERT INTO relationship_status_history "
+                    "(id,journey_id,actor_user_id,event_type,from_status,to_status,from_stage_code,to_stage_code,reason_code,"
+                    "safe_metadata,occurred_at) VALUES (:id,:journey,:user,:event,'active','active',:from_stage,:to_stage,"
+                    "'test_showcase','{\"fixture\"\\:true}'::jsonb,now()-CAST(:days AS integer)*interval '1 day') "
+                    "ON CONFLICT (id) DO UPDATE SET event_type=EXCLUDED.event_type,from_stage_code=EXCLUDED.from_stage_code,"
+                    "to_stage_code=EXCLUDED.to_stage_code,occurred_at=EXCLUDED.occurred_at"
+                ),
+                {
+                    "id": _id(f"relationship-history:{index}:{history_index}"),
+                    "journey": journey_id,
+                    "user": user_id,
+                    "event": event_type,
+                    "from_stage": from_stage,
+                    "to_stage": to_stage,
+                    "days": 15 - history_index * 3,
+                },
+            )
         for participant_index, participant_user in enumerate((user_id, target_id), start=1):
             await session.execute(
                 text(
@@ -1663,7 +2091,7 @@ async def _seed_matchmaking_and_relationships(session: AsyncSession, user_id: UU
                     "occurred": date.today() - timedelta(days=days_ago),
                 },
             )
-        for checkin_index in range(1, 3):
+        for checkin_index in range(1, 4):
             checkin_id = _id(f"relationship-checkin:{index}:{checkin_index}")
             await session.execute(
                 text(
@@ -1773,41 +2201,56 @@ async def _seed_matchmaking_and_relationships(session: AsyncSession, user_id: UU
                     "snapshot": _json({str(contact_id): "test-showcase"}),
                 },
             )
-    skipped_target = await session.scalar(
-        text("SELECT id FROM users WHERE email='recommendation-fixture-hannah@example.com'")
+    skip_emails = (
+        "recommendation-fixture-hannah@example.com",
+        "recommendation-fixture-mei@example.com",
+        "recommendation-fixture-grace@example.com",
     )
-    if skipped_target is None:
-        raise RuntimeError("The skip-history fixture member is missing.")
-    low, high = _canonical_pair(user_id, skipped_target)
-    skip_pair_id = _id("matchmaking-skip-pair:1")
-    await session.execute(
-        text(
-            "INSERT INTO matchmaking_pairs (id,user_low_id,user_high_id,status,pair_version) "
-            "VALUES (:id,:low,:high,'interacting',1) ON CONFLICT (user_low_id,user_high_id) DO NOTHING"
-        ),
-        {"id": skip_pair_id, "low": low, "high": high},
+    skipped_targets = list(
+        (
+            await session.execute(
+                text(
+                    "SELECT id,email FROM users WHERE email=ANY(CAST(:emails AS citext[])) "
+                    "ORDER BY array_position(CAST(:emails AS citext[]),email)"
+                ),
+                {"emails": list(skip_emails)},
+            )
+        ).mappings()
     )
-    pair_id = await session.scalar(
-        text("SELECT id FROM matchmaking_pairs WHERE user_low_id=:low AND user_high_id=:high"),
-        {"low": low, "high": high},
-    )
-    await session.execute(
-        text(
-            "INSERT INTO matchmaking_skips "
-            "(id,pair_id,actor_user_id,target_user_id,skip_type,reason_code,reason_details_encrypted,status,cooldown_until,"
-            "undo_available_until,idempotency_key) VALUES (:id,:pair,:actor,:target,'not_now','timing',:details,'active',"
-            "now()+interval '14 days',now()+interval '1 hour',:key) ON CONFLICT (actor_user_id,idempotency_key) DO UPDATE SET "
-            "status='active',cooldown_until=EXCLUDED.cooldown_until,withdrawn_at=NULL,expired_at=NULL"
-        ),
-        {
-            "id": _id("matchmaking-skip:1"),
-            "pair": pair_id,
-            "actor": user_id,
-            "target": skipped_target,
-            "details": encrypt_private("目前希望放慢节奏。"),
-            "key": f"{SHOWCASE_PREFIX}:skip:1",
-        },
-    )
+    if len(skipped_targets) != 3:
+        raise RuntimeError("Three skip-history fixture members are required.")
+    for index, skipped_target in enumerate(skipped_targets, start=1):
+        target_id = cast(UUID, skipped_target["id"])
+        low, high = _canonical_pair(user_id, target_id)
+        skip_pair_id = _id(f"matchmaking-skip-pair:{index}")
+        await session.execute(
+            text(
+                "INSERT INTO matchmaking_pairs (id,user_low_id,user_high_id,status,pair_version) "
+                "VALUES (:id,:low,:high,'interacting',1) ON CONFLICT (user_low_id,user_high_id) DO NOTHING"
+            ),
+            {"id": skip_pair_id, "low": low, "high": high},
+        )
+        pair_id = await session.scalar(
+            text("SELECT id FROM matchmaking_pairs WHERE user_low_id=:low AND user_high_id=:high"),
+            {"low": low, "high": high},
+        )
+        await session.execute(
+            text(
+                "INSERT INTO matchmaking_skips "
+                "(id,pair_id,actor_user_id,target_user_id,skip_type,reason_code,reason_details_encrypted,status,cooldown_until,"
+                "undo_available_until,idempotency_key) VALUES (:id,:pair,:actor,:target,'not_now','timing',:details,'active',"
+                "now()+interval '14 days',now()+interval '1 hour',:key) ON CONFLICT (actor_user_id,idempotency_key) DO UPDATE SET "
+                "status='active',cooldown_until=EXCLUDED.cooldown_until,withdrawn_at=NULL,expired_at=NULL"
+            ),
+            {
+                "id": _id(f"matchmaking-skip:{index}"),
+                "pair": pair_id,
+                "actor": user_id,
+                "target": target_id,
+                "details": encrypt_private("目前希望放慢节奏。"),
+                "key": f"{SHOWCASE_PREFIX}:skip:{index}",
+            },
+        )
 
 
 async def _seed_safety(session: AsyncSession, user_id: UUID) -> None:
@@ -1816,14 +2259,15 @@ async def _seed_safety(session: AsyncSession, user_id: UUID) -> None:
             await session.execute(
                 text(
                     "SELECT id,email FROM users WHERE email IN "
-                    "('dating-fixture-anna@example.test','dating-fixture-ben@example.test') ORDER BY email"
+                    "('dating-fixture-anna@example.test','dating-fixture-ben@example.test',"
+                    "'dating-fixture-clara@example.test') ORDER BY email"
                 )
             )
         ).mappings()
     )
-    if len(target_rows) != 2:
-        raise RuntimeError("Two synthetic safety target accounts are required.")
-    categories = ("spam", "privacy_violation")
+    if len(target_rows) != 3:
+        raise RuntimeError("Three synthetic safety target accounts are required.")
+    categories = ("spam", "privacy_violation", "harassment")
     for index, (target, category) in enumerate(zip(target_rows, categories, strict=True), start=1):
         report_id = _id(f"safety-report:{index}")
         await session.execute(
@@ -1875,28 +2319,42 @@ async def _seed_safety(session: AsyncSession, user_id: UUID) -> None:
             ),
             {"low": low, "high": high},
         )
-    restriction_id = _id("account-restriction:1")
-    await session.execute(
-        text(
-            "INSERT INTO account_restrictions "
-            "(id,user_id,restriction_type,scope_definition,status,source_type,source_reference_id,reason_code,user_message_safe,"
-            "internal_reason_encrypted,starts_at,ends_at,appeal_allowed,imposed_by,approved_by) "
-            "VALUES (:id,:user,'profile_edit_review_required','{\"profile_fields\"\\:\"all\"}'::jsonb,'active','migration',"
-            ":source,'test_showcase_review','测试账户的档案修改会进入人工复核演示流程。',:reason,now()-interval '10 days',"
-            "now()+interval '20 days',true,NULL,NULL) ON CONFLICT (id) DO UPDATE SET status='active',ends_at=EXCLUDED.ends_at,"
-            "user_message_safe=EXCLUDED.user_message_safe,updated_at=now()"
+    restriction_ids: list[UUID] = []
+    for index, (scope, user_message) in enumerate(
+        (
+            ("identity", "身份资料修改会进入人工复核演示流程。"),
+            ("faith", "信仰资料修改会进入人工复核演示流程。"),
+            ("photos", "照片修改会进入人工复核演示流程。"),
         ),
-        {
-            "id": restriction_id,
-            "user": user_id,
-            "source": _id("account-restriction-source:1"),
-            "reason": encrypt_safety({"reason": "Synthetic showcase restriction"}),
-        },
-    )
+        start=1,
+    ):
+        restriction_id = _id(f"account-restriction:{index}")
+        restriction_ids.append(restriction_id)
+        await session.execute(
+            text(
+                "INSERT INTO account_restrictions "
+                "(id,user_id,restriction_type,scope_definition,status,source_type,source_reference_id,reason_code,user_message_safe,"
+                "internal_reason_encrypted,starts_at,ends_at,appeal_allowed,imposed_by,approved_by) "
+                "VALUES (:id,:user,'profile_edit_review_required',CAST(:scope AS jsonb),'active','migration',"
+                ":source,'test_showcase_review',:message,:reason,now()-CAST(:days AS integer)*interval '1 day',"
+                "now()+interval '20 days',true,NULL,NULL) ON CONFLICT (id) DO UPDATE SET status='active',"
+                "scope_definition=EXCLUDED.scope_definition,ends_at=EXCLUDED.ends_at,user_message_safe=EXCLUDED.user_message_safe,updated_at=now()"
+            ),
+            {
+                "id": restriction_id,
+                "user": user_id,
+                "scope": _json({"profile_fields": scope}),
+                "source": _id(f"account-restriction-source:{index}"),
+                "message": user_message,
+                "reason": encrypt_safety({"reason": "Synthetic showcase restriction"}),
+                "days": 8 + index * 2,
+            },
+        )
     for index, (status, outcome, message) in enumerate(
         (
             ("decided", "modified", "复核后缩小了限制范围。"),
             ("closed", "upheld", "复核确认该演示限制保持不变。"),
+            ("decided", "modified", "复核后进一步缩小了演示限制范围。"),
         ),
         start=1,
     ):
@@ -1915,7 +2373,7 @@ async def _seed_safety(session: AsyncSession, user_id: UUID) -> None:
                 "id": _id(f"safety-appeal:{index}"),
                 "number": f"SA-TEST-{index:03d}",
                 "user": user_id,
-                "restriction": restriction_id,
+                "restriction": restriction_ids[index - 1],
                 "status": status,
                 "reason": encrypt_safety({"reason": "希望复核展示限制的范围与期限。"}),
                 "days": index * 5,
@@ -1934,30 +2392,98 @@ async def _coverage_counts(session: AsyncSession, user_id: UUID) -> dict[str, in
         "AND canonical_slug LIKE 'test-showcase-%'",
         "stories": "SELECT count(*) FROM content_entries WHERE entry_type='testimonial' AND status='published' "
         "AND canonical_slug LIKE 'test-showcase-%'",
+        "contact_points": "SELECT count(*) FROM user_contact_points WHERE user_id=:user "
+        "AND id IN (:contact_email,:contact_phone,:contact_wechat)",
+        "consents": "SELECT count(*) FROM user_consents WHERE user_id=:user AND id IN (:consent_a,:consent_b,:consent_c)",
         "notifications": "SELECT count(*) FROM user_notifications WHERE user_id=:user AND id IN (:a,:b,:c)",
+        "notification_preferences": "SELECT count(*) FROM notification_preferences WHERE user_id=:user "
+        "AND id IN (:notification_pref_a,:notification_pref_b,:notification_pref_c)",
         "ai_conversations": "SELECT count(*) FROM ai_conversations WHERE user_id=:user AND conversation_number LIKE 'AI-TEST-%'",
         "privacy_requests": "SELECT count(*) FROM data_subject_requests WHERE user_id=:user AND request_number LIKE 'PRQ-TEST-%'",
         "ai_memories": "SELECT count(*) FROM ai_memory_items WHERE user_id=:user AND source_type='test_showcase'",
+        "auth_sessions": "SELECT count(*) FROM auth_sessions WHERE user_id=:user AND audience='user' AND status='active' "
+        "AND device_name IN ('Safari · macOS','Chrome · Windows','Mobile Safari · iPhone')",
         "activity_registrations": "SELECT count(*) FROM activity_registrations WHERE user_id=:user AND registration_number LIKE 'REG-TEST-%'",
+        "activity_waitlist": "SELECT count(*) FROM activity_waitlist_entries WHERE user_id=:user",
+        "activity_participants": "SELECT count(*) FROM activity_participant_profiles p JOIN activities a ON a.id=p.activity_id "
+        "WHERE a.activity_code='activity-showcase-walk' AND p.user_id<>:user AND p.visibility_status='visible'",
+        "activity_choices": "SELECT count(*) FROM activity_post_event_choices c JOIN activities a ON a.id=c.activity_id "
+        "WHERE a.activity_code='activity-showcase-walk' AND c.chooser_user_id=:user AND c.status='active'",
+        "activity_matches": "SELECT count(*) FROM activity_mutual_choices m JOIN activities a ON a.id=m.activity_id "
+        "WHERE a.activity_code='activity-showcase-walk' AND (m.user_a_id=:user OR m.user_b_id=:user) AND m.status='matched_private'",
         "course_enrollments": "SELECT count(*) FROM course_enrollments e JOIN courses c ON c.id=e.course_id "
         "WHERE e.user_id=:user AND c.course_code IN ('course-e2e-foundations','course-showcase-communication','course-showcase-growth-plan')",
         "course_certificates": "SELECT count(*) FROM course_certificates WHERE user_id=:user "
         "AND certificate_number LIKE 'CERT-TEST-%'",
         "counseling_appointments": "SELECT count(*) FROM counseling_appointments WHERE user_id=:user AND appointment_number LIKE 'APT-TEST-%'",
+        "counseling_followups": "SELECT count(*) FROM counseling_follow_ups WHERE user_id=:user AND id IN "
+        "(:followup_a,:followup_b,:followup_c)",
+        "cart_items": "SELECT count(*) FROM cart_items WHERE cart_id=:cart",
         "orders": "SELECT count(*) FROM orders WHERE user_id=:user AND order_number LIKE 'ORD-TEST-%'",
+        "subscriptions": "SELECT count(*) FROM subscriptions WHERE user_id=:user "
+        "AND provider='fixture' AND provider_subscription_id LIKE 'test-showcase-subscription-%'",
+        "entitlements": "SELECT count(*) FROM entitlements WHERE user_id=:user AND id IN "
+        "(:entitlement_a,:entitlement_b,:entitlement_c)",
+        "membership_history": "SELECT count(*) FROM membership_accounts WHERE user_id=:user AND source_type='admin_grant' "
+        "AND id IN (:membership_a,:membership_b,:membership_c)",
+        "dating_photos": "SELECT count(*) FROM dating_profile_photos ph JOIN dating_profiles p ON p.id=ph.dating_profile_id "
+        "WHERE p.user_id=:user AND ph.status='approved' AND ph.deleted_at IS NULL",
+        "preference_criteria": "SELECT count(*) FROM partner_preference_criteria c "
+        "JOIN partner_preference_profiles p ON p.id=c.partner_preference_profile_id WHERE p.user_id=:user",
         "recommendations": "SELECT count(*) FROM recommendation_items WHERE viewer_user_id=:user AND status IN ('ready','exposed','viewed')",
+        "recommendation_batches": "SELECT count(*) FROM recommendation_batches WHERE user_id=:user",
+        "likes": "SELECT count(*) FROM matchmaking_likes WHERE actor_user_id=:user "
+        "AND idempotency_key LIKE 'test-showcase%' AND split_part(idempotency_key,':',2)='like' "
+        "AND split_part(idempotency_key,':',4)='user'",
+        "skips": "SELECT count(*) FROM matchmaking_skips WHERE actor_user_id=:user AND idempotency_key LIKE 'test-showcase:skip:%'",
         "matches": "SELECT count(*) FROM matchmaking_mutual_matches WHERE (user_low_id=:user OR user_high_id=:user) AND status='active'",
+        "invitations": "SELECT count(*) FROM matchmaking_introduction_invitations WHERE "
+        "(sender_user_id=:user OR recipient_user_id=:user) AND invitation_number LIKE 'INV-TEST-%'",
+        "contact_exchanges": "SELECT count(*) FROM matchmaking_contact_exchange_requests r "
+        "JOIN matchmaking_pairs p ON p.id=r.pair_id WHERE (p.user_low_id=:user OR p.user_high_id=:user) AND r.status='active'",
         "relationships": "SELECT count(*) FROM relationship_journeys WHERE (user_low_id=:user OR user_high_id=:user) AND status='active'",
+        "relationship_timeline": "SELECT count(*) FROM relationship_status_history h JOIN relationship_journeys j ON j.id=h.journey_id "
+        "WHERE (j.user_low_id=:user OR j.user_high_id=:user) AND j.journey_number LIKE 'REL-TEST-%'",
+        "relationship_milestones": "SELECT count(*) FROM relationship_milestones m JOIN relationship_journeys j ON j.id=m.journey_id "
+        "WHERE (j.user_low_id=:user OR j.user_high_id=:user) AND j.journey_number LIKE 'REL-TEST-%' AND m.status='active'",
+        "relationship_checkins": "SELECT count(*) FROM relationship_checkins c JOIN relationship_journeys j ON j.id=c.journey_id "
+        "WHERE (j.user_low_id=:user OR j.user_high_id=:user) AND j.journey_number LIKE 'REL-TEST-%'",
+        "relationship_reflections": "SELECT count(*) FROM relationship_reflections r JOIN relationship_journeys j ON j.id=r.journey_id "
+        "WHERE r.author_user_id=:user AND j.journey_number LIKE 'REL-TEST-%' AND r.status='active'",
         "safety_reports": "SELECT count(*) FROM safety_reports WHERE reporter_user_id=:user AND report_number LIKE 'SR-TEST-%'",
         "blocks": "SELECT count(*) FROM user_blocks WHERE blocker_user_id=:user AND status='active'",
+        "restrictions": "SELECT count(*) FROM account_restrictions WHERE user_id=:user AND status='active' "
+        "AND reason_code='test_showcase_review'",
+        "appeals": "SELECT count(*) FROM safety_appeals WHERE appellant_user_id=:user AND appeal_number LIKE 'SA-TEST-%'",
         "membership_plans": "SELECT count(*) FROM membership_plans WHERE status='active'",
         "experience_tasks": "SELECT count(*) FROM experience_user_tasks WHERE user_id=:user AND deduplication_key LIKE 'test-showcase:%'",
+        "experience_journeys": "SELECT count(*) FROM experience_journey_instances WHERE user_id=:user "
+        "AND source_module='test_showcase'",
     }
     parameters = {
         "user": user_id,
         "a": _id("notification:1"),
         "b": _id("notification:2"),
         "c": _id("notification:3"),
+        "contact_email": _id("contact:email"),
+        "contact_phone": _id("contact:phone"),
+        "contact_wechat": _id("contact:wechat"),
+        "consent_a": _id("consent:platform_terms"),
+        "consent_b": _id("consent:privacy_policy"),
+        "consent_c": _id("consent:ai_assistant_use"),
+        "notification_pref_a": _id("notification-preference:1"),
+        "notification_pref_b": _id("notification-preference:2"),
+        "notification_pref_c": _id("notification-preference:3"),
+        "followup_a": _id("counseling-followup:1"),
+        "followup_b": _id("counseling-followup:2"),
+        "followup_c": _id("counseling-followup:3"),
+        "cart": _id("cart"),
+        "entitlement_a": _id("entitlement:1"),
+        "entitlement_b": _id("entitlement:2"),
+        "entitlement_c": _id("entitlement:3"),
+        "membership_a": _id("membership-history:1"),
+        "membership_b": _id("membership-history:2"),
+        "membership_c": _id("membership-history:3"),
     }
     counts: dict[str, int] = {}
     for name, query in queries.items():
@@ -1966,22 +2492,49 @@ async def _coverage_counts(session: AsyncSession, user_id: UUID) -> dict[str, in
         "published_pages": 8,
         "articles": 3,
         "stories": 3,
+        "contact_points": 3,
+        "consents": 3,
         "notifications": 3,
+        "notification_preferences": 3,
         "ai_conversations": 3,
         "privacy_requests": 3,
         "ai_memories": 3,
+        "auth_sessions": 3,
         "activity_registrations": 3,
+        "activity_waitlist": 3,
+        "activity_participants": 3,
+        "activity_choices": 3,
+        "activity_matches": 3,
         "course_enrollments": 3,
-        "course_certificates": 2,
+        "course_certificates": 3,
         "counseling_appointments": 3,
+        "counseling_followups": 3,
+        "cart_items": 3,
         "orders": 3,
-        "recommendations": 2,
+        "subscriptions": 3,
+        "entitlements": 3,
+        "membership_history": 3,
+        "dating_photos": 3,
+        "preference_criteria": 3,
+        "recommendations": 3,
+        "recommendation_batches": 3,
+        "likes": 3,
+        "skips": 3,
         "matches": 3,
-        "relationships": 2,
-        "safety_reports": 2,
-        "blocks": 2,
+        "invitations": 3,
+        "contact_exchanges": 3,
+        "relationships": 3,
+        "relationship_timeline": 9,
+        "relationship_milestones": 9,
+        "relationship_checkins": 9,
+        "relationship_reflections": 9,
+        "safety_reports": 3,
+        "blocks": 3,
+        "restrictions": 3,
+        "appeals": 3,
         "membership_plans": 3,
         "experience_tasks": 3,
+        "experience_journeys": 3,
     }
     missing = {
         name: {"expected_at_least": minimum, "actual": counts[name]}
@@ -2029,6 +2582,7 @@ async def seed_test_showcase() -> dict[str, int]:
         await _seed_ai_conversations(session, user_id)
         await _seed_sessions_and_experience(session, user_id)
         await _seed_activity_registrations(session, user_id)
+        await _seed_activity_experience(session, user_id)
         await _seed_course_learning(session, user_id)
         await _seed_counseling_appointments(session, user_id)
         await _seed_commerce(session, user_id)
