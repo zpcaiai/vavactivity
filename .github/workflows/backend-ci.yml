@@ -155,6 +155,9 @@ jobs:
             --confirm-insecure-test-account
           uv run --package vav-platform-api python -m vav.cli.seed_test_showcase \
             --confirm-test-showcase
+          uv run --package vav-platform-api python -m vav.cli.seed_admin_showcase \
+            --email admin@vav.com \
+            --confirm-admin-showcase
       - name: Verify the live Neon schema
         env:
           DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}

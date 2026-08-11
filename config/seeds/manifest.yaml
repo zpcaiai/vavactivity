@@ -26,4 +26,5 @@ groups:
   test:
     - vav.cli.seed_test_user
     - vav.cli.seed_test_showcase
+    - vav.cli.seed_admin_showcase
     - vav.cli.seed_recommendation_evaluations
