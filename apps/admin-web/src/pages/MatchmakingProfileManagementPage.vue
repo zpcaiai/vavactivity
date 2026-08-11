@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
+import { localizeAdminLabel, localizeAdminValue } from "@vav/ui-admin";
 
 import { catalogApi } from "@/features/catalog/api";
 import { useAdminAuthStore } from "@/stores/admin-auth";
@@ -280,7 +281,7 @@ onMounted(() => void load());
         <el-option
           v-for="code in PHOTO_REASON_CODES"
           :key="code"
-          :label="code"
+          :label="localizeAdminValue(code, 'reason_code')"
           :value="code"
         />
       </el-select>
@@ -311,9 +312,13 @@ onMounted(() => void load());
         v-for="key in Object.keys(rows[0] ?? {})"
         :key="key"
         :prop="key"
-        :label="key"
+        :label="localizeAdminLabel(key)"
         show-overflow-tooltip
-      />
+      >
+        <template #default="{ row }">
+          {{ localizeAdminValue(row[key], key) }}
+        </template>
+      </el-table-column>
       <el-table-column
         label="操作"
         width="260"
@@ -373,7 +378,7 @@ onMounted(() => void load());
     >
       <h3>审核案件 {{ activeCase.id }}</h3>
       <p>
-        状态 {{ activeCase.status }} · 乐观锁版本 {{ activeCase.version }} ·
+        状态 {{ localizeAdminValue(activeCase.status, "status") }} · 乐观锁版本 {{ activeCase.version }} ·
         敏感字段权限：{{ activeCase.sensitive_access_granted ? "已授予" : "未授予" }}
       </p>
 

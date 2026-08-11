@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
+import { localizeAdminLabel, localizeAdminValue } from "@vav/ui-admin";
 
 import { catalogApi } from "@/features/catalog/api";
 
@@ -77,7 +78,7 @@ watch(section, () => void load());
     <header class="page-toolbar">
       <div>
         <p class="admin-kicker">
-          COMMERCE CONTROL PLANE
+          交易运营控制台
         </p>
         <h2>{{ labels[section] }}</h2>
         <p>金额均为最小货币单位；支付成功只来自已验签 Webhook。</p>
@@ -104,8 +105,12 @@ watch(section, () => void load());
         v-for="column in columns"
         :key="column"
         :prop="column"
-        :label="column"
-      />
+        :label="localizeAdminLabel(column)"
+      >
+        <template #default="{ row }">
+          {{ localizeAdminValue(row[column], column) }}
+        </template>
+      </el-table-column>
       <el-table-column
         label="操作"
         width="250"

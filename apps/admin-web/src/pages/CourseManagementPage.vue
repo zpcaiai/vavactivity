@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from "vue";
+import { formatAdminTableCell } from "@vav/ui-admin";
 
 import { catalogApi } from "@/features/catalog/api";
 
@@ -275,7 +276,7 @@ onMounted(() => void load());
     <header class="page-toolbar">
       <div>
         <p class="admin-kicker">
-          COURSE OPERATIONS
+          课程运营
         </p>
         <h2>课程中心</h2>
         <p>课程结构、版本、视频与学习进度在此管理；商品定价和订单仍由 Catalog/Commerce 管理。</p>
@@ -364,6 +365,7 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           />
           <el-table-column
@@ -516,7 +518,7 @@ onMounted(() => void load());
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="Provider 视频 ID">
+          <el-form-item label="服务商视频编号">
             <el-input v-model="videoForm.provider_video_id" />
           </el-form-item>
           <el-form-item label="私有资源引用">
@@ -560,7 +562,7 @@ onMounted(() => void load());
           label-position="top"
           class="editor-grid"
         >
-          <el-form-item label="用户 UUID">
+          <el-form-item label="用户唯一标识">
             <el-input v-model="grantForm.user_id" />
           </el-form-item>
           <el-form-item label="授权天数">
@@ -593,6 +595,7 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           />
           <el-table-column label="操作">
@@ -645,6 +648,7 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           />
           <el-table-column label="操作">

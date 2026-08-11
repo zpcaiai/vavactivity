@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
+import { formatAdminTableCell } from "@vav/ui-admin";
 
 import { catalogApi } from "@/features/catalog/api";
 import { useAdminAuthStore } from "@/stores/admin-auth";
@@ -251,6 +252,7 @@ onMounted(() => {
             label="模板"
           /><el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           /><el-table-column label="操作">
             <template #default="scope">
@@ -281,6 +283,7 @@ onMounted(() => {
             label="渠道"
           /><el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           /><el-table-column
             prop="provider"
@@ -318,6 +321,7 @@ onMounted(() => {
             label="安全错误码"
           /><el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           /><el-table-column label="操作">
             <template #default="scope">
@@ -346,9 +350,11 @@ onMounted(() => {
             label="业务对象"
           /><el-table-column
             prop="trigger_at"
-            label="触发时间"
+            :formatter="formatAdminTableCell"
+            label="触发时间（UTC+8）"
           /><el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           /><el-table-column label="操作">
             <template #default="scope">
@@ -411,6 +417,7 @@ onMounted(() => {
             label="分类"
           /><el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           /><el-table-column
             label="受控流程"
@@ -506,6 +513,7 @@ onMounted(() => {
             label="来源"
           /><el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           /><el-table-column label="操作">
             <template #default="scope">
@@ -552,7 +560,8 @@ onMounted(() => {
             label="理由"
           /><el-table-column
             prop="created_at"
-            label="时间"
+            :formatter="formatAdminTableCell"
+            label="时间（UTC+8）"
           />
         </el-table><p>审计不保存完整正文、辅导内容、AI 对话、密码重置 Token 或退订 Token。</p>
       </el-tab-pane>

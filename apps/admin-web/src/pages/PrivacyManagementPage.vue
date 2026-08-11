@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
+import { formatAdminTableCell, localizeAdminValue } from "@vav/ui-admin";
 
 import { catalogApi } from "@/features/catalog/api";
 import { useAdminAuthStore } from "@/stores/admin-auth";
@@ -188,7 +189,7 @@ onMounted(() => void load());
         v-for="item in dashboard.requests"
         :key="`${item.request_type}-${item.status}`"
       >
-        <strong>{{ item.count }}</strong><span>{{ item.request_type }} · {{ item.status }}</span>
+        <strong>{{ item.count }}</strong><span>{{ localizeAdminValue(item.request_type, "request_type") }} · {{ localizeAdminValue(item.status, "status") }}</span>
       </el-card>
     </div>
 
@@ -209,15 +210,15 @@ onMounted(() => void load());
         />
         <el-table-column
           prop="consent_code"
-          label="Consent Code"
+          label="同意代码"
         />
         <el-table-column
           prop="asset_code"
-          label="Data Asset"
+          label="数据资产"
         />
         <el-table-column
           prop="policy_code"
-          label="Policy"
+          label="策略"
         />
         <el-table-column
           prop="event_type"
@@ -241,6 +242,7 @@ onMounted(() => void load());
         />
         <el-table-column
           prop="status"
+          :formatter="formatAdminTableCell"
           label="状态"
         />
         <el-table-column

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import { formatAdminTableCell } from "@vav/ui-admin";
 
 import { catalogApi } from "@/features/catalog/api";
 
@@ -183,7 +184,7 @@ onMounted(() => void load());
     <div class="module-heading">
       <div>
         <p class="admin-kicker">
-          AUTHORIZED KNOWLEDGE
+          授权知识库
         </p>
         <h2>知识库中心</h2>
         <p>授权先于索引；检索时再次执行 ACL；引用始终绑定精确文档版本和 Chunk。</p>
@@ -230,6 +231,7 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           />
         </el-table>
@@ -318,6 +320,7 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           />
           <el-table-column label="证据">
@@ -374,11 +377,13 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           />
           <el-table-column
             prop="valid_until"
-            label="到期"
+            :formatter="formatAdminTableCell"
+            label="到期时间（UTC+8）"
           />
         </el-table>
       </el-tab-pane>
@@ -412,7 +417,7 @@ onMounted(() => void load());
             value="zh-TW"
           />
           <el-option
-            label="English"
+            label="英文"
             value="en"
           />
         </el-select>
@@ -441,6 +446,7 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           />
           <el-table-column
@@ -481,6 +487,7 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           />
           <el-table-column label="通过">
@@ -494,7 +501,7 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="acl_leakage_count"
-            label="ACL 泄漏"
+            label="访问控制泄漏"
           />
         </el-table>
       </el-tab-pane>
@@ -515,7 +522,8 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="created_at"
-            label="时间"
+            :formatter="formatAdminTableCell"
+            label="时间（UTC+8）"
           />
         </el-table>
       </el-tab-pane>

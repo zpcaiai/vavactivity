@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
+import { localizeAdminLabel, localizeAdminValue } from "@vav/ui-admin";
 
 import { membershipAdminApi, type MembershipAdminRow } from "@/features/memberships/api";
 import { useAdminAuthStore } from "@/stores/admin-auth";
@@ -63,7 +64,7 @@ watch(() => route.fullPath, load); onMounted(load);
     <header>
       <div>
         <p class="eyebrow">
-          BATCH 17 · ENTITLEMENT GOVERNANCE
+          第 17 批 · 权益治理
         </p><h1>会员运营中心</h1>
       </div><p>会员是 Commerce 与 Entitlement 的受控投影。这里不能伪造付款、覆盖使用量或授予安全绕过。</p>
     </header>
@@ -99,7 +100,7 @@ watch(() => route.fullPath, load); onMounted(load);
         v-for="(value,key) in summary"
         :key="key"
       >
-        <small>{{ key }}</small><strong>{{ typeof value === 'object' ? JSON.stringify(value) : value }}</strong>
+        <small>{{ localizeAdminLabel(key) }}</small><strong>{{ localizeAdminValue(value, key) }}</strong>
       </article>
     </div>
     <article
@@ -124,12 +125,12 @@ watch(() => route.fullPath, load); onMounted(load);
         此视图坚持最小披露。生产操作必须使用对应权限、原因代码、幂等键和追加式审计；Subscription 与付款状态只能由 Commerce 修改。
       </p>
       <table v-if="rows.length">
-        <thead><tr><th>ID / Code</th><th>类型</th><th>状态</th><th>安全操作</th></tr></thead><tbody>
+        <thead><tr><th>编号或代码</th><th>类型</th><th>状态</th><th>安全操作</th></tr></thead><tbody>
           <tr
             v-for="row in rows"
             :key="String(row.id ?? row.plan_code ?? row.benefit_code)"
           >
-            <td>{{ row.plan_code ?? row.benefit_code ?? row.issue_code ?? row.id }}</td><td>{{ row.plan_type ?? row.benefit_type ?? row.severity }}</td><td>{{ row.status }}</td><td>
+            <td>{{ row.plan_code ?? row.benefit_code ?? row.issue_code ?? row.id }}</td><td>{{ localizeAdminValue(row.plan_type ?? row.benefit_type ?? row.severity, "type") }}</td><td>{{ localizeAdminValue(row.status, "status") }}</td><td>
               <div v-if="section === 'reconciliation' && row.status !== 'resolved'">
                 <input
                   v-model="resolution"
@@ -153,7 +154,7 @@ watch(() => route.fullPath, load); onMounted(load);
           v-for="(value,key) in summary"
           :key="key"
         >
-          <small>{{ key }}</small><strong>{{ typeof value === 'object' ? JSON.stringify(value) : value }}</strong>
+          <small>{{ localizeAdminLabel(key) }}</small><strong>{{ localizeAdminValue(value, key) }}</strong>
         </article>
       </div>
     </article>

@@ -16,7 +16,7 @@ const error = ref("");
 const notice = ref("");
 const section = computed(() => String(route.meta.experienceSection ?? "dashboard"));
 const sections = [
-  ["dashboard", "概览", "experience.analytics.read"], ["ia", "信息架构", "experience.ia.read"], ["routes", "路由", "experience.routes.read"], ["navigation", "导航", "experience.navigation.read"], ["tasks", "任务", "experience.tasks.read"], ["journeys", "旅程", "experience.journeys.read"], ["handoffs", "Handoff", "experience.handoffs.read"], ["search-governance", "搜索治理", "experience.search.read"], ["help", "帮助", "experience.help.read"], ["support", "支持", "experience.support.read"], ["dead-ends", "死路检测", "experience.dead_ends.read"], ["analytics", "分析", "experience.analytics.read"], ["evidence", "证据", "experience.closure.read"], ["release", "发布", "experience.closure.read"], ["audit", "审计", "experience.audit.read"]
+  ["dashboard", "概览", "experience.analytics.read"], ["ia", "信息架构", "experience.ia.read"], ["routes", "路由", "experience.routes.read"], ["navigation", "导航", "experience.navigation.read"], ["tasks", "任务", "experience.tasks.read"], ["journeys", "旅程", "experience.journeys.read"], ["handoffs", "交接", "experience.handoffs.read"], ["search-governance", "搜索治理", "experience.search.read"], ["help", "帮助", "experience.help.read"], ["support", "支持", "experience.support.read"], ["dead-ends", "死路检测", "experience.dead_ends.read"], ["analytics", "分析", "experience.analytics.read"], ["evidence", "证据", "experience.closure.read"], ["release", "发布", "experience.closure.read"], ["audit", "审计", "experience.audit.read"]
 ] as const;
 const visibleSections = computed(() => sections.filter((item) => auth.hasPermission(item[2])));
 const tableRows = computed(() => rows.value.map((row) => ({
@@ -63,11 +63,11 @@ watch(section, load);
     <header>
       <div>
         <p class="eyebrow">
-          BATCH 23 · EXPERIENCE ORCHESTRATION
+          第 23 批 · 体验编排
         </p><h1>信息架构与体验闭环</h1><p>导航、任务和旅程是权威业务状态的安全投影；体验层不会直接修改所属业务状态。</p>
       </div><VStatusBadge
         :status="dashboard.production_certified ? 'success' : 'warning'"
-        :label="dashboard.production_certified ? 'PRODUCTION CERTIFIED' : 'NOT CERTIFIED'"
+        :label="dashboard.production_certified ? '已通过生产认证' : '未认证'"
       />
     </header>
     <nav aria-label="体验治理分区">
@@ -97,7 +97,7 @@ watch(section, load);
       class="metrics"
       aria-live="polite"
     >
-      <article><strong>{{ dashboard.ia_nodes ?? 0 }}</strong><span>IA 节点</span></article><article><strong>{{ dashboard.active_routes ?? 0 }}</strong><span>活跃路由</span></article><article><strong>{{ dashboard.active_tasks ?? 0 }}</strong><span>活跃任务</span></article><article><strong>{{ dashboard.active_journeys ?? 0 }}</strong><span>进行中旅程</span></article><article><strong>{{ dashboard.critical_dead_ends ?? 0 }}</strong><span>关键死路</span></article><article><strong>{{ dashboard.release_allowed ? 'GO' : 'NO-GO' }}</strong><span>生产发布</span></article>
+      <article><strong>{{ dashboard.ia_nodes ?? 0 }}</strong><span>信息架构节点</span></article><article><strong>{{ dashboard.active_routes ?? 0 }}</strong><span>活跃路由</span></article><article><strong>{{ dashboard.active_tasks ?? 0 }}</strong><span>活跃任务</span></article><article><strong>{{ dashboard.active_journeys ?? 0 }}</strong><span>进行中旅程</span></article><article><strong>{{ dashboard.critical_dead_ends ?? 0 }}</strong><span>关键死路</span></article><article><strong>{{ dashboard.release_allowed ? '允许发布' : '禁止发布' }}</strong><span>生产发布</span></article>
     </div>
     <div
       v-else

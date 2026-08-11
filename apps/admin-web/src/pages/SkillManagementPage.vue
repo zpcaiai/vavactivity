@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
+import { localizeAdminLabel, localizeAdminValue } from "@vav/ui-admin";
 
 import { skillsAdminApi, type SkillRow } from "@/features/skills/api";
 import { useAdminAuthStore } from "@/stores/admin-auth";
@@ -15,7 +16,7 @@ const notice = ref("");
 
 const sections = [
   ["dashboard", "概览", "skills.analytics.read"],
-  ["catalog", "Skill 目录", "skills.registry.read"],
+  ["catalog", "技能目录", "skills.registry.read"],
   ["installations", "安装", "skills.installations.read"],
   ["executions", "执行", "skills.executions.read"],
   ["dependencies", "依赖", "skills.registry.read"],
@@ -23,7 +24,7 @@ const sections = [
   ["configurations", "配置", "skills.installations.read"],
   ["publishers", "发布者", "skills.publishers.read"],
   ["reviews", "审核", "skills.marketplace.review"],
-  ["marketplace", "Marketplace", "skills.marketplace.read"],
+  ["marketplace", "技能市场", "skills.marketplace.read"],
   ["incidents", "安全事件", "skills.incidents.read"],
   ["audit", "审计", "skills.audit.read"]
 ] as const;
@@ -43,12 +44,6 @@ const metrics = computed(() => ({
   quarantined: rows.value.filter((row) => row.status === "quarantined").length,
   failed: rows.value.filter((row) => row.status === "failed").length
 }));
-
-function display(value: unknown) {
-  if (value === null || value === undefined || value === "") return "—";
-  if (typeof value === "object") return JSON.stringify(value);
-  return String(value);
-}
 
 async function load() {
   busy.value = true;
@@ -105,8 +100,8 @@ onMounted(load);
     <header>
       <div>
         <p class="eyebrow">
-          BATCH 20 · GOVERNED SKILL PLATFORM
-        </p><h1>Skill 控制台</h1>
+          第 20 批 · 受控技能平台
+        </p><h1>技能控制台</h1>
       </div>
       <p>第三方代码不进入 API 主进程；高风险权限、签名、SBOM、兼容性和 Marketplace 人工审核均为服务端 fail-closed 门禁。</p>
     </header>
@@ -148,7 +143,7 @@ onMounted(load);
         v-for="(value, key) in metrics"
         :key="key"
       >
-        <strong>{{ key }}</strong><span>{{ value }}</span>
+        <strong>{{ localizeAdminLabel(key) }}</strong><span>{{ localizeAdminValue(value, key) }}</span>
       </div>
     </article>
     <article class="panel">
@@ -165,7 +160,7 @@ onMounted(load);
               v-for="column in columns"
               :key="column"
             >
-              {{ column }}
+              {{ localizeAdminLabel(column) }}
             </th><th>受控操作</th>
           </tr>
         </thead>
@@ -178,7 +173,7 @@ onMounted(load);
               v-for="column in columns"
               :key="column"
             >
-              {{ display(row[column]) }}
+              {{ localizeAdminValue(row[column], column) }}
             </td>
             <td class="actions">
               <template v-if="section === 'installations'">

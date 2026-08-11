@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { formatAdminTableCell } from "@vav/ui-admin";
 import { resolveApiBaseUrl } from "@/config/api";
 
 import { useAdminAuthStore } from "@/stores/admin-auth";
@@ -158,6 +159,7 @@ watch(section, () => void load());
       />
       <el-table-column
         prop="status"
+        :formatter="formatAdminTableCell"
         label="发布状态"
       />
       <el-table-column

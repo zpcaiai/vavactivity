@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { formatAdminTableCell } from "@vav/ui-admin";
 
 import { catalogApi } from "@/features/catalog/api";
 
@@ -58,7 +59,7 @@ onMounted(() => void load());
     <div class="module-heading">
       <div>
         <p class="admin-kicker">
-          COUNSELING OPERATIONS
+          咨询运营
         </p>
         <h2>辅导中心</h2>
         <p>导师、服务、排班、预约、交付记录与安全转介按最小权限分层管理。</p>
@@ -95,11 +96,13 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           />
           <el-table-column
             prop="scheduled_starts_at"
-            label="预约时间"
+            :formatter="formatAdminTableCell"
+            label="预约时间（UTC+8）"
           />
           <el-table-column
             prop="payment_status"
@@ -158,6 +161,7 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           />
         </el-table>
@@ -184,6 +188,7 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           />
         </el-table>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
+import { formatAdminDate, formatAdminTableCell, localizeAdminValue } from "@vav/ui-admin";
 
 import { catalogApi } from "@/features/catalog/api";
 
@@ -380,17 +381,17 @@ onMounted(() => void load());
     <header class="page-toolbar">
       <div>
         <p class="admin-kicker">
-          PRODUCT / SKU / PRICE
+          商品、SKU 与价格
         </p>
         <h2>{{ product?.internal_name }}</h2>
         <p>
-          {{ product?.product_code }} · {{ product?.status }}
-          · 可见性：{{ product?.visibility }} · 分类：{{ product?.category_id ?? "无" }}
+          {{ product?.product_code }} · {{ localizeAdminValue(product?.status, "status") }}
+          · 可见性：{{ localizeAdminValue(product?.visibility, "visibility") }} · 分类：{{ product?.category_id ?? "无" }}
         </p>
         <p>
-          可售窗口：{{ product?.purchasable_from || "—" }} 至 {{ product?.purchasable_until || "—" }}
+          可售窗口：{{ formatAdminDate(product?.purchasable_from) }} 至 {{ formatAdminDate(product?.purchasable_until) }}
           · 精选：{{ product?.featured ? "是" : "否" }} · 排序：{{ product?.sort_order ?? 0 }}
-          · 版本：{{ product?.version }} · 更新时间：{{ product?.updated_at || "—" }}
+          · 版本：{{ product?.version }} · 更新时间：{{ formatAdminDate(product?.updated_at) }}
         </p>
       </div>
       <div class="toolbar-actions">
@@ -432,17 +433,17 @@ onMounted(() => void load());
         size="small"
         @click="openLocalization(locale)"
       >
-        {{ locale }} · {{ product.localizations[locale]?.translation_status ?? "missing" }}
+        {{ localizeAdminValue(locale, "locale") }} · {{ localizeAdminValue(product.localizations[locale]?.translation_status ?? "missing", "translation_status") }}
       </el-button>
     </div>
     <el-table :data="skus">
       <el-table-column
         prop="sku_code"
-        label="SKU"
+        label="库存单元（SKU）"
       />
       <el-table-column
         prop="id"
-        label="SKU ID"
+        label="SKU 编号"
       />
       <el-table-column
         prop="internal_name"
@@ -474,14 +475,17 @@ onMounted(() => void load());
       />
       <el-table-column
         prop="purchasable_from"
-        label="可售起始"
+        :formatter="formatAdminTableCell"
+        label="可售起始（UTC+8）"
       />
       <el-table-column
         prop="purchasable_until"
-        label="可售截止"
+        :formatter="formatAdminTableCell"
+        label="可售截止（UTC+8）"
       />
       <el-table-column
         prop="status"
+        :formatter="formatAdminTableCell"
         label="状态"
       />
       <el-table-column label="操作">
@@ -522,8 +526,8 @@ onMounted(() => void load());
             <span>
               {{ price.currency_code }} {{ price.unit_amount_minor }}
               （对比价：{{ price.compare_at_amount_minor ?? "—" }}）
-              · {{ price.billing_type }}
-              · {{ price.status }}
+              · {{ localizeAdminValue(price.billing_type, "billing_type") }}
+              · {{ localizeAdminValue(price.status, "status") }}
               · 价格簿：{{ price.price_book_id }}
             </span>
             <el-button
@@ -564,7 +568,7 @@ onMounted(() => void load());
             value="zh-TW"
           />
           <el-option
-            label="English"
+            label="英文"
             value="en"
           />
         </el-select></label>
@@ -687,19 +691,19 @@ onMounted(() => void load());
         <label>Price Book UUID<el-input v-model="priceForm.priceBookId" /></label>
         <label>币种<el-select v-model="priceForm.currency">
           <el-option
-            label="CNY"
+            label="人民币（CNY）"
             value="CNY"
           />
           <el-option
-            label="USD"
+            label="美元（USD）"
             value="USD"
           />
           <el-option
-            label="TWD"
+            label="新台币（TWD）"
             value="TWD"
           />
           <el-option
-            label="HKD"
+            label="港币（HKD）"
             value="HKD"
           />
         </el-select></label>

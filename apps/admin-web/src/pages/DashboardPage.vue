@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { localizeAdminValue } from "@vav/ui-admin";
+
 const metrics = [
   { label: "运行状态", value: "就绪", note: "API、数据库与队列健康检查" },
   { label: "待决策项", value: "9", note: "全部保持 undecided / 关闭" },
@@ -33,7 +35,7 @@ const gates = [
         <div class="panel-heading">
           <div>
             <p class="admin-kicker">
-              DELIVERY MAP
+              交付路径
             </p>
             <h2>能力开放顺序</h2>
           </div>
@@ -51,7 +53,7 @@ const gates = [
           >
             <span>0{{ index + 1 }}</span>
             <strong>{{ gate.label }}</strong>
-            <small>{{ gate.status }}</small>
+            <small>{{ localizeAdminValue(gate.status, "status") }}</small>
           </div>
         </div>
       </article>
@@ -60,7 +62,7 @@ const gates = [
         <div class="panel-heading">
           <div>
             <p class="admin-kicker">
-              DECISIONS
+              决策状态
             </p>
             <h2>未决政策保护</h2>
           </div>
@@ -76,4 +78,3 @@ const gates = [
     </section>
   </div>
 </template>
-

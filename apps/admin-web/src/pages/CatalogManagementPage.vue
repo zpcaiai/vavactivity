@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { localizeAdminLabel, localizeAdminValue } from "@vav/ui-admin";
 
 import { catalogApi } from "@/features/catalog/api";
 
@@ -403,17 +404,8 @@ async function lifecycle(row: CatalogRow, action: string) {
   }
 }
 
-function formatValue(value: unknown) {
-  if (value === null || value === undefined || value === "") {
-    return "";
-  }
-  if (typeof value === "boolean") {
-    return value ? "是" : "否";
-  }
-  if (typeof value === "object") {
-    return JSON.stringify(value);
-  }
-  return String(value);
+function formatValue(value: unknown, field: string) {
+  return localizeAdminValue(value, field);
 }
 
 onMounted(() => void load());
@@ -425,7 +417,7 @@ watch(section, () => void load());
     <header class="page-toolbar">
       <div>
         <p class="admin-kicker">
-          CATALOG CONTROL PLANE
+          商品运营控制台
         </p>
         <h2>{{ title }}</h2>
       </div>
@@ -452,10 +444,10 @@ watch(section, () => void load());
         v-for="column in columns"
         :key="`${column.prop}-${column.label}`"
         :prop="column.prop"
-        :label="column.label"
+        :label="localizeAdminLabel(column.prop, column.label)"
       >
         <template #default="{ row }">
-          <span>{{ formatValue(row[column.prop]) }}</span>
+          <span>{{ formatValue(row[column.prop], column.prop) }}</span>
         </template>
       </el-table-column>
       <el-table-column

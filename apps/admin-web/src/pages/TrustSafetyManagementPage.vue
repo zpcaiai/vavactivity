@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
+import { localizeAdminValue } from "@vav/ui-admin";
 
 import { safetyAdminApi, type SafetyAdminRow } from "@/features/trust-safety/api";
 import { useAdminAuthStore } from "@/stores/admin-auth";
@@ -63,7 +64,7 @@ onMounted(load);
     <header>
       <div>
         <p class="eyebrow">
-          BATCH 18 · TRUST &amp; SAFETY OPS
+          第 18 批 · 信任与安全运营
         </p><h1>信任与安全中心</h1>
       </div><p>自动信号只能冻结、限速或升级复核；永久停用、重大诈骗与其他高影响决定必须双人审批并允许独立申诉。</p>
     </header>
@@ -113,7 +114,7 @@ onMounted(load);
             v-for="row in rows"
             :key="String(row.id)"
           >
-            <td>{{ row.report_number ?? row.case_number ?? row.appeal_number ?? row.rule_code ?? row.run_number ?? row.id }}</td><td>{{ row.category ?? row.primary_category ?? row.target_type ?? row.restriction_type ?? row.rule_type ?? row.signal_code ?? row.metric_code ?? row.event_type }}</td><td>{{ row.status ?? 'recorded' }}</td><td>
+            <td>{{ row.report_number ?? row.case_number ?? row.appeal_number ?? row.rule_code ?? row.run_number ?? row.id }}</td><td>{{ localizeAdminValue(row.category ?? row.primary_category ?? row.target_type ?? row.restriction_type ?? row.rule_type ?? row.signal_code ?? row.metric_code ?? row.event_type, "type") }}</td><td>{{ localizeAdminValue(row.status ?? 'recorded', "status") }}</td><td>
               <button
                 v-if="['cases','moderation','rules'].includes(section)"
                 @click="act(row)"

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
+import { localizeAdminLabel, localizeAdminValue } from "@vav/ui-admin";
 
 import { relationshipAdminApi, type RelationshipAdminRow } from "@/features/relationships/api";
 import { useAdminAuthStore } from "@/stores/admin-auth";
@@ -56,7 +57,7 @@ watch(() => route.fullPath, load); onMounted(load);
     <header>
       <div>
         <p class="eyebrow">
-          BATCH 16 · CONSENT BOUNDARY
+          第 16 批 · 同意边界
         </p><h1>关系运营中心</h1>
       </div><p>管理员可诊断和执行安全冻结，但不能代替成员确认阶段、恢复关系，或恢复已经结束的关系。</p>
     </header>
@@ -92,7 +93,7 @@ watch(() => route.fullPath, load); onMounted(load);
         v-for="(value,key) in summary"
         :key="key"
       >
-        <small>{{ key }}</small><strong>{{ value }}</strong>
+        <small>{{ localizeAdminLabel(key) }}</small><strong>{{ localizeAdminValue(value, key) }}</strong>
       </article>
     </div>
     <article
@@ -101,7 +102,7 @@ watch(() => route.fullPath, load); onMounted(load);
     >
       <RouterLink to="/admin/relationships/journeys">
         ← 返回旅程列表
-      </RouterLink><h2>{{ detail.journey_number }}</h2><pre>{{ JSON.stringify(detail, null, 2) }}</pre><div class="safety">
+      </RouterLink><h2>{{ detail.journey_number }}</h2><pre>{{ localizeAdminValue(detail) }}</pre><div class="safety">
         <h3>安全处置</h3><input
           v-model="reason"
           placeholder="原因代码"
@@ -136,7 +137,7 @@ watch(() => route.fullPath, load); onMounted(load);
       <p v-if="section !== 'journeys'">
         该视图坚持最小披露，当前仅显示相关旅程的过程状态；私人反思、暂停原因和回顾回答不会在此列表展示。
       </p><table>
-        <thead><tr><th>编号</th><th>匿名成员</th><th>状态</th><th>阶段</th><th>更新</th></tr></thead><tbody>
+        <thead><tr><th>编号</th><th>匿名成员</th><th>状态</th><th>阶段</th><th>更新时间（UTC+8）</th></tr></thead><tbody>
           <tr
             v-for="row in rows"
             :key="String(row.journey_id)"
@@ -145,7 +146,7 @@ watch(() => route.fullPath, load); onMounted(load);
               <RouterLink :to="`/admin/relationships/journeys/${row.journey_id}`">
                 {{ row.journey_number }}
               </RouterLink>
-            </td><td>{{ row.members }}</td><td>{{ row.status }}</td><td>{{ row.current_stage_code }}</td><td>{{ row.updated_at }}</td>
+            </td><td>{{ localizeAdminValue(row.members, "members") }}</td><td>{{ localizeAdminValue(row.status, "status") }}</td><td>{{ localizeAdminValue(row.current_stage_code, "current_stage_code") }}</td><td>{{ localizeAdminValue(row.updated_at, "updated_at") }}</td>
           </tr>
         </tbody>
       </table>

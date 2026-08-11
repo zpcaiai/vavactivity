@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
+import { localizeAdminLabel, localizeAdminValue } from "@vav/ui-admin";
 
 import { systemAdminApi, type SystemAdminRow } from "@/features/system/api";
 import { useAdminAuthStore } from "@/stores/admin-auth";
@@ -37,10 +38,8 @@ const columns = computed(() => {
   return [...keys].slice(0, 8);
 });
 
-function display(value: unknown) {
-  if (value === null || value === undefined) return "—";
-  if (typeof value === "object") return JSON.stringify(value);
-  return String(value);
+function display(value: unknown, field = "") {
+  return localizeAdminValue(value, field);
 }
 
 async function load() {
@@ -102,7 +101,7 @@ onMounted(load);
     <header>
       <div>
         <p class="eyebrow">
-          BATCH 19 · PRODUCTION OPERATIONS
+          第 19 批 · 生产运维
         </p><h1>系统运维中心</h1>
       </div>
       <p>仅展示脱敏运行信息。发布使用不可变镜像摘要；生产维护、功能开关激活和恢复操作都保留独立审批与审计边界。</p>
@@ -145,7 +144,7 @@ onMounted(load);
         v-for="(value, key) in summary"
         :key="key"
       >
-        <strong>{{ key }}</strong><span>{{ display(value) }}</span>
+        <strong>{{ localizeAdminLabel(key) }}</strong><span>{{ display(value, key) }}</span>
       </div>
     </article>
     <article
@@ -196,7 +195,7 @@ onMounted(load);
               v-for="column in columns"
               :key="column"
             >
-              {{ column }}
+              {{ localizeAdminLabel(column) }}
             </th><th v-if="section === 'feature-flags'">
               受控操作
             </th>
@@ -211,7 +210,7 @@ onMounted(load);
               v-for="column in columns"
               :key="column"
             >
-              {{ display(row[column]) }}
+              {{ display(row[column], column) }}
             </td>
             <td v-if="section === 'feature-flags'">
               <button

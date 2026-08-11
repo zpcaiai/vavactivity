@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { formatAdminTableCell } from "@vav/ui-admin";
 
 import { catalogApi } from "@/features/catalog/api";
 import { useAdminAuthStore } from "@/stores/admin-auth";
@@ -150,7 +151,7 @@ onMounted(() => void load());
     <div class="module-heading">
       <div>
         <p class="admin-kicker">
-          GOVERNED AGENT OPERATIONS
+          受控智能助手运营
         </p>
         <h2>AI 运营与安全中心</h2>
         <p>默认只显示匿名摘要；完整会话需要单独权限、访问原因和追加式审计。</p>
@@ -203,6 +204,7 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           />
         </el-table>
@@ -255,6 +257,7 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           />
           <el-table-column label="操作">
@@ -270,7 +273,7 @@ onMounted(() => void load());
         </el-table>
       </el-tab-pane>
 
-      <el-tab-pane label="Prompt 发布">
+      <el-tab-pane label="提示词发布">
         <el-table :data="prompts">
           <el-table-column
             prop="prompt_code"
@@ -286,7 +289,7 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="tool_registry_version"
-            label="Tool 版本"
+            label="工具版本"
           />
           <el-table-column
             prop="safety_policy_version"
@@ -294,6 +297,7 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           />
           <el-table-column label="操作">
@@ -313,11 +317,11 @@ onMounted(() => void load());
         <el-table :data="models">
           <el-table-column
             prop="profile_code"
-            label="Profile"
+            label="配置档"
           />
           <el-table-column
             prop="provider"
-            label="Provider"
+            label="服务商"
           />
           <el-table-column
             prop="model_name"
@@ -333,6 +337,7 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           />
         </el-table>
@@ -342,7 +347,7 @@ onMounted(() => void load());
         <el-table :data="tools">
           <el-table-column
             prop="tool_code"
-            label="Tool"
+            label="工具"
           />
           <el-table-column
             prop="semantic_version"
@@ -362,6 +367,7 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           />
           <el-table-column label="操作">
@@ -386,6 +392,7 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           />
           <el-table-column label="用例">
@@ -400,7 +407,8 @@ onMounted(() => void load());
           </el-table-column>
           <el-table-column
             prop="started_at"
-            label="开始时间"
+            :formatter="formatAdminTableCell"
+            label="开始时间（UTC+8）"
           />
         </el-table>
         <el-table :data="audits">
@@ -418,7 +426,8 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="created_at"
-            label="时间"
+            :formatter="formatAdminTableCell"
+            label="时间（UTC+8）"
           />
         </el-table>
       </el-tab-pane>

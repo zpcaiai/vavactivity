@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from "vue";
+import { formatAdminTableCell } from "@vav/ui-admin";
 
 import { catalogApi } from "@/features/catalog/api";
 
@@ -292,7 +293,7 @@ onMounted(() => void load());
     <header class="page-toolbar">
       <div>
         <p class="admin-kicker">
-          ACTIVITY OPERATIONS
+          活动运营
         </p>
         <h2>活动中心</h2>
         <p>活动只关联 Catalog 票种；支付、名额与权益仍由 Commerce/Catalog 权威处理。</p>
@@ -385,11 +386,13 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           />
           <el-table-column
             prop="starts_at"
-            label="开始时间"
+            :formatter="formatAdminTableCell"
+            label="开始时间（UTC+8）"
           />
           <el-table-column label="生命周期操作">
             <template #default="{ row }">
@@ -447,12 +450,12 @@ onMounted(() => void load());
                 value="zh-TW"
               />
               <el-option
-                label="English"
+                label="英文"
                 value="en"
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="Slug">
+          <el-form-item label="URL 短标识">
             <el-input v-model="localization.slug" />
           </el-form-item>
           <el-form-item label="标题">
@@ -523,10 +526,10 @@ onMounted(() => void load());
           <el-form-item label="内部名称">
             <el-input v-model="ticket.internal_name" />
           </el-form-item>
-          <el-form-item label="Catalog Product UUID">
+          <el-form-item label="商品唯一标识">
             <el-input v-model="ticket.catalog_product_id" />
           </el-form-item>
-          <el-form-item label="Catalog SKU UUID">
+          <el-form-item label="SKU 唯一标识">
             <el-input v-model="ticket.catalog_sku_id" />
           </el-form-item>
           <el-button
@@ -551,6 +554,7 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           />
           <el-table-column
@@ -592,11 +596,13 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           />
           <el-table-column
             prop="promotion_offer_expires_at"
-            label="邀请到期"
+            :formatter="formatAdminTableCell"
+            label="邀请到期（UTC+8）"
           />
           <el-table-column label="人工顺序">
             <template #default="{ row }">
@@ -713,11 +719,12 @@ onMounted(() => void load());
           />
           <el-table-column
             prop="status"
+            :formatter="formatAdminTableCell"
             label="状态"
           />
           <el-table-column
             prop="random_seed"
-            label="固定 Seed"
+            label="固定随机种子"
           />
           <el-table-column label="操作">
             <template #default="{ row }">

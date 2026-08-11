@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
+import { formatAdminTableCell, localizeAdminLabel, localizeAdminValue } from "@vav/ui-admin";
 
 import {
   matchmakingInteractionAdminApi,
@@ -113,7 +114,7 @@ onMounted(load);
 <template>
   <section class="interaction-admin">
     <p class="eyebrow">
-      BATCH 15 · INTERACTION OPERATIONS
+      第 15 批 · 互动运营
     </p>
     <h2>互动运营中心</h2>
     <el-alert
@@ -162,7 +163,7 @@ onMounted(load);
         v-for="(value, key) in summary"
         :key="key"
       >
-        <dt>{{ key }}</dt><dd>{{ value }}</dd>
+        <dt>{{ localizeAdminLabel(key) }}</dt><dd>{{ localizeAdminValue(value, key) }}</dd>
       </div>
     </dl>
 
@@ -171,7 +172,7 @@ onMounted(load);
       class="detail"
     >
       <h3>受限诊断详情</h3>
-      <pre>{{ JSON.stringify(detail, null, 2) }}</pre>
+      <pre>{{ localizeAdminValue(detail) }}</pre>
     </article>
 
     <el-table
@@ -189,6 +190,7 @@ onMounted(load);
       </el-table-column>
       <el-table-column
         prop="status"
+        :formatter="formatAdminTableCell"
         label="状态"
         width="150"
       />
@@ -197,7 +199,7 @@ onMounted(load);
         min-width="260"
       >
         <template #default="scope">
-          <code>{{ JSON.stringify(scope.row) }}</code>
+          <code>{{ localizeAdminValue(scope.row) }}</code>
         </template>
       </el-table-column>
       <el-table-column

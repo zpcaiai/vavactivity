@@ -7,6 +7,7 @@ import {
   ref
 } from "vue";
 import { onBeforeRouteLeave, useRoute } from "vue-router";
+import { localizeAdminValue } from "@vav/ui-admin";
 
 import { useAdminAuthStore } from "@/stores/admin-auth";
 
@@ -362,7 +363,7 @@ onBeforeRouteLeave(() => {
           STRUCTURED CONTENT EDITOR
         </p>
         <h2>{{ entry?.internal_name }}</h2>
-        <p>{{ entry?.canonical_slug }} · {{ entry?.status }} · v{{ entry?.version }}</p>
+        <p>{{ entry?.canonical_slug }} · {{ localizeAdminValue(entry?.status, "status") }} · 版本 {{ entry?.version }}</p>
       </div>
       <div class="toolbar-actions">
         <el-button @click="preview">
@@ -417,7 +418,7 @@ onBeforeRouteLeave(() => {
           :key="block.id"
           class="cms-block-list-item"
         >
-          <strong>{{ index + 1 }}. {{ block.type }}</strong>
+          <strong>{{ index + 1 }}. {{ localizeAdminValue(block.type, "type") }}</strong>
           <div>
             <el-button
               link
@@ -488,7 +489,7 @@ onBeforeRouteLeave(() => {
           :key="block.id"
           class="cms-block-editor"
         >
-          <strong>{{ index + 1 }} · {{ block.type }}</strong>
+          <strong>{{ index + 1 }} · {{ localizeAdminValue(block.type, "type") }}</strong>
           <template v-if="block.type === 'hero'">
             <label>标题<el-input v-model="block.data.heading" /></label>
             <label>副标题<el-input

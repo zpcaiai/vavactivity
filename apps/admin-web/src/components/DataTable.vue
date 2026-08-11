@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { localizeAdminLabel, localizeAdminValue } from "@vav/ui-admin";
+
 export interface TableColumn {
   key: string;
   label: string;
@@ -22,10 +24,13 @@ defineProps<{
       v-for="column in columns"
       :key="column.key"
       :prop="column.key"
-      :label="column.label"
+      :label="localizeAdminLabel(column.key, column.label)"
       :width="column.width"
-    />
+    >
+      <template #default="{ row }">
+        {{ localizeAdminValue(row[column.key], column.key) }}
+      </template>
+    </el-table-column>
     <slot />
   </el-table>
 </template>
-

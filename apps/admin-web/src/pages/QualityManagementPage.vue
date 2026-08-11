@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
+import { localizeAdminValue } from "@vav/ui-admin";
 
 import { qualityAdminApi, type QualityRow } from "@/features/quality/api";
 import { useAdminAuthStore } from "@/stores/admin-auth";
@@ -84,12 +85,12 @@ watch(section, load);
     <header>
       <div>
         <p class="eyebrow">
-          BATCH 21 · QUALITY CONTROL PLANE
+          第 21 批 · 质量控制台
         </p>
         <h1>质量治理与发布门禁</h1>
         <p>证据缺失、过期或提交不匹配均按失败处理；生产环境不接受 Conditional Go。</p>
       </div>
-      <strong class="fail-closed">FAIL CLOSED</strong>
+      <strong class="fail-closed">默认阻断</strong>
     </header>
     <nav aria-label="质量治理分区">
       <router-link
@@ -123,8 +124,8 @@ watch(section, load);
       <div><strong>{{ dashboard.capabilities ?? 0 }}</strong><span>可用能力</span></div>
       <div><strong>{{ dashboard.critical_gaps_open ?? 0 }}</strong><span>关键缺口</span></div>
       <div><strong>{{ dashboard.gate_failures ?? 0 }}</strong><span>门禁失败</span></div>
-      <div><strong>{{ dashboard.releases_no_go ?? 0 }}</strong><span>No-Go 发布</span></div>
-      <div><strong>{{ dashboard.release_allowed ? "GO" : "NO-GO" }}</strong><span>当前结构状态</span></div>
+      <div><strong>{{ dashboard.releases_no_go ?? 0 }}</strong><span>禁止发布</span></div>
+      <div><strong>{{ dashboard.release_allowed ? "允许发布" : "禁止发布" }}</strong><span>当前结构状态</span></div>
     </div>
     <div
       v-else
@@ -139,7 +140,7 @@ watch(section, load);
             :key="String(row.id ?? rowLabel(row))"
           >
             <td>{{ rowLabel(row) }}</td>
-            <td>{{ row.status ?? row.decision ?? "-" }}</td>
+            <td>{{ localizeAdminValue(row.status ?? row.decision, row.status ? "status" : "decision") }}</td>
             <td><code>{{ JSON.stringify(row) }}</code></td>
             <td class="actions">
               <button

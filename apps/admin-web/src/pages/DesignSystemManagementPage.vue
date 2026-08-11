@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { AdminDataTable } from "@vav/ui-admin";
+import { AdminDataTable, localizeAdminValue } from "@vav/ui-admin";
 import { VAlert, VButton, VStatusBadge } from "@vav/ui-core";
 
 import { designSystemAdminApi, type DesignRow } from "@/features/design-system/api";
@@ -17,7 +17,7 @@ const notice = ref("");
 const section = computed(() => String(route.meta.designSystemSection ?? "dashboard"));
 const sections = [
   ["dashboard", "概览", "design.analytics.read"],
-  ["tokens", "Token", "design.tokens.read"],
+  ["tokens", "设计令牌", "design.tokens.read"],
   ["components", "组件", "design.components.read"],
   ["patterns", "模式", "design.patterns.read"],
   ["pages", "页面", "design.audits.read"],
@@ -88,11 +88,11 @@ watch(section, load);
     <header>
       <div>
         <p class="eyebrow">
-          BATCH 22 · DESIGN SYSTEM CONTROL PLANE
+          第 22 批 · 设计系统控制台
         </p><h1>设计系统与 UI 质量</h1><p>自动检查只形成技术证据；无障碍与视觉基线仍需独立人工审核。</p>
       </div><VStatusBadge
         :status="dashboard.production_certified ? 'success' : 'warning'"
-        :label="dashboard.production_certified ? 'PRODUCTION CERTIFIED' : 'NOT CERTIFIED'"
+        :label="dashboard.production_certified ? '已通过生产认证' : '未认证'"
       />
     </header>
     <nav aria-label="设计系统治理分区">
@@ -123,7 +123,7 @@ watch(section, load);
       class="metrics"
       aria-live="polite"
     >
-      <article><strong>{{ dashboard.components_active ?? 0 }}</strong><span>活跃组件</span></article><article><strong>{{ dashboard.patterns_active ?? 0 }}</strong><span>页面模式</span></article><article><strong>{{ dashboard.pages_registered ?? 0 }}</strong><span>登记页面</span></article><article><strong>{{ dashboard.audits_failed ?? 0 }}</strong><span>失败审核</span></article><article><strong>{{ dashboard.manual_reviews_open ?? 0 }}</strong><span>待人工复核</span></article><article><strong>{{ dashboard.release_allowed ? 'GO' : 'NO-GO' }}</strong><span>生产发布</span></article>
+      <article><strong>{{ dashboard.components_active ?? 0 }}</strong><span>活跃组件</span></article><article><strong>{{ dashboard.patterns_active ?? 0 }}</strong><span>页面模式</span></article><article><strong>{{ dashboard.pages_registered ?? 0 }}</strong><span>登记页面</span></article><article><strong>{{ dashboard.audits_failed ?? 0 }}</strong><span>失败审核</span></article><article><strong>{{ dashboard.manual_reviews_open ?? 0 }}</strong><span>待人工复核</span></article><article><strong>{{ dashboard.release_allowed ? '允许发布' : '禁止发布' }}</strong><span>生产发布</span></article>
     </div>
     <div
       v-else
@@ -142,7 +142,7 @@ watch(section, load);
       >
         <VStatusBadge
           :status="tone(row.status)"
-          :label="String(row.status ?? '未知')"
+          :label="localizeAdminValue(row.status, 'status')"
         /><span>{{ row.token_version ?? row.audit_code ?? row.baseline_code ?? row.id }}</span><div
           v-if="row.id && ((section === 'tokens' && row.status === 'draft') || (section === 'baselines' && row.status === 'pending') || (section === 'evidence' && row.status === 'validated') || (['accessibility','responsive-audits','visual-regression'].includes(section) && ['technical_pass','needs_review'].includes(String(row.status))))"
           class="actions"

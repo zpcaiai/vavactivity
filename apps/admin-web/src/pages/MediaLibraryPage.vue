@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import { localizeAdminValue } from "@vav/ui-admin";
 import { resolveApiBaseUrl } from "@/config/api";
 
 import { useAdminAuthStore } from "@/stores/admin-auth";
@@ -219,7 +220,7 @@ onMounted(() => void load());
         </div>
         <strong>{{ item.filename }}</strong>
         <small>{{ item.mime_type }} · {{ Math.ceil(item.byte_size / 1024) }} KB</small>
-        <small>{{ item.visibility }} · {{ item.processing_status }}</small>
+        <small>{{ localizeAdminValue(item.visibility, "visibility") }} · {{ localizeAdminValue(item.processing_status, "processing_status") }}</small>
       </article>
     </div>
   </section>
