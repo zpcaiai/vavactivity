@@ -44,8 +44,8 @@ defineProps<{
 .recommendation-reason ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.25rem; }
 .recommendation-reason li { font-size: 0.9rem; line-height: 1.6; padding-left: 0.9rem; position: relative; }
 .recommendation-reason li::before { content: "·"; position: absolute; left: 0.2rem; }
-.recommendation-reason.strength li::before { color: #3f7d58; }
-.recommendation-reason.preference li::before { color: #1f2933; }
-.recommendation-reason.topic li::before { color: #7a5c1e; }
+.recommendation-reason.strength li::before { color: var(--vav-color-success); }
+.recommendation-reason.preference li::before { color: var(--vav-color-text); }
+.recommendation-reason.topic li::before { color: var(--vav-color-accent); }
 .hint { font-size: 0.8rem; opacity: 0.7; }
 </style>

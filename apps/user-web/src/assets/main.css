@@ -18,10 +18,10 @@
 
 .notification-badge {
   align-items: center;
-  background: #a62a2a;
-  border: 2px solid var(--color-paper, #fffaf3);
+  background: var(--vav-color-danger);
+  border: 2px solid var(--color-paper, var(--vav-color-surface-raised));
   border-radius: 999px;
-  color: white;
+  color: var(--vav-color-on-action);
   display: inline-flex;
   font-size: 0.65rem;
   font-weight: 700;
@@ -65,7 +65,7 @@
 }
 
 .notification-toolbar {
-  background: #f7f1e8;
+  background: var(--vav-color-surface-soft);
   border-radius: 1rem;
   margin: 2rem 0 1rem;
   padding: 1rem;
@@ -73,7 +73,7 @@
 
 .notification-item {
   background: white;
-  border: 1px solid #e2d8c8;
+  border: 1px solid var(--vav-color-border);
   border-radius: 1rem;
   display: grid;
   gap: 1rem;
@@ -83,7 +83,7 @@
 }
 
 .notification-item.unread {
-  border-left: 0.35rem solid #9a6a3a;
+  border-left: 0.35rem solid var(--vav-color-accent);
 }
 
 .notification-item.expired {
@@ -96,7 +96,7 @@
 }
 
 .notification-meta {
-  color: #776b5d;
+  color: var(--vav-color-text-muted);
   font-size: 0.8rem;
   justify-content: flex-start;
 }
@@ -111,7 +111,7 @@
 .notification-actions a {
   background: none;
   border: 0;
-  color: #704a27;
+  color: var(--vav-color-accent);
   cursor: pointer;
   text-decoration: underline;
 }
@@ -124,7 +124,7 @@
 }
 
 .preference-card {
-  border: 1px solid #e2d8c8;
+  border: 1px solid var(--vav-color-border);
   border-radius: 1rem;
   display: grid;
   gap: 0.8rem;
@@ -132,7 +132,7 @@
 }
 
 .preference-card small {
-  color: #7e4b31;
+  color: var(--vav-color-accent);
 }
 
 .marketing-consent {
@@ -161,13 +161,13 @@
   display: grid;
   grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
   min-height: calc(100vh - 8rem);
-  background: #fffdf9;
+  background: var(--vav-color-surface);
 }
 
 .ai-conversation-list {
   padding: 1.5rem;
-  border-right: 1px solid #e8dfd3;
-  background: #f8f1e8;
+  border-right: 1px solid var(--vav-color-border);
+  background: var(--vav-color-surface-soft);
 }
 
 .ai-disclosure {
@@ -175,9 +175,9 @@
   gap: 0.75rem;
   margin: 1rem 0;
   padding: 1rem;
-  border: 1px solid #caa37d;
+  border: 1px solid var(--vav-color-accent);
   border-radius: 0.75rem;
-  background: #fffaf3;
+  background: var(--vav-color-surface-raised);
   font-size: 0.9rem;
 }
 
@@ -202,7 +202,7 @@
 }
 
 .ai-conversation-button.active {
-  border-color: #9b6d44;
+  border-color: var(--vav-color-accent);
   background: white;
 }
 
@@ -219,7 +219,7 @@
   align-items: center;
   justify-content: space-between;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #e8dfd3;
+  border-bottom: 1px solid var(--vav-color-border);
 }
 
 .ai-chat-header > div {
@@ -243,13 +243,13 @@
 
 .ai-message.user {
   align-self: flex-end;
-  background: #5c4028;
-  color: white;
+  background: var(--vav-color-text);
+  color: var(--vav-color-on-action);
 }
 
 .ai-message.assistant {
   align-self: flex-start;
-  border: 1px solid #e8dfd3;
+  border: 1px solid var(--vav-color-border);
   background: white;
 }
 
@@ -263,12 +263,12 @@
 .ai-safety-pause {
   padding: 1rem;
   border-radius: 0.6rem;
-  background: #f6efe5;
+  background: var(--vav-color-surface-soft);
 }
 
 .ai-safety-pause {
-  border: 1px solid #b9483b;
-  background: #fff2ef;
+  border: 1px solid var(--vav-color-danger);
+  background: var(--vav-color-surface-danger);
 }
 
 .ai-composer {
@@ -276,7 +276,7 @@
   grid-template-columns: 1fr auto;
   gap: 0.75rem;
   padding-top: 1rem;
-  border-top: 1px solid #e8dfd3;
+  border-top: 1px solid var(--vav-color-border);
 }
 
 .ai-composer textarea {
@@ -291,7 +291,7 @@
 
   .ai-conversation-list {
     border-right: 0;
-    border-bottom: 1px solid #e8dfd3;
+    border-bottom: 1px solid var(--vav-color-border);
   }
 
   .ai-chat-header {
@@ -365,7 +365,7 @@ select {
 }
 
 .form-error {
-  color: #9d2a38;
+  color: var(--vav-color-danger);
 }
 
 .session-card {
@@ -489,7 +489,7 @@ select {
   background:
     linear-gradient(140deg, rgb(57 80 72 / 88%), rgb(201 152 91 / 68%)),
     var(--vav-color-primary);
-  color: white;
+  color: var(--vav-color-on-action);
   display: flex;
   min-height: 11rem;
   padding: 1.4rem;
@@ -548,7 +548,7 @@ select {
 
 .availability-badge.sold_out {
   background: rgb(157 42 56 / 10%);
-  color: #9d2a38;
+  color: var(--vav-color-danger);
 }
 
 .catalog-empty {
@@ -636,7 +636,7 @@ select {
   background: var(--vav-color-primary);
   border: 0;
   border-radius: var(--vav-radius-sm);
-  color: white;
+  color: var(--vav-color-on-action);
   cursor: pointer;
   font: inherit;
   padding: 0.85rem 1.1rem;
@@ -706,9 +706,9 @@ select {
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem;
-  border: 1px solid var(--color-border, #ded8ce);
+  border: 1px solid var(--color-border, var(--vav-color-border));
   border-radius: 18px;
-  background: #fff;
+  background: var(--vav-color-on-action);
 }
 
 .commerce-card div,
@@ -718,7 +718,7 @@ select {
 }
 
 .commerce-card small {
-  color: var(--color-text-muted, #716b62);
+  color: var(--color-text-muted, var(--vav-color-text-muted));
 }
 
 .commerce-actions {
@@ -771,7 +771,7 @@ select {
   z-index: 100;
   border-radius: var(--vav-radius-sm);
   background: var(--vav-color-ink);
-  color: white;
+  color: var(--vav-color-on-action);
   padding: 0.75rem 1rem;
 }
 
@@ -819,7 +819,7 @@ select {
   align-items: center;
   background: var(--vav-color-primary);
   border-radius: 50% 50% 48% 52%;
-  color: white;
+  color: var(--vav-color-on-action);
   display: inline-flex;
   font-family: Georgia, serif;
   font-size: 1.25rem;
@@ -933,7 +933,7 @@ select {
   background: var(--vav-color-primary);
   border: 0;
   border-radius: 999px;
-  color: white;
+  color: var(--vav-color-on-action);
   cursor: pointer;
   display: inline-flex;
   font-size: 0.9rem;
@@ -1046,7 +1046,7 @@ select {
 
 .journey-section {
   background: var(--vav-color-ink);
-  color: white;
+  color: var(--vav-color-on-action);
   padding: 7rem clamp(1.25rem, 7vw, 8rem);
 }
 
@@ -1084,7 +1084,7 @@ select {
 }
 
 .journey-grid article {
-  border-left: 1px solid rgb(255 255 255 / 15%);
+  border-left: 1px solid var(--vav-color-border);
   padding: 2rem 3rem;
 }
 
@@ -1427,7 +1427,7 @@ select {
 
   .journey-grid article {
     border-left: 0;
-    border-top: 1px solid rgb(255 255 255 / 15%);
+    border-top: 1px solid var(--vav-color-border);
     padding: 2rem 0;
   }
 
@@ -1453,26 +1453,6 @@ select {
 }
 
 /* C-end cinematic theme — scoped to user-web so the operational admin UI stays neutral. */
-:root {
-  color-scheme: dark;
-  --vav-color-ink: #f5f7f8;
-  --vav-color-muted: #aebbc2;
-  --vav-color-surface: #091722;
-  --vav-color-surface-soft: #132632;
-  --vav-color-primary: #e5818d;
-  --vav-color-primary-strong: #c96176;
-  --vav-color-accent: #efae93;
-  --vav-color-success: #77b7a7;
-  --vav-color-danger: #ef8892;
-  --vav-color-border: rgb(222 235 241 / 16%);
-  --vav-radius-sm: 0.75rem;
-  --vav-radius-md: 1.15rem;
-  --vav-radius-lg: 1.75rem;
-  --vav-shadow-soft: 0 24px 80px rgb(0 0 0 / 28%);
-  --vav-glass: rgb(16 28 36 / 72%);
-  --vav-glass-strong: rgb(9 18 25 / 88%);
-  --vav-pink-gradient: linear-gradient(118deg, #ef8a91 0%, #b55e78 100%);
-}
 
 html,
 body,
@@ -1482,10 +1462,10 @@ body,
 
 body {
   background:
-    radial-gradient(circle at 50% -20%, rgb(103 148 174 / 27%), transparent 42rem),
-    radial-gradient(circle at 100% 30%, rgb(203 104 126 / 10%), transparent 32rem),
-    #07131c;
-  color: var(--vav-color-ink);
+    radial-gradient(circle at 50% -20%, rgb(140 79 94 / 6%), transparent 42rem),
+    radial-gradient(circle at 100% 30%, rgb(201 152 91 / 7%), transparent 32rem),
+    var(--vav-color-surface);
+  color: var(--vav-color-text);
 }
 
 body::before {
@@ -1503,13 +1483,13 @@ body::before {
 input,
 textarea,
 select {
-  background: rgb(255 255 255 / 6%);
+  background: var(--vav-color-surface-raised);
   border-color: var(--vav-color-border);
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: rgb(222 232 237 / 42%);
+  color: var(--vav-color-text-subtle);
 }
 
 .site-shell {
@@ -1520,7 +1500,7 @@ textarea::placeholder {
 
 .site-header {
   backdrop-filter: blur(24px);
-  background: rgb(8 20 29 / 82%);
+  background: var(--vav-color-surface-raised);
   border: 1px solid var(--vav-color-border);
   border-radius: 1.35rem;
   box-shadow: 0 18px 60px rgb(0 0 0 / 18%);
@@ -1549,7 +1529,7 @@ textarea::placeholder {
 }
 
 .brand-wordmark {
-  color: #ee838c;
+  color: var(--vav-color-action-primary);
   font-family: var(--vav-font-sans);
   font-size: 1.75rem;
   font-weight: 400;
@@ -1557,13 +1537,13 @@ textarea::placeholder {
 }
 
 .brand > small {
-  color: rgb(239 245 248 / 58%);
+  color: var(--vav-color-text-muted);
   font-size: 0.68rem;
   letter-spacing: 0.08em;
 }
 
 .main-nav a {
-  color: rgb(239 245 248 / 72%);
+  color: var(--vav-color-text);
   font-size: 0.88rem;
   padding: 0.55rem 0;
   position: relative;
@@ -1572,11 +1552,11 @@ textarea::placeholder {
 
 .main-nav a:hover,
 .main-nav a.router-link-active {
-  color: white;
+  color: var(--vav-color-on-action);
 }
 
 .main-nav > a:not(.start-link).router-link-exact-active::after {
-  background: #ec818a;
+  background: var(--vav-color-action-primary);
   bottom: 0;
   content: "";
   height: 2px;
@@ -1586,17 +1566,17 @@ textarea::placeholder {
 }
 
 .main-nav .cart-link {
-  color: rgb(239 245 248 / 62%);
+  color: var(--vav-color-text-muted);
   font-size: 0.78rem;
 }
 
 .main-nav .start-link {
   align-items: center;
-  background: var(--vav-pink-gradient);
-  border: 1px solid rgb(255 255 255 / 16%);
+  background: linear-gradient(118deg, var(--vav-color-action-primary) 0%, var(--vav-color-action-primary-hover) 100%);
+  border: 1px solid var(--vav-color-border);
   border-radius: 999px;
   box-shadow: 0 12px 28px rgb(180 83 108 / 20%);
-  color: white;
+  color: var(--vav-color-on-action);
   display: inline-flex;
   gap: 1rem;
   padding: 0.72rem 1.2rem;
@@ -1615,7 +1595,7 @@ textarea::placeholder {
 }
 
 .home-hero {
-  border: 1px solid rgb(218 236 245 / 16%);
+  border: 1px solid var(--vav-color-border);
   border-radius: 1.65rem;
   box-shadow: 0 38px 120px rgb(0 0 0 / 35%);
   min-height: max(730px, calc(100vh - 2rem));
@@ -1625,8 +1605,8 @@ textarea::placeholder {
 
 .home-hero-image {
   background-image:
-    linear-gradient(90deg, rgb(6 14 21 / 91%) 0%, rgb(6 14 21 / 62%) 36%, transparent 67%),
-    linear-gradient(0deg, rgb(5 12 18 / 76%) 0%, transparent 45%),
+    linear-gradient(90deg, var(--vav-color-surface-raised) 0%, var(--vav-color-surface-soft) 36%, transparent 67%),
+    linear-gradient(0deg, var(--vav-color-surface-soft) 0%, transparent 45%),
     none;
   background-position: center;
   background-size: cover;
@@ -1651,11 +1631,11 @@ textarea::placeholder {
 }
 
 .home-hero .eyebrow {
-  color: #f09aa2;
+  color: var(--vav-color-action-primary);
 }
 
 .home-hero h1 {
-  color: #f7fafb;
+  color: var(--vav-color-surface-raised);
   font-family: var(--vav-font-sans);
   font-size: clamp(3.3rem, 5.2vw, 6.15rem);
   font-weight: 350;
@@ -1667,14 +1647,14 @@ textarea::placeholder {
 }
 
 .home-hero .hero-intro {
-  color: rgb(240 245 247 / 76%);
+  color: var(--vav-color-text);
   line-height: 1.8;
   max-width: 33rem;
 }
 
 .hero-primary {
   align-items: center;
-  background: var(--vav-pink-gradient);
+  background: linear-gradient(118deg, var(--vav-color-action-primary) 0%, var(--vav-color-action-primary-hover) 100%);
   border-radius: 999px;
   min-width: 13rem;
   padding: 1rem 2rem;
@@ -1683,8 +1663,8 @@ textarea::placeholder {
 .round-arrow {
   align-items: center;
   backdrop-filter: blur(16px);
-  background: rgb(255 255 255 / 12%);
-  border: 1px solid rgb(255 255 255 / 20%);
+  background: var(--vav-color-border);
+  border: 1px solid var(--vav-color-border);
   border-radius: 50%;
   display: inline-flex;
   font-size: 1.6rem;
@@ -1696,7 +1676,7 @@ textarea::placeholder {
 }
 
 .round-arrow:hover {
-  background: rgb(255 255 255 / 20%);
+  background: var(--vav-color-border);
   transform: translateX(4px);
 }
 
@@ -1711,7 +1691,7 @@ textarea::placeholder {
 }
 
 .member-proof p {
-  color: rgb(238 244 247 / 70%);
+  color: var(--vav-color-text-muted);
   font-size: 0.78rem;
   line-height: 1.45;
   margin: 0;
@@ -1719,7 +1699,7 @@ textarea::placeholder {
 }
 
 .member-proof strong {
-  color: #f2a4a7;
+  color: var(--vav-color-action-primary);
   font-size: 1rem;
 }
 
@@ -1729,10 +1709,10 @@ textarea::placeholder {
 
 .member-faces span {
   align-items: center;
-  background: linear-gradient(145deg, #d5b09f, #485c67);
-  border: 2px solid #172732;
+  background: linear-gradient(145deg, var(--vav-color-accent), var(--vav-color-text-muted));
+  border: 2px solid var(--vav-color-surface-soft);
   border-radius: 50%;
-  color: white;
+  color: var(--vav-color-on-action);
   display: inline-flex;
   font-size: 0.65rem;
   height: 2.35rem;
@@ -1747,8 +1727,8 @@ textarea::placeholder {
 
 .needs-panel {
   backdrop-filter: blur(26px);
-  background: linear-gradient(145deg, rgb(25 35 42 / 66%), rgb(12 22 29 / 82%));
-  border: 1px solid rgb(255 255 255 / 18%);
+  background: linear-gradient(145deg, var(--vav-color-surface-soft), var(--vav-color-surface-raised));
+  border: 1px solid var(--vav-color-border);
   border-radius: 1.35rem;
   bottom: 3.5rem;
   padding: 1.35rem;
@@ -1771,8 +1751,8 @@ textarea::placeholder {
 
 .needs-grid a {
   align-items: center;
-  background: rgb(255 255 255 / 7%);
-  border: 1px solid rgb(255 255 255 / 10%);
+  background: var(--vav-color-surface-soft);
+  border: 1px solid var(--vav-color-surface-soft);
   border-radius: 0.9rem;
   display: flex;
   flex-direction: column;
@@ -1806,7 +1786,7 @@ textarea::placeholder {
 
 .need-icon::before,
 .need-icon::after {
-  color: #f3b0b4;
+  color: var(--vav-color-action-primary);
   font-size: 1rem;
   left: 50%;
   position: absolute;
@@ -1823,8 +1803,8 @@ textarea::placeholder {
 .ai-prompt-card {
   align-items: center;
   backdrop-filter: blur(26px);
-  background: linear-gradient(120deg, rgb(20 13 15 / 88%), rgb(7 14 20 / 90%));
-  border: 1px solid rgb(255 255 255 / 16%);
+  background: linear-gradient(120deg, var(--vav-color-surface-soft), var(--vav-color-surface-raised));
+  border: 1px solid var(--vav-color-border);
   border-radius: 1.25rem;
   bottom: 3.5rem;
   display: flex;
@@ -1839,11 +1819,11 @@ textarea::placeholder {
 
 .ai-orb {
   align-items: center;
-  background: radial-gradient(circle at 50% 45%, #3a2025, #0d141a 62%);
-  border: 1px solid #eb927d;
+  background: radial-gradient(circle at 50% 45%, var(--vav-color-surface-soft), var(--vav-color-surface) 62%);
+  border: 1px solid var(--vav-color-accent);
   border-radius: 50%;
   box-shadow: 0 0 0 6px rgb(228 118 102 / 8%), 0 0 28px rgb(234 137 106 / 55%);
-  color: #f18c91;
+  color: var(--vav-color-action-primary);
   display: inline-flex;
   flex: 0 0 auto;
   font-size: 0.85rem;
@@ -1874,8 +1854,8 @@ textarea::placeholder {
 
 .ai-prompt-field {
   align-items: center;
-  background: rgb(255 255 255 / 5%);
-  border: 1px solid rgb(255 255 255 / 10%);
+  background: var(--vav-color-surface-soft);
+  border: 1px solid var(--vav-color-surface-soft);
   border-radius: 999px;
   color: rgb(238 244 247 / 38%);
   display: flex;
@@ -1887,9 +1867,9 @@ textarea::placeholder {
 
 .ai-prompt-field b {
   align-items: center;
-  background: #c87987;
+  background: var(--vav-color-action-primary-hover);
   border-radius: 50%;
-  color: white;
+  color: var(--vav-color-on-action);
   display: inline-flex;
   height: 1.65rem;
   justify-content: center;
@@ -1897,7 +1877,7 @@ textarea::placeholder {
 }
 
 .journey-section {
-  background: linear-gradient(145deg, #0d202c, #0a1721 66%, #20141a);
+  background: linear-gradient(145deg, var(--vav-color-surface), var(--vav-color-surface) 66%, var(--vav-color-surface-soft));
   border: 1px solid var(--vav-color-border);
   border-radius: 1.75rem;
   margin: 1rem 0 0;
@@ -1910,7 +1890,7 @@ textarea::placeholder {
 }
 
 .journey-grid article:hover {
-  background: rgb(255 255 255 / 5%);
+  background: var(--vav-color-surface-soft);
 }
 
 .home-cms-content {
@@ -1932,13 +1912,13 @@ textarea::placeholder {
 .status-panel,
 .empty-state {
   backdrop-filter: blur(18px);
-  background: var(--vav-glass);
+  background: var(--vav-color-surface-raised);
   border-color: var(--vav-color-border);
   box-shadow: var(--vav-shadow-soft);
 }
 
 .product-card-art {
-  background: linear-gradient(140deg, #1b3b4c, #94576c 62%, #d58c7f);
+  background: linear-gradient(140deg, var(--vav-color-focus), var(--vav-color-action-primary-hover) 62%, var(--vav-color-accent));
 }
 
 .catalog-heading h1,
@@ -1969,7 +1949,7 @@ textarea::placeholder {
 }
 
 .site-footer {
-  background: rgb(7 16 23 / 55%);
+  background: var(--vav-color-surface-soft);
   border-color: var(--vav-color-border);
   margin-top: 2rem;
 }
@@ -1992,7 +1972,7 @@ textarea::placeholder {
 @media (max-width: 980px) {
   .site-header,
   .home-route .site-header {
-    background: rgb(8 20 29 / 82%);
+    background: var(--vav-color-surface-raised);
     border-color: var(--vav-color-border);
     left: auto;
     margin: 0;
@@ -2006,7 +1986,7 @@ textarea::placeholder {
 
   .main-nav {
     backdrop-filter: blur(28px);
-    background: rgb(8 20 29 / 96%);
+    background: var(--vav-color-surface-raised);
     border: 1px solid var(--vav-color-border);
     border-radius: 1.25rem;
     left: 0;
@@ -2024,8 +2004,8 @@ textarea::placeholder {
 
   .home-hero-image {
     background-image:
-      linear-gradient(90deg, rgb(6 14 21 / 86%) 0%, rgb(6 14 21 / 56%) 68%, rgb(6 14 21 / 28%)),
-      linear-gradient(0deg, rgb(5 12 18 / 96%) 0%, transparent 62%),
+      linear-gradient(90deg, var(--vav-color-surface-raised) 0%, var(--vav-color-surface-soft) 68%, var(--vav-color-surface-soft)),
+      linear-gradient(0deg, var(--vav-color-surface-raised) 0%, transparent 62%),
       none;
     background-position: 64% center;
   }
@@ -2123,4 +2103,162 @@ textarea::placeholder {
     border-radius: 1.25rem;
     padding: 4rem 1.25rem;
   }
+}
+
+/* ---------------------------------------------------------------------------
+ * Public shell (redesign 2026-08)
+ *
+ * The marketing header, navigation and footer were rebuilt around the IA
+ * module. Everything below resolves through semantic tokens, so the light,
+ * dark and high-contrast themes all render correctly — the previous build
+ * pinned a dark palette at :root and made theming impossible.
+ * ------------------------------------------------------------------------ */
+
+.site-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow: visible;
+  position: relative;
+}
+
+.site-header,
+.home-route .site-header {
+  align-items: center;
+  backdrop-filter: blur(18px);
+  background: color-mix(in srgb, var(--vav-color-surface-raised) 86%, transparent);
+  border: 1px solid var(--vav-color-border);
+  border-radius: var(--vav-radius-lg);
+  box-shadow: var(--vav-component-elevation-raised);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vav-space-4);
+  justify-content: space-between;
+  left: auto;
+  margin: var(--vav-space-4) auto 0;
+  max-width: min(1560px, calc(100% - 2rem));
+  padding: var(--vav-space-3) clamp(1rem, 3vw, 2.5rem);
+  position: sticky;
+  top: var(--vav-space-4);
+  transform: none;
+  width: auto;
+  z-index: var(--vav-layout-z-index-sticky);
+}
+
+.site-header__brand {
+  align-items: center;
+  color: var(--vav-color-text);
+  display: inline-flex;
+  gap: var(--vav-space-3);
+  text-decoration: none;
+}
+
+.site-header__mark {
+  align-items: center;
+  background: var(--vav-color-action-primary);
+  border-radius: 50% 50% 48% 52%;
+  color: var(--vav-color-on-action);
+  display: inline-flex;
+  font-family: Georgia, serif;
+  font-size: var(--vav-font-size-lg);
+  height: 2.5rem;
+  justify-content: center;
+  transform: rotate(-7deg);
+  width: 2.5rem;
+}
+
+.site-header__wordmark { display: grid; line-height: var(--vav-line-height-tight); }
+.site-header__wordmark strong { font-size: var(--vav-font-size-lg); letter-spacing: -0.04em; }
+.site-header__wordmark small { color: var(--vav-color-text-muted); font-size: var(--vav-font-size-xs); letter-spacing: var(--vav-letter-spacing-wide); }
+
+.site-nav { align-items: center; display: flex; flex-wrap: wrap; gap: clamp(0.75rem, 1.5vw, 1.5rem); }
+
+.site-nav a {
+  border-bottom: 2px solid transparent;
+  color: var(--vav-color-text-muted);
+  font-size: var(--vav-font-size-sm);
+  padding-block: var(--vav-space-2);
+  text-decoration: none;
+}
+
+.site-nav a:hover { color: var(--vav-color-text); }
+.site-nav a.router-link-active { border-bottom-color: var(--vav-color-action-primary); color: var(--vav-color-action-primary); }
+
+.site-header__actions { align-items: center; display: flex; flex-wrap: wrap; gap: var(--vav-space-2); }
+.site-header__cart, .site-header__language { color: var(--vav-color-text-muted); font-size: var(--vav-font-size-sm); text-decoration: none; }
+.site-header__cart:hover, .site-header__language:hover { color: var(--vav-color-text); }
+
+.site-header__cta {
+  align-items: center;
+  background: linear-gradient(118deg, var(--vav-color-action-primary) 0%, var(--vav-color-action-primary-hover) 100%);
+  border-radius: var(--vav-radius-pill);
+  color: var(--vav-color-on-action);
+  display: inline-flex;
+  font-size: var(--vav-font-size-sm);
+  font-weight: var(--vav-font-weight-semibold);
+  gap: var(--vav-space-3);
+  min-height: var(--vav-component-button-height);
+  padding-inline: var(--vav-space-4);
+  text-decoration: none;
+}
+
+.site-header__menu {
+  background: var(--vav-color-surface-raised);
+  border: 1px solid var(--vav-color-border);
+  border-radius: var(--vav-radius-sm);
+  cursor: pointer;
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: center;
+  min-height: var(--vav-component-touch-target-minimum);
+  min-width: var(--vav-component-touch-target-minimum);
+  padding-inline: var(--vav-space-2);
+}
+
+.site-header__menu span { background: var(--vav-color-text); display: block; height: 2px; }
+
+.site-shell > main { flex: 1 1 auto; }
+
+.site-footer {
+  align-items: start;
+  background: var(--vav-color-surface-soft);
+  border-top: 1px solid var(--vav-color-border);
+  display: grid;
+  gap: var(--vav-space-6);
+  grid-template-columns: minmax(12rem, 1fr) minmax(0, 3fr);
+  margin: var(--vav-space-16) auto 0;
+  max-width: 1440px;
+  padding: var(--vav-space-12) clamp(1.25rem, 4vw, 4.5rem);
+  width: 100%;
+}
+
+.site-footer__brand { align-items: center; display: flex; gap: var(--vav-space-3); }
+.site-footer__brand p { color: var(--vav-color-text-muted); font-size: var(--vav-font-size-sm); margin: 0; }
+.site-footer__groups { display: grid; gap: var(--vav-space-6); grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); }
+.site-footer__groups h2 { font-size: var(--vav-font-size-sm); letter-spacing: var(--vav-letter-spacing-wide); margin: 0 0 var(--vav-space-3); text-transform: uppercase; }
+.site-footer__groups ul { display: grid; gap: var(--vav-space-2); list-style: none; margin: 0; padding: 0; }
+.site-footer__groups a { color: var(--vav-color-text-muted); font-size: var(--vav-font-size-sm); text-decoration: none; }
+.site-footer__groups a:hover { color: var(--vav-color-text); text-decoration: underline; }
+.site-footer__legal { color: var(--vav-color-text-subtle); font-size: var(--vav-font-size-xs); grid-column: 1 / -1; margin: 0; }
+
+@media (max-width: 64rem) {
+  .site-header__menu { display: flex; }
+
+  .site-nav {
+    background: var(--vav-color-surface-raised);
+    border: 1px solid var(--vav-color-border);
+    border-radius: var(--vav-radius-md);
+    box-shadow: var(--vav-component-elevation-overlay);
+    display: none;
+    inset-inline: 0;
+    margin-top: var(--vav-space-3);
+    padding: var(--vav-space-4);
+    position: absolute;
+    top: 100%;
+    z-index: var(--vav-layout-z-index-drawer);
+  }
+
+  .site-nav.open { display: grid; }
+  .site-footer { grid-template-columns: minmax(0, 1fr); }
 }

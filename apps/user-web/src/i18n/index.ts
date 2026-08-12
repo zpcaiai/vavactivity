@@ -7,9 +7,8 @@ import zhTWExtensions from "./locales/zh-TW.json";
 export const supportedLocales = ["zh-CN", "zh-TW", "en"] as const;
 export type SupportedLocale = (typeof supportedLocales)[number];
 
-const messages = {
+const baseMessages = {
   "zh-CN": {
-    ...zhCNExtensions,
     brand: { promise: "认真认识，安心同行" },
     nav: {
       home: "首页",
@@ -107,7 +106,6 @@ const messages = {
     common: { coming: "正在建立可靠的服务闭环", language: "语言", close: "关闭" }
   },
   "zh-TW": {
-    ...zhTWExtensions,
     brand: { promise: "認真認識，安心同行" },
     nav: {
       home: "首頁",
@@ -165,7 +163,6 @@ const messages = {
     common: { coming: "正在建立可靠的服務閉環", language: "語言", close: "關閉" }
   },
   en: {
-    ...enExtensions,
     brand: { promise: "Meet thoughtfully. Walk forward safely." },
     nav: {
       home: "Home",
@@ -223,6 +220,31 @@ const messages = {
     common: { coming: "Building a dependable service journey", language: "Language", close: "Close" }
   }
 } as const;
+
+type MessageTree = { [key: string]: string | MessageTree };
+
+/**
+ * Locale JSON files are merged *over* the inline defaults key by key, so a
+ * feature can add or override a single string without having to restate the
+ * whole namespace. A shallow spread used to drop sibling keys silently.
+ */
+function deepMerge(base: MessageTree, extension: MessageTree): MessageTree {
+  const result: MessageTree = { ...base };
+  for (const [key, value] of Object.entries(extension)) {
+    const current = result[key];
+    result[key] =
+      value && typeof value === "object" && current && typeof current === "object"
+        ? deepMerge(current, value)
+        : value;
+  }
+  return result;
+}
+
+const messages = {
+  "zh-CN": deepMerge(baseMessages["zh-CN"] as unknown as MessageTree, zhCNExtensions as MessageTree),
+  "zh-TW": deepMerge(baseMessages["zh-TW"] as unknown as MessageTree, zhTWExtensions as MessageTree),
+  en: deepMerge(baseMessages.en as unknown as MessageTree, enExtensions as MessageTree)
+};
 
 export const i18n = createI18n({
   legacy: false,

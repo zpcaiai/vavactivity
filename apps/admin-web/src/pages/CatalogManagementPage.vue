@@ -114,8 +114,16 @@ const form = ref({
   customerSegment: "",
   importPrefix: "",
   importCount: 1,
-  importValidUntil: ""
+  importValidUntil: "",
+  parentId: ""
 });
+
+/**
+ * Categories used to be unreachable: no route, no page, and the product form
+ * asked the operator to paste a UUID. Load them so the product form can offer
+ * a real picker and so the category section can list and create them.
+ */
+const categories = ref<CatalogRow[]>([]);
 
 const fulfillmentByProductType: Record<string, string> = {
   activity_ticket: "event_admission",
@@ -130,6 +138,7 @@ const fulfillmentByProductType: Record<string, string> = {
 };
 
 const title = computed(() => ({
+  categories: "商品分类",
   products: "商品管理",
   "price-books": "价格簿",
   prices: "价格记录",
@@ -142,6 +151,16 @@ const endpoint = computed(() => `/admin/catalog/${section.value}`);
 const canCreate = computed(() => !["inventory", "prices"].includes(section.value));
 
 const columns = computed<TableColumn[]>(() => {
+  if (section.value === "categories") {
+    return [
+      { prop: "category_code", label: "分类编码" },
+      { prop: "internal_name", label: "内部名称" },
+      { prop: "display_name", label: "展示名称" },
+      { prop: "parent_name", label: "上级分类" },
+      { prop: "sort_order", label: "排序权重" },
+      { prop: "status", label: "状态" },
+    ];
+  }
   if (section.value === "products") {
     return [
       { prop: "id", label: "商品 ID" },
@@ -242,12 +261,40 @@ const columns = computed<TableColumn[]>(() => {
   ];
 });
 
+function categoryName(row: CatalogRow) {
+  const localizations = row.localizations as Record<string, { name?: string }> | undefined;
+  return (
+    localizations?.[String(row.default_locale ?? "zh-CN")]?.name ??
+    Object.values(localizations ?? {})[0]?.name ??
+    String(row.internal_name ?? row.category_code ?? "")
+  );
+}
+
+async function loadCategories() {
+  const result = await catalogApi<{ items: CatalogRow[] }>("/admin/catalog/categories");
+  categories.value = result.items.map((item) => ({
+    ...item,
+    display_name: categoryName(item),
+    parent_name: item.parent_id
+      ? categoryName(result.items.find((parent) => parent.id === item.parent_id) ?? item)
+      : ""
+  }));
+}
+
 async function load() {
   loading.value = true;
   error.value = "";
   try {
+    if (section.value === "categories") {
+      await loadCategories();
+      rows.value = categories.value;
+      return;
+    }
     const result = await catalogApi<{ items: CatalogRow[] }>(endpoint.value);
     rows.value = result.items;
+    if (section.value === "products") {
+      await loadCategories();
+    }
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : "加载失败";
   } finally {
@@ -266,7 +313,19 @@ function safeMetadata() {
 async function create() {
   error.value = "";
   let body: Record<string, unknown>;
-  if (section.value === "products") {
+  if (section.value === "categories") {
+    body = {
+      category_code: form.value.code.toLowerCase(),
+      parent_id: form.value.parentId || null,
+      internal_name: form.value.internalName || form.value.name,
+      sort_order: form.value.sortOrder,
+      localizations: [{
+        locale: form.value.locale,
+        name: form.value.name,
+        slug: form.value.slug || form.value.code.toLowerCase().replaceAll("_", "-")
+      }]
+    };
+  } else if (section.value === "products") {
     body = {
       product_code: form.value.code.toUpperCase(),
       product_type: form.value.productType,
@@ -488,8 +547,36 @@ watch(section, () => void load());
       <div class="editor-form">
         <label>编码<el-input v-model="form.code" /></label>
         <label>Slug<el-input v-model="form.slug" /></label>
-        <label v-if="section === 'products' || section === 'promotions'">
+        <label v-if="['products', 'promotions', 'categories'].includes(section)">
           内部名称<el-input v-model="form.internalName" />
+        </label>
+        <label v-if="section === 'categories'">
+          展示名称<el-input v-model="form.name" />
+        </label>
+        <label v-if="section === 'categories'">
+          上级分类
+          <el-select
+            v-model="form.parentId"
+            clearable
+            filterable
+            placeholder="留空表示顶级分类"
+          >
+            <el-option
+              v-for="category in categories"
+              :key="category.id"
+              :label="`${category.display_name}（${category.category_code}）`"
+              :value="category.id"
+            />
+          </el-select>
+        </label>
+        <label v-if="section === 'categories'">
+          展示语言<el-input v-model="form.locale" />
+        </label>
+        <label v-if="section === 'categories'">
+          排序权重<el-input-number
+            v-model="form.sortOrder"
+            :min="0"
+          />
         </label>
         <label v-if="section === 'products' || section === 'price-books'">
           公开名称<el-input v-model="form.name" />
@@ -552,7 +639,20 @@ watch(section, () => void load());
           默认语言<el-input v-model="form.locale" />
         </label>
         <label v-if="section === 'products'">
-          分类 UUID<el-input v-model="form.categoryId" />
+          商品分类
+          <el-select
+            v-model="form.categoryId"
+            clearable
+            filterable
+            placeholder="选择商品分类"
+          >
+            <el-option
+              v-for="category in categories"
+              :key="category.id"
+              :label="`${category.display_name}（${category.category_code}）`"
+              :value="category.id"
+            />
+          </el-select>
         </label>
         <label v-if="section === 'products'">
           可售起始时间<el-input

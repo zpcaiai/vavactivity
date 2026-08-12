@@ -831,12 +831,81 @@ USABILITY_PERMISSIONS = {
     "usability.certifications.evaluate",
 }
 
+P1_EXPERIENCE_PERMISSIONS = {
+    # B13 discovery / maps / sharing
+    "discovery.location.read",
+    "discovery.map_provider.manage",
+    "discovery.venue_location.manage",
+    "activities.share.manage",
+    "activities.share.revoke",
+    # B14 attendee preview and follow graph
+    "attendee_preview.read",
+    "attendee_preview.consent.read",
+    "attendee_preview.consent.grant",
+    "attendee_preview.consent.withdraw",
+    "social.follows.read",
+    "social.notifications.dispatch",
+    # B15 profile media
+    "profile_media.assets.read",
+    "profile_media.assets.remove",
+    "profile_media.moderation.read",
+    "profile_media.moderation.decide",
+}
+
+PHASE_TWO_PERMISSIONS = {
+    # B16 couples and SCOPE. Note there is deliberately NO permission that
+    # reads a participant's raw SCOPE answers: sealed means sealed, including
+    # for administrators.
+    "couples.relationships.read",
+    "couples.relationships.unbind",
+    "couples.free_benefits.read",
+    "couples.scope.versions.manage",
+    "couples.scope.versions.publish",
+    "couples.scope.advice.manage",
+    # B17 paid assessments
+    "assessments.products.manage",
+    "assessments.versions.manage",
+    "assessments.versions.publish",
+    "assessments.licenses.verify",
+    "assessments.purchases.read",
+    "assessments.entitlements.revoke",
+    "assessments.reports.read",
+    "assessments.refunds.process",
+    "assessments.advice.manage",
+}
+
+MATCHMAKING_ENTITLEMENT_PERMISSIONS = {
+    "matchmaking.relationship_status.read",
+    "matchmaking.relationship_status.manage",
+    "matchmaking.entitlements.read",
+    "matchmaking.entitlements.adjust",
+    "matchmaking.disclaimers.manage",
+}
+
+POST_EVENT_CLOSURE_PERMISSIONS = {
+    "activities.candidates.freeze",
+    "activities.candidates.exclude",
+    "activities.selection_policy.manage",
+    "surveys.definitions.manage",
+    "surveys.assignments.manage",
+    "surveys.responses.read_aggregate",
+    "surveys.responses.override",
+    "result_letters.generate",
+    "result_letters.review",
+    "result_letters.publish",
+    "result_letters.revoke",
+}
+
 ALL_PERMISSIONS = (
     IDENTITY_PERMISSIONS
     | CMS_PERMISSIONS
     | CATALOG_PERMISSIONS
     | COMMERCE_PERMISSIONS
     | ACTIVITY_PERMISSIONS
+    | POST_EVENT_CLOSURE_PERMISSIONS
+    | MATCHMAKING_ENTITLEMENT_PERMISSIONS
+    | P1_EXPERIENCE_PERMISSIONS
+    | PHASE_TWO_PERMISSIONS
     | COURSE_PERMISSIONS
     | COUNSELING_PERMISSIONS
     | KNOWLEDGE_PERMISSIONS

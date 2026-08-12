@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { formatAdminTableCell } from "@vav/ui-admin";
 
 import { catalogApi } from "@/features/catalog/api";
+import { useAdminAuthStore } from "@/stores/admin-auth";
 
 type CourseRow = {
   id: string;
@@ -30,6 +31,7 @@ type CertificateRow = {
   status: string;
 };
 
+const auth = useAdminAuthStore();
 const courses = ref<CourseRow[]>([]);
 const selectedCourseId = ref("");
 const selectedCourse = ref<CourseDetail>();
@@ -62,6 +64,106 @@ const videoForm = reactive({
 });
 const grantForm = reactive({ user_id: "", access_duration_days: 365, reason: "" });
 
+/**
+ * Courses could be built and published but never attached to anything sellable:
+ * the catalog mapping endpoints existed with no UI, so monetisation had to be
+ * done straight against the API. Only digital-access course / course-bundle
+ * SKUs are accepted by the backend, so the picker offers exactly those.
+ */
+type CatalogMapping = {
+  id: string;
+  catalog_sku_id: string;
+  access_duration_days: number | null;
+  access_start_policy: string;
+  course_version_policy: string;
+};
+type SellableSku = { id: string; sku_code: string; product_name: string };
+
+const catalogMappings = ref<CatalogMapping[]>([]);
+const sellableSkus = ref<SellableSku[]>([]);
+const mappingForm = reactive({ catalog_sku_id: "", access_duration_days: 365 });
+
+const canManageCatalog = computed(() => auth.hasPermission("courses.catalog.manage"));
+
+function skuLabel(id: string) {
+  const sku = sellableSkus.value.find((item) => item.id === id);
+  return sku ? `${sku.sku_code}（${sku.product_name}）` : id;
+}
+
+async function loadSellableSkus() {
+  // Listing SKUs needs its own permission; without it the picker stays empty
+  // rather than failing the whole page load.
+  if (!auth.hasPermission(["catalog.products.read", "catalog.skus.read"])) return;
+  const products = await catalogApi<{ items: Array<Record<string, unknown>> }>(
+    "/admin/catalog/products?page_size=100"
+  );
+  const eligible = products.items.filter(
+    (product) =>
+      ["course", "course_bundle"].includes(String(product.product_type)) &&
+      String(product.fulfillment_type) === "digital_access"
+  );
+  const collected: SellableSku[] = [];
+  for (const product of eligible) {
+    const skus = await catalogApi<{ items: Array<Record<string, unknown>> }>(
+      `/admin/catalog/products/${String(product.id)}/skus`
+    );
+    for (const sku of skus.items) {
+      collected.push({
+        id: String(sku.id),
+        sku_code: String(sku.sku_code ?? sku.id),
+        product_name: String(product.internal_name ?? product.product_code ?? "")
+      });
+    }
+  }
+  sellableSkus.value = collected;
+}
+
+async function loadCatalogMappings() {
+  if (!selectedCourseId.value || !canManageCatalog.value) return;
+  const result = await catalogApi<{ items: CatalogMapping[] }>(
+    `/admin/courses/${selectedCourseId.value}/catalog-mappings`
+  );
+  catalogMappings.value = result.items;
+}
+
+async function saveCatalogMapping() {
+  if (!mappingForm.catalog_sku_id) {
+    error.value = "请选择要关联的商品 SKU。";
+    return;
+  }
+  error.value = "";
+  try {
+    await catalogApi(`/admin/courses/${selectedCourseId.value}/catalog-mappings`, {
+      method: "POST",
+      body: JSON.stringify({
+        catalog_sku_id: mappingForm.catalog_sku_id,
+        access_duration_days: mappingForm.access_duration_days || null,
+        access_start_policy: "entitlement_activation",
+        course_version_policy: "pin_at_enrollment"
+      })
+    });
+    mappingForm.catalog_sku_id = "";
+    await loadCatalogMappings();
+    await loadSelected();
+  } catch (cause) {
+    error.value = cause instanceof Error ? cause.message : "商品关联失败";
+  }
+}
+
+async function removeCatalogMapping(mapping: CatalogMapping) {
+  if (!window.confirm("确认解除该商品关联？解除后新的购买将无法开通本课程访问权。")) return;
+  error.value = "";
+  try {
+    await catalogApi(
+      `/admin/courses/${selectedCourseId.value}/catalog-mappings/${mapping.id}`,
+      { method: "DELETE" }
+    );
+    await loadCatalogMappings();
+  } catch (cause) {
+    error.value = cause instanceof Error ? cause.message : "解除关联失败";
+  }
+}
+
 async function load() {
   loading.value = true;
   error.value = "";
@@ -71,6 +173,8 @@ async function load() {
       selectedCourseId.value = courses.value[0].id;
     }
     if (selectedCourseId.value) await loadSelected();
+    await loadSellableSkus();
+
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : "课程中心加载失败";
   } finally {
@@ -93,6 +197,7 @@ async function loadSelected() {
     selectedCourse.value = detail;
     enrollments.value = enrollmentResult.items;
     certificates.value = certificateResult.items;
+    await loadCatalogMappings();
     if (!detail.modules.some((module) => module.id === lessonForm.module_id)) {
       lessonForm.module_id = detail.modules[0]?.id ?? "";
     }
@@ -620,6 +725,83 @@ onMounted(() => void load());
                 @click="enrollmentAction(row, 'revoke')"
               >
                 撤销
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-tab-pane>
+      <el-tab-pane
+        v-if="canManageCatalog"
+        label="商品关联"
+        name="catalog"
+      >
+        <el-alert
+          title="课程只有关联到「数字访问」类型的课程或课程套餐 SKU 之后才能被售卖；关联后按订单权益开通访问权，并在报名时锁定课程版本。"
+          type="info"
+          :closable="false"
+        />
+        <el-form
+          label-position="top"
+          class="editor-grid"
+        >
+          <el-form-item label="可售 SKU">
+            <el-select
+              v-model="mappingForm.catalog_sku_id"
+              filterable
+              placeholder="选择数字访问类课程 SKU"
+            >
+              <el-option
+                v-for="sku in sellableSkus"
+                :key="sku.id"
+                :label="`${sku.sku_code}（${sku.product_name}）`"
+                :value="sku.id"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="访问有效期（天，留空表示长期有效）">
+            <el-input-number
+              v-model="mappingForm.access_duration_days"
+              :min="0"
+            />
+          </el-form-item>
+          <el-button
+            type="primary"
+            @click="saveCatalogMapping"
+          >
+            保存关联
+          </el-button>
+        </el-form>
+        <el-table
+          :data="catalogMappings"
+          stripe
+        >
+          <el-table-column label="SKU">
+            <template #default="{ row }">
+              {{ skuLabel(row.catalog_sku_id) }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="access_duration_days"
+            label="有效期（天）"
+          />
+          <el-table-column
+            prop="access_start_policy"
+            :formatter="formatAdminTableCell"
+            label="生效方式"
+          />
+          <el-table-column
+            prop="course_version_policy"
+            :formatter="formatAdminTableCell"
+            label="版本策略"
+          />
+          <el-table-column label="操作">
+            <template #default="{ row }">
+              <el-button
+                type="danger"
+                size="small"
+                @click="removeCatalogMapping(row)"
+              >
+                解除关联
               </el-button>
             </template>
           </el-table-column>

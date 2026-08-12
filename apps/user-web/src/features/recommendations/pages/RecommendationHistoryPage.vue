@@ -118,7 +118,7 @@ onMounted(() => void load());
 .recommendation-history h1 { margin: 0; font-size: 1.4rem; }
 .intro { max-width: 62ch; line-height: 1.7; margin: 0; }
 .alert { padding: 0.75rem 1rem; border-radius: 0.5rem; margin: 0; }
-.alert.error { background: #fdecea; color: #8a1c12; }
+.alert.error { background: var(--vav-color-surface-danger); color: var(--vav-color-danger); }
 .history { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
 .history th, .history td { text-align: left; padding: 0.5rem 0.6rem; border-bottom: 1px solid rgba(0, 0, 0, 0.08); }
 .hint { font-size: 0.85rem; opacity: 0.75; margin: 0; }

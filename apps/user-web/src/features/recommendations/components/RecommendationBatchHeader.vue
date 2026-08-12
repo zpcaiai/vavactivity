@@ -72,7 +72,7 @@ const expiresText = computed(() => {
 .status-bar { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .chip { padding: 0.15rem 0.6rem; border-radius: 999px; background: rgba(0, 0, 0, 0.06); font-size: 0.8rem; }
 .hint { font-size: 0.85rem; opacity: 0.75; margin: 0; }
-.hint.paused { color: #8a1c12; opacity: 1; }
-button.primary { align-self: flex-start; padding: 0.6rem 1.4rem; border-radius: 0.5rem; border: none; background: #1f2933; color: #fff; cursor: pointer; }
+.hint.paused { color: var(--vav-color-danger); opacity: 1; }
+button.primary { align-self: flex-start; padding: 0.6rem 1.4rem; border-radius: 0.5rem; border: none; background: var(--vav-color-text); color: var(--vav-color-surface-raised); cursor: pointer; }
 button.primary:disabled { opacity: 0.45; cursor: not-allowed; }
 </style>

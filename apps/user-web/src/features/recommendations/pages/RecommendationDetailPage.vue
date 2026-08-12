@@ -128,7 +128,7 @@ onMounted(async () => {
 .recommendation-detail { display: flex; flex-direction: column; gap: 1rem; padding: 2rem 0; }
 .recommendation-detail h1 { margin: 0; font-size: 1.4rem; }
 .alert { padding: 0.75rem 1rem; border-radius: 0.5rem; margin: 0; }
-.alert.error { background: #fdecea; color: #8a1c12; }
-.alert.notice { background: #eaf6ec; color: #1c5a2a; }
+.alert.error { background: var(--vav-color-surface-danger); color: var(--vav-color-danger); }
+.alert.notice { background: var(--vav-color-surface-success); color: var(--vav-color-success); }
 .hint { font-size: 0.85rem; opacity: 0.75; line-height: 1.6; margin: 0; max-width: 62ch; }
 </style>

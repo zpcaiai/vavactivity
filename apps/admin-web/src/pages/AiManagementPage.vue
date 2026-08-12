@@ -135,12 +135,65 @@ async function activatePrompt(prompt: Prompt) {
   await load();
 }
 
+/**
+ * A referral used to be a one-way street: an operator could acknowledge it and
+ * then the ticket had nowhere to go. Assign and resolve close the loop.
+ */
+const referralDialog = ref<{
+  open: boolean;
+  referral?: Referral;
+  action: "assign" | "resolve";
+  assigned_to: string;
+  resolution: string;
+}>({ open: false, action: "assign", assigned_to: "", resolution: "" });
+
+async function referralAction(referral: Referral, action: "acknowledge") {
+  error.value = "";
+  try {
+    await catalogApi(`/admin/ai/referrals/${referral.id}/actions`, {
+      method: "POST",
+      body: JSON.stringify({ action })
+    });
+    await load();
+  } catch (cause) {
+    error.value = cause instanceof Error ? cause.message : "转介操作失败";
+  }
+}
+
 async function acknowledgeReferral(referral: Referral) {
-  await catalogApi(`/admin/ai/referrals/${referral.id}/actions`, {
-    method: "POST",
-    body: JSON.stringify({ action: "acknowledge" })
-  });
-  await load();
+  await referralAction(referral, "acknowledge");
+}
+
+function openReferralDialog(referral: Referral, action: "assign" | "resolve") {
+  error.value = "";
+  referralDialog.value = { open: true, referral, action, assigned_to: "", resolution: "" };
+}
+
+async function submitReferralAction() {
+  const form = referralDialog.value;
+  if (!form.referral) return;
+  if (form.action === "assign" && !form.assigned_to.trim()) {
+    error.value = "请填写要指派的责任人用户编号。";
+    return;
+  }
+  if (form.action === "resolve" && form.resolution.trim().length < 10) {
+    error.value = "请填写至少 10 个字符的处理结果；结果会加密留存并用于复核。";
+    return;
+  }
+  try {
+    await catalogApi(`/admin/ai/referrals/${form.referral.id}/actions`, {
+      method: "POST",
+      body: JSON.stringify(
+        form.action === "assign"
+          ? { action: "assign", assigned_to: form.assigned_to.trim() }
+          : { action: "resolve", resolution: form.resolution.trim() }
+      )
+    });
+    referralDialog.value = { open: false, action: "assign", assigned_to: "", resolution: "" };
+    await load();
+  } catch (cause) {
+    error.value = cause instanceof Error ? cause.message : "转介操作失败";
+  }
 }
 
 onMounted(() => void load());
@@ -260,17 +313,76 @@ onMounted(() => void load());
             :formatter="formatAdminTableCell"
             label="状态"
           />
-          <el-table-column label="操作">
+          <el-table-column
+            prop="assigned_team"
+            label="责任团队"
+          />
+          <el-table-column
+            label="操作"
+            min-width="280"
+          >
             <template #default="scope">
               <el-button
-                v-if="auth.hasPermission('ai.referrals.assign')"
+                v-if="auth.hasPermission('ai.referrals.assign') && scope.row.status === 'open'"
+                size="small"
                 @click="acknowledgeReferral(scope.row)"
               >
                 确认接收
               </el-button>
+              <el-button
+                v-if="auth.hasPermission('ai.referrals.assign') && scope.row.status !== 'resolved'"
+                size="small"
+                @click="openReferralDialog(scope.row, 'assign')"
+              >
+                指派责任人
+              </el-button>
+              <el-button
+                v-if="auth.hasPermission('ai.referrals.resolve') && scope.row.status !== 'resolved'"
+                size="small"
+                type="primary"
+                @click="openReferralDialog(scope.row, 'resolve')"
+              >
+                结案
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
+        <el-dialog
+          v-model="referralDialog.open"
+          :title="referralDialog.action === 'assign' ? '指派转介责任人' : '转介结案'"
+          width="520px"
+        >
+          <el-form label-position="top">
+            <el-form-item
+              v-if="referralDialog.action === 'assign'"
+              label="责任人用户编号"
+            >
+              <el-input v-model="referralDialog.assigned_to" />
+            </el-form-item>
+            <el-form-item
+              v-else
+              label="处理结果（至少 10 个字符）"
+            >
+              <el-input
+                v-model="referralDialog.resolution"
+                type="textarea"
+                :rows="3"
+                placeholder="写明实际采取的干预、联系到的人与后续安排。"
+              />
+            </el-form-item>
+          </el-form>
+          <template #footer>
+            <el-button @click="referralDialog.open = false">
+              取消
+            </el-button>
+            <el-button
+              type="primary"
+              @click="submitReferralAction"
+            >
+              提交
+            </el-button>
+          </template>
+        </el-dialog>
       </el-tab-pane>
 
       <el-tab-pane label="提示词发布">

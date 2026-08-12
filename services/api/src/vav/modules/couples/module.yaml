@@ -1,0 +1,14 @@
+module: {code: couples, owner: relationships, version: "1.0.0"}
+dependencies: {required: [identity, privacy, notifications, matchmaking_entitlements, activities]}
+database: {revisions: [100]}
+events:
+  publishes:
+    - couple.invitation.sent.v1
+    - couple.relationship.bound.v1
+    - couple.relationship.unbound.v1
+    - couple.scope.started.v1
+    - couple.scope.report.ready.v1
+  consumes: [identity.account.deactivated.v1]
+permissions: {prefixes: [couples.relationships., couples.scope., couples.free_benefits.]}
+configuration: {prefixes: [COUPLES_, COUPLE_SCOPE_, COUPLE_INVITATION_]}
+health: {checks: [couple_active_member_uniqueness, scope_free_benefit_ledger, scope_report_barrier]}

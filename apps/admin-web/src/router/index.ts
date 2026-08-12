@@ -1,5 +1,23 @@
 import { createRouter, createWebHistory } from "vue-router";
 
+import {
+  adminPlatformSectionPermissions,
+  dataGovernanceSectionPermissions,
+  designSystemSectionPermissions,
+  experienceSectionPermissions,
+  interactionSectionPermissions,
+  matchmakingSectionPermissions,
+  membershipSectionPermissions,
+  notificationSectionPermissions,
+  privacySectionPermissions,
+  processSectionPermissions,
+  qualitySectionPermissions,
+  recommendationSectionPermissions,
+  relationshipSectionPermissions,
+  safetySectionPermissions,
+  skillSectionPermissions,
+  systemSectionPermissions
+} from "@/navigation/admin-nav";
 import { useAccessStore } from "@/stores/access";
 
 const AdminLayout = () => import("@/layouts/AdminLayout.vue");
@@ -17,6 +35,7 @@ const UserManagementPage = () => import("@/pages/UserManagementPage.vue");
 const SiteSettingsPage = () => import("@/pages/SiteSettingsPage.vue");
 const AdminManagementPage = () => import("@/pages/AdminManagementPage.vue");
 const CmsManagementPage = () => import("@/pages/CmsManagementPage.vue");
+const ContactSubmissionPage = () => import("@/pages/ContactSubmissionPage.vue");
 const ErrorPage = () => import("@/pages/ErrorPage.vue");
 const LoginPage = () => import("@/pages/LoginPage.vue");
 const MediaLibraryPage = () => import("@/pages/MediaLibraryPage.vue");
@@ -56,228 +75,21 @@ const modules = [
   ["audit", "审计日志", "追加式操作记录", "audit:view"]
 ] as const;
 
-const notificationSectionPermissions: Record<string, string> = {
-  dashboard: "notifications.analytics.read",
-  templates: "notifications.templates.read",
-  "template-releases": "notifications.templates.read",
-  "event-subscriptions": "notifications.subscriptions.read",
-  deliveries: "notifications.deliveries.read",
-  "dead-letters": "notifications.dead_letters.read",
-  reminders: "notifications.reminders.read",
-  campaigns: "notifications.campaigns.read",
-  providers: "notifications.providers.read",
-  "provider-events": "notifications.providers.read",
-  suppressions: "notifications.suppressions.read",
-  unsubscribes: "notifications.preferences.read",
-  audit: "notifications.audit.read"
-};
 
-const matchmakingSectionPermissions: Record<string, string> = {
-  profiles: "matchmaking.profiles.read",
-  reviews: "matchmaking.reviews.read",
-  "photo-reviews": "matchmaking.photos.read",
-  "schema-releases": "matchmaking.schemas.read",
-  taxonomies: "matchmaking.taxonomies.read",
-  projections: "matchmaking.projections.read",
-  audit: "matchmaking.audit.read"
-};
 
-export const recommendationSectionPermissions: Record<string, string> = {
-  dashboard: "recommendations.analytics.read",
-  strategies: "recommendations.strategies.read",
-  features: "recommendations.features.read",
-  constraints: "recommendations.constraints.read",
-  batches: "recommendations.batches.read",
-  candidates: "recommendations.candidates.read",
-  diagnostics: "recommendations.diagnostics.run",
-  "pair-diagnostics": "recommendations.candidates.sensitive.read",
-  exposures: "recommendations.exposures.read",
-  "cold-start": "recommendations.analytics.read",
-  feedback: "recommendations.feedback.read",
-  evaluations: "recommendations.evaluations.read",
-  experiments: "recommendations.experiments.read",
-  incidents: "recommendations.incidents.read",
-  audit: "recommendations.audit.read"
-};
 
-export const interactionSectionPermissions: Record<string, string> = {
-  dashboard: "matchmaking.analytics.read",
-  pairs: "matchmaking.interactions.read",
-  matches: "matchmaking.matches.read",
-  invitations: "matchmaking.invitations.read",
-  "contact-exchanges": "matchmaking.contact_exchange.read",
-  invalidations: "matchmaking.interactions.read",
-  "dead-letters": "matchmaking.dead_letters.resolve",
-  incidents: "matchmaking.incidents.read",
-  audit: "matchmaking.audit.read"
-};
 
-export const relationshipSectionPermissions: Record<string, string> = {
-  dashboard: "relationships.analytics.read",
-  journeys: "relationships.read",
-  stages: "relationships.stages.read",
-  proposals: "relationships.proposals.read",
-  pauses: "relationships.pauses.read",
-  endings: "relationships.endings.read",
-  milestones: "relationships.milestones.read",
-  checkins: "relationships.checkins.read",
-  reminders: "relationships.reminders.read",
-  audit: "relationships.audit.read"
-};
 
-export const membershipSectionPermissions: Record<string, string> = {
-  dashboard: "memberships.analytics.read",
-  plans: "memberships.plans.read",
-  "plan-versions": "memberships.plans.read",
-  benefits: "memberships.benefits.read",
-  "sku-mappings": "memberships.sku_mappings.read",
-  accounts: "memberships.accounts.read",
-  cycles: "memberships.accounts.read",
-  changes: "memberships.changes.read",
-  quotas: "memberships.quotas.read",
-  usage: "memberships.quotas.read",
-  adjustments: "memberships.quotas.read",
-  "manual-grants": "memberships.manual_grants.read",
-  trials: "memberships.trials.read",
-  reconciliation: "memberships.reconciliation.read",
-  incidents: "memberships.incidents.read",
-  audit: "memberships.audit.read"
-};
 
-export const safetySectionPermissions: Record<string, string> = {
-  reports: "safety.reports.read",
-  cases: "safety.cases.read",
-  moderation: "safety.moderation.read",
-  harassment: "safety.analytics.read",
-  fraud: "safety.analytics.read",
-  restrictions: "safety.restrictions.read",
-  appeals: "safety.appeals.read",
-  rules: "safety.rules.read",
-  "red-team": "safety.red_team.read",
-  audit: "safety.audit.read"
-};
 
-export const systemSectionPermissions: Record<string, string> = {
-  status: "system.status.read",
-  releases: "system.releases.read",
-  jobs: "system.jobs.read",
-  integrations: "system.status.read",
-  "dead-letters": "system.dead_letters.read",
-  "feature-flags": "system.feature_flags.read",
-  maintenance: "system.maintenance.read",
-  backups: "system.backups.read",
-  "restore-drills": "system.restore_drills.read",
-  capacity: "system.capacity.read"
-};
 
-export const skillSectionPermissions: Record<string, string> = {
-  dashboard: "skills.analytics.read",
-  catalog: "skills.registry.read",
-  installations: "skills.installations.read",
-  executions: "skills.executions.read",
-  dependencies: "skills.registry.read",
-  permissions: "skills.permissions.read",
-  configurations: "skills.installations.read",
-  publishers: "skills.publishers.read",
-  reviews: "skills.marketplace.review",
-  marketplace: "skills.marketplace.read",
-  incidents: "skills.incidents.read",
-  audit: "skills.audit.read"
-};
 
-export const qualitySectionPermissions: Record<string, string> = {
-  dashboard: "quality.analytics.read",
-  requirements: "quality.requirements.read",
-  capabilities: "quality.capabilities.read",
-  traceability: "quality.traceability.read",
-  "business-flows": "quality.business_flows.read",
-  gaps: "quality.gaps.read",
-  risks: "quality.risks.read",
-  waivers: "quality.waivers.read",
-  evidence: "quality.evidence.read",
-  gates: "quality.gates.read",
-  "gate-runs": "quality.gates.read",
-  releases: "quality.releases.read",
-  certifications: "quality.releases.read",
-  audit: "quality.audit.read"
-};
 
-export const designSystemSectionPermissions: Record<string, string> = {
-  dashboard: "design.analytics.read",
-  tokens: "design.tokens.read",
-  components: "design.components.read",
-  patterns: "design.patterns.read",
-  pages: "design.audits.read",
-  accessibility: "design.accessibility.read",
-  "responsive-audits": "design.audits.read",
-  "visual-regression": "design.audits.read",
-  baselines: "design.baselines.read",
-  evidence: "design.evidence.read",
-  releases: "design.tokens.read",
-  audit: "design.audit.read"
-};
 
-export const experienceSectionPermissions: Record<string, string> = {
-  dashboard: "experience.analytics.read",
-  ia: "experience.ia.read",
-  routes: "experience.routes.read",
-  navigation: "experience.navigation.read",
-  tasks: "experience.tasks.read",
-  journeys: "experience.journeys.read",
-  handoffs: "experience.handoffs.read",
-  "search-governance": "experience.search.read",
-  help: "experience.help.read",
-  support: "experience.support.read",
-  "dead-ends": "experience.dead_ends.read",
-  analytics: "experience.analytics.read",
-  evidence: "experience.closure.read",
-  release: "experience.closure.read",
-  audit: "experience.audit.read"
-};
 
-export const processSectionPermissions: Record<string, string> = {
-  dashboard: "process.dashboard.read",
-  definitions: "process.definitions.read",
-  "state-machines": "process.state_machines.read",
-  instances: "process.instances.read",
-  sagas: "process.sagas.read",
-  timeouts: "process.timeouts.read",
-  cancellations: "process.cancellations.read",
-  compensations: "process.compensations.read",
-  stuck: "process.stuck.read",
-  interventions: "process.interventions.read",
-  simulations: "process.simulations.read",
-  certifications: "process.certifications.read",
-  release: "process.release.read"
-};
 
-export const dataGovernanceSectionPermissions: Record<string, string> = {
-  dashboard: "data.dashboard.read", assets: "data.assets.read", contracts: "data.contracts.read", lineage: "data.lineage.read", events: "data.events.read", "event-gaps": "data.events.read", "dead-letters": "data.dead_letters.read", quality: "data.quality.read", reconciliations: "data.reconciliations.read", differences: "data.reconciliations.read", backfills: "data.backfills.read", repairs: "data.repairs.read", projections: "data.projections.read", erasures: "data.erasures.read", certifications: "data.certifications.read", release: "data.release.read"
-};
 
-export const adminPlatformSectionPermissions: Record<string, string> = {
-  dashboard: "admin.workbench.read", capabilities: "admin.capabilities.read", "work-items": "admin.workbench.read", "saved-views": "admin.saved_views.read", "bulk-jobs": "admin.bulk.read", approvals: "admin.approvals.read", exceptions: "admin.exceptions.read", configurations: "admin.configurations.read", "field-access": "admin.fields.policies.read", "reveal-history": "admin.fields.policies.read", certifications: "admin.certifications.read", releases: "admin.certifications.read", audit: "admin.audit.read"
-};
 
-const privacySectionPermissions: Record<string, string> = {
-  dashboard: "privacy.requests.read",
-  requests: "privacy.requests.read",
-  exports: "privacy.exports.read",
-  corrections: "privacy.corrections.read",
-  erasures: "privacy.erasures.read",
-  consents: "privacy.consents.read",
-  "consent-releases": "privacy.consents.read",
-  inventory: "privacy.inventory.read",
-  processing: "privacy.inventory.read",
-  classifications: "privacy.classifications.read",
-  retention: "privacy.retention.read",
-  "retention-instances": "privacy.retention.read",
-  holds: "privacy.holds.read",
-  "break-glass": "privacy.break_glass.read",
-  "access-events": "privacy.sensitive_access.read",
-  incidents: "privacy.incidents.read",
-  audit: "privacy.audit.read"
-};
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -348,14 +160,24 @@ export const router = createRouter({
           meta: { title: "网站设置", permission: "content.settings.read" }
         },
         {
-          path: "contact-submissions",
+          path: "content/contact-submissions",
           name: "admin-contact-submissions",
-          component: AccessManagementPage,
-          meta: { title: "合作联系记录", permission: "contact.submissions.read", endpoint: "/admin/contact-submissions" }
+          component: ContactSubmissionPage,
+          meta: { title: "合作联系记录", permission: "contact.submissions.read" }
+        },
+        {
+          path: "contact-submissions",
+          redirect: "/admin/content/contact-submissions"
         },
         {
           path: "catalog",
           redirect: "/admin/catalog/products"
+        },
+        {
+          path: "catalog/categories",
+          name: "admin-catalog-categories",
+          component: CatalogManagementPage,
+          meta: { title: "商品分类", permission: "catalog.products.read", catalogSection: "categories" }
         },
         {
           path: "catalog/products",
@@ -503,7 +325,6 @@ export const router = createRouter({
           "providers",
           "provider-events",
           "suppressions",
-          "unsubscribes",
           "audit"
         ].map((section) => ({
           path: `notifications/${section}`,
@@ -771,3 +592,19 @@ router.beforeEach(async (to) => {
 });
 
 export const adminModuleRoutes = modules;
+
+export {
+  adminPlatformSectionPermissions,
+  dataGovernanceSectionPermissions,
+  designSystemSectionPermissions,
+  experienceSectionPermissions,
+  interactionSectionPermissions,
+  membershipSectionPermissions,
+  processSectionPermissions,
+  qualitySectionPermissions,
+  recommendationSectionPermissions,
+  relationshipSectionPermissions,
+  safetySectionPermissions,
+  skillSectionPermissions,
+  systemSectionPermissions
+};

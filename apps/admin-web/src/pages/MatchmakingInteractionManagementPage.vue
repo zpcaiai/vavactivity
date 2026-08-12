@@ -264,15 +264,15 @@ onMounted(load);
 
 <style scoped>
 .interaction-admin { display: flex; flex-direction: column; gap: 1rem; }
-.eyebrow { letter-spacing: .14em; font-size: .75rem; color: #64748b; }
+.eyebrow { letter-spacing: .14em; font-size: .75rem; color: var(--vav-color-text-muted); }
 .tabs { display: flex; flex-wrap: wrap; gap: .8rem; }
 .metrics { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: .8rem; }
-.metrics div, .detail, .operation-context { padding: 1rem; border: 1px solid #dbe2ea; border-radius: .6rem; }
-.metrics dt { color: #64748b; font-size: .8rem; }
+.metrics div, .detail, .operation-context { padding: 1rem; border: 1px solid var(--vav-color-border); border-radius: .6rem; }
+.metrics dt { color: var(--vav-color-text-muted); font-size: .8rem; }
 .metrics dd { margin: .3rem 0 0; font-size: 1.2rem; font-weight: 600; }
 .detail pre { max-height: 32rem; overflow: auto; white-space: pre-wrap; }
 .operation-context { display: flex; gap: 1rem; flex-wrap: wrap; }
 .operation-context label { display: flex; flex-direction: column; gap: .35rem; min-width: 18rem; }
-.boundary { padding: .8rem; background: #fff7ed; color: #9a3412; }
+.boundary { padding: .8rem; background: var(--vav-color-surface-warning); color: var(--vav-color-danger); }
 code { font-size: .72rem; white-space: normal; overflow-wrap: anywhere; }
 </style>

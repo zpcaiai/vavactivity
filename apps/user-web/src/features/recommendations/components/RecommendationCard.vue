@@ -193,7 +193,7 @@ const photoInitial = computed(() => displayName.value.slice(0, 1));
 </template>
 
 <style scoped>
-.recommendation-card { display: flex; flex-direction: column; gap: 0.9rem; padding: 1.25rem; border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 0.75rem; background: #fff; }
+.recommendation-card { display: flex; flex-direction: column; gap: 0.9rem; padding: 1.25rem; border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 0.75rem; background: var(--vav-color-surface-raised); }
 .identity { display: flex; gap: 0.9rem; align-items: center; }
 .photo { width: 3.5rem; height: 3.5rem; border-radius: 999px; background: rgba(0, 0, 0, 0.08); display: grid; place-items: center; font-size: 1.25rem; font-weight: 600; }
 .identity-text { display: flex; flex-direction: column; gap: 0.2rem; }
@@ -204,8 +204,8 @@ const photoInitial = computed(() => displayName.value.slice(0, 1));
 .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .actions button { padding: 0.45rem 1rem; border-radius: 0.5rem; border: 1px solid rgba(0, 0, 0, 0.15); background: transparent; cursor: pointer; font-size: 0.9rem; }
 .actions button:disabled { opacity: 0.45; cursor: not-allowed; }
-.actions button.primary { background: #1f2933; color: #fff; border-color: #1f2933; }
+.actions button.primary { background: var(--vav-color-text); color: var(--vav-color-surface-raised); border-color: var(--vav-color-text); }
 .actions button.quiet { border-style: dashed; }
-.interaction-notice { margin: 0; padding: .6rem .8rem; border-radius: .5rem; background: #eaf6ec; color: #1c5a2a; }
-.interaction-error { margin: 0; padding: .6rem .8rem; border-radius: .5rem; background: #fdecea; color: #8a1c12; }
+.interaction-notice { margin: 0; padding: .6rem .8rem; border-radius: .5rem; background: var(--vav-color-surface-success); color: var(--vav-color-success); }
+.interaction-error { margin: 0; padding: .6rem .8rem; border-radius: .5rem; background: var(--vav-color-surface-danger); color: var(--vav-color-danger); }
 </style>

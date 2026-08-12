@@ -220,8 +220,8 @@ onMounted(async () => {
 .intro { max-width: 62ch; line-height: 1.7; }
 .links { display: flex; flex-wrap: wrap; gap: 1rem; font-size: 0.9rem; }
 .alert { padding: 0.75rem 1rem; border-radius: 0.5rem; margin: 0; }
-.alert.error { background: #fdecea; color: #8a1c12; }
-.alert.notice { background: #eaf6ec; color: #1c5a2a; }
+.alert.error { background: var(--vav-color-surface-danger); color: var(--vav-color-danger); }
+.alert.notice { background: var(--vav-color-surface-success); color: var(--vav-color-success); }
 .panel { display: flex; flex-direction: column; gap: 0.6rem; padding: 1.25rem; border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 0.75rem; }
 .panel h2 { margin: 0; font-size: 1rem; }
 .plain { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.9rem; }

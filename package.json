@@ -15,7 +15,9 @@
     "test:e2e": "playwright test",
     "test:e2e:external-uat": "playwright test --config playwright.external-uat.config.ts",
     "typecheck": "pnpm --recursive --if-present typecheck",
-    "generate:api": "pnpm --filter @vav/api-client generate"
+    "generate:api": "pnpm --filter @vav/api-client generate",
+    "check:design-tokens": "node scripts/check-design-tokens.mjs apps/user-web/src apps/admin-web/src packages",
+    "check:i18n": "node scripts/check-i18n.mjs apps/user-web/src/i18n/locales && node scripts/check-i18n.mjs apps/admin-web/src/i18n/locales"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.12.1",

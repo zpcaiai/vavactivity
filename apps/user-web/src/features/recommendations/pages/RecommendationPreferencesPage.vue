@@ -293,8 +293,8 @@ onMounted(() => void load());
 .recommendation-preferences h1 { margin: 0; font-size: 1.4rem; }
 .intro { max-width: 62ch; line-height: 1.7; margin: 0; }
 .alert { padding: 0.75rem 1rem; border-radius: 0.5rem; margin: 0; }
-.alert.error { background: #fdecea; color: #8a1c12; }
-.alert.notice { background: #eaf6ec; color: #1c5a2a; }
+.alert.error { background: var(--vav-color-surface-danger); color: var(--vav-color-danger); }
+.alert.notice { background: var(--vav-color-surface-success); color: var(--vav-color-success); }
 .panel { display: flex; flex-direction: column; gap: 0.85rem; padding: 1.5rem; border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 0.75rem; }
 .field { display: flex; flex-direction: column; gap: 0.35rem; border: none; padding: 0; margin: 0; }
 .field legend { font-weight: 600; padding: 0 0 0.35rem; }
@@ -303,7 +303,7 @@ onMounted(() => void load());
 .hint { font-size: 0.85rem; opacity: 0.75; line-height: 1.6; margin: 0; }
 .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .actions button { padding: 0.5rem 1.2rem; border-radius: 0.5rem; border: 1px solid rgba(0, 0, 0, 0.15); background: transparent; cursor: pointer; }
-.actions button.primary { background: #1f2933; color: #fff; border-color: #1f2933; }
+.actions button.primary { background: var(--vav-color-text); color: var(--vav-color-surface-raised); border-color: var(--vav-color-text); }
 .actions button:disabled { opacity: 0.45; cursor: not-allowed; }
 input[type="number"], select { padding: 0.4rem 0.6rem; border-radius: 0.5rem; border: 1px solid rgba(0, 0, 0, 0.2); max-width: 16rem; }
 </style>

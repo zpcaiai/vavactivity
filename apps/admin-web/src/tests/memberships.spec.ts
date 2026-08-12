@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { membershipSectionPermissions, router } from "@/router";
 
-const sections = ["dashboard", "plans", "plan-versions", "benefits", "sku-mappings", "accounts", "cycles", "changes", "quotas", "usage", "adjustments", "manual-grants", "trials", "reconciliation", "incidents", "audit"];
+// `incidents` was removed: the backend's ADMIN_RESOURCE_PERMISSIONS has no such
+// key, so the section answered 404 on every open and the page hid it by falling
+// back to dashboard data.
+const sections = ["dashboard", "plans", "plan-versions", "benefits", "sku-mappings", "accounts", "cycles", "changes", "quotas", "usage", "adjustments", "manual-grants", "trials", "reconciliation", "audit"];
 
 describe("membership operations routes", () => {
   it("permission-gates every Batch 17 operations view", () => {

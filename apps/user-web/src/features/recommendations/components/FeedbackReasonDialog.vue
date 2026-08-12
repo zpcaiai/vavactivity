@@ -120,7 +120,7 @@ function submit() {
 
 <style scoped>
 .dialog-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.35); display: grid; place-items: center; padding: 1rem; z-index: 50; }
-.dialog { width: min(32rem, 100%); max-height: calc(100vh - 2rem); overflow-y: auto; background: #fff; border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
+.dialog { width: min(32rem, 100%); max-height: calc(100vh - 2rem); overflow-y: auto; background: var(--vav-color-surface-raised); border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
 .dialog h2 { margin: 0; font-size: 1.05rem; }
 .hint { font-size: 0.85rem; opacity: 0.75; line-height: 1.6; margin: 0; }
 fieldset { border: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.35rem; }
@@ -128,9 +128,9 @@ legend { font-weight: 600; font-size: 0.9rem; padding: 0 0 0.35rem; }
 .option { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; }
 .details { font-weight: 600; font-size: 0.9rem; }
 textarea { width: 100%; padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(0, 0, 0, 0.2); }
-.alert.error { background: #fdecea; color: #8a1c12; padding: 0.6rem 0.8rem; border-radius: 0.5rem; margin: 0; }
+.alert.error { background: var(--vav-color-surface-danger); color: var(--vav-color-danger); padding: 0.6rem 0.8rem; border-radius: 0.5rem; margin: 0; }
 .actions { display: flex; gap: 0.5rem; }
 .actions button { padding: 0.5rem 1.2rem; border-radius: 0.5rem; border: 1px solid rgba(0, 0, 0, 0.15); background: transparent; cursor: pointer; }
-.actions button.primary { background: #1f2933; color: #fff; border-color: #1f2933; }
+.actions button.primary { background: var(--vav-color-text); color: var(--vav-color-surface-raised); border-color: var(--vav-color-text); }
 .actions button.primary:disabled { opacity: 0.45; cursor: not-allowed; }
 </style>

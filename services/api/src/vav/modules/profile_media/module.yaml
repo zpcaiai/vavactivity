@@ -1,0 +1,12 @@
+module: {code: profile_media, owner: matchmaking, version: "1.0.0"}
+dependencies: {required: [identity, privacy, storage, moderation, matchmaking_profiles]}
+database: {revisions: [99]}
+events:
+  publishes:
+    - profile_media.asset.submitted.v1
+    - profile_media.asset.moderated.v1
+    - profile_media.asset.deleted.v1
+  consumes: [moderation.report.upheld.v1]
+permissions: {prefixes: [profile_media.]}
+configuration: {prefixes: [PROFILE_MEDIA_]}
+health: {checks: [media_token_secret_present, moderation_queue_backlog]}

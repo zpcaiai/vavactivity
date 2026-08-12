@@ -340,6 +340,152 @@ class Settings(BaseSettings):
     activity_grouping_max_group_size: int = Field(
         default=20, validation_alias="ACTIVITY_GROUPING_MAX_GROUP_SIZE"
     )
+    # --- B09 / B10 / B11 post-event closure ---------------------------------
+    # Framework-level features. They ship enabled because the schema is
+    # configurable and carries no invented questionnaire or letter copy; the
+    # content itself stays empty until an editor supplies it (DEC-003).
+    post_event_candidate_freeze_enabled: bool = Field(
+        default=True, validation_alias="POST_EVENT_CANDIDATE_FREEZE_ENABLED"
+    )
+    post_event_survey_enabled: bool = Field(
+        default=True, validation_alias="POST_EVENT_SURVEY_ENABLED"
+    )
+    post_event_selection_max_choices: int = Field(
+        default=3, ge=1, le=3, validation_alias="POST_EVENT_SELECTION_MAX_CHOICES"
+    )
+    post_event_selection_edit_window_hours: int = Field(
+        default=24, ge=0, le=720, validation_alias="POST_EVENT_SELECTION_EDIT_WINDOW_HOURS"
+    )
+    post_event_survey_reminder_offsets_hours: list[int] = Field(
+        default_factory=lambda: [48, 12],
+        validation_alias="POST_EVENT_SURVEY_REMINDER_OFFSETS_HOURS",
+    )
+    result_letters_enabled: bool = Field(
+        default=True, validation_alias="RESULT_LETTERS_ENABLED"
+    )
+    #: Four-eyes review is a privacy control, not a convenience. Turning it off
+    #: is only meaningful in a local development stack.
+    result_letter_require_review: bool = Field(
+        default=True, validation_alias="RESULT_LETTER_REQUIRE_REVIEW"
+    )
+
+    # --- B12 matchmaking eligibility and entitlements ------------------------
+    matchmaking_entitlements_enabled: bool = Field(
+        default=True, validation_alias="MATCHMAKING_ENTITLEMENTS_ENABLED"
+    )
+    #: V1.6: three free attempts per member.
+    matchmaking_free_attempts: int = Field(
+        default=3, ge=0, le=10, validation_alias="MATCHMAKING_FREE_ATTEMPTS"
+    )
+    #: V1.6: each attempt returns at most three candidates.
+    matchmaking_candidates_per_attempt: int = Field(
+        default=3, ge=1, le=3, validation_alias="MATCHMAKING_CANDIDATES_PER_ATTEMPT"
+    )
+    matchmaking_wait_pool_cooldown_hours: int = Field(
+        default=24, ge=1, le=720, validation_alias="MATCHMAKING_WAIT_POOL_COOLDOWN_HOURS"
+    )
+    #: DEC-004 is unresolved: whether the three attempts expire is a business
+    #: decision. The ledger supports expiry, but no expiry is granted until the
+    #: decision lands, so nobody silently loses attempts they were promised.
+    matchmaking_free_attempt_validity_days: int | None = Field(
+        default=None, validation_alias="MATCHMAKING_FREE_ATTEMPT_VALIDITY_DAYS"
+    )
+
+    # --- B13 discovery, maps and sharing -------------------------------------
+    discovery_geo_enabled: bool = Field(
+        default=True, validation_alias="DISCOVERY_GEO_ENABLED"
+    )
+    #: An IP-derived city is only ever a *suggestion* (GEO-001). Turning this
+    #: off makes the platform rely purely on the member's manual choice.
+    discovery_ip_suggestion_enabled: bool = Field(
+        default=True, validation_alias="DISCOVERY_IP_SUGGESTION_ENABLED"
+    )
+    #: Salt for the coarse IP marker. No raw IP is ever persisted, so this
+    #: exists to keep even the marker non-reversible across deployments.
+    discovery_ip_marker_salt: SecretStr = Field(
+        default=SecretStr("local-ip-marker-salt-change-me"),
+        validation_alias="DISCOVERY_IP_MARKER_SALT",
+    )
+    #: Below this many local results the query falls back to national scope.
+    discovery_minimum_local_results: int = Field(
+        default=1, ge=0, le=100, validation_alias="DISCOVERY_MINIMUM_LOCAL_RESULTS"
+    )
+    map_amap_enabled: bool = Field(default=False, validation_alias="MAP_AMAP_ENABLED")
+    map_amap_api_key: SecretStr | None = Field(
+        default=None, validation_alias="MAP_AMAP_API_KEY", repr=False
+    )
+    map_google_enabled: bool = Field(default=False, validation_alias="MAP_GOOGLE_ENABLED")
+    map_google_api_key: SecretStr | None = Field(
+        default=None, validation_alias="MAP_GOOGLE_API_KEY", repr=False
+    )
+    event_sharing_enabled: bool = Field(
+        default=True, validation_alias="EVENT_SHARING_ENABLED"
+    )
+    #: Canonical origin every share link and QR code resolves to.
+    share_public_base_url: str = Field(
+        default="http://localhost:5173", validation_alias="SHARE_PUBLIC_BASE_URL"
+    )
+    share_link_secret: SecretStr = Field(
+        default=SecretStr("local-share-link-secret-change-me"),
+        validation_alias="SHARE_LINK_SECRET",
+        repr=False,
+    )
+    share_link_default_ttl_hours: int = Field(
+        default=720, ge=1, le=8760, validation_alias="SHARE_LINK_DEFAULT_TTL_HOURS"
+    )
+
+    # --- B14 attendee preview and follow graph -------------------------------
+    #: DEC-002 safe default: the preview mechanism exists, but no attendee is
+    #: shown without their explicit opt-in consent.
+    attendee_preview_enabled: bool = Field(
+        default=True, validation_alias="ATTENDEE_PREVIEW_ENABLED"
+    )
+    social_follow_enabled: bool = Field(
+        default=True, validation_alias="SOCIAL_FOLLOW_ENABLED"
+    )
+    social_max_following: int = Field(
+        default=2000, ge=1, le=100000, validation_alias="SOCIAL_MAX_FOLLOWING"
+    )
+
+    # --- B15 profile media ---------------------------------------------------
+    profile_media_enabled: bool = Field(
+        default=True, validation_alias="PROFILE_MEDIA_ENABLED"
+    )
+    #: Signs the opaque per-asset access grants. Private media must not be
+    #: reachable through a guessable URL (PROFILE-001).
+    profile_media_token_secret: SecretStr = Field(
+        default=SecretStr("local-profile-media-secret-change-me"),
+        validation_alias="PROFILE_MEDIA_TOKEN_SECRET",
+        repr=False,
+    )
+
+    # --- B16 couples and SCOPE (DEC-001: off until approved) -----------------
+    couples_enabled: bool = Field(default=False, validation_alias="COUPLES_ENABLED")
+    couple_scope_enabled: bool = Field(
+        default=False, validation_alias="COUPLE_SCOPE_ENABLED"
+    )
+    couple_invitation_ttl_hours: int = Field(
+        default=168, ge=1, le=8760, validation_alias="COUPLE_INVITATION_TTL_HOURS"
+    )
+    #: Keyed on the partner pair, not the relationship row, so unbinding and
+    #: rebinding cannot regenerate a consumed benefit (COUPLE-001).
+    couple_scope_free_assessments_per_pair: int = Field(
+        default=1, ge=0, le=10, validation_alias="COUPLE_SCOPE_FREE_ASSESSMENTS_PER_PAIR"
+    )
+    couple_scope_ai_advice_enabled: bool = Field(
+        default=False, validation_alias="COUPLE_SCOPE_AI_ADVICE_ENABLED"
+    )
+
+    # --- B17 paid assessments (DEC-001: off until approved) ------------------
+    paid_assessments_enabled: bool = Field(
+        default=False, validation_alias="PAID_ASSESSMENTS_ENABLED"
+    )
+    paid_assessment_refund_window_hours: int = Field(
+        default=168, ge=0, le=8760, validation_alias="PAID_ASSESSMENT_REFUND_WINDOW_HOURS"
+    )
+    paid_assessment_ai_advice_enabled: bool = Field(
+        default=False, validation_alias="PAID_ASSESSMENT_AI_ADVICE_ENABLED"
+    )
     activity_grouping_require_checkin: bool = Field(
         default=False, validation_alias="ACTIVITY_GROUPING_REQUIRE_CHECKIN"
     )

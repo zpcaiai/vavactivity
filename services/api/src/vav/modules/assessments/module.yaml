@@ -1,0 +1,14 @@
+module: {code: assessments, owner: growth, version: "1.0.0"}
+dependencies: {required: [identity, privacy, payments, notifications]}
+database: {revisions: [101]}
+events:
+  publishes:
+    - assessment.version.published.v1
+    - assessment.purchase.completed.v1
+    - assessment.attempt.submitted.v1
+    - assessment.report.generated.v1
+    - assessment.entitlement.revoked.v1
+  consumes: [payment.order.paid.v1, payment.order.refunded.v1]
+permissions: {prefixes: [assessments.products., assessments.versions., assessments.licenses., assessments.purchases., assessments.refunds., assessments.entitlements., assessments.advice., assessments.reports.]}
+configuration: {prefixes: [PAID_ASSESSMENTS_, PAID_ASSESSMENT_]}
+health: {checks: [version_license_reference_present, entitlement_version_pinning, refund_revocation_audit]}

@@ -61,6 +61,142 @@ const visibleSections = computed(() =>
   recommendationSections.filter((item) => auth.hasPermission(item[2]))
 );
 const reasonReady = computed(() => reason.value.trim().length >= 3);
+const canCreateStrategy = computed(() => auth.hasPermission("recommendations.strategies.create"));
+const canCreateExperiment = computed(() => auth.hasPermission("recommendations.experiments.create"));
+
+const POLICY_FIELDS = [
+  "hard_constraint_policy",
+  "feature_manifest",
+  "scoring_policy",
+  "bidirectional_policy",
+  "ranking_policy",
+  "diversification_policy",
+  "exposure_policy",
+  "explanation_policy",
+  "cold_start_policy"
+] as const;
+
+const strategyDialog = ref({
+  open: false,
+  source_id: "",
+  strategy_code: "",
+  semantic_version: "",
+  policies: "{}"
+});
+const experimentDialog = ref({
+  open: false,
+  experiment_code: "",
+  name: "",
+  hypothesis: "",
+  control_strategy_id: "",
+  treatment_strategy_ids: [] as string[],
+  primary_metrics: "",
+  guardrail_metrics: ""
+});
+
+function splitList(value: string) {
+  return value.split(/[,，\s]+/u).map((item) => item.trim()).filter(Boolean);
+}
+
+async function openStrategyDialog(row?: Row) {
+  error.value = "";
+  const sourceId = String(row?.id ?? "");
+  let policies: Record<string, unknown> = {};
+  if (sourceId) {
+    try {
+      const detail = await recommendationApi.getStrategy(sourceId);
+      const source = detail.strategy as Record<string, unknown>;
+      for (const field of POLICY_FIELDS) {
+        policies[field] = source[field] ?? {};
+      }
+    } catch (cause) {
+      error.value = cause instanceof Error ? cause.message : "读取源策略失败";
+      return;
+    }
+  } else {
+    policies = Object.fromEntries(POLICY_FIELDS.map((field) => [field, {}]));
+  }
+  strategyDialog.value = {
+    open: true,
+    source_id: sourceId,
+    strategy_code: String(row?.strategy_code ?? ""),
+    semantic_version: "",
+    policies: JSON.stringify(policies, null, 2)
+  };
+}
+
+async function createStrategy() {
+  const form = strategyDialog.value;
+  if (!form.strategy_code.trim() || !form.semantic_version.trim()) {
+    error.value = "请填写策略代码与新的语义化版本。";
+    return;
+  }
+  let policies: Record<string, unknown>;
+  try {
+    policies = JSON.parse(form.policies) as Record<string, unknown>;
+  } catch {
+    error.value = "策略文档必须是合法的 JSON 对象。";
+    return;
+  }
+  busy.value = true;
+  error.value = "";
+  try {
+    await recommendationApi.createStrategy({
+      strategy_code: form.strategy_code.trim(),
+      semantic_version: form.semantic_version.trim(),
+      applicable_regions: [],
+      applicable_segments: [],
+      ...policies
+    });
+    notice.value = "策略草稿已创建；仍需通过离线评估、由另一位管理员审批后才能上线。";
+    strategyDialog.value.open = false;
+    await load();
+  } catch (cause) {
+    error.value = cause instanceof Error ? cause.message : "策略创建失败";
+  } finally {
+    busy.value = false;
+  }
+}
+
+async function createExperiment() {
+  const form = experimentDialog.value;
+  if (!form.experiment_code.trim() || !form.name.trim()) {
+    error.value = "请填写实验代码与名称。";
+    return;
+  }
+  if (form.hypothesis.trim().length < 10) {
+    error.value = "请写明至少 10 个字符的实验假设；没有假设的实验无法判定成败。";
+    return;
+  }
+  if (!form.control_strategy_id) {
+    error.value = "请选择对照组策略。";
+    return;
+  }
+  busy.value = true;
+  error.value = "";
+  try {
+    await recommendationApi.createExperiment({
+      experiment_code: form.experiment_code.trim(),
+      name: form.name.trim(),
+      hypothesis: form.hypothesis.trim(),
+      control_strategy_id: form.control_strategy_id,
+      treatment_strategy_ids: form.treatment_strategy_ids,
+      eligibility_definition: {},
+      allocation_policy: {},
+      primary_metrics: splitList(form.primary_metrics),
+      guardrail_metrics: splitList(form.guardrail_metrics),
+      guardrail_thresholds: {}
+    });
+    notice.value = "实验草稿已创建；启动前仍需审批，并会持续校验护栏指标。";
+    experimentDialog.value.open = false;
+    await load();
+  } catch (cause) {
+    error.value = cause instanceof Error ? cause.message : "实验创建失败";
+  } finally {
+    busy.value = false;
+  }
+}
+
 const canApproveStrategy = computed(() => auth.hasPermission("recommendations.strategies.approve"));
 const canActivateStrategy = computed(() =>
   auth.hasPermission("recommendations.strategies.activate")
@@ -360,6 +496,15 @@ onMounted(() => void load());
         type="info"
         :closable="false"
       />
+      <div class="panel-toolbar">
+        <el-button
+          v-if="canCreateStrategy"
+          type="primary"
+          @click="openStrategyDialog()"
+        >
+          新建策略草稿
+        </el-button>
+      </div>
       <el-table
         :data="rows"
         class="admin-table"
@@ -386,6 +531,13 @@ onMounted(() => void load());
               @click="openStrategy(scope.row)"
             >
               查看
+            </el-button>
+            <el-button
+              v-if="canCreateStrategy"
+              size="small"
+              @click="openStrategyDialog(scope.row)"
+            >
+              基于此新建版本
             </el-button>
             <el-button
               v-if="canApproveStrategy"
@@ -853,6 +1005,15 @@ onMounted(() => void load());
         type="info"
         :closable="false"
       />
+      <div class="panel-toolbar">
+        <el-button
+          v-if="canCreateExperiment"
+          type="primary"
+          @click="experimentDialog.open = true"
+        >
+          新建实验
+        </el-button>
+      </div>
       <el-table
         :data="rows"
         class="admin-table"
@@ -936,7 +1097,114 @@ onMounted(() => void load());
       推荐结果由策略版本、特征注册表与硬性条件共同决定；运营的每一次干预都会带原因写入推荐审计，
       并且始终无法指定配对、修改分数或读取会员的择偶条件原文。
     </p>
-  </section>
+  
+    <el-dialog
+      v-model="strategyDialog.open"
+      title="新建策略草稿"
+      width="720px"
+    >
+      <p class="dialog-hint">
+        策略由八份策略文档组成。从现有版本克隆再改，比从零手填更接近线上真实配置；新版本仍要通过离线评估并由另一位管理员审批才能上线。
+      </p>
+      <el-form label-position="top">
+        <el-form-item label="策略代码">
+          <el-input v-model="strategyDialog.strategy_code" />
+        </el-form-item>
+        <el-form-item label="新的语义化版本">
+          <el-input
+            v-model="strategyDialog.semantic_version"
+            placeholder="例如 2.1.0"
+          />
+        </el-form-item>
+        <el-form-item label="策略文档（JSON）">
+          <el-input
+            v-model="strategyDialog.policies"
+            type="textarea"
+            :rows="14"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="strategyDialog.open = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="busy"
+          @click="createStrategy"
+        >
+          创建草稿
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog
+      v-model="experimentDialog.open"
+      title="新建 A/B 实验"
+      width="640px"
+    >
+      <el-form label-position="top">
+        <el-form-item label="实验代码">
+          <el-input v-model="experimentDialog.experiment_code" />
+        </el-form-item>
+        <el-form-item label="实验名称">
+          <el-input v-model="experimentDialog.name" />
+        </el-form-item>
+        <el-form-item label="实验假设（至少 10 个字符）">
+          <el-input
+            v-model="experimentDialog.hypothesis"
+            type="textarea"
+            :rows="3"
+          />
+        </el-form-item>
+        <el-form-item label="对照组策略">
+          <el-select
+            v-model="experimentDialog.control_strategy_id"
+            filterable
+          >
+            <el-option
+              v-for="item in rows"
+              :key="String(item.id)"
+              :label="`${item.strategy_code ?? item.id} · ${item.semantic_version ?? ''}`"
+              :value="String(item.id)"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="实验组策略（可多选）">
+          <el-select
+            v-model="experimentDialog.treatment_strategy_ids"
+            multiple
+            filterable
+          >
+            <el-option
+              v-for="item in rows"
+              :key="String(item.id)"
+              :label="`${item.strategy_code ?? item.id} · ${item.semantic_version ?? ''}`"
+              :value="String(item.id)"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="主要指标（多个用逗号分隔）">
+          <el-input v-model="experimentDialog.primary_metrics" />
+        </el-form-item>
+        <el-form-item label="护栏指标（多个用逗号分隔）">
+          <el-input v-model="experimentDialog.guardrail_metrics" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="experimentDialog.open = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="busy"
+          @click="createExperiment"
+        >
+          创建实验
+        </el-button>
+      </template>
+    </el-dialog>
+</section>
 </template>
 
 <style scoped>
@@ -953,4 +1221,6 @@ onMounted(() => void load());
 .code-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.25rem; }
 .policy-json { max-height: 20rem; overflow: auto; font-size: 0.8rem; }
 .admin-hint { font-size: 0.85rem; opacity: 0.75; }
+.panel-toolbar { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 0.75rem 0; }
+.dialog-hint { color: var(--el-text-color-secondary); margin: 0 0 0.75rem; }
 </style>

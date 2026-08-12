@@ -1,0 +1,11 @@
+module: {code: discovery, owner: activities, version: "1.0.0"}
+dependencies: {required: [identity, activities, privacy, notifications]}
+database: {revisions: [97]}
+events:
+  publishes:
+    - activity.share_card.created.v1
+    - activity.share_links.revoked.v1
+  consumes: [activity.published.v1, activity.unpublished.v1]
+permissions: {prefixes: [discovery., activities.share.]}
+configuration: {prefixes: [DISCOVERY_, MAP_, SHARE_, EVENT_SHARING_]}
+health: {checks: [map_provider_reachability, share_link_signature_rotation]}

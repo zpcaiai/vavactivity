@@ -135,6 +135,14 @@ export const recommendationApi = {
   dashboard: () => catalogApi<DashboardSummary>(`${BASE}/dashboard`),
 
   listStrategies: () => catalogApi<{ strategies: Row[] }>(`${BASE}/strategies`),
+  /**
+   * A strategy carries eight policy documents. Authoring them field by field in
+   * a form would be a worse source of truth than the strategy that is already
+   * live, so the console clones an existing version and bumps the code/version;
+   * the policies stay editable as JSON for the cases that need a real change.
+   */
+  createStrategy: (payload: Record<string, unknown>) =>
+    catalogApi<Row>(`${BASE}/strategies`, { method: "POST", body: JSON.stringify(payload) }),
   getStrategy: (strategyId: string) =>
     catalogApi<StrategyDetail>(`${BASE}/strategies/${strategyId}`),
   transitionStrategy: (
@@ -180,6 +188,8 @@ export const recommendationApi = {
     }),
 
   listExperiments: () => catalogApi<{ experiments: Row[] }>(`${BASE}/experiments`),
+  createExperiment: (payload: Record<string, unknown>) =>
+    catalogApi<Row>(`${BASE}/experiments`, { method: "POST", body: JSON.stringify(payload) }),
   transitionExperiment: (
     experimentId: string,
     action: "approve" | "start" | "stop",

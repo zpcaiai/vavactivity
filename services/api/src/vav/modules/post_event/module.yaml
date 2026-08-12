@@ -1,0 +1,13 @@
+module: {code: post_event, owner: activities, version: "1.0.0"}
+dependencies: {required: [identity, activities, privacy, notifications, matchmaking_profiles]}
+database: {revisions: [95]}
+events:
+  publishes:
+    - activity.candidates.frozen.v1
+    - activity.selection.submitted.v1
+    - activity.survey.completed.v1
+    - activity.result_letter.published.v1
+  consumes: [activity.checkin.recorded.v1]
+permissions: {prefixes: [activities.candidates., activities.selection_policy., surveys., result_letters.]}
+configuration: {prefixes: [POST_EVENT_, RESULT_LETTER_]}
+health: {checks: [survey_reminder_scheduler, letter_release_immutability]}

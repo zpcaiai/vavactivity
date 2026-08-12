@@ -1,0 +1,11 @@
+module: {code: matchmaking_entitlements, owner: matchmaking, version: "1.0.0"}
+dependencies: {required: [identity, recommendations, matchmaking_profiles, notifications, relationships]}
+database: {revisions: [96]}
+events:
+  publishes:
+    - matchmaking.access.revoked.v1
+    - matchmaking.candidates.arrived.v1
+  consumes: [relationship.journey.confirmed.v1, couple.relationship.bound.v1]
+permissions: {prefixes: [matchmaking.entitlements., matchmaking.relationship_status., matchmaking.disclaimers.]}
+configuration: {prefixes: [MATCHMAKING_]}
+health: {checks: [entitlement_ledger_balance, wait_pool_arrival_job]}

@@ -1,0 +1,11 @@
+module: {code: attendee_social, owner: activities, version: "1.0.0"}
+dependencies: {required: [identity, activities, privacy, notifications, moderation]}
+database: {revisions: [98]}
+events:
+  publishes:
+    - social.follow.created.v1
+    - social.followed_user_registered.v1
+  consumes: [activity.registration.confirmed.v1, moderation.block.created.v1]
+permissions: {prefixes: [attendee_preview., social.]}
+configuration: {prefixes: [ATTENDEE_PREVIEW_, SOCIAL_]}
+health: {checks: [preview_consent_opt_in_default, follow_notification_dedupe]}

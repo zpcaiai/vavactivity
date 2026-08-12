@@ -59,6 +59,6 @@ defineProps<{
 <style scoped>
 .compatibility-summary { display: flex; flex-direction: column; gap: 0.75rem; }
 .summary { line-height: 1.7; margin: 0; }
-.caveat { font-size: 0.85rem; line-height: 1.6; padding: 0.6rem 0.8rem; border-left: 3px solid #c8a04a; background: rgba(200, 160, 74, 0.08); }
+.caveat { font-size: 0.85rem; line-height: 1.6; padding: 0.6rem 0.8rem; border-left: 3px solid var(--vav-color-accent); background: rgba(200, 160, 74, 0.08); }
 .boundary { font-size: 0.8rem; opacity: 0.7; line-height: 1.6; }
 </style>

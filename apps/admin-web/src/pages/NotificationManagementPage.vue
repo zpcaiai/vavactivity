@@ -37,6 +37,15 @@ const suppressions = ref<Suppression[]>([]);
 const providerEvents = ref<ProviderEvent[]>([]);
 const audits = ref<AuditEvent[]>([]);
 const activeTab = ref("dashboard");
+
+/** Navigation section key → the tab pane that actually renders it. */
+const SECTION_TO_TAB: Record<string, string> = {
+  "template-releases": "templates",
+  "event-subscriptions": "subscriptions",
+  "dead-letters": "deadletters",
+  "provider-events": "providers",
+  suppressions: "providers"
+};
 const reason = ref("Batch 11 governed notification operation.");
 const busy = ref(false);
 const error = ref("");
@@ -140,7 +149,10 @@ async function liftSuppression(item: Suppression) {
 
 onMounted(() => {
   if (typeof route.meta.notificationSection === "string") {
-    activeTab.value = route.meta.notificationSection;
+    // Several sections share a pane. Without this map the tab component gets a
+    // name no pane declares and renders nothing, so those nav links opened a
+    // blank page.
+    activeTab.value = SECTION_TO_TAB[route.meta.notificationSection] ?? route.meta.notificationSection;
   }
   void load();
 });
