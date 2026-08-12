@@ -45,7 +45,8 @@
     "adminPlatform": "统一管理平台",
     "settings": "网站设置",
     "admins": "管理员",
-    "audit": "审计日志"
+    "audit": "审计日志",
+    "usability": "可用性控制台"
   },
   "group": {
     "workbench": "工作台",
@@ -230,6 +231,16 @@
     "admins": "管理员",
     "roles": "角色",
     "invitations-admin": "邀请",
-    "auth": "认证审计"
+    "auth": "认证审计",
+    "scenarios": "UAT 场景",
+    "runs": "UAT 执行",
+    "synthetic-data": "合成数据",
+    "demo": "演示环境",
+    "compatibility": "兼容性",
+    "localization": "本地化",
+    "drafts": "草稿恢复",
+    "notifications": "通知用例",
+    "imports": "导入作业",
+    "studies": "可用性研究"
   }
 }

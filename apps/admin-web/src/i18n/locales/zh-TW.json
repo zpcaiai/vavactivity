@@ -45,7 +45,8 @@
     "adminPlatform": "統一管理平台",
     "settings": "網站設定",
     "admins": "管理員",
-    "audit": "稽核紀錄"
+    "audit": "稽核紀錄",
+    "usability": "可用性控制台"
   },
   "group": {
     "workbench": "工作台",
@@ -230,6 +231,16 @@
     "admins": "管理員",
     "roles": "角色",
     "invitations-admin": "邀請",
-    "auth": "認證審計"
+    "auth": "認證審計",
+    "scenarios": "UAT 場景",
+    "runs": "UAT 執行",
+    "synthetic-data": "合成資料",
+    "demo": "示範環境",
+    "compatibility": "相容性",
+    "localization": "在地化",
+    "drafts": "草稿復原",
+    "notifications": "通知案例",
+    "imports": "匯入作業",
+    "studies": "可用性研究"
   }
 }
