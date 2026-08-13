@@ -86,24 +86,45 @@ def test_render_blueprint_declares_fail_closed_staging_inputs() -> None:
     assert all("value" not in environment[key] for key in generated_secrets)
 
 
-def test_neon_staging_seed_populates_the_test_showcase_after_the_test_account() -> None:
+def test_neon_staging_migrates_before_seeding_the_complete_showcase() -> None:
     workflow = yaml.safe_load(
         (ROOT / ".github/workflows/backend-ci.yml").read_text(encoding="utf-8")
     )
-    steps = workflow["jobs"]["neon-migrations"]["steps"]
+    job = workflow["jobs"]["neon-migrations"]
+    assert job["timeout-minutes"] >= 30
+    steps = job["steps"]
     migration_step = next(
         step for step in steps if step.get("name") == "Apply pending migrations to Neon"
     )
     assert migration_step["env"]["APP_ENV"] == "staging"
+    assert "alembic -c services/api/alembic.ini upgrade head" in migration_step["run"]
 
-    commands = migration_step["run"]
-    account_command = "python -m vav.cli.seed_test_user"
-    showcase_command = "python -m vav.cli.seed_test_showcase"
-    assert account_command in commands
-    assert "--confirm-insecure-test-account" in commands
-    assert showcase_command in commands
-    assert "--confirm-test-showcase" in commands
-    assert commands.index(account_command) < commands.index(showcase_command)
+    verification_index = next(
+        index
+        for index, step in enumerate(steps)
+        if step.get("name") == "Verify the live Neon schema"
+    )
+    showcase_index = next(
+        index
+        for index, step in enumerate(steps)
+        if step.get("name") == "Seed deterministic staging showcases"
+    )
+    assert verification_index < showcase_index
+
+    showcase_step = steps[showcase_index]
+    assert showcase_step["env"]["APP_ENV"] == "staging"
+    assert "python -m vav.cli.seed_admin_showcase" in showcase_step["run"]
+    assert "--confirm-admin-showcase" in showcase_step["run"]
+    assert "seed_test_showcase" not in showcase_step["run"]
+
+    admin_showcase_source = (
+        ROOT / "services/api/src/vav/cli/seed_admin_showcase.py"
+    ).read_text(encoding="utf-8")
+    test_showcase_source = (
+        ROOT / "services/api/src/vav/cli/seed_test_showcase.py"
+    ).read_text(encoding="utf-8")
+    assert "business_counts = await seed_test_showcase()" in admin_showcase_source
+    assert "await seed_test_user()" in test_showcase_source
 
     manifest = yaml.safe_load(
         (ROOT / "config/seeds/manifest.yaml").read_text(encoding="utf-8")
