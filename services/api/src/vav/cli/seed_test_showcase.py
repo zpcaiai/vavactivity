@@ -1233,7 +1233,14 @@ async def _seed_commerce(session: AsyncSession, user_id: UUID) -> None:
     )
     if len(catalog_rows) != 3:
         raise RuntimeError("The three Catalog showcase SKUs are not available.")
-    cart_id = _id("cart")
+    existing_cart_id = await session.scalar(
+        text(
+            "SELECT id FROM carts WHERE user_id=:user AND currency_code='USD' "
+            "AND status IN ('active','checkout_started') ORDER BY created_at LIMIT 1"
+        ),
+        {"user": user_id},
+    )
+    cart_id = cast(UUID, existing_cart_id or _id("cart"))
     await session.execute(
         text(
             "INSERT INTO carts (id,user_id,status,currency_code,expires_at) "
@@ -1248,7 +1255,11 @@ async def _seed_commerce(session: AsyncSession, user_id: UUID) -> None:
                 "INSERT INTO cart_items (id,cart_id,sku_id,quantity) VALUES (:id,:cart,:sku,1) "
                 "ON CONFLICT (cart_id,sku_id) DO UPDATE SET quantity=1,updated_at=now()"
             ),
-            {"id": _id(f"cart-item:{index}"), "cart": cart_id, "sku": row["sku_id"]},
+            {
+                "id": _id(f"cart-item:{cart_id}:{index}"),
+                "cart": cart_id,
+                "sku": row["sku_id"],
+            },
         )
         quote_id = _id(f"pricing-quote:{index}")
         amount = int(row["unit_amount_minor"])
