@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-last_updated: 2026-08-13T21:46:01+08:00
+last_updated: 2026-08-13T22:00:30+08:00
 repository: /Users/stephen/Documents/Projects/python/vavactivity
 canonical: true
 ---
@@ -50,7 +50,8 @@ so another agent can continue without guessing.
 
 - ID: `ci-closure-and-frontend-integration`
 - Status: `COMPLETED` for the approved CI closure and split-repository publish
-  scope
+  scope; backend Draft PR 5 and frontend PR 11 are ready for review with green
+  checks
 - Owner: Codex, incorporating reviewed concurrent Claude Code formatting and
   Gitleaks-ignore changes
 - Objective: clear backend PR 4 Ruff and Gitleaks failures, include the two
@@ -58,8 +59,8 @@ so another agent can continue without guessing.
   Code/Codex shared ledger, and open a new frontend integration PR for commits
   `c539120` and `c379b16`.
 - Branch: `codex/ai-coordination-followup`
-- Snapshot commit: `8967e4f709b94949afc722c6372757930535e8a9`, matching
-  `origin/admin/usability-closure` after a clean fast-forward.
+- Snapshot commit: `75d1e64ce3cb2b7495c4e0c70367164bd7a0ef27`, matching
+  `origin/codex/ai-coordination-followup`.
 - Scope: the pushed Ruff/format, exact Gitleaks-fingerprint, and production
   object-storage credential fixes; two admin Vue indentation fixes;
   `AGENTS.md`, `CLAUDE.md`, and `.ai/`; frontend branch
@@ -79,18 +80,18 @@ so another agent can continue without guessing.
   PR 11.
 - Remote CI: backend PR 4 is fully green at `8967e4f`: Backend CI, Secret Scan,
   Integration CI, Docker Build, Security Tests, assembly contracts, and
-  migration compatibility all passed. Frontend Draft PR 11 targets `main` at
-  `c379b16`; Frontend CI passed install, lint, typecheck, tests, and build, and
-  Vercel reported success. Backend Draft PR 5 targets post-merge `main` at
-  `b8ff079`; Backend CI passed Ruff, format, full mypy, migrations, deterministic
-  seed, the complete API suite, and migration-head verification; Gitleaks,
-  Integration CI, Security Tests, assembly contracts, and migration
-  compatibility also passed.
+  migration compatibility all passed. Frontend PR 11 targets `main` at
+  `c379b16`; Frontend CI passed install, lint, typecheck, tests, and build,
+  Vercel reported success, and the PR is ready for review. Backend Draft PR 5
+  targets post-merge `main` at `75d1e64`; Ruff, format, full mypy, migrations,
+  deterministic seed, the complete API suite, migration-head verification,
+  Gitleaks, Integration CI, Security Tests, assembly contracts, and migration
+  compatibility all passed.
 - Remaining gates: review/merge backend Draft PR 5 and frontend Draft PR 11;
   production deployment,
   browser/device acceptance, and certification remain `NOT_CERTIFIED`.
-- Next action: review and merge backend Draft PR 5 and frontend Draft PR 11
-  when ready.
+- Next action: review and merge backend Draft PR 5 and frontend PR 11 when
+  ready.
 - Blockers: none for lightweight Git/CI work. Docker builds, large local test
   suites, package-manager builds, generators, pruning, and cleanup remain
   paused until the separate disk-window owner explicitly releases them.
