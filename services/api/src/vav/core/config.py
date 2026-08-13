@@ -8,6 +8,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _DEFAULT_MEDIA_S3_ACCESS_KEY = "vav_minio_local"
 _DEFAULT_MEDIA_S3_SECRET_KEY = "vav_minio_local_development_only"
+_UNSAFE_MEDIA_S3_ACCESS_KEYS = frozenset({_DEFAULT_MEDIA_S3_ACCESS_KEY, "vav_minio_ci"})
+_UNSAFE_MEDIA_S3_SECRET_KEYS = frozenset({_DEFAULT_MEDIA_S3_SECRET_KEY, "vav_minio_ci_only"})
 
 
 class Settings(BaseSettings):
@@ -1741,23 +1743,23 @@ class Settings(BaseSettings):
         if production_like:
             invalid_storage_credentials = sorted(
                 environment_name
-                for field_name, environment_name, secret, shipped_default in (
+                for field_name, environment_name, secret, shipped_defaults in (
                     (
                         "media_s3_access_key",
                         "MEDIA_S3_ACCESS_KEY",
                         self.media_s3_access_key,
-                        _DEFAULT_MEDIA_S3_ACCESS_KEY,
+                        _UNSAFE_MEDIA_S3_ACCESS_KEYS,
                     ),
                     (
                         "media_s3_secret_key",
                         "MEDIA_S3_SECRET_KEY",
                         self.media_s3_secret_key,
-                        _DEFAULT_MEDIA_S3_SECRET_KEY,
+                        _UNSAFE_MEDIA_S3_SECRET_KEYS,
                     ),
                 )
                 if field_name not in self.model_fields_set
                 or not secret.get_secret_value().strip()
-                or secret.get_secret_value().strip() == shipped_default
+                or secret.get_secret_value().strip() in shipped_defaults
             )
             if invalid_storage_credentials:
                 raise ValueError(
