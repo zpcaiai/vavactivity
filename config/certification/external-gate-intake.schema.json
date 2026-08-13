@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vav.example/schemas/external-gate-intake.schema.json",
+  "title": "VAV external production certification intake",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "certification_target",
+    "targets",
+    "security_authorization",
+    "test_accounts",
+    "device_uat",
+    "infrastructure_access",
+    "owner_approvals",
+    "load_test_authorization"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "certification_target": {
+      "enum": ["current_production", "latest_feature"]
+    },
+    "targets": {
+      "type": "object",
+      "required": ["current_production", "latest_feature"],
+      "additionalProperties": {"$ref": "#/$defs/target"}
+    },
+    "security_authorization": {"type": "object"},
+    "test_accounts": {"type": "object"},
+    "device_uat": {"type": "object"},
+    "infrastructure_access": {"type": "object"},
+    "owner_approvals": {"type": "object"},
+    "load_test_authorization": {"type": "object"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "httpsUrl": {"type": "string", "pattern": "^https://"},
+    "artifact": {
+      "type": "object",
+      "required": ["kind", "digest"],
+      "properties": {
+        "kind": {
+          "enum": ["source_deployment", "static_deployment", "oci_image"]
+        },
+        "digest": {"type": ["string", "null"]},
+        "reason": {"type": "string"}
+      }
+    },
+    "target": {
+      "type": "object",
+      "required": [
+        "backend_git_commit",
+        "frontend_git_commit",
+        "backend_deployment_id",
+        "frontend_deployment_id",
+        "release_version",
+        "api_url",
+        "api_readiness_url",
+        "user_url",
+        "admin_url",
+        "artifacts"
+      ],
+      "properties": {
+        "backend_git_commit": {"$ref": "#/$defs/sha"},
+        "frontend_git_commit": {"$ref": "#/$defs/sha"},
+        "backend_deployment_id": {"type": "string"},
+        "frontend_deployment_id": {"type": "string"},
+        "release_version": {"type": "string", "minLength": 1},
+        "api_url": {"$ref": "#/$defs/httpsUrl"},
+        "api_readiness_url": {"$ref": "#/$defs/httpsUrl"},
+        "user_url": {"$ref": "#/$defs/httpsUrl"},
+        "admin_url": {"$ref": "#/$defs/httpsUrl"},
+        "artifacts": {
+          "type": "object",
+          "required": ["backend", "frontend"],
+          "properties": {
+            "backend": {"$ref": "#/$defs/artifact"},
+            "frontend": {"$ref": "#/$defs/artifact"}
+          }
+        }
+      }
+    }
+  }
+}
