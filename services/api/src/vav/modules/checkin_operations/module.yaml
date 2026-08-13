@@ -1,0 +1,12 @@
+module: {code: checkin_operations, owner: activities, version: "1.0.0"}
+dependencies: {required: [identity, activities, privacy, notifications]}
+database: {revisions: [105]}
+events:
+  publishes:
+    - activity.checkin.recorded.v1
+    - activity.checkin.undone.v1
+    - checkin.last_four_backfill.requested.v1
+  consumes: [activity.registration.confirmed.v1, activity.session.rescheduled.v1]
+permissions: {prefixes: [activities.checkin., privacy.contact_points.]}
+configuration: {prefixes: [CHECKIN_]}
+health: {checks: [last_four_hmac_key_present, last_four_backfill_coverage, operator_rate_limit_headroom, window_override_rate]}

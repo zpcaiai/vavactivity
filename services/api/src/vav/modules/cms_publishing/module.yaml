@@ -1,0 +1,10 @@
+module: {code: cms_publishing, owner: content, version: "1.0.0"}
+dependencies: {required: [content, identity, privacy]}
+database: {revisions: [104, 108, 109, 110]}
+events:
+  publishes:
+    - cms.entry.published.v1
+  consumes: []
+permissions: {prefixes: [cms.entries., cms.revisions., cms.previews.]}
+configuration: {prefixes: [CMS_]}
+health: {checks: [sanitizer_allow_list_version, translation_coverage, preview_grant_expiry]}

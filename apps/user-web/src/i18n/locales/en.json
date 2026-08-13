@@ -94,7 +94,12 @@
     "loading": "Loading",
     "pleaseWait": "One moment please.",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "save": "Save",
+    "errorTitle": "Something went wrong",
+    "unknownError": "Unknown error",
+    "saved": "Saved",
+    "listSeparator": ", "
   },
   "nav": {
     "primary": "Primary navigation"
@@ -172,7 +177,17 @@
       "notificationPreferences": "Notification preferences",
       "privacy": "Privacy and data",
       "safety": "Safety center",
-      "sessions": "Sessions"
+      "sessions": "Sessions",
+      "surveyTasks": "Event surveys",
+      "matchmakingEntitlement": "Recommendation credits",
+      "resultLetters": "Result letters",
+      "relationshipStatus": "Relationship status",
+      "memberDashboard": "My board",
+      "discovery": "Discover nearby",
+      "assessments": "Assessments",
+      "profileMedia": "Profile media",
+      "couple": "Partnership",
+      "follows": "Follows"
     },
     "public": {
       "activities": "Activities",
@@ -849,5 +864,506 @@
     "submitted": "Version {version} submitted for review and is now frozen.",
     "paused": "Profile paused and removed from the recommendation pool.",
     "reactivated": "Profile resumed."
+  },
+  "postEvent": {
+    "eyebrow": "After the event",
+    "selection": {
+      "title": "Mutual selection",
+      "description": "Choose up to {max} people from those who attended. Choosing nobody is fine too.",
+      "loadingMessage": "Loading the attendee list…",
+      "chosen": "Chosen",
+      "candidatesTitle": "People who attended",
+      "counter": "{selected} of {max} chosen",
+      "limitHint": "You may choose up to {max}. {remaining} left.",
+      "emptyTitle": "No one to choose from yet",
+      "emptyMessage": "Eligible attendees appear here once the list is frozen.",
+      "notEligibleTitle": "You are not in this selection",
+      "notEligibleMessage": "Mutual selection is for attendees who checked in on the day. Contact the team if you think this is wrong.",
+      "submittedTitle": "Submitted",
+      "submittedMessage": "Your choices are recorded.",
+      "editableUntil": "You can still change this until {time}.",
+      "lockedTitle": "Closed",
+      "lockedMessage": "The edit window has closed and this selection can no longer change.",
+      "draftSavedTitle": "Draft saved",
+      "draftSavedMessage": "Not submitted yet — come back any time.",
+      "reasonTitle": "You chose nobody this time",
+      "reasonDescription": "Pick the closest reason. It is only used to improve how events are run.",
+      "reasonNoteLabel": "Anything to add",
+      "reasonNoteHint": "This reason needs one line of explanation.",
+      "saveDraft": "Save draft",
+      "submit": "Submit selection",
+      "submitNone": "Submit (choose nobody)"
+    },
+    "survey": {
+      "title": "Event survey",
+      "description": "Your feedback is only used to improve events.",
+      "loadingMessage": "Loading the survey…",
+      "notFoundTitle": "Survey not found",
+      "notFoundMessage": "This survey is not yours, or it is not open yet.",
+      "notOpenTitle": "Not open yet",
+      "notOpenMessage": "You will be notified when it opens.",
+      "closedTitle": "Survey closed",
+      "closedMessage": "The deadline was {deadline}. You can still read it.",
+      "deadlineTitle": "Deadline",
+      "deadlineMessage": "Please submit before {deadline} ({timezone}).",
+      "submittedTitle": "Submitted",
+      "submittedEditable": "You can still edit until the deadline.",
+      "charactersLeft": "{count} characters left",
+      "noSubjects": "There is nobody to rate for this event.",
+      "missingRequired": "{count} required answers are still missing.",
+      "savedAt": "Saved at {time}",
+      "saveDraft": "Save draft",
+      "submit": "Submit survey"
+    },
+    "tasks": {
+      "title": "Event surveys",
+      "description": "Events you attended create a survey task here.",
+      "loadingMessage": "Loading tasks…",
+      "dueAt": "Due {time}",
+      "emptyTitle": "No surveys yet",
+      "emptyMessage": "Attend an event and check in, and your survey appears here.",
+      "status": {
+        "pending": "To do",
+        "in_progress": "In progress",
+        "completed": "Completed",
+        "expired": "Expired",
+        "waived": "Waived"
+      }
+    },
+    "letters": {
+      "title": "Result letters",
+      "description": "Results arrive as a letter after the event.",
+      "detailTitle": "Result letter",
+      "loadingMessage": "Loading…",
+      "emptyTitle": "No letters yet",
+      "emptyMessage": "Letters appear here once they are published.",
+      "notFoundTitle": "Letter not found",
+      "notFoundMessage": "This letter does not exist, or it is not published.",
+      "publishedAt": "Published {time}",
+      "read": "Read",
+      "unread": "Unread",
+      "outcome": {
+        "mutual_match": "You have a match",
+        "no_match": "No match this time",
+        "not_eligible": "Did not take part"
+      }
+    },
+    "passReasons": {}
+  },
+  "matchmakingAccess": {
+    "eyebrow": "Matchmaking",
+    "status": {
+      "title": "Relationship status",
+      "description": "Recommendations and mutual selection are open to single members only.",
+      "loadingMessage": "Loading…",
+      "openTitle": "Recommendations are open",
+      "openMessage": "You can use recommendations and mutual selection.",
+      "closedTitle": "Recommendations are closed",
+      "closedMessage": "Set your status to single to reopen recommendations.",
+      "lockedTitle": "Maintained by a partner binding",
+      "lockedMessage": "This status comes from a confirmed partner binding. Unbind first to change it.",
+      "savedTitle": "Saved",
+      "savedMessage": "Your status is updated.",
+      "fieldLabel": "Current status",
+      "fieldHint": "This is never shown publicly.",
+      "reasonLabel": "Note (optional)",
+      "reasonHint": "Only you and an administrator can see this.",
+      "values": {
+        "undisclosed": "Not stated",
+        "single": "Single",
+        "dating": "Dating",
+        "engaged": "Engaged",
+        "married": "Married",
+        "separated": "Separated",
+        "widowed": "Widowed"
+      }
+    },
+    "entitlement": {
+      "title": "Recommendation credits",
+      "description": "Every member gets three free attempts.",
+      "loadingMessage": "Loading credits…",
+      "unavailableTitle": "Recommendations are not open",
+      "unavailableMessage": "Recommendations are for single members. You can update this under Relationship status.",
+      "remaining": "Attempts left",
+      "remainingHint": "{granted} in total",
+      "used": "Used",
+      "perAttempt": "Candidates per attempt",
+      "perAttemptHint": "at most",
+      "generate": "Get recommendations",
+      "exhausted": "You have used all your free attempts.",
+      "noNewTitle": "No new candidates right now",
+      "noNewMessage": "This did not use an attempt. We will let you know when someone new joins.",
+      "deliveredTitle": "Recommendations ready",
+      "deliveredMessage": "{count} candidates this time.",
+      "ledgerTitle": "Credit history",
+      "ledgerDescription": "Every change is accounted for.",
+      "reason": {
+        "grant": "Granted",
+        "consume": "Used",
+        "refund": "Refunded",
+        "expire": "Expired",
+        "admin_adjust": "Adjusted"
+      }
+    },
+    "waitPool": {
+      "title": "You are on the wait list",
+      "message": "We will notify you when a suitable candidate appears."
+    }
+  },
+  "memberDashboard": {
+    "eyebrow": "Member space",
+    "title": "My board",
+    "description": "Every outstanding item in one place. Each item's status is still owned by its own module.",
+    "loadingMessage": "Reading each module's state.",
+    "openTasks": "Open tasks",
+    "urgentCount": "{count} urgent",
+    "degradedTitle": "Some sections are unavailable",
+    "degradedMessage": "These sections could not be read: {sections}. The list below is incomplete.",
+    "countExcludesDegraded": "Sections that failed to load are not counted above.",
+    "emptyTitle": "Nothing outstanding",
+    "emptyMessage": "New surveys, letters and event reminders will appear here.",
+    "sectionEmpty": "Nothing here right now.",
+    "sectionUnavailableTitle": "Temporarily unavailable",
+    "sectionUnavailableMessage": "The module behind this section did not respond. Try again shortly.",
+    "hideSection": "Hide",
+    "showSection": "Show {section}",
+    "hiddenTitle": "Hidden sections",
+    "dismiss": "Dismiss",
+    "loadMore": "Load more",
+    "dueAt": "Due {time}",
+    "sections": {
+      "survey_tasks": "Surveys",
+      "result_letters": "Result letters",
+      "registrations": "Registrations",
+      "mutual_selection": "Mutual selection",
+      "matchmaking": "Matchmaking",
+      "notifications": "Notifications"
+    },
+    "taskTypes": {
+      "survey_pending": "Survey to complete",
+      "mutual_selection_pending": "Selection to submit",
+      "result_letter_unread": "Unread result letter",
+      "registration_upcoming": "Upcoming event",
+      "matchmaking_attempt_available": "Matchmaking attempt available",
+      "notification_unread": "Unread notification"
+    },
+    "priority": {
+      "urgent": "Urgent",
+      "high": "High",
+      "normal": "Normal",
+      "low": "Low"
+    }
+  },
+  "discovery": {
+    "eyebrow": "Discover",
+    "title": "Events near you",
+    "description": "Events filtered by city. Where the city came from, and whether the filter applied, are stated on this page.",
+    "loadingMessage": "Loading events.",
+    "cityUnknown": "an unknown city",
+    "untitled": "Untitled event",
+    "cityLabel": "City",
+    "cityPlaceholder": "Enter a city code",
+    "applyCity": "Save as my city",
+    "clearCity": "Clear city preference",
+    "loadMore": "Load more",
+    "emptyTitle": "No events found",
+    "emptyMessage": "Try another city, or clear the preference to see events nationwide.",
+    "scopeSummary": "Showing {scope} results for {city}; that city has {count} event(s).",
+    "scope": {
+      "local": "local",
+      "national": "nationwide"
+    },
+    "ipSuggestionTitle": "This city is a guess",
+    "ipSuggestionMessage": "We guessed {city} from your network location. You have not confirmed it.",
+    "confirmCity": "Use {city}",
+    "disableIpSuggestion": "Stop guessing from my network",
+    "switchCityTitle": "Switch city?",
+    "switchCityMessage": "Your network location suggests you may be in {city}.",
+    "switchCity": "Switch to {city}",
+    "nationalFallbackTitle": "Showing nationwide results",
+    "fallback": {
+      "not_applied": "The city filter is applied.",
+      "no_city_resolved": "No city has been determined, so nationwide events are shown.",
+      "local_results_empty": "That city has no events right now, so nationwide events are shown.",
+      "local_below_minimum": "That city has too few events, so nationwide events are shown as well."
+    },
+    "location": {
+      "title": "Event location",
+      "description": "The organiser's address is authoritative; it stays valid even when map lookup fails.",
+      "loadingMessage": "Loading the location.",
+      "noneTitle": "No location yet",
+      "noneMessage": "The organiser has not recorded an address for this event.",
+      "addressHeading": "Address",
+      "approximateTitle": "Map lookup unavailable",
+      "coordinates": "Coordinates {lat}, {lon}",
+      "openMap": "Open in maps",
+      "searchMap": "Search this address in maps"
+    },
+    "geocodeStatus": {
+      "resolved": "Located",
+      "failed": "Lookup failed; the address below is exactly what the organiser typed.",
+      "skipped": "No lookup was made; the address below is exactly what the organiser typed."
+    },
+    "share": {
+      "heading": "Share this event",
+      "copyLink": "Copy link",
+      "copied": "Copied",
+      "openQrTarget": "Open the QR target",
+      "unavailableTitle": "Sharing unavailable",
+      "unavailableMessage": "This event is not published, or sharing is turned off for it.",
+      "fallbackCover": "This cover is a placeholder; the organiser has not uploaded one."
+    }
+  },
+  "social": {
+    "eyebrow": "Fellow attendees",
+    "preview": {
+      "title": "Attendee preview",
+      "description": "Only attendees who agreed to appear are listed.",
+      "loadingMessage": "Loading attendees.",
+      "emptyTitle": "No attendees to show",
+      "emptyMessage": "Nobody has agreed to appear in the attendee list yet.",
+      "additional": "And {count} more attendees who agreed to appear."
+    },
+    "consent": {
+      "heading": "Appear in the attendee list",
+      "explanation": "You are hidden by default. Others see you only after you explicitly agree.",
+      "state": {
+        "not_asked": "Not chosen — hidden",
+        "granted": "Visible",
+        "declined": "Declined",
+        "withdrawn": "Withdrawn"
+      },
+      "grant": "Agree to appear",
+      "decline": "Stay hidden",
+      "withdraw": "Withdraw",
+      "saved": {
+        "granted": "You will now appear in the attendee list.",
+        "declined": "You will not appear in the attendee list.",
+        "withdrawn": "Withdrawn — you no longer appear."
+      },
+      "introLabel": "One-line intro",
+      "introPlaceholder": "Optional",
+      "introHint": "Up to {max} characters, shown next to your avatar.",
+      "saveIntro": "Save intro",
+      "introSaved": "Intro saved."
+    },
+    "follow": "Follow",
+    "unfollow": "Unfollow",
+    "wantToMeet": {
+      "action": "Want to meet",
+      "done": "Recorded",
+      "recorded": "Recorded. This applies to this event only and is not a follow or a like."
+    },
+    "follows": {
+      "title": "Follows",
+      "description": "Following is one-way, and is not a match or a like.",
+      "loadingMessage": "Loading your follows.",
+      "followingHeading": "Following",
+      "followersHeading": "Followers",
+      "followingEmpty": "You are not following anyone yet.",
+      "followersEmpty": "Nobody follows you yet.",
+      "since": "Since {date}",
+      "mutual": "Mutual",
+      "followBack": "Follow back",
+      "notificationHeading": "Follow notifications",
+      "notifyOnRegistration": "Tell me when someone I follow registers for an event",
+      "notifyHint": "Only sent when that member agreed to appear in the attendee list."
+    }
+  },
+  "couples": {
+    "eyebrow": "Partnership",
+    "title": "Partnership",
+    "description": "A binding needs both sides. Sending an invitation does not create one.",
+    "loadingMessage": "Loading your relationship.",
+    "kind": {
+      "dating": "Dating",
+      "engaged": "Engaged",
+      "married": "Married"
+    },
+    "relationship": {
+      "heading": "Current relationship",
+      "partner": "Partner: {id}",
+      "unbindReasonLabel": "Reason (optional)",
+      "unbindHint": "Both sides get a record of the unbind. History is not deleted.",
+      "unbind": "Unbind",
+      "unbound": "The relationship has been unbound."
+    },
+    "invite": {
+      "heading": "Invite a partner",
+      "explanation": "Sending this does not bind anyone. It takes effect only once they accept.",
+      "inviteeLabel": "Their user ID",
+      "kindLabel": "Relationship type",
+      "noteLabel": "Note (optional)",
+      "noteHint": "Stored encrypted and visible only to them.",
+      "send": "Send invitation",
+      "sentPending": "Invitation sent. The relationship starts only when they accept.",
+      "responded": {
+        "accept": "Invitation accepted.",
+        "reject": "Invitation rejected."
+      }
+    },
+    "invitations": {
+      "heading": "Invitations",
+      "empty": "No invitations.",
+      "direction": {
+        "incoming": "Received",
+        "outgoing": "Sent"
+      },
+      "status": {
+        "pending": "Pending",
+        "accepted": "Accepted",
+        "rejected": "Rejected",
+        "cancelled": "Cancelled",
+        "expired": "Expired"
+      },
+      "expiresAt": "Expires {time}",
+      "accept": "Accept",
+      "reject": "Reject",
+      "cancel": "Cancel"
+    }
+  },
+  "scope": {
+    "title": "Partnership assessment",
+    "description": "The report is produced only once both partners submit. There is no interim score.",
+    "loadingMessage": "Loading the assessment.",
+    "start": {
+      "heading": "Start an assessment",
+      "noVersions": "No published version is available.",
+      "algorithm": "Algorithm version {version}",
+      "action": "Start"
+    },
+    "progress": {
+      "heading": "Progress",
+      "partner": "Partner: {status}"
+    },
+    "participant": {
+      "not_started": "Not started",
+      "in_progress": "In progress",
+      "submitted": "Submitted"
+    },
+    "waiting": {
+      "title": "Waiting for your partner",
+      "default": "You have submitted. The report is generated once your partner submits too."
+    },
+    "answers": {
+      "heading": "Your answers",
+      "hint": "Only you can read your answers; your partner sees progress, not content.",
+      "empty": "This version has no questions yet.",
+      "saveDraft": "Save draft",
+      "submit": "Submit"
+    },
+    "draftSaved": "Draft saved.",
+    "submitted": "Submitted.",
+    "report": {
+      "heading": "Report",
+      "generatedAt": "Generated {time}",
+      "adviceHeading": "Interpretation",
+      "advicePending": "No interpretation yet."
+    },
+    "dimensions": {
+      "support": "Support",
+      "communication": "Communication",
+      "outlook": "Outlook",
+      "partnership": "Partnership",
+      "expectations": "Expectations"
+    }
+  },
+  "assessments": {
+    "eyebrow": "Assessments",
+    "title": "Assessments",
+    "description": "You answer and are scored on the exact version you bought; it never changes underneath you.",
+    "loadingMessage": "Loading the catalogue.",
+    "emptyTitle": "No assessments available",
+    "emptyMessage": "New assessments will appear here.",
+    "questionCount": "{count} questions",
+    "alreadyOwned": "Owned",
+    "purchaseViaCheckout": "Go to checkout",
+    "purchaseHint": "Purchase happens at checkout; your attempt appears here afterwards.",
+    "owned": {
+      "heading": "Your assessments",
+      "attempts": "{remaining} of {granted} attempts left"
+    },
+    "contentSource": {
+      "administrator_authored": "Written in-house",
+      "licensed_third_party": "Licensed third party",
+      "public_domain": "Public domain",
+      "partner_supplied": "Partner supplied"
+    },
+    "attempt": {
+      "title": "Assessment",
+      "description": "Answered and scored on the version you bought.",
+      "loadingMessage": "Loading the questions.",
+      "missingTitle": "No attempt found",
+      "missingMessage": "Open it again from your assessments.",
+      "status": {
+        "in_progress": "In progress",
+        "submitted": "Submitted",
+        "expired": "Expired",
+        "abandoned": "Abandoned"
+      },
+      "remaining": "{count} question(s) still unanswered.",
+      "saveDraft": "Save draft",
+      "submit": "Submit",
+      "draftSaved": "Draft saved.",
+      "submitted": "Submitted. Your report is ready."
+    },
+    "report": {
+      "heading": "Report",
+      "generatedAt": "Generated {time}",
+      "algorithm": "Algorithm version {version}",
+      "adviceHeading": "Interpretation"
+    }
+  },
+  "profileMedia": {
+    "eyebrow": "Profile",
+    "title": "Photos and video",
+    "description": "Stored privately behind unguessable links, and visible to others only after review.",
+    "loadingMessage": "Loading your media.",
+    "completeness": {
+      "heading": "Completeness"
+    },
+    "published": "Published",
+    "notPublished": "Not published",
+    "photos": {
+      "heading": "Photos",
+      "empty": "No photos yet."
+    },
+    "video": {
+      "heading": "Video",
+      "empty": "No video yet."
+    },
+    "photoAlt": "Profile photo",
+    "remove": "Remove",
+    "pending": "{count} file(s) still uploading.",
+    "moderation": {
+      "pending": "Under review",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "tags": {
+      "heading": "Tags and intro",
+      "mbtiLabel": "MBTI",
+      "introLabel": "Intro",
+      "cityLabel": "City"
+    },
+    "tagsSaved": "Saved.",
+    "share": {
+      "heading": "Share card",
+      "explanation": "Consent is per field. A field you leave off is omitted entirely, not shown as blank.",
+      "enabled": "Enable the share card",
+      "share_photos": "Include photos",
+      "share_video": "Include video",
+      "share_mbti": "Include MBTI",
+      "share_intro": "Include intro",
+      "share_city": "Include city",
+      "disabledHint": "The share card is off, so the per-field switches have no effect."
+    },
+    "addPhoto": "Add a photo",
+    "addVideo": "Add a video",
+    "uploadLimits": "Up to 3 photos (10 MB each) and 1 video (100 MB, 3–30 seconds).",
+    "uploadProgress": "Uploading {percent}%",
+    "uploadDone": "Uploaded. Awaiting review.",
+    "uploadFailed": "Upload failed",
+    "previewUnavailable": "Preview unavailable right now; the file itself is unaffected."
   }
 }

@@ -46,7 +46,8 @@
     "settings": "網站設定",
     "admins": "管理員",
     "audit": "稽核紀錄",
-    "usability": "可用性控制台"
+    "usability": "可用性控制台",
+    "postEvent": "活動後閉環"
   },
   "group": {
     "workbench": "工作台",
@@ -241,6 +242,7 @@
     "drafts": "草稿復原",
     "notifications": "通知案例",
     "imports": "匯入作業",
-    "studies": "可用性研究"
+    "studies": "可用性研究",
+    "letters": "結果信審核"
   }
 }

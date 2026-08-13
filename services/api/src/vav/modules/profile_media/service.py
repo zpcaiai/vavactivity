@@ -31,6 +31,8 @@ from vav.common.exceptions import VavError
 from vav.core.config import get_settings
 from vav.modules.privacy.crypto import decrypt_private, encrypt_private
 from vav.modules.profile_media.domain import (
+    MAX_PHOTO_BYTES,
+    MAX_VIDEO_BYTES,
     AssetState,
     CompletenessInput,
     MediaAsset,
@@ -55,6 +57,11 @@ from vav.modules.profile_media.domain import (
     validate_moderation_transition,
     validate_upload,
     verify_access_grant,
+)
+from vav.modules.profile_media.storage import (
+    measure_object,
+    presigned_read_url,
+    presigned_upload,
 )
 
 # ---------------------------------------------------------------------------
@@ -87,13 +94,23 @@ def _fail(error: ProfileMediaRuleError, status_code: int = 422) -> VavError:
 
 def media_enabled() -> None:
     if not get_settings().profile_media_enabled:
-        raise VavError(
-            "PROFILE_MEDIA_DISABLED", "Profile media is not enabled.", status_code=503
-        )
+        raise VavError("PROFILE_MEDIA_DISABLED", "Profile media is not enabled.", status_code=503)
+
+
+def _upload_ceiling(kind: MediaKind) -> int:
+    """The hard byte ceiling storage will enforce for this kind.
+
+    Taken from the domain constants rather than restated, so the policy signed
+    into an upload and the policy checked at finalize can never disagree.
+    """
+
+    return MAX_PHOTO_BYTES if kind is MediaKind.PHOTO else MAX_VIDEO_BYTES
 
 
 def _media_secret() -> str:
-    return get_settings().profile_media_token_secret
+    # Configured as a SecretStr; the domain signs with a plain str.
+    secret = get_settings().profile_media_token_secret
+    return secret.get_secret_value() if secret else ""
 
 
 async def _publish(
@@ -210,9 +227,7 @@ def _asset_payload(asset: MediaAsset, *, owner_id: UUID) -> dict:
 # ---------------------------------------------------------------------------
 
 
-async def register_upload(
-    session: AsyncSession, *, owner_id: UUID, payload: dict
-) -> dict:
+async def register_upload(session: AsyncSession, *, owner_id: UUID, payload: dict) -> dict:
     """Register a new upload slot and return its opaque token.
 
     The row is created in ``uploading`` / ``pending`` state. It occupies no slot
@@ -237,9 +252,7 @@ async def register_upload(
     except ProfileMediaRuleError as error:
         raise _fail(error) from error
 
-    position = payload.get("position") or (
-        len(active_assets(assets, request.kind)) + 1
-    )
+    position = payload.get("position") or (len(active_assets(assets, request.kind)) + 1)
     asset_id = UUID(
         str(
             await session.scalar(
@@ -276,7 +289,15 @@ async def register_upload(
     await session.commit()
     return {
         "asset_id": str(asset_id),
+        # The logical identity of the asset. Kept for logs and comparison; it is
+        # not fetchable, and never was — see ``profile_media.storage``.
         "upload_path": private_media_path(token),
+        # Where the bytes actually go. Presigned so they never pass through the
+        # API, and carrying a size condition storage itself enforces — the
+        # declared byte_size is the member's claim, this is the ceiling.
+        "upload": presigned_upload(
+            token, mime_type=request.mime_type, max_bytes=_upload_ceiling(request.kind)
+        ),
         "state": AssetState.UPLOADING.value,
         "moderation_state": ModerationState.PENDING.value,
     }
@@ -310,10 +331,28 @@ async def finalize_upload(
         raise VavError("ASSET_NOT_FOUND", "That media asset does not exist.", status_code=404)
     asset = _asset_from_row(dict(row))
     assets = [item for item in await _load_assets(session, owner_id) if item.asset_id != asset_id]
+    # Measured from storage, not taken from the request body. Re-checking the
+    # client's own numbers would be the same trust boundary as registration, so
+    # "enforced twice" would have meant "the same claim checked twice".
+    #
+    # A missing object means the member abandoned the upload: without this an
+    # asset goes ``active`` backed by nothing, renders as a broken image, and
+    # occupies one of the member's three photo slots.
+    measured = measure_object(asset.access_token)
+    if measured is None:
+        raise VavError(
+            "MEDIA_BYTES_MISSING",
+            "No uploaded content was found for this asset.",
+            status_code=409,
+        )
+
     request = UploadRequest(
         kind=asset.kind,
-        mime_type=payload["mime_type"],
-        byte_size=int(payload["byte_size"]),
+        mime_type=str(measured["mime_type"]) or payload["mime_type"],
+        byte_size=int(measured["byte_size"]),
+        # Duration is not derivable from object metadata, so it stays a client
+        # value — bounded by the domain rules, and the honest limit of what can
+        # be verified without decoding the file here.
         duration_seconds=payload.get("duration_seconds"),
     )
     try:
@@ -417,13 +456,14 @@ async def replace_asset(
         "asset_id": str(new_id),
         "replaced_asset_id": str(asset_id),
         "upload_path": private_media_path(token),
+        "upload": presigned_upload(
+            token, mime_type=request.mime_type, max_bytes=_upload_ceiling(request.kind)
+        ),
         "moderation_state": plan.new_moderation_state.value,
     }
 
 
-async def delete_asset(
-    session: AsyncSession, *, owner_id: UUID, asset_id: UUID
-) -> dict:
+async def delete_asset(session: AsyncSession, *, owner_id: UUID, asset_id: UUID) -> dict:
     """Delete an asset. Terminal - there is no undelete."""
 
     media_enabled()
@@ -514,9 +554,7 @@ async def issue_media_grant(
             row["share_enabled"]
             and is_publishable(row["moderation_state"])
             and (
-                row["share_photos"]
-                if row["kind"] == MediaKind.PHOTO.value
-                else row["share_video"]
+                row["share_photos"] if row["kind"] == MediaKind.PHOTO.value else row["share_video"]
             )
         )
         if not shareable:
@@ -533,6 +571,9 @@ async def issue_media_grant(
         raise _fail(error) from error
     return {
         "media_path": private_media_path(grant.access_token),
+        # The fetchable form. The authorization decision was made above; this
+        # only turns it into a URL, and is deliberately produced nowhere else.
+        "media_url": presigned_read_url(grant.access_token, ttl_seconds=ttl_seconds),
         "expires_at": grant.expires_at,
         "signature": grant.signature,
         # Echoed so a caller can prove which viewer the grant is bound to; the
@@ -658,9 +699,7 @@ async def _refresh_completeness(session: AsyncSession, owner_id: UUID) -> int:
     return score.percent
 
 
-async def set_profile_tags(
-    session: AsyncSession, *, owner_id: UUID, payload: dict
-) -> dict:
+async def set_profile_tags(session: AsyncSession, *, owner_id: UUID, payload: dict) -> dict:
     """Store the MBTI tag, intro and city."""
 
     media_enabled()
@@ -715,9 +754,7 @@ async def get_share_consent(session: AsyncSession, owner_id: UUID) -> dict:
     return {key: bool(value) for key, value in row.items()}
 
 
-async def set_share_consent(
-    session: AsyncSession, *, owner_id: UUID, payload: dict
-) -> dict:
+async def set_share_consent(session: AsyncSession, *, owner_id: UUID, payload: dict) -> dict:
     media_enabled()
     await session.execute(
         text(
@@ -890,9 +927,7 @@ async def decide_moderation(
     }
 
 
-async def admin_remove_asset(
-    session: AsyncSession, *, actor_id: UUID, payload: dict
-) -> dict:
+async def admin_remove_asset(session: AsyncSession, *, actor_id: UUID, payload: dict) -> dict:
     """Operator takedown. Uses the same terminal delete transition as a member."""
 
     media_enabled()

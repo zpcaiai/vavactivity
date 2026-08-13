@@ -78,8 +78,15 @@ describe("skill console data sources", () => {
     expect(api).toContain("/security-review");
     expect(api).toContain("/quarantine");
     expect(api).toContain('"/admin/skills/signature-revocations"');
-    expect(page).toContain('auth.hasPermission("skills.security.quarantine")');
-    expect(page).toContain('auth.hasPermission("skills.security.revoke_signature")');
+    // Quote-agnostic on purpose. These two gates are written inline in the
+    // template, where the surrounding attribute is double-quoted and the inner
+    // string therefore has to be single-quoted — so pinning double quotes here
+    // asserted something the file could never satisfy, and the test failed on
+    // correct code. What matters is that the permission gates the control.
+    expect(page).toMatch(/auth\.hasPermission\(['"]skills\.security\.quarantine['"]\)/u);
+    expect(page).toMatch(
+      /auth\.hasPermission\(['"]skills\.security\.revoke_signature['"]\)/u
+    );
   });
 
   it("stops shipping a canned reason code and empty findings", () => {

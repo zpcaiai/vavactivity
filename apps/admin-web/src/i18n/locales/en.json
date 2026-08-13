@@ -46,7 +46,8 @@
     "settings": "Site settings",
     "admins": "Administrators",
     "audit": "Audit log",
-    "usability": "Usability Console"
+    "usability": "Usability Console",
+    "postEvent": "Post-event closure"
   },
   "group": {
     "workbench": "Workbench",
@@ -241,6 +242,7 @@
     "drafts": "Draft recovery",
     "notifications": "Notification cases",
     "imports": "Import jobs",
-    "studies": "Usability studies"
+    "studies": "Usability studies",
+    "letters": "Result letters"
   }
 }

@@ -1,0 +1,11 @@
+module: {code: ai_hardening, owner: trust_and_safety, version: "1.0.0"}
+dependencies: {required: [identity, ai_assistant, notifications, privacy]}
+database: {revisions: [103, 107]}
+events:
+  publishes:
+    - ai.escalation.opened.v1
+    - ai.provider.failed.v1
+  consumes: [ai.conversation.started.v1]
+permissions: {prefixes: [ai.budgets., ai.policies., ai.audit., ai.crisis_resources., ai.runbooks., ai.escalations., ai.launch_gates.]}
+configuration: {prefixes: [AI_]}
+health: {checks: [budget_policies_configured, crisis_resources_verified, escalation_runbook_present, provider_circuit_state]}

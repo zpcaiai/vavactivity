@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from uuid import UUID, uuid4
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from vav.common.exceptions import VavError
@@ -77,6 +77,29 @@ class ContentService:
             ).all()
         )
 
+    async def next_revision_number(self, session: AsyncSession, entry_id: UUID) -> int:
+        """Return the next free number in this entry's revision history.
+
+        The number has to come from ``content_versions`` itself, not from a
+        counter on the entry. ``cms_publishing`` appends to the same history,
+        so a counter this console maintains alone drifts behind the real head
+        the moment an editor uses the other console — and the next save here
+        then collides with a number that already exists.
+        """
+
+        # ``no_autoflush`` matters: callers ask for this number in the middle of
+        # mutating the entry, and an autoflush here would push a half-applied
+        # row to the database — for example a status already set to
+        # ``published`` before the live-revision pin has been assigned, which
+        # the ``published_revision_present`` check constraint then rejects.
+        with session.no_autoflush:
+            head = await session.scalar(
+                select(func.max(ContentVersion.version_number)).where(
+                    ContentVersion.entry_id == entry_id
+                )
+            )
+        return int(head or 0) + 1
+
     async def snapshot(
         self,
         session: AsyncSession,
@@ -86,14 +109,18 @@ class ContentService:
         change_summary: str,
     ) -> ContentVersion:
         localizations = await self._localizations(session, entry.id)
+        number = await self.next_revision_number(session, entry.id)
         version = ContentVersion(
             entry_id=entry.id,
-            version_number=entry.current_version,
+            version_number=number,
             snapshot=content_dict(entry, localizations),
             change_summary=change_summary,
             created_by=actor_id,
         )
         session.add(version)
+        # ``current_version`` now means one thing only: the head of history.
+        # Writing it here keeps it true no matter which console appended.
+        entry.current_version = number
         return version
 
     async def create(
@@ -195,7 +222,6 @@ class ContentService:
             for field, value in values.items():
                 setattr(localization, field, value)
         entry.version += 1
-        entry.current_version += 1
         await session.flush()
         await self.snapshot(session, entry, actor_id=actor_id, change_summary=change_summary)
         record_security_event(
@@ -266,6 +292,10 @@ class ContentService:
             entry.status = ContentStatus.PUBLISHED
             entry.published_at = now
             entry.published_by = actor_id
+            # Pin which revision went live. ``snapshot`` below appends one more
+            # row for this transition itself, so the live revision is that new
+            # number — the same thing a member will read.
+            entry.published_revision_number = await self.next_revision_number(session, entry.id)
         elif action == "reject" and entry.status == ContentStatus.IN_REVIEW:
             entry.status = ContentStatus.DRAFT
         elif action == "schedule" and scheduled_at and scheduled_at > now:
@@ -284,7 +314,6 @@ class ContentService:
                 status_code=409,
             )
         entry.version += 1
-        entry.current_version += 1
         await session.flush()
         await self.snapshot(
             session,

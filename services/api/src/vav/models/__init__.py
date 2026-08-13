@@ -36,7 +36,44 @@ from vav.models.ai_assistant import (
     AiSafetyPolicy,
     AiToolDefinition,
 )
+from vav.models.ai_hardening import (
+    AiBudgetPolicy,
+    AiContentPolicyRule,
+    AiCrisisResource,
+    AiEscalationRunbook,
+    AiLaunchGate,
+    AiPolicyDecision,
+    AiProviderHealth,
+    AiProviderProfile,
+    AiUsageEntry,
+)
+from vav.models.assessments import (
+    AssessmentAttempt,
+    AssessmentEntitlement,
+    AssessmentProduct,
+    AssessmentPurchase,
+    AssessmentRefundEvent,
+    AssessmentReport,
+    AssessmentVersion,
+    AssessmentVersionQuestion,
+)
+from vav.models.attendee_social import (
+    AttendeePreviewConsent,
+    AttendeePreviewConsentHistory,
+    AttendeeSocialAudit,
+    SocialFollow,
+    SocialNotificationDelivery,
+    SocialNotificationPreference,
+    SocialWantToMeet,
+)
 from vav.models.base import Base
+from vav.models.capacity_guard import (
+    ActivityCapacityCounter,
+    ActivityCapacityEvent,
+    ActivityCapacityReservation,
+    ActivityWaitlistPosition,
+    ActivityWaitlistPromotionOffer,
+)
 from vav.models.catalog import (
     Coupon,
     CouponRedemptionReservation,
@@ -54,6 +91,14 @@ from vav.models.catalog import (
     ProductSku,
     Promotion,
     SupportedCurrency,
+)
+from vav.models.checkin_operations import (
+    CheckinLastFourBackfillRun,
+    CheckinLookupCandidate,
+    CheckinLookupSession,
+    CheckinOperationEvent,
+    CheckinWindowOverride,
+    CheckinWindowPolicy,
 )
 from vav.models.commerce import (
     Cart,
@@ -105,6 +150,19 @@ from vav.models.counseling import (
     CounselingSession,
     CounselingSlotHold,
 )
+from vav.models.couples import (
+    CoupleActiveMember,
+    CoupleBindingEvent,
+    CoupleInvitation,
+    CoupleRelationship,
+    CoupleScopeFreeBenefit,
+    ScopeAssessment,
+    ScopeAssessmentQuestion,
+    ScopeAssessmentVersion,
+    ScopeDimensionScore,
+    ScopeParticipantSubmission,
+    ScopeReport,
+)
 from vav.models.courses import (
     Course,
     CourseCertificate,
@@ -131,6 +189,16 @@ from vav.models.courses import (
     LessonPrerequisite,
     LessonProgress,
     LessonVideoResource,
+)
+from vav.models.discovery import (
+    ActivityShareCard,
+    ActivityShareLink,
+    ActivityShareResolution,
+    ActivityVenueLocation,
+    DiscoveryAudit,
+    DiscoveryIpHint,
+    MapProviderConfig,
+    MemberCityPreference,
 )
 from vav.models.identity import (
     AdminInvitation,
@@ -160,54 +228,6 @@ from vav.models.knowledge import (
     KnowledgeSpace,
     KnowledgeUpload,
 )
-from vav.models.assessments import (
-    AssessmentAttempt,
-    AssessmentEntitlement,
-    AssessmentProduct,
-    AssessmentPurchase,
-    AssessmentRefundEvent,
-    AssessmentReport,
-    AssessmentVersion,
-    AssessmentVersionQuestion,
-)
-from vav.models.attendee_social import (
-    AttendeePreviewConsent,
-    AttendeePreviewConsentHistory,
-    AttendeeSocialAudit,
-    SocialFollow,
-    SocialNotificationDelivery,
-    SocialNotificationPreference,
-    SocialWantToMeet,
-)
-from vav.models.couples import (
-    CoupleActiveMember,
-    CoupleBindingEvent,
-    CoupleInvitation,
-    CoupleRelationship,
-    CoupleScopeFreeBenefit,
-    ScopeAssessment,
-    ScopeAssessmentQuestion,
-    ScopeAssessmentVersion,
-    ScopeDimensionScore,
-    ScopeParticipantSubmission,
-    ScopeReport,
-)
-from vav.models.discovery import (
-    ActivityShareCard,
-    ActivityShareLink,
-    ActivityShareResolution,
-    ActivityVenueLocation,
-    DiscoveryAudit,
-    DiscoveryIpHint,
-    MapProviderConfig,
-    MemberCityPreference,
-)
-from vav.models.profile_media import (
-    ProfileMediaAsset,
-    ProfileMediaAudit,
-    ProfileMediaProfile,
-    ProfileShareConsent,
-)
 from vav.models.matchmaking_entitlements import (
     MatchmakingDeliveryHistory,
     MatchmakingDeliveryReset,
@@ -217,6 +237,12 @@ from vav.models.matchmaking_entitlements import (
     MatchmakingWaitPoolEntry,
     MemberRelationshipStatus,
     MemberRelationshipStatusHistory,
+)
+from vav.models.member_dashboard import (
+    MemberDashboardPreference,
+    MemberDashboardSectionIncident,
+    MemberDashboardTaskDismissal,
+    MemberDashboardTaskTypeOverride,
 )
 from vav.models.post_event import (
     ActivityCandidateEntry,
@@ -239,6 +265,12 @@ from vav.models.post_event import (
     SurveyResponse,
     SurveyTask,
 )
+from vav.models.profile_media import (
+    ProfileMediaAsset,
+    ProfileMediaAudit,
+    ProfileMediaProfile,
+    ProfileShareConsent,
+)
 from vav.models.system import (
     AuditEvent,
     IdempotencyKey,
@@ -255,6 +287,30 @@ from vav.models.system import (
 )
 
 __all__ = [
+    "ActivityCapacityCounter",
+    "ActivityCapacityEvent",
+    "ActivityCapacityReservation",
+    "ActivityWaitlistPosition",
+    "ActivityWaitlistPromotionOffer",
+    "AiBudgetPolicy",
+    "AiContentPolicyRule",
+    "AiCrisisResource",
+    "AiEscalationRunbook",
+    "AiLaunchGate",
+    "AiPolicyDecision",
+    "AiProviderHealth",
+    "AiProviderProfile",
+    "AiUsageEntry",
+    "CheckinLastFourBackfillRun",
+    "CheckinLookupCandidate",
+    "CheckinLookupSession",
+    "CheckinOperationEvent",
+    "CheckinWindowOverride",
+    "CheckinWindowPolicy",
+    "MemberDashboardPreference",
+    "MemberDashboardSectionIncident",
+    "MemberDashboardTaskDismissal",
+    "MemberDashboardTaskTypeOverride",
     "ActivityShareCard",
     "ActivityShareLink",
     "ActivityShareResolution",

@@ -46,7 +46,8 @@
     "settings": "网站设置",
     "admins": "管理员",
     "audit": "审计日志",
-    "usability": "可用性控制台"
+    "usability": "可用性控制台",
+    "postEvent": "活动后闭环"
   },
   "group": {
     "workbench": "工作台",
@@ -241,6 +242,7 @@
     "drafts": "草稿恢复",
     "notifications": "通知用例",
     "imports": "导入作业",
-    "studies": "可用性研究"
+    "studies": "可用性研究",
+    "letters": "结果信审核"
   }
 }

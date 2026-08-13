@@ -21,4 +21,9 @@ secrets:
   payment_webhook_secret: env://PAYMENT_TEST_WEBHOOK_SECRET
   email_provider_secret: env://NOTIFICATION_EMAIL_PROVIDER_WEBHOOK_SECRET
   ai_provider_api_key: env://AI_PROVIDER_API_KEY
+  checkin_last_four_hmac_key: env://CHECKIN_LAST_FOUR_HMAC_KEY
+  checkin_token_signing_key: env://CHECKIN_TOKEN_SIGNING_KEY
+  share_link_secret: env://SHARE_LINK_SECRET
+  profile_media_token_secret: env://PROFILE_MEDIA_TOKEN_SECRET
+  discovery_ip_marker_salt: env://DISCOVERY_IP_MARKER_SALT
 feature_flags: {version: ci}

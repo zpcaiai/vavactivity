@@ -1,5 +1,5 @@
 module: {code: attendee_social, owner: activities, version: "1.0.0"}
-dependencies: {required: [identity, activities, privacy, notifications, moderation]}
+dependencies: {required: [activities, identity, notifications, privacy, trust_safety]}
 database: {revisions: [98]}
 events:
   publishes:

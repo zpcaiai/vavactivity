@@ -69,6 +69,7 @@ from vav.modules.activities.domain import (
     validate_form_response,
 )
 from vav.modules.activities.schemas import RegistrationCreateRequest
+from vav.modules.capacity_guard import service as capacity_guard_service
 from vav.modules.catalog.inventory import available_quantity, inventory_service
 from vav.modules.catalog.promotions import coupon_redemption_service
 from vav.modules.commerce.domain import OrderStatus
@@ -641,6 +642,14 @@ class ActivityPublicationService:
             ).all()
         )
         for registration in registrations:
+            await capacity_guard_service.release_registration(
+                session,
+                ticket_type_id=registration.ticket_type_id,
+                registration_id=registration.id,
+                reason="activity_cancelled",
+                actor_id=actor_id,
+                promote=False,
+            )
             transition_registration(
                 session,
                 registration,
@@ -916,12 +925,7 @@ class ActivityRegistrationService:
             # must never reject a participant opaquely.
             approval = "manual"
         payment_timing = ticket.payment_timing_override or activity.payment_timing_policy
-        capacity = await self._capacity_available(session, ticket)
-        if not capacity:
-            if not (activity.waitlist_enabled and ticket.waitlist_enabled):
-                raise VavError("ACTIVITY_SOLD_OUT", "This ticket is sold out.", status_code=409)
-            initial = RegistrationStatus.WAITLISTED
-        elif approval == "manual":
+        if approval == "manual":
             initial = RegistrationStatus.PENDING_APPROVAL
         else:
             initial = RegistrationStatus.STARTED
@@ -936,6 +940,20 @@ class ActivityRegistrationService:
         )
         session.add(registration)
         await session.flush()
+        capacity_decision = await capacity_guard_service.reserve_seat(
+            session,
+            ticket_type_id=ticket.id,
+            registration_id=registration.id,
+            user_id=user.id,
+            payload={
+                "seats": 1,
+                "accept_waitlist": bool(activity.waitlist_enabled and ticket.waitlist_enabled),
+                "idempotency_key": request.idempotency_key
+                or f"activity-registration:{activity.id}:{user.id}",
+            },
+        )
+        if capacity_decision["outcome"] == "waitlist":
+            initial = RegistrationStatus.WAITLISTED
         if initial == RegistrationStatus.WAITLISTED:
             transition_registration(
                 session, registration, initial, actor_type="system", reason_code="capacity_full"
@@ -1036,6 +1054,12 @@ class ActivityRegistrationService:
                 )
                 await session.commit()
         elif registration.status == RegistrationStatus.STARTED:
+            await capacity_guard_service.confirm_reservation(
+                session,
+                ticket_type_id=registration.ticket_type_id,
+                registration_id=registration.id,
+                seats=1,
+            )
             transition_registration(
                 session, registration, RegistrationStatus.CONFIRMED, actor_type="system"
             )
@@ -1098,6 +1122,13 @@ class ActivityRegistrationService:
                 actor_id=actor_id,
                 reason_code=reason_code,
             )
+            await capacity_guard_service.release_registration(
+                session,
+                ticket_type_id=registration.ticket_type_id,
+                registration_id=registration.id,
+                reason=reason_code,
+                actor_id=actor_id,
+            )
             await session.commit()
             return registration
         registration.review_status = "approved"
@@ -1123,6 +1154,13 @@ class ActivityRegistrationService:
             actor_id=actor_id,
             reason_code=reason_code,
         )
+        if target == RegistrationStatus.CONFIRMED:
+            await capacity_guard_service.confirm_reservation(
+                session,
+                ticket_type_id=registration.ticket_type_id,
+                registration_id=registration.id,
+                seats=1,
+            )
         await session.commit()
         if payment_timing == "after_approval" and registration.order_id is None:
             private = decrypt_private(registration.form_response_encrypted)
@@ -1186,6 +1224,12 @@ class ActivityRegistrationService:
         if registration.status == RegistrationStatus.PENDING_APPROVAL:
             pass
         elif registration.status != RegistrationStatus.CONFIRMED:
+            await capacity_guard_service.confirm_reservation(
+                session,
+                ticket_type_id=registration.ticket_type_id,
+                registration_id=registration.id,
+                seats=1,
+            )
             transition_registration(
                 session,
                 registration,
@@ -1240,6 +1284,13 @@ class ActivityRegistrationService:
             RegistrationStatus.EXPIRED,
         }:
             return registration
+        await capacity_guard_service.release_registration(
+            session,
+            ticket_type_id=registration.ticket_type_id,
+            registration_id=registration.id,
+            reason=reason_code,
+            actor_id=actor_id,
+        )
         transition_registration(
             session,
             registration,

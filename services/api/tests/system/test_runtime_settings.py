@@ -30,6 +30,17 @@ def production_values() -> dict[str, Any]:
         "NOTIFICATION_EMAIL_PROVIDER": "transactional",
         "NOTIFICATION_EMAIL_PROVIDER_WEBHOOK_SECRET": "render-generated-webhook-secret",
         "PRIVACY_SEARCH_HMAC_PEPPER": "render-generated-privacy-pepper",
+        # Batch B13-B19 secrets. Each is the only thing making a capability
+        # unforgeable, so production refuses to boot on the repository default
+        # and the deployment config (render.yaml, the Kubernetes secret
+        # reference, the compose file and config/env/*.yaml) provisions all
+        # five. This baseline mirrors that config: if a key is added here it
+        # has to exist there too, or "complete baseline" stops being true.
+        "CHECKIN_LAST_FOUR_HMAC_KEY": "render-generated-last-four-key",
+        "CHECKIN_TOKEN_SIGNING_KEY": "render-generated-checkin-token-key",
+        "SHARE_LINK_SECRET": "render-generated-share-link-secret",
+        "PROFILE_MEDIA_TOKEN_SECRET": "render-generated-profile-media-secret",
+        "DISCOVERY_IP_MARKER_SALT": "render-generated-ip-marker-salt",
     }
 
 

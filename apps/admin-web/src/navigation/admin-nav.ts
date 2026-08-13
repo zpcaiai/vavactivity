@@ -309,6 +309,12 @@ export const privacySectionPermissions: Record<string, string> = {
   audit: "privacy.audit.read"
 };
 
+export const postEventSectionPermissions: Record<string, string> = {
+  candidates: "activities.post_event.read",
+  surveys: "surveys.definitions.manage",
+  letters: "result_letters.review"
+};
+
 function sectionsOf(permissions: Record<string, string>): AdminSection[] {
   return Object.entries(permissions).map(([key, permission]) => section(key, permission));
 }
@@ -419,6 +425,14 @@ export const adminGroups: AdminGroup[] = [
     glyph: "✦",
     modules: [
       { key: "activities", labelKey: "menu.activities", base: "/admin/activities", permission: "activities.read", sections: [] },
+      {
+        key: "post-event",
+        labelKey: "menu.postEvent",
+        base: "/admin/post-event",
+        landing: "candidates",
+        permission: "activities.post_event.read",
+        sections: sectionsOf(postEventSectionPermissions)
+      },
       { key: "courses", labelKey: "menu.courses", base: "/admin/courses", permission: "courses.read", sections: [] },
       { key: "counseling", labelKey: "menu.counseling", base: "/admin/counseling", permission: "counseling.appointments.read", sections: [] },
       { key: "knowledge", labelKey: "menu.knowledge", base: "/admin/knowledge", permission: "knowledge.spaces.read", sections: [] },

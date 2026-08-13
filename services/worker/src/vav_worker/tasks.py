@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from sqlalchemy import select, text
 
 from vav.core.database import get_engine, session_factory
+from vav.cli.backfill_last_four_hmac import run as run_last_four_backfill
 from vav.core.config import get_settings
 from vav.models.content import ContentEntry
 from vav.models.courses import Course, CourseEnrollment
@@ -115,6 +116,100 @@ async def _advance_activities() -> dict[str, int]:
 @celery_app.task(name="vav.activities.advance")  # type: ignore[misc]
 def advance_activities() -> dict[str, int]:
     return asyncio.run(_advance_activities())
+
+
+async def _process_last_four_backfill() -> dict[str, int]:
+    """Claim and execute one explicitly requested plaintext-touching run."""
+
+    run_row = None
+    async with session_factory() as session:
+        run_row = (
+            (
+                await session.execute(
+                    text(
+                        "SELECT id,batch_size,salt_version,dry_run "
+                        "FROM checkin_last_four_backfill_runs "
+                        "WHERE status='queued' ORDER BY created_at "
+                        "FOR UPDATE SKIP LOCKED LIMIT 1"
+                    )
+                )
+            )
+            .mappings()
+            .first()
+        )
+        if run_row is None:
+            return {"claimed": 0, "processed": 0, "remaining": 0}
+        await session.execute(
+            text(
+                "UPDATE checkin_last_four_backfill_runs "
+                "SET status='running',started_at=now(),updated_at=now() WHERE id=:id"
+            ),
+            {"id": str(run_row["id"])},
+        )
+        await session.commit()
+
+    run_id = str(run_row["id"])
+    try:
+        configured_salt = get_settings().checkin_last_four_salt_version
+        if str(run_row["salt_version"]) != configured_salt:
+            raise ValueError(
+                "requested salt version does not match the active configuration"
+            )
+        processed = await run_last_four_backfill(
+            batch_size=int(run_row["batch_size"]),
+            apply=not bool(run_row["dry_run"]),
+            limit=None,
+        )
+        async with session_factory() as session:
+            remaining = int(
+                await session.scalar(
+                    text(
+                        "SELECT count(*) FROM user_contact_points "
+                        "WHERE contact_type='phone' AND value_encrypted IS NOT NULL "
+                        "AND (last_four_hmac IS NULL OR last_four_hmac NOT LIKE :prefix)"
+                    ),
+                    {"prefix": f"{configured_salt}:%"},
+                )
+                or 0
+            )
+            note = (
+                "dry run completed; no rows were changed"
+                if bool(run_row["dry_run"])
+                else f"completed with {remaining} row(s) still pending or unfixable"
+            )
+            await session.execute(
+                text(
+                    "UPDATE checkin_last_four_backfill_runs "
+                    "SET status='completed',processed_rows=:processed,pending_rows=:remaining,"
+                    "note=:note,finished_at=now(),updated_at=now() WHERE id=:id"
+                ),
+                {
+                    "id": run_id,
+                    "processed": processed,
+                    "remaining": remaining,
+                    "note": note,
+                },
+            )
+            await session.commit()
+        return {"claimed": 1, "processed": processed, "remaining": remaining}
+    except Exception as error:
+        async with session_factory() as session:
+            await session.execute(
+                text(
+                    "UPDATE checkin_last_four_backfill_runs "
+                    "SET status='failed',note=:note,finished_at=now(),updated_at=now() WHERE id=:id"
+                ),
+                {"id": run_id, "note": f"worker failed: {type(error).__name__}"},
+            )
+            await session.commit()
+        raise
+    finally:
+        await get_engine().dispose()
+
+
+@celery_app.task(name="vav.checkin.process_last_four_backfill")  # type: ignore[misc]
+def process_last_four_backfill() -> dict[str, int]:
+    return asyncio.run(_process_last_four_backfill())
 
 
 async def _advance_courses() -> dict[str, int]:

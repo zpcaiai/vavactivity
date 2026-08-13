@@ -43,5 +43,52 @@ events:
   admin.approval.changed.v1: {owner: admin_platform, sensitivity: restricted}
   admin.configuration.changed.v1: {owner: admin_platform, sensitivity: internal}
   admin.certification.changed.v1: {owner: admin_platform, sensitivity: internal}
+  ai.conversation.started.v1: {owner: ai_assistant, sensitivity: restricted}
+  ai.escalation.opened.v1: {owner: ai_hardening, sensitivity: highly_restricted}
+  ai.provider.failed.v1: {owner: ai_hardening, sensitivity: internal}
+  assessment.attempt.submitted.v1: {owner: assessments, sensitivity: restricted}
+  assessment.entitlement.revoked.v1: {owner: assessments, sensitivity: restricted}
+  assessment.purchase.completed.v1: {owner: assessments, sensitivity: restricted}
+  assessment.report.generated.v1: {owner: assessments, sensitivity: highly_restricted}
+  assessment.version.published.v1: {owner: assessments, sensitivity: internal}
+  social.follow.created.v1: {owner: attendee_social, sensitivity: restricted}
+  social.followed_user_registered.v1: {owner: attendee_social, sensitivity: restricted}
+  moderation.block.created.v1: {owner: trust_safety, sensitivity: restricted}
+  activity.capacity.seat_held.v1: {owner: capacity_guard, sensitivity: internal}
+  activity.capacity.seat_released.v1: {owner: capacity_guard, sensitivity: internal}
+  activity.waitlist.joined.v1: {owner: capacity_guard, sensitivity: restricted}
+  activity.waitlist.promotion_offered.v1: {owner: capacity_guard, sensitivity: restricted}
+  activity.waitlist.promotion_expired.v1: {owner: capacity_guard, sensitivity: internal}
+  payment.order.expired.v1: {owner: commerce, sensitivity: internal}
+  payment.order.paid.v1: {owner: commerce, sensitivity: restricted}
+  payment.order.refunded.v1: {owner: commerce, sensitivity: restricted}
+  activity.registration.cancelled.v1: {owner: activities, sensitivity: restricted}
+  activity.checkin.recorded.v1: {owner: checkin_operations, sensitivity: restricted}
+  activity.checkin.undone.v1: {owner: checkin_operations, sensitivity: restricted}
+  activity.session.rescheduled.v1: {owner: activities, sensitivity: restricted}
+  checkin.last_four_backfill.requested.v1: {owner: checkin_operations, sensitivity: highly_restricted}
+  cms.entry.published.v1: {owner: cms_publishing, sensitivity: public}
+  couple.invitation.sent.v1: {owner: couples, sensitivity: restricted}
+  couple.relationship.bound.v1: {owner: couples, sensitivity: highly_restricted}
+  couple.relationship.unbound.v1: {owner: couples, sensitivity: highly_restricted}
+  couple.scope.started.v1: {owner: couples, sensitivity: highly_restricted}
+  couple.scope.report.ready.v1: {owner: couples, sensitivity: highly_restricted}
+  identity.account.deactivated.v1: {owner: identity, sensitivity: restricted}
+  activity.share_card.created.v1: {owner: discovery, sensitivity: public}
+  activity.share_links.revoked.v1: {owner: discovery, sensitivity: internal}
+  activity.published.v1: {owner: activities, sensitivity: public}
+  activity.unpublished.v1: {owner: activities, sensitivity: internal}
+  matchmaking.access.revoked.v1: {owner: matchmaking_entitlements, sensitivity: restricted}
+  matchmaking.candidates.arrived.v1: {owner: matchmaking_entitlements, sensitivity: restricted}
+  relationship.journey.confirmed.v1: {owner: relationships, sensitivity: highly_restricted}
+  member_dashboard.task_type.updated.v1: {owner: member_dashboard, sensitivity: internal}
+  activity.candidates.frozen.v1: {owner: post_event, sensitivity: highly_restricted}
+  activity.selection.submitted.v1: {owner: post_event, sensitivity: highly_restricted}
+  activity.survey.completed.v1: {owner: post_event, sensitivity: highly_restricted}
+  activity.result_letter.published.v1: {owner: post_event, sensitivity: highly_restricted}
+  profile_media.asset.submitted.v1: {owner: profile_media, sensitivity: highly_restricted}
+  profile_media.asset.moderated.v1: {owner: profile_media, sensitivity: restricted}
+  profile_media.asset.deleted.v1: {owner: profile_media, sensitivity: highly_restricted}
+  moderation.report.upheld.v1: {owner: trust_safety, sensitivity: restricted}
   usability.uat.completed.v1: {owner: usability, sensitivity: restricted}
   usability.certification.changed.v1: {owner: usability, sensitivity: internal}

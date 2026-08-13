@@ -21,4 +21,9 @@ secrets:
   payment_webhook_secret: cloud://dr/payment-webhook-secret
   email_provider_secret: cloud://dr/email-provider-secret
   ai_provider_api_key: cloud://dr/ai-provider-key
+  checkin_last_four_hmac_key: cloud://dr/checkin-last-four-key
+  checkin_token_signing_key: cloud://dr/checkin-token-key
+  share_link_secret: cloud://dr/share-link-secret
+  profile_media_token_secret: cloud://dr/profile-media-secret
+  discovery_ip_marker_salt: cloud://dr/ip-marker-salt
 feature_flags: {version: dr-approved}

@@ -22,7 +22,7 @@ Design notes:
 from __future__ import annotations
 
 import json
-from collections.abc import Callable, Mapping
+from collections.abc import Awaitable, Callable, Mapping
 from datetime import UTC, datetime
 from typing import Any, Protocol
 from uuid import UUID
@@ -72,6 +72,20 @@ def _now() -> datetime:
 
 def _json(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, default=str)
+
+
+def _secret_value(secret: object) -> str:
+    """Unwrap a pydantic ``SecretStr`` into the plain string the domain signs with.
+
+    The domain layer takes ``secret: str`` and guards on falsiness, so passing
+    the SecretStr object straight through would silently defeat that guard —
+    a SecretStr is always truthy — and then fail on ``.encode()``.
+    """
+
+    if secret is None:
+        return ""
+    getter = getattr(secret, "get_secret_value", None)
+    return str(getter() if callable(getter) else secret)
 
 
 def _fail(error: DiscoveryRuleError, status_code: int = 422) -> VavError:
@@ -177,9 +191,7 @@ async def get_city_preference(session: AsyncSession, user_id: UUID) -> dict:
     return dict(row)
 
 
-async def set_city_preference(
-    session: AsyncSession, *, user_id: UUID, payload: dict
-) -> dict:
+async def set_city_preference(session: AsyncSession, *, user_id: UUID, payload: dict) -> dict:
     """Persist (or clear) the member's manual city preference.
 
     Only a manually confirmed choice reaches this table - the domain guard
@@ -236,7 +248,7 @@ async def record_ip_hint(
         record = build_ip_hint_record(
             ip_address=ip_address,
             city_code=city_code,
-            salt=settings.discovery_ip_marker_salt,
+            salt=_secret_value(settings.discovery_ip_marker_salt),
         )
         reject_precise_location_fields(record)
     except DiscoveryRuleError as error:
@@ -347,8 +359,9 @@ async def discovery_feed(
                     "FROM activities a "
                     "LEFT JOIN activity_localizations loc ON loc.activity_id=a.id AND loc.locale=a.default_locale "
                     "LEFT JOIN activity_venue_locations v ON v.activity_id=a.id "
-                    "WHERE a.status='published' AND a.visibility='public'" + clause +
-                    " ORDER BY a.starts_at ASC, a.id LIMIT :limit OFFSET :offset"
+                    "WHERE a.status='published' AND a.visibility='public'"
+                    + clause
+                    + " ORDER BY a.starts_at ASC, a.id LIMIT :limit OFFSET :offset"
                 ),
                 params,
             )
@@ -396,7 +409,9 @@ class MapProvider(Protocol):
 
     code: MapProviderCode
 
-    def geocode(self, address: str, *, city_code: str | None = None) -> NormalizedPlace | None:
+    async def geocode(
+        self, address: str, *, city_code: str | None = None
+    ) -> NormalizedPlace | None:
         """Resolve an address, or return ``None`` when the provider found nothing."""
 
     def display_link(self, place: NormalizedPlace | None, *, fallback_query: str) -> str | None:
@@ -404,9 +419,11 @@ class MapProvider(Protocol):
 
 
 #: Injected by infrastructure at startup. Signature:
-#: ``(provider_code, url, params) -> mapping``. Kept as a module-level hook so
-#: this module has no direct HTTP dependency and stays importable in tests.
-FetchJson = Callable[[str, str, Mapping[str, Any]], Mapping[str, Any]]
+#: ``async (provider_code, url, params) -> mapping``. Kept as a module-level
+#: hook so this module has no direct HTTP dependency and stays importable in
+#: tests. It is async because geocoding happens inside async request handlers —
+#: a blocking call here would stall the event loop for every other request.
+FetchJson = Callable[[str, str, Mapping[str, Any]], Awaitable[Mapping[str, Any]]]
 
 _fetch_json: FetchJson | None = None
 
@@ -418,11 +435,13 @@ def register_geocode_fetcher(fetcher: FetchJson | None) -> None:
     _fetch_json = fetcher
 
 
-def _fetch(provider: MapProviderCode, url: str, params: Mapping[str, Any]) -> Mapping[str, Any]:
+async def _fetch(
+    provider: MapProviderCode, url: str, params: Mapping[str, Any]
+) -> Mapping[str, Any]:
     if _fetch_json is None:
         raise MapProviderUnavailable("No geocode transport is registered.")
     try:
-        return _fetch_json(provider.value, url, params)
+        return await _fetch_json(provider.value, url, params)
     except MapProviderUnavailable:
         raise
     except Exception as exc:  # pragma: no cover - transport specific
@@ -439,8 +458,10 @@ class AmapProvider:
         # The key lives here and nowhere else; it never enters a response body.
         self._api_key = api_key
 
-    def geocode(self, address: str, *, city_code: str | None = None) -> NormalizedPlace | None:
-        payload = _fetch(
+    async def geocode(
+        self, address: str, *, city_code: str | None = None
+    ) -> NormalizedPlace | None:
+        payload = await _fetch(
             self.code,
             self.endpoint,
             {"key": self._api_key, "address": address, "city": city_code or ""},
@@ -466,10 +487,10 @@ class GoogleMapsProvider:
     def __init__(self, api_key: str) -> None:
         self._api_key = api_key
 
-    def geocode(self, address: str, *, city_code: str | None = None) -> NormalizedPlace | None:
-        payload = _fetch(
-            self.code, self.endpoint, {"key": self._api_key, "address": address}
-        )
+    async def geocode(
+        self, address: str, *, city_code: str | None = None
+    ) -> NormalizedPlace | None:
+        payload = await _fetch(self.code, self.endpoint, {"key": self._api_key, "address": address})
         results = payload.get("results") or []
         if not results:
             return None
@@ -491,12 +512,26 @@ def build_provider(country_code: str | None) -> MapProvider:
         )
     except DiscoveryRuleError as error:
         raise _fail(error, status_code=503) from error
+    # The key is a SecretStr in configuration. Unwrap it here — and only here —
+    # so it never travels as an object that could be logged by accident. A
+    # provider that is enabled but has no key is a misconfiguration, not a
+    # reason to call an API with `key=None`.
+    secret = (
+        settings.map_amap_api_key if code is MapProviderCode.AMAP else (settings.map_google_api_key)
+    )
+    api_key = secret.get_secret_value().strip() if secret is not None else ""
+    if not api_key:
+        raise VavError(
+            "MAP_PROVIDER_KEY_MISSING",
+            f"Map provider {code.value} is enabled but no API key is configured.",
+            status_code=503,
+        )
     if code is MapProviderCode.AMAP:
-        return AmapProvider(settings.map_amap_api_key)
-    return GoogleMapsProvider(settings.map_google_api_key)
+        return AmapProvider(api_key)
+    return GoogleMapsProvider(api_key)
 
 
-def geocode_address(
+async def geocode_address(
     *, manual_address: str, country_code: str | None, city_code: str | None = None
 ) -> VenueLocation:
     """Geocode an address, preserving the operator's text on any failure.
@@ -515,7 +550,7 @@ def geocode_address(
             failure_code="GEOCODE_PROVIDER_UNAVAILABLE",
         )
     try:
-        place = provider.geocode(manual_address, city_code=city_code)
+        place = await provider.geocode(manual_address, city_code=city_code)
     except MapProviderUnavailable:
         return resolve_venue_location(
             manual_address=manual_address, place=None, failure_code="GEOCODE_BACKEND_UNAVAILABLE"
@@ -539,7 +574,7 @@ def geocode_address(
 async def geocode_preview(session: AsyncSession, *, payload: dict) -> dict:
     """Operator-facing geocode preview used by the venue editor."""
 
-    venue = geocode_address(
+    venue = await geocode_address(
         manual_address=payload["manual_address"],
         country_code=payload.get("country_code"),
         city_code=payload.get("city_code"),
@@ -564,9 +599,7 @@ def _venue_payload(venue: VenueLocation) -> dict:
     }
 
 
-async def save_venue_location(
-    session: AsyncSession, *, actor_id: UUID, payload: dict
-) -> dict:
+async def save_venue_location(session: AsyncSession, *, actor_id: UUID, payload: dict) -> dict:
     """Persist a venue location for an activity.
 
     ``place=None`` is a first-class outcome, not an error: the row is written
@@ -751,7 +784,7 @@ async def create_share_card(
             event_id=activity_id,
             share_version=card_version,
             base_url=settings.share_public_base_url,
-            secret=settings.share_link_secret,
+            secret=_secret_value(settings.share_link_secret),
             issued_at=_now(),
             ttl_hours=payload.get("ttl_hours", settings.share_link_default_ttl_hours),
             publication_status=activity["status"],
@@ -910,18 +943,20 @@ async def resolve_short_link(session: AsyncSession, *, short_code: str) -> dict:
         raise VavError("SHARE_LINK_NOT_FOUND", "This share link is not valid.", status_code=404)
     activity_id = UUID(str(row["activity_id"]))
     expected_code = short_link_code(
-        activity_id, int(row["share_version"]), secret=settings.share_link_secret
+        activity_id,
+        int(row["share_version"]),
+        secret=_secret_value(settings.share_link_secret),
     )
     signed_payload = {
         "event_id": str(activity_id),
         "share_version": int(row["share_version"]),
         "short_code": row["short_code"],
-        "expires_at": row["expires_at"].astimezone(UTC).isoformat()
-        if row["expires_at"]
-        else None,
+        "expires_at": row["expires_at"].astimezone(UTC).isoformat() if row["expires_at"] else None,
     }
     if expected_code != row["short_code"] or not verify_share_token(
-        signed_payload, row["signature"], secret=settings.share_link_secret
+        signed_payload,
+        row["signature"],
+        secret=_secret_value(settings.share_link_secret),
     ):
         raise VavError(
             "SHARE_LINK_SIGNATURE_INVALID",
@@ -1050,7 +1085,9 @@ async def list_map_provider_configs(session: AsyncSession) -> list[dict]:
     return [dict(row) for row in rows]
 
 
-async def location_debug(session: AsyncSession, *, user_id: UUID | None, ip_city_code: str | None) -> dict:
+async def location_debug(
+    session: AsyncSession, *, user_id: UUID | None, ip_city_code: str | None
+) -> dict:
     """Operator view of how a city was resolved, for support tickets."""
 
     resolved = await resolve_location(session, user_id=user_id, ip_city_code=ip_city_code)

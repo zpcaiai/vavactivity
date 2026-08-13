@@ -105,3 +105,18 @@ services:
         generateValue: true
       - key: NOTIFICATION_EMAIL_PROVIDER_WEBHOOK_SECRET
         generateValue: true
+      # Salts the check-in last-four lookup; a known key makes that column a phone enumeration oracle.
+      - key: CHECKIN_LAST_FOUR_HMAC_KEY
+        generateValue: true
+      # Signs the operator confirm/undo capability; forging one forges an attendance record.
+      - key: CHECKIN_TOKEN_SIGNING_KEY
+        generateValue: true
+      # Signs share links.
+      - key: SHARE_LINK_SECRET
+        generateValue: true
+      # Signs per-asset private media access grants.
+      - key: PROFILE_MEDIA_TOKEN_SECRET
+        generateValue: true
+      # Pseudonymizes the coarse IP marker; a known salt re-identifies it.
+      - key: DISCOVERY_IP_MARKER_SALT
+        generateValue: true

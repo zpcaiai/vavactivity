@@ -1,5 +1,5 @@
 module: {code: assessments, owner: growth, version: "1.0.0"}
-dependencies: {required: [identity, privacy, payments, notifications]}
+dependencies: {required: [commerce, identity, notifications, privacy]}
 database: {revisions: [101]}
 events:
   publishes:

@@ -18,6 +18,10 @@ from vav.core.request_context import RequestContextMiddleware
 from vav.core.security_headers import SecurityHeadersMiddleware
 from vav.core.telemetry import configure_telemetry
 from vav.modules.content.seo import seo_router
+from vav.modules.discovery.transport import (
+    install_geocode_transport,
+    uninstall_geocode_transport,
+)
 
 MAX_REQUEST_BODY_BYTES = 16 * 1024 * 1024
 
@@ -30,8 +34,15 @@ def documentation_urls(environment: str) -> dict[str, str | None]:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    yield
-    await close_resources()
+    # Wire the map-provider HTTP transport. Without this the geocode adapters
+    # have no way out to the network and every lookup degrades to "keep the
+    # typed address" — correct, but silently useless (MAP-001).
+    install_geocode_transport()
+    try:
+        yield
+    finally:
+        uninstall_geocode_transport()
+        await close_resources()
 
 
 def create_app() -> FastAPI:

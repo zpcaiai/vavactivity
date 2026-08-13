@@ -30,12 +30,12 @@ dependencies = [
   "sqlalchemy==2.0.42",
   "structlog==25.4.0",
   "uvicorn[standard]==0.35.0",
-  "vav-skill-sdk==1.0.0",
 ]
 
 [dependency-groups]
 dev = [
   "httpx2==2.9.1",
+  "moto[s3]==5.2.2",
   "mypy==1.17.0",
   "pytest==8.4.1",
   "pytest-asyncio==1.1.0",

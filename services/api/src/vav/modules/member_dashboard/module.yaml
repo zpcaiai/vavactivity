@@ -1,0 +1,10 @@
+module: {code: member_dashboard, owner: member_experience, version: "1.0.0"}
+dependencies: {required: [identity, activities, post_event, matchmaking_entitlements, notifications]}
+database: {revisions: [102]}
+events:
+  publishes:
+    - member_dashboard.task_type.updated.v1
+  consumes: [activity.survey.completed.v1, activity.result_letter.published.v1, activity.selection.submitted.v1, matchmaking.candidates.arrived.v1]
+permissions: {prefixes: [member_dashboard.incidents., member_dashboard.task_types., member_dashboard.preview.]}
+configuration: {prefixes: [MEMBER_DASHBOARD_]}
+health: {checks: [section_degradation_rate, task_type_deep_link_templates]}

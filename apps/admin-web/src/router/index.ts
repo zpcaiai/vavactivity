@@ -11,6 +11,7 @@ import {
   notificationSectionPermissions,
   privacySectionPermissions,
   processSectionPermissions,
+  postEventSectionPermissions,
   qualitySectionPermissions,
   recommendationSectionPermissions,
   relationshipSectionPermissions,
@@ -55,6 +56,7 @@ const TrustSafetyManagementPage = () => import("@/pages/TrustSafetyManagementPag
 const SystemOperationsPage = () => import("@/pages/SystemOperationsPage.vue");
 const SkillManagementPage = () => import("@/pages/SkillManagementPage.vue");
 const UsabilityManagementPage = () => import("@/pages/UsabilityManagementPage.vue");
+const PostEventManagementPage = () => import("@/pages/PostEventManagementPage.vue");
 const QualityManagementPage = () => import("@/pages/QualityManagementPage.vue");
 const DesignSystemManagementPage = () => import("@/pages/DesignSystemManagementPage.vue");
 const ExperienceManagementPage = () => import("@/pages/ExperienceManagementPage.vue");
@@ -460,6 +462,16 @@ export const router = createRouter({
           component: UsabilityManagementPage,
           meta: { title: "可用性控制台", permission: usabilitySectionPermissions[section], usabilitySection: section }
         })),
+        ...Object.keys(postEventSectionPermissions).map((section) => ({
+          path: `post-event/${section}`,
+          name: `admin-post-event-${section}`,
+          component: PostEventManagementPage,
+          meta: {
+            title: "活动后闭环",
+            permission: postEventSectionPermissions[section],
+            postEventSection: section
+          }
+        })),
         ...Object.keys(qualitySectionPermissions).map((section) => ({
           path: `quality/${section}`,
           name: `admin-quality-${section}`,
@@ -609,6 +621,7 @@ export {
   interactionSectionPermissions,
   membershipSectionPermissions,
   processSectionPermissions,
+  postEventSectionPermissions,
   qualitySectionPermissions,
   recommendationSectionPermissions,
   relationshipSectionPermissions,

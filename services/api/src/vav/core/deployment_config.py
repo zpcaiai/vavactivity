@@ -63,6 +63,15 @@ class SecretReferences(StrictModel):
     payment_webhook_secret: str
     email_provider_secret: str
     ai_provider_api_key: str
+    # Batch B13-B19 secrets. Each is required rather than optional: production
+    # refuses to boot without them (see ``Settings`` in ``core.config``), so a
+    # deployment file that omits one describes an environment that cannot
+    # start. Declaring them optional here would let that file validate.
+    checkin_last_four_hmac_key: str
+    checkin_token_signing_key: str
+    share_link_secret: str
+    profile_media_token_secret: str
+    discovery_ip_marker_salt: str
 
 
 class FeatureFlagDeployment(StrictModel):

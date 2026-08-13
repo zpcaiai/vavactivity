@@ -1,5 +1,5 @@
 module: {code: profile_media, owner: matchmaking, version: "1.0.0"}
-dependencies: {required: [identity, privacy, storage, moderation, matchmaking_profiles]}
+dependencies: {required: [content, identity, matchmaking_profiles, privacy, trust_safety]}
 database: {revisions: [99]}
 events:
   publishes:

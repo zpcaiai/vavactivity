@@ -94,7 +94,12 @@
     "loading": "正在加載",
     "pleaseWait": "請稍候。",
     "yes": "是",
-    "no": "否"
+    "no": "否",
+    "save": "儲存",
+    "errorTitle": "出錯了",
+    "unknownError": "未知錯誤",
+    "saved": "已儲存",
+    "listSeparator": "、"
   },
   "nav": {
     "primary": "主導航"
@@ -172,7 +177,17 @@
       "notificationPreferences": "通知偏好",
       "privacy": "隱私與數據",
       "safety": "安全中心",
-      "sessions": "登入工作階段"
+      "sessions": "登入工作階段",
+      "surveyTasks": "活動問卷",
+      "matchmakingEntitlement": "推薦額度",
+      "resultLetters": "結果信",
+      "relationshipStatus": "情感狀態",
+      "memberDashboard": "我的看板",
+      "discovery": "同城發現",
+      "assessments": "測評",
+      "profileMedia": "檔案照片與影片",
+      "couple": "伴侶關係",
+      "follows": "關注"
     },
     "public": {
       "activities": "活動",
@@ -849,5 +864,506 @@
     "submitted": "第 {version} 版已提交審核，該版本不可再修改。",
     "paused": "檔案已暫停，已退出推荐池。",
     "reactivated": "檔案已重新启用。"
+  },
+  "postEvent": {
+    "eyebrow": "活動之後",
+    "selection": {
+      "title": "雙方互選",
+      "description": "從當天到場的夥伴中，最多選擇 {max} 位。也可以誰都不選。",
+      "loadingMessage": "正在讀取當天的名單…",
+      "chosen": "已選擇",
+      "candidatesTitle": "到場夥伴",
+      "counter": "已選 {selected} / {max}",
+      "limitHint": "最多可選 {max} 位，還可再選 {remaining} 位。",
+      "emptyTitle": "暫時沒有可選的夥伴",
+      "emptyMessage": "名單凍結後，符合條件的夥伴會出現在這裡。",
+      "notEligibleTitle": "你不在本次互選名單中",
+      "notEligibleMessage": "互選只面向當天完成報到的參與者。如果你認為這是誤判，請聯繫工作人員。",
+      "submittedTitle": "已提交",
+      "submittedMessage": "你的選擇已經記錄。",
+      "editableUntil": "在 {time} 之前你還可以修改。",
+      "lockedTitle": "已截止",
+      "lockedMessage": "修改視窗已經關閉，本次選擇不能再更改。",
+      "draftSavedTitle": "草稿已儲存",
+      "draftSavedMessage": "還沒有正式提交，你可以隨時回來繼續。",
+      "reasonTitle": "這次誰都沒有選",
+      "reasonDescription": "選一個最接近的原因，這只會用於改進活動安排。",
+      "reasonNoteLabel": "補充說明",
+      "reasonNoteHint": "這一項需要一句話說明。",
+      "saveDraft": "儲存草稿",
+      "submit": "提交選擇",
+      "submitNone": "提交（不選擇任何人）"
+    },
+    "survey": {
+      "title": "活動問卷",
+      "description": "你的回饋只用於改進活動。",
+      "loadingMessage": "正在讀取問卷…",
+      "notFoundTitle": "沒有找到這份問卷",
+      "notFoundMessage": "這份問卷不屬於你，或者尚未開放。",
+      "notOpenTitle": "問卷還未開放",
+      "notOpenMessage": "開放後你會收到通知。",
+      "closedTitle": "問卷已截止",
+      "closedMessage": "截止時間是 {deadline}，現在只能查看。",
+      "deadlineTitle": "填寫截止時間",
+      "deadlineMessage": "請在 {deadline}（{timezone}）之前提交。",
+      "submittedTitle": "已提交",
+      "submittedEditable": "截止之前你仍然可以修改。",
+      "charactersLeft": "還可輸入 {count} 字",
+      "noSubjects": "本次沒有可評價的夥伴。",
+      "missingRequired": "還有 {count} 項必答題沒有填寫。",
+      "savedAt": "已於 {time} 儲存",
+      "saveDraft": "儲存草稿",
+      "submit": "提交問卷"
+    },
+    "tasks": {
+      "title": "活動問卷",
+      "description": "參加過的活動會在這裡產生問卷任務。",
+      "loadingMessage": "正在讀取任務…",
+      "dueAt": "截止 {time}",
+      "emptyTitle": "暫時沒有問卷",
+      "emptyMessage": "參加並完成報到後，問卷會出現在這裡。",
+      "status": {
+        "pending": "待填寫",
+        "in_progress": "填寫中",
+        "completed": "已完成",
+        "expired": "已過期",
+        "waived": "已豁免"
+      }
+    },
+    "letters": {
+      "title": "結果信",
+      "description": "活動結束後的結果會以信件形式送達。",
+      "detailTitle": "結果信",
+      "loadingMessage": "正在讀取…",
+      "emptyTitle": "還沒有結果信",
+      "emptyMessage": "結果信發布後會出現在這裡。",
+      "notFoundTitle": "沒有找到這封信",
+      "notFoundMessage": "這封信不存在，或者尚未發布。",
+      "publishedAt": "發布於 {time}",
+      "read": "已讀",
+      "unread": "未讀",
+      "outcome": {
+        "mutual_match": "有互選結果",
+        "no_match": "本次沒有互選成功",
+        "not_eligible": "本次未參與互選"
+      }
+    },
+    "passReasons": {}
+  },
+  "matchmakingAccess": {
+    "eyebrow": "緣分",
+    "status": {
+      "title": "情感狀態",
+      "description": "只有單身狀態才會開放推薦與互選。",
+      "loadingMessage": "正在讀取…",
+      "openTitle": "推薦已開放",
+      "openMessage": "你可以使用推薦與互選功能。",
+      "closedTitle": "推薦已關閉",
+      "closedMessage": "把狀態改為「單身」後，推薦功能會重新開放。",
+      "lockedTitle": "由伴侶綁定維護",
+      "lockedMessage": "這個狀態來自已確認的伴侶綁定。需要先解除綁定才能修改。",
+      "savedTitle": "已儲存",
+      "savedMessage": "狀態已更新。",
+      "fieldLabel": "目前狀態",
+      "fieldHint": "這個資訊不會公開展示。",
+      "reasonLabel": "變更說明（選填）",
+      "reasonHint": "只有你和管理員能看到。",
+      "values": {
+        "undisclosed": "未填寫",
+        "single": "單身",
+        "dating": "戀愛中",
+        "engaged": "已訂婚",
+        "married": "已婚",
+        "separated": "分居",
+        "widowed": "喪偶"
+      }
+    },
+    "entitlement": {
+      "title": "推薦額度",
+      "description": "每位成員有三次免費推薦機會。",
+      "loadingMessage": "正在讀取額度…",
+      "unavailableTitle": "推薦暫未開放",
+      "unavailableMessage": "推薦功能只面向單身成員。你可以在「情感狀態」中更新。",
+      "remaining": "剩餘次數",
+      "remainingHint": "共 {granted} 次",
+      "used": "已使用",
+      "perAttempt": "每次最多推薦",
+      "perAttemptHint": "位候選人",
+      "generate": "取得推薦",
+      "exhausted": "免費次數已用完。",
+      "noNewTitle": "暫時沒有新的候選人",
+      "noNewMessage": "這次沒有消耗你的次數。有新人加入時我們會通知你。",
+      "deliveredTitle": "已產生推薦",
+      "deliveredMessage": "本次推薦了 {count} 位候選人。",
+      "ledgerTitle": "額度紀錄",
+      "ledgerDescription": "每一次變化都有據可查。",
+      "reason": {
+        "grant": "發放",
+        "consume": "使用",
+        "refund": "退回",
+        "expire": "過期",
+        "admin_adjust": "人工調整"
+      }
+    },
+    "waitPool": {
+      "title": "你在等待名單中",
+      "message": "有新的合適候選人時，我們會通知你。"
+    }
+  },
+  "memberDashboard": {
+    "eyebrow": "會員空間",
+    "title": "我的看板",
+    "description": "把各個模組的待辦彙總到一處。每一項的狀態仍由所屬模組決定。",
+    "loadingMessage": "正在讀取各模組狀態。",
+    "openTasks": "待處理事項",
+    "urgentCount": "{count} 項緊急",
+    "degradedTitle": "部分內容暫時讀不到",
+    "degradedMessage": "以下版塊暫時無法讀取：{sections}。下面的列表並不完整。",
+    "countExcludesDegraded": "讀不到的版塊不計入上面的數字。",
+    "emptyTitle": "暫時沒有待辦",
+    "emptyMessage": "有新的問卷、結果信或活動提醒時會出現在這裡。",
+    "sectionEmpty": "這個版塊暫時沒有內容。",
+    "sectionUnavailableTitle": "暫時讀不到",
+    "sectionUnavailableMessage": "這個版塊的來源模組暫時沒有回應，稍後再試。",
+    "hideSection": "收起",
+    "showSection": "顯示「{section}」",
+    "hiddenTitle": "已收起的版塊",
+    "dismiss": "忽略",
+    "loadMore": "載入更多",
+    "dueAt": "截止 {time}",
+    "sections": {
+      "survey_tasks": "問卷任務",
+      "result_letters": "結果信",
+      "registrations": "活動報名",
+      "mutual_selection": "互選",
+      "matchmaking": "婚戀額度",
+      "notifications": "通知"
+    },
+    "taskTypes": {
+      "survey_pending": "待填寫的問卷",
+      "mutual_selection_pending": "待提交的互選",
+      "result_letter_unread": "未讀結果信",
+      "registration_upcoming": "即將開始的活動",
+      "matchmaking_attempt_available": "可用的婚戀額度",
+      "notification_unread": "未讀通知"
+    },
+    "priority": {
+      "urgent": "緊急",
+      "high": "較高",
+      "normal": "普通",
+      "low": "較低"
+    }
+  },
+  "discovery": {
+    "eyebrow": "同城發現",
+    "title": "同城活動",
+    "description": "按城市篩選活動。城市來源和篩選是否生效都會寫在頁面上。",
+    "loadingMessage": "正在讀取活動列表。",
+    "cityUnknown": "未確定的城市",
+    "untitled": "未命名活動",
+    "cityLabel": "城市",
+    "cityPlaceholder": "輸入城市代碼",
+    "applyCity": "設為我的城市",
+    "clearCity": "清除城市偏好",
+    "loadMore": "載入更多",
+    "emptyTitle": "沒有找到活動",
+    "emptyMessage": "換一個城市，或清除城市偏好看看全國的活動。",
+    "scopeSummary": "目前範圍：{scope}（{city}），該城市共有 {count} 場活動。",
+    "scope": {
+      "local": "本地",
+      "national": "全國"
+    },
+    "ipSuggestionTitle": "這個城市是猜的",
+    "ipSuggestionMessage": "我們根據網路位置猜測你在{city}，你還沒有確認過。",
+    "confirmCity": "就用{city}",
+    "disableIpSuggestion": "不要再根據網路位置猜測",
+    "switchCityTitle": "要換一個城市嗎",
+    "switchCityMessage": "根據網路位置，你現在可能在{city}。",
+    "switchCity": "改用{city}",
+    "nationalFallbackTitle": "已改為顯示全國活動",
+    "fallback": {
+      "not_applied": "城市篩選正常生效。",
+      "no_city_resolved": "還沒有確定城市，因此顯示全國的活動。",
+      "local_results_empty": "這個城市暫時沒有活動，因此顯示全國的活動。",
+      "local_below_minimum": "這個城市的活動太少，因此補充顯示全國的活動。"
+    },
+    "location": {
+      "title": "活動地點",
+      "description": "地址以主辦方填寫的為準；地圖定位失敗時地址依然有效。",
+      "loadingMessage": "正在讀取地點資訊。",
+      "noneTitle": "尚未填寫地點",
+      "noneMessage": "主辦方還沒有填寫這場活動的地址。",
+      "addressHeading": "地址",
+      "approximateTitle": "地圖定位不可用",
+      "coordinates": "座標 {lat}, {lon}",
+      "openMap": "在地圖中開啟",
+      "searchMap": "在地圖中搜尋這個地址"
+    },
+    "geocodeStatus": {
+      "resolved": "已定位",
+      "failed": "定位失敗，下面的地址是主辦方填寫的原文。",
+      "skipped": "未進行定位，下面的地址是主辦方填寫的原文。"
+    },
+    "share": {
+      "heading": "分享這場活動",
+      "copyLink": "複製連結",
+      "copied": "已複製",
+      "openQrTarget": "開啟 QR 目標頁",
+      "unavailableTitle": "暫時不能分享",
+      "unavailableMessage": "這場活動尚未發布或已關閉分享。",
+      "fallbackCover": "這張封面是預設圖，主辦方還沒有上傳。"
+    }
+  },
+  "social": {
+    "eyebrow": "同場參與者",
+    "preview": {
+      "title": "參與者預覽",
+      "description": "只顯示同意出現在這裡的參與者。",
+      "loadingMessage": "正在讀取參與者。",
+      "emptyTitle": "還沒有可顯示的參與者",
+      "emptyMessage": "還沒有人同意公開出現在參與者列表裡。",
+      "additional": "還有 {count} 位同意公開的參與者。"
+    },
+    "consent": {
+      "heading": "是否出現在參與者列表",
+      "explanation": "預設不出現。只有你明確同意後，其他參與者才會看到你。",
+      "state": {
+        "not_asked": "未選擇（不會出現）",
+        "granted": "已同意出現",
+        "declined": "已拒絕",
+        "withdrawn": "已撤回"
+      },
+      "grant": "同意出現",
+      "decline": "不出現",
+      "withdraw": "撤回同意",
+      "saved": {
+        "granted": "你現在會出現在參與者列表裡。",
+        "declined": "你不會出現在參與者列表裡。",
+        "withdrawn": "已撤回，你不再出現在列表裡。"
+      },
+      "introLabel": "一句話介紹",
+      "introPlaceholder": "選填",
+      "introHint": "最多 {max} 個字元，會和頭像一起顯示。",
+      "saveIntro": "儲存介紹",
+      "introSaved": "介紹已儲存。"
+    },
+    "follow": "關注",
+    "unfollow": "取消關注",
+    "wantToMeet": {
+      "action": "想認識",
+      "done": "已表達",
+      "recorded": "已記錄。這只針對這場活動，與關注和喜歡都不同。"
+    },
+    "follows": {
+      "title": "關注",
+      "description": "關注是單向的,和互選、喜歡都不是一回事。",
+      "loadingMessage": "正在讀取關注列表。",
+      "followingHeading": "我關注的人",
+      "followersHeading": "關注我的人",
+      "followingEmpty": "還沒有關注任何人。",
+      "followersEmpty": "還沒有人關注你。",
+      "since": "自 {date}",
+      "mutual": "互相關注",
+      "followBack": "回關",
+      "notificationHeading": "關注提醒",
+      "notifyOnRegistration": "我關注的人報名活動時通知我",
+      "notifyHint": "只在對方同意公開出現在參與者列表時才會通知。"
+    }
+  },
+  "couples": {
+    "eyebrow": "伴侶",
+    "title": "伴侶關係",
+    "description": "綁定需要雙方都確認。發出邀請本身不會建立關係。",
+    "loadingMessage": "正在讀取關係狀態。",
+    "kind": {
+      "dating": "戀愛中",
+      "engaged": "已訂婚",
+      "married": "已婚"
+    },
+    "relationship": {
+      "heading": "目前關係",
+      "partner": "伴侶：{id}",
+      "unbindReasonLabel": "解除原因（選填）",
+      "unbindHint": "解除後雙方都會收到記錄，歷史不會被刪除。",
+      "unbind": "解除關係",
+      "unbound": "關係已解除。"
+    },
+    "invite": {
+      "heading": "邀請伴侶綁定",
+      "explanation": "發出邀請不會建立關係，需要對方接受後才生效。",
+      "inviteeLabel": "對方的使用者 ID",
+      "kindLabel": "關係類型",
+      "noteLabel": "留言（選填）",
+      "noteHint": "留言會加密儲存，只有對方能看到。",
+      "send": "發送邀請",
+      "sentPending": "邀請已發出，等待對方確認後關係才會建立。",
+      "responded": {
+        "accept": "已接受邀請。",
+        "reject": "已拒絕邀請。"
+      }
+    },
+    "invitations": {
+      "heading": "邀請記錄",
+      "empty": "暫時沒有邀請。",
+      "direction": {
+        "incoming": "收到的邀請",
+        "outgoing": "發出的邀請"
+      },
+      "status": {
+        "pending": "待回應",
+        "accepted": "已接受",
+        "rejected": "已拒絕",
+        "cancelled": "已取消",
+        "expired": "已過期"
+      },
+      "expiresAt": "有效期至 {time}",
+      "accept": "接受",
+      "reject": "拒絕",
+      "cancel": "撤回"
+    }
+  },
+  "scope": {
+    "title": "伴侶測評",
+    "description": "雙方都提交後才會生成報告，中途不會有任何分數。",
+    "loadingMessage": "正在讀取測評狀態。",
+    "start": {
+      "heading": "開始一次測評",
+      "noVersions": "暫時沒有可用的測評版本。",
+      "algorithm": "演算法版本 {version}",
+      "action": "開始"
+    },
+    "progress": {
+      "heading": "進度",
+      "partner": "伴侶：{status}"
+    },
+    "participant": {
+      "not_started": "未開始",
+      "in_progress": "填寫中",
+      "submitted": "已提交"
+    },
+    "waiting": {
+      "title": "等待伴侶提交",
+      "default": "你已提交。報告要等伴侶也提交後才會生成。"
+    },
+    "answers": {
+      "heading": "作答",
+      "hint": "你的作答只有你自己能看到，伴侶看不到具體答案。",
+      "empty": "這個版本還沒有題目。",
+      "saveDraft": "儲存草稿",
+      "submit": "提交"
+    },
+    "draftSaved": "草稿已儲存。",
+    "submitted": "已提交。",
+    "report": {
+      "heading": "報告",
+      "generatedAt": "生成於 {time}",
+      "adviceHeading": "解讀",
+      "advicePending": "解讀尚未生成。"
+    },
+    "dimensions": {
+      "support": "支持",
+      "communication": "溝通",
+      "outlook": "期待",
+      "partnership": "協作",
+      "expectations": "預期"
+    }
+  },
+  "assessments": {
+    "eyebrow": "測評",
+    "title": "測評",
+    "description": "購買後按購買時的版本作答與計分，版本不會中途變更。",
+    "loadingMessage": "正在讀取測評目錄。",
+    "emptyTitle": "暫時沒有上架的測評",
+    "emptyMessage": "有新的測評上架時會出現在這裡。",
+    "questionCount": "{count} 道題",
+    "alreadyOwned": "已擁有",
+    "purchaseViaCheckout": "前往結算",
+    "purchaseHint": "購買在結算頁完成，完成後這裡會出現你的作答入口。",
+    "owned": {
+      "heading": "我的測評",
+      "attempts": "剩餘 {remaining} / 共 {granted} 次"
+    },
+    "contentSource": {
+      "administrator_authored": "平台自編",
+      "licensed_third_party": "第三方授權",
+      "public_domain": "公有領域",
+      "partner_supplied": "合作方提供"
+    },
+    "attempt": {
+      "title": "作答",
+      "description": "作答與計分都基於你購買的版本。",
+      "loadingMessage": "正在讀取題目。",
+      "missingTitle": "找不到作答記錄",
+      "missingMessage": "請從「我的測評」重新進入。",
+      "status": {
+        "in_progress": "填寫中",
+        "submitted": "已提交",
+        "expired": "已過期",
+        "abandoned": "已放棄"
+      },
+      "remaining": "還有 {count} 題未作答。",
+      "saveDraft": "儲存草稿",
+      "submit": "提交",
+      "draftSaved": "草稿已儲存。",
+      "submitted": "已提交，報告已生成。"
+    },
+    "report": {
+      "heading": "報告",
+      "generatedAt": "生成於 {time}",
+      "algorithm": "演算法版本 {version}",
+      "adviceHeading": "解讀"
+    }
+  },
+  "profileMedia": {
+    "eyebrow": "婚戀檔案",
+    "title": "照片與影片",
+    "description": "私密儲存，連結不可猜測。審核通過後才會對外可見。",
+    "loadingMessage": "正在讀取你的素材。",
+    "completeness": {
+      "heading": "完成度"
+    },
+    "published": "已發布",
+    "notPublished": "未發布",
+    "photos": {
+      "heading": "照片",
+      "empty": "還沒有上傳照片。"
+    },
+    "video": {
+      "heading": "影片",
+      "empty": "還沒有上傳影片。"
+    },
+    "photoAlt": "檔案照片",
+    "remove": "刪除",
+    "pending": "有 {count} 個檔案正在上傳。",
+    "moderation": {
+      "pending": "待審核",
+      "approved": "已通過",
+      "rejected": "未通過"
+    },
+    "tags": {
+      "heading": "標籤與自我介紹",
+      "mbtiLabel": "MBTI",
+      "introLabel": "自我介紹",
+      "cityLabel": "城市"
+    },
+    "tagsSaved": "已儲存。",
+    "share": {
+      "heading": "分享名片",
+      "explanation": "逐項授權。未打開的項目不會出現在名片上，也不會顯示為空白。",
+      "enabled": "啟用分享名片",
+      "share_photos": "包含照片",
+      "share_video": "包含影片",
+      "share_mbti": "包含 MBTI",
+      "share_intro": "包含自我介紹",
+      "share_city": "包含城市",
+      "disabledHint": "分享名片未啟用，逐項設定暫時不生效。"
+    },
+    "addPhoto": "新增照片",
+    "addVideo": "新增影片",
+    "uploadLimits": "最多 3 張照片(單張 10MB 以內)和 1 段影片(100MB、3–30 秒以內)。",
+    "uploadProgress": "上傳中 {percent}%",
+    "uploadDone": "上傳完成,等待審核。",
+    "uploadFailed": "上傳失敗",
+    "previewUnavailable": "預覽暫時不可用,檔案本身未受影響。"
   }
 }

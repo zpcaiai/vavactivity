@@ -36,6 +36,10 @@ celery_app.conf.update(
             "task": "vav.activities.advance",
             "schedule": 60.0,
         },
+        "process-checkin-last-four-backfills": {
+            "task": "vav.checkin.process_last_four_backfill",
+            "schedule": 30.0,
+        },
         "advance-course-publication-and-completion": {
             "task": "vav.courses.advance",
             "schedule": float(
