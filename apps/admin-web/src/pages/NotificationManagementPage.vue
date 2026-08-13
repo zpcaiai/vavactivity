@@ -822,7 +822,7 @@ onMounted(() => {
         </el-table><p>审计不保存完整正文、辅导内容、AI 对话、密码重置 Token 或退订 Token。</p>
       </el-tab-pane>
     </el-tabs>
-  
+
     <el-drawer
       v-model="templateDrawer"
       title="模板版本与发布"

@@ -524,7 +524,7 @@ onMounted(load);
         暂无记录。
       </p>
     </article>
-  
+
     <el-drawer
       v-model="versionsDrawer"
       :title="`${versionsSkill} · 版本与安全门禁`"
