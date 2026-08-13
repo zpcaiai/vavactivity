@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-last_updated: 2026-08-13T16:38:36+08:00
+last_updated: 2026-08-13T17:04:31+08:00
 repository: /Users/stephen/Documents/Projects/python/vavactivity
 canonical: true
 ---
@@ -49,19 +49,29 @@ so another agent can continue without guessing.
 ## Current task
 
 - ID: `profile-media-storage-v2-capacity-mode`
-- Status: `IN_PROGRESS`
-- Owner: shared feature implementation; Codex owns the current validation and
-  publish pass
+- Status: `COMPLETED` for the requested local implementation and scoped
+  branch-publish checkpoint
+- Owner: shared feature implementation; Codex completed the validation and
+  split-repository publish pass
 - Objective: finish the explicit capacity-mode and profile-media storage-v2
   hardening/release work, including client contracts, privacy/export handling,
   worker routing, migrations, deployment configuration, and release gates.
 - Branch: `admin/usability-closure`
-- Snapshot commit: `ed4234a59f51f03c473877a714257d7da861e6ff`
-- Remote at snapshot: `origin/admin/usability-closure` matched the snapshot
-  commit.
-- Working tree at `2026-08-13T15:36:29+08:00`: 53 tracked paths modified and
-  16 untracked paths. These changes pre-existed creation of `.ai/` and must not
-  be overwritten or broadly staged without ownership review.
+- Implementation commit:
+  `1f76f217bb714e8fb51c3d44bbdbe954fa66855b` on
+  `admin/usability-closure`; the matching remote branch was verified after
+  push.
+- Frontend commits: `c539120` (admin workflows) and `c379b16` (user attendee
+  social and private media flows) on `codex/unify-content-card-layout` in the
+  sibling `vavactivityWeb` repository. The branch was rebased onto remote
+  `ef2ce34`, pushed, and local/remote were both verified at
+  `c379b16acb810b9a9450b19e5ad77d32789b460e`.
+- Working tree after the scoped backend implementation commit: only two
+  pre-existing, unstaged indentation-only changes remain in
+  `apps/admin-web/src/pages/SkillManagementPage.vue` and
+  `apps/admin-web/src/pages/SystemOperationsPage.vue`; they are not part of
+  this task and were deliberately left unstaged. The frontend worktree is
+  clean after push.
 - Observed scope: profile-media upload/grants/storage inspection, attendee
   social contract handling, privacy export, explicit capacity mode, migrations
   `0111` and `0112`, API/worker routing, deployment templates, release gate,
@@ -92,14 +102,26 @@ so another agent can continue without guessing.
   `./scripts/vavctl smoke` could not connect to port 8000 while the local API
   service was unavailable during PostgreSQL recovery. This is not recorded as
   a product pass or failure.
-- Commit state: `NOT_PUSHED` for the current uncommitted scope.
+- Commit/push state: `PUSHED` for backend implementation commit `1f76f217` and
+  frontend commit `c379b16`; both remote SHAs were verified.
+- Remote CI for backend `1f76f217`: `PASSED` for Docker Build, Security Tests,
+  and PR Production Gates; `FAILED` for Backend CI because the branch has 15
+  full-service Ruff findings outside this scoped implementation, and `FAILED`
+  for Secret Scan because full-history scanning flags two test fixture strings
+  introduced by historical commits `9c4c276` and `a84299b`. Integration CI is
+  `FAILED` because it checks the frontend repository's default `main` branch,
+  which lacks seven route permissions; the pushed frontend feature branch
+  contains them and the same handoff contract passes locally. Frontend CI for
+  final SHA `c379b16` is `NOT_RUN` at this checkpoint.
 - Production state: `NOT_CERTIFIED`.
-- Next action: create a scoped commit and push, then write the verified local
-  and remote commit state back to this ledger in a follow-up documentation
-  commit.
-- Blockers: local runtime smoke and the full API suite require a stable local
-  API/PostgreSQL runtime; they do not block publishing the locally validated
-  implementation checkpoint.
+- Next action: integrate `codex/unify-content-card-layout` into the frontend
+  default branch through an authorized review/merge, then rerun backend
+  Integration CI; separately resolve the branch-wide Ruff and historical
+  Gitleaks findings and rerun those workflows.
+- Blockers: the frontend default-branch merge requires separate authorization;
+  local runtime smoke and the full API suite require a stable local
+  API/PostgreSQL runtime. These do not invalidate the published, locally
+  validated implementation checkpoint.
 
 ## Recent repository history observed
 
@@ -113,6 +135,32 @@ snapshot. Their presence is not proof that every associated external gate ran.
 - `9c4c276` — `feat: complete member journeys and production gates`
 
 ## Completion log
+
+### 2026-08-13 — Profile media storage v2, capacity mode, and split frontend publish
+
+- Status: `COMPLETED` for local implementation, scoped commits, and branch
+  pushes; external production certification remains `NOT_CERTIFIED`.
+- Backend: committed 74 files as `1f76f217` and pushed
+  `admin/usability-closure`; local and remote SHAs matched after push.
+- Frontend: split the work into `c539120` and `c379b16`, rebased cleanly onto
+  the current remote feature branch, pushed `codex/unify-content-card-layout`,
+  and verified local/remote SHA `c379b16acb810b9a9450b19e5ad77d32789b460e`.
+- Post-rebase frontend validation: user/admin typecheck passed; affected user
+  tests passed `13/13`; affected admin tests passed `17/17`; i18n parity passed
+  for user `3 locales / 828 keys` and admin `3 locales / 235 keys`; diff check
+  passed. The backend-to-frontend handoff contract passed with 4 Skill
+  artifacts, OpenAPI, Skill schema, and 40 route permissions.
+- Backend validation: scoped Ruff and strict mypy checks passed; affected
+  frontend tests passed `13/13`; attendee-social service tests passed `3/3`;
+  user/admin typecheck and lint passed; root contract tests passed `26/26`;
+  Compose rendering, project-manifest validation, unique Alembic head 0112,
+  and clean/snapshot migration upgrades passed.
+- Evidence limitations: local runtime smoke was `BLOCKED` by unavailable API
+  port 8000 during PostgreSQL recovery; the full API suite produced no verdict.
+  Remote CI failures and their exact causes are recorded in `Current task`.
+- Preserved unrelated work: the two backend admin-page indentation changes
+  remain unstaged; no default branch was merged and no pull request was created
+  by this publish pass.
 
 ### 2026-08-13 — Shared Claude Code / Codex task ledger
 
