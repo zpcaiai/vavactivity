@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-last_updated: 2026-08-13T23:45:46+08:00
+last_updated: 2026-08-14T00:26:51+08:00
 repository: /Users/stephen/Documents/Projects/python/vavactivity
 canonical: true
 ---
@@ -57,8 +57,7 @@ so another agent can continue without guessing.
   admin indentation corrections, restore the versioned Claude
   Code/Codex shared ledger, integrate frontend commits `c539120` and `c379b16`,
   and merge the approved backend/frontend pull requests.
-- Branch: merged ledger record is on backend `main`; the active follow-up is a
-  docs-only evidence-wording correction based on that merged state
+- Branch: completed records and evidence wording are merged on backend `main`
 - Snapshot basis: backend PR 4 merged as
   `bee990d35d2b6c0d8115b5845e9a0b9db26f3119`; backend PR 5 head
   `97bfe85a6e8914b16a06797c7c85644a743c84f7` merged as
@@ -77,11 +76,11 @@ so another agent can continue without guessing.
   was fetched after merge and verified to contain its exact PR head. Heavy
   local suites remained intentionally `NOT_RUN` during the shared low-disk
   window because current remote CI supplied the merge evidence.
-- Commit/push state: backend PR 4 and PR 5 are `MERGED`; frontend PR 11 is
-  `MERGED`. Backend `origin/main` resolved to `74785173`; frontend `origin/main`
-  resolved to `bc4840c` at the post-merge verification. This final writeback is
-  intentionally not self-recording its own commit SHA; use Git history for the
-  ledger-only record commit.
+- Commit/push state: backend PR 4, PR 5, ledger PR 8, and evidence-wording PR 9
+  are `MERGED`; frontend PR 11 is `MERGED`. Backend `origin/main` contains all
+  of those heads; frontend `origin/main` resolved to `bc4840c` at post-merge
+  verification. Use Git history for later unrelated `main` advances rather
+  than making this ledger self-record its own merge SHA.
 - Remote CI: `PASSED` for every reported non-conditional backend PR 5 and
   frontend PR 11 check; GitHub reported no branch-protection required checks.
   The conditional backend `Apply migrations to Neon` job was `SKIPPED` by its
@@ -118,6 +117,8 @@ snapshot. Their presence is not proof that every associated external gate ran.
 - Backend PR 5 passed all reported non-conditional checks at `97bfe85` and
   merged as `74785173`. Frontend PR 11 passed dependency installation, lint,
   typecheck, tests, build, and Vercel at `c379b16`, then merged as `bc4840c`.
+- Ledger PR 8 and wording-correction PR 9 each passed their reported checks and
+  merged; PR 9's Backend CI completed in 10m58s.
 - Fetched both remote default branches after merge and verified backend `main`
   contains `97bfe85` and frontend `main` contains `c379b16`.
 - Confirmed the long-running VAV admin-web dev server on port 5174 had no
