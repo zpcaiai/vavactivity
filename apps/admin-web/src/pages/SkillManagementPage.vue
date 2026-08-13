@@ -691,7 +691,7 @@ onMounted(load);
         确认吊销
       </template>
     </VModal>
-</section>
+  </section>
 </template>
 
 <style scoped>
