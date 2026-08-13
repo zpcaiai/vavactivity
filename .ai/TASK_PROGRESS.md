@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-last_updated: 2026-08-13T22:24:22+08:00
+last_updated: 2026-08-13T23:12:35+08:00
 repository: /Users/stephen/Documents/Projects/python/vavactivity
 canonical: true
 ---
@@ -49,51 +49,46 @@ so another agent can continue without guessing.
 ## Current task
 
 - ID: `ci-closure-and-frontend-integration`
-- Status: `COMPLETED` for the approved CI closure and split-repository publish
-  scope; backend PR 5 and frontend PR 11 are ready for review with green checks
+- Status: `COMPLETED` for the approved CI closure, split-repository publish,
+  and merge scope; backend PR 5 and frontend PR 11 are merged into `main`
 - Owner: Codex, incorporating reviewed concurrent Claude Code formatting and
   Gitleaks-ignore changes
 - Objective: clear backend PR 4 Ruff and Gitleaks failures, include the two
   admin indentation corrections, restore the versioned Claude
-  Code/Codex shared ledger, and open a new frontend integration PR for commits
-  `c539120` and `c379b16`.
-- Branch: `codex/ai-coordination-followup`
-- Snapshot basis: merged backend PR 4 at
-  `bee990d35d2b6c0d8115b5845e9a0b9db26f3119`; follow-up implementation commit
-  `b8ff0797c2786898470a0df7299a93618538a9de`. The current ledger commit cannot
-  self-record its own SHA; query PR 5 for the live branch head.
+  Code/Codex shared ledger, integrate frontend commits `c539120` and `c379b16`,
+  and merge the approved backend/frontend pull requests.
+- Branch: final writeback on `codex/ai-merge-record`, based on backend `main`
+  merge `74785173ca617233f5e6876869c0c5d18c138c5c`
+- Snapshot basis: backend PR 4 merged as
+  `bee990d35d2b6c0d8115b5845e9a0b9db26f3119`; backend PR 5 head
+  `97bfe85a6e8914b16a06797c7c85644a743c84f7` merged as
+  `74785173ca617233f5e6876869c0c5d18c138c5c`; frontend PR 11 head
+  `c379b16acb810b9a9450b19e5ad77d32789b460e` merged as
+  `bc4840caf3f96f0fd166cdef8521e4f5ab51dde7`.
 - Scope: the pushed Ruff/format, exact Gitleaks-fingerprint, and production
   object-storage credential fixes; two admin Vue indentation fixes;
-  `AGENTS.md`, `CLAUDE.md`, and `.ai/`; frontend branch
-  `codex/unify-content-card-layout` remains clean at `c379b16`.
-- Validation: remote `PASSED` for Ruff check/format, Gitleaks,
-  migration-compatibility, assembly contracts, Compose, container image build,
-  sensitive-domain tests, and the complete Backend CI run at `8967e4f`. Local
-  admin lint/typecheck, shared-ledger link checks, and `git diff --check`
-  previously passed. Heavy local suites remain intentionally `NOT_RUN` during
-  the shared low-disk window.
-- Commit/push state: backend CI/security fixes were merged to `main` by PR 4.
-  Coordination files and two admin indentation corrections were committed as
-  `9e250ec` on the old branch, then isolated onto post-merge `main` as
-  `b8ff0797c2786898470a0df7299a93618538a9de` on
-  `codex/ai-coordination-followup`; it is pushed and covered by backend PR 5.
-  Frontend commits `c539120` and `c379b16` are pushed and covered by PR 11.
-- Remote CI: backend PR 4 is fully green at `8967e4f`: Backend CI, Secret Scan,
-  Integration CI, Docker Build, Security Tests, assembly contracts, and
-  migration compatibility all passed. Frontend PR 11 targets `main` at
-  `c379b16`; Frontend CI passed install, lint, typecheck, tests, and build,
-  Vercel reported success, and the PR is ready for review. Backend PR 5 targets
-  post-merge `main`; its current head must be obtained from GitHub rather than
-  self-recorded here. Ruff, format, full mypy, migrations, deterministic seed,
-  the complete API suite, migration-head verification, Gitleaks, Integration
-  CI, Security Tests, assembly contracts, and migration compatibility passed
-  before this ledger-only follow-up. A push that changes this file triggers a
-  new head and must be observed again before merge.
-- Remaining gates: review/merge backend Draft PR 5 and frontend Draft PR 11;
-  production deployment,
-  browser/device acceptance, and certification remain `NOT_CERTIFIED`.
-- Next action: review and merge backend Draft PR 5 and frontend PR 11 when
-  ready.
+  `AGENTS.md`, `CLAUDE.md`, and `.ai/`; frontend commits `c539120` and
+  `c379b16`.
+- Validation: backend PR 5 head `97bfe85` passed Backend CI (Ruff, format,
+  mypy, migrations, deterministic seed, complete API suite, and migration-head
+  verification), Gitleaks, Integration CI, Security Tests, assembly contracts,
+  and migration compatibility. Frontend PR 11 head `c379b16` passed install,
+  lint, typecheck, tests, build, and Vercel. `origin/main` in each repository
+  was fetched after merge and verified to contain its exact PR head. Heavy
+  local suites remained intentionally `NOT_RUN` during the shared low-disk
+  window because current remote CI supplied the merge evidence.
+- Commit/push state: backend PR 4 and PR 5 are `MERGED`; frontend PR 11 is
+  `MERGED`. Backend `origin/main` resolved to `74785173`; frontend `origin/main`
+  resolved to `bc4840c` at the post-merge verification. This final writeback is
+  intentionally not self-recording its own commit SHA; use Git history for the
+  ledger-only record commit.
+- Remote CI: `PASSED` for every required backend PR 5 and frontend PR 11 check.
+  The conditional backend `Apply migrations to Neon` job was `SKIPPED` by its
+  workflow condition and was not a required merge check.
+- Remaining gates: production deployment, browser/device acceptance, customer
+  acceptance, and certification remain `NOT_CERTIFIED`.
+- Next action: no repository merge action remains. Run deployment and external
+  acceptance/certification only under a separately authorized release scope.
 - Blockers: none for lightweight Git/CI work. Docker builds, large local test
   suites, package-manager builds, generators, pruning, and cleanup remain
   paused until the separate disk-window owner explicitly releases them.
@@ -111,16 +106,19 @@ snapshot. Their presence is not proof that every associated external gate ran.
 
 ## Completion log
 
-### 2026-08-13 — Backend CI closure and frontend integration PR
+### 2026-08-13 — Backend CI closure and split-repository merge
 
-- Status: `COMPLETED` for the approved branch-publish and CI-observation scope.
+- Status: `COMPLETED` for the approved branch-publish, CI-observation, and merge
+  scope.
 - Backend CI closure was integrated by commits `0703bf5`, `31f6aae`, merge
   `1456d9d`, and security follow-up `8967e4f`.
 - Backend PR 4 is green: Backend CI, Secret Scan, Integration CI, Docker Build,
   Security Tests, assembly contracts, and migration compatibility all passed.
-- Created frontend Draft PR 11 for `c539120` and `c379b16` targeting `main`.
-  Frontend CI passed dependency installation, lint, typecheck, tests, and build;
-  Vercel also reported success.
+- Backend PR 5 passed all required checks at `97bfe85` and merged as
+  `74785173`. Frontend PR 11 passed dependency installation, lint, typecheck,
+  tests, build, and Vercel at `c379b16`, then merged as `bc4840c`.
+- Fetched both remote default branches after merge and verified backend `main`
+  contains `97bfe85` and frontend `main` contains `c379b16`.
 - Confirmed the long-running VAV admin-web dev server on port 5174 had no
   current browser-acceptance dependency and shut down its pnpm/Vite process
   tree using `TERM` only; no data was removed.
