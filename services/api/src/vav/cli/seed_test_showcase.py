@@ -741,7 +741,7 @@ async def _seed_activity_registrations(session: AsyncSession, user_id: UUID) -> 
                 "CASE WHEN CAST(:status AS varchar)='confirmed' THEN now() ELSE NULL END,"
                 "CASE WHEN CAST(:status AS varchar)='cancelled' THEN now() ELSE NULL END) "
                 "ON CONFLICT (activity_id,user_id) DO UPDATE SET status=EXCLUDED.status,attendance_status=EXCLUDED.attendance_status,"
-                "form_response_encrypted=EXCLUDED.form_response_encrypted,confirmed_at=EXCLUDED.confirmed_at,"
+                "registration_number=EXCLUDED.registration_number,form_response_encrypted=EXCLUDED.form_response_encrypted,confirmed_at=EXCLUDED.confirmed_at,"
                 "cancelled_at=EXCLUDED.cancelled_at,updated_at=now()"
             ),
             {
@@ -1749,6 +1749,14 @@ async def _seed_recommendations(session: AsyncSession, user_id: UUID, profile_id
             {"batch": batch["id"], "candidate": candidate["user_id"]},
         )
         if existing is not None:
+            await session.execute(
+                text(
+                    "UPDATE recommendation_items SET status='ready',available_from=now(),expires_at=:expires,"
+                    "exposed_at=NULL,viewed_at=NULL,invalidated_at=NULL,invalidation_reason=NULL "
+                    "WHERE id=:id"
+                ),
+                {"id": existing, "expires": batch["expires_at"]},
+            )
             continue
         current_size = int(
             await session.scalar(
@@ -2434,7 +2442,8 @@ async def _coverage_counts(session: AsyncSession, user_id: UUID) -> dict[str, in
         "counseling_appointments": "SELECT count(*) FROM counseling_appointments WHERE user_id=:user AND appointment_number LIKE 'APT-TEST-%'",
         "counseling_followups": "SELECT count(*) FROM counseling_follow_ups WHERE user_id=:user AND id IN "
         "(:followup_a,:followup_b,:followup_c)",
-        "cart_items": "SELECT count(*) FROM cart_items WHERE cart_id=:cart",
+        "cart_items": "SELECT count(*) FROM cart_items i JOIN carts c ON c.id=i.cart_id "
+        "WHERE c.user_id=:user AND c.currency_code='USD' AND c.status IN ('active','checkout_started')",
         "orders": "SELECT count(*) FROM orders WHERE user_id=:user AND order_number LIKE 'ORD-TEST-%'",
         "subscriptions": "SELECT count(*) FROM subscriptions WHERE user_id=:user "
         "AND provider='fixture' AND provider_subscription_id LIKE 'test-showcase-subscription-%'",
@@ -2493,7 +2502,6 @@ async def _coverage_counts(session: AsyncSession, user_id: UUID) -> dict[str, in
         "followup_a": _id("counseling-followup:1"),
         "followup_b": _id("counseling-followup:2"),
         "followup_c": _id("counseling-followup:3"),
-        "cart": _id("cart"),
         "entitlement_a": _id("entitlement:1"),
         "entitlement_b": _id("entitlement:2"),
         "entitlement_c": _id("entitlement:3"),
