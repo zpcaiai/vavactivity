@@ -113,7 +113,11 @@ def result_letters_enabled() -> None:
 
 
 async def _publish(
-    session: AsyncSession, topic: str, aggregate_type: str, aggregate_id: UUID, payload: dict
+    session: AsyncSession,
+    topic: str,
+    aggregate_type: str,
+    aggregate_id: UUID,
+    payload: dict[str, Any],
 ) -> None:
     await session.execute(
         text(
@@ -139,7 +143,7 @@ async def _audit(
     action: str,
     subject_user_id: UUID | None = None,
     reason: str | None = None,
-    metadata: dict | None = None,
+    metadata: dict[str, Any] | None = None,
 ) -> None:
     await session.execute(
         text(
@@ -198,8 +202,8 @@ async def _load_policy(session: AsyncSession, activity_id: UUID) -> SelectionPol
 
 
 async def upsert_selection_policy(
-    session: AsyncSession, *, activity_id: UUID, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, activity_id: UUID, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     candidate_freeze_enabled()
     try:
         # Constructing the dataclass validates the combination before we store it.
@@ -246,9 +250,7 @@ async def upsert_selection_policy(
     return {"activity_id": str(activity_id), **payload}
 
 
-async def _allowed_pass_reasons(
-    session: AsyncSession, activity_id: UUID
-) -> dict[str, bool]:
+async def _allowed_pass_reasons(session: AsyncSession, activity_id: UUID) -> dict[str, bool]:
     """Activity-scoped reasons win over global ones with the same code."""
 
     rows = (
@@ -268,7 +270,7 @@ async def _allowed_pass_reasons(
     return {row["reason_code"]: bool(row["requires_note"]) for row in rows}
 
 
-async def list_pass_reasons(session: AsyncSession, activity_id: UUID) -> list[dict]:
+async def list_pass_reasons(session: AsyncSession, activity_id: UUID) -> list[dict[str, Any]]:
     reasons = await _allowed_pass_reasons(session, activity_id)
     return [
         {"reason_code": code, "requires_note": requires_note}
@@ -277,8 +279,8 @@ async def list_pass_reasons(session: AsyncSession, activity_id: UUID) -> list[di
 
 
 async def upsert_pass_reason(
-    session: AsyncSession, *, activity_id: UUID | None, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, activity_id: UUID | None, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     conflict_target = (
         "(activity_id, reason_code) WHERE activity_id IS NOT NULL"
         if activity_id
@@ -381,8 +383,8 @@ async def _restricted_pairs(session: AsyncSession, user_ids: list[UUID]) -> dict
 
 
 async def freeze_candidates(
-    session: AsyncSession, *, activity_id: UUID, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, activity_id: UUID, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Create and freeze a new candidate snapshot version.
 
     The activity row is locked for the duration so two administrators pressing
@@ -475,14 +477,10 @@ async def freeze_candidates(
                     "actor": str(actor_id),
                     "considered": len(decisions),
                     "eligible": sum(
-                        1
-                        for item in decisions
-                        if item.eligibility is CandidateEligibility.ELIGIBLE
+                        1 for item in decisions if item.eligibility is CandidateEligibility.ELIGIBLE
                     ),
                     "excluded": sum(
-                        1
-                        for item in decisions
-                        if item.eligibility is CandidateEligibility.EXCLUDED
+                        1 for item in decisions if item.eligibility is CandidateEligibility.EXCLUDED
                     ),
                     "note": payload.get("freeze_note"),
                 },
@@ -516,7 +514,9 @@ async def freeze_candidates(
                 "excluded_by": (
                     str(carried_row["excluded_by"])
                     if carried_row is not None
-                    else (str(actor_id) if decision.exclusion_kind is ExclusionKind.MANUAL else None)
+                    else (
+                        str(actor_id) if decision.exclusion_kind is ExclusionKind.MANUAL else None
+                    )
                 ),
                 "excluded_at": (
                     _now() if decision.exclusion_kind is ExclusionKind.MANUAL else None
@@ -575,7 +575,7 @@ async def freeze_candidates(
     return await get_snapshot(session, snapshot_id)
 
 
-async def get_snapshot(session: AsyncSession, snapshot_id: UUID) -> dict:
+async def get_snapshot(session: AsyncSession, snapshot_id: UUID) -> dict[str, Any]:
     row = (
         (
             await session.execute(
@@ -595,7 +595,7 @@ async def get_snapshot(session: AsyncSession, snapshot_id: UUID) -> dict:
     return {key: str(value) if isinstance(value, UUID) else value for key, value in row.items()}
 
 
-async def _active_snapshot(session: AsyncSession, activity_id: UUID) -> dict:
+async def _active_snapshot(session: AsyncSession, activity_id: UUID) -> dict[str, Any]:
     row = (
         (
             await session.execute(
@@ -620,7 +620,7 @@ async def _active_snapshot(session: AsyncSession, activity_id: UUID) -> dict:
 
 async def list_snapshot_entries(
     session: AsyncSession, snapshot_id: UUID, *, include_excluded: bool = True
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     clause = "" if include_excluded else " AND eligibility='eligible'"
     rows = (
         (
@@ -628,8 +628,9 @@ async def list_snapshot_entries(
                 text(
                     "SELECT user_id,registration_id,display_name,gender,group_id,eligibility,"
                     "exclusion_kind,exclusion_reason,excluded_by,excluded_at,checked_in_at "
-                    "FROM activity_candidate_entries WHERE snapshot_id=:snapshot_id" + clause +
-                    " ORDER BY eligibility, display_name"
+                    "FROM activity_candidate_entries WHERE snapshot_id=:snapshot_id"
+                    + clause
+                    + " ORDER BY eligibility, display_name"
                 ),
                 {"snapshot_id": str(snapshot_id)},
             )
@@ -644,8 +645,8 @@ async def list_snapshot_entries(
 
 
 async def exclude_candidate(
-    session: AsyncSession, *, snapshot_id: UUID, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, snapshot_id: UUID, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Administratively exclude one candidate from a frozen snapshot.
 
     Raw attendance data is untouched: only the snapshot entry flips, and the
@@ -675,7 +676,7 @@ async def exclude_candidate(
             "user_id": str(payload["user_id"]),
         },
     )
-    if updated.rowcount == 0:
+    if int(getattr(updated, "rowcount", 0) or 0) == 0:
         raise VavError(
             "CANDIDATE_NOT_ELIGIBLE",
             "That member is not an eligible candidate in this snapshot.",
@@ -714,8 +715,8 @@ async def exclude_candidate(
 
 
 async def restore_candidate(
-    session: AsyncSession, *, snapshot_id: UUID, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, snapshot_id: UUID, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Undo a manual exclusion. Only manual exclusions can be undone."""
 
     candidate_freeze_enabled()
@@ -732,7 +733,7 @@ async def restore_candidate(
         ),
         {"snapshot_id": str(snapshot_id), "user_id": str(payload["user_id"])},
     )
-    if updated.rowcount == 0:
+    if int(getattr(updated, "rowcount", 0) or 0) == 0:
         raise VavError(
             "CANDIDATE_NOT_MANUALLY_EXCLUDED",
             "Only a manual exclusion can be restored; attendance-based exclusions are facts.",
@@ -770,7 +771,7 @@ async def _recount_snapshot(session: AsyncSession, snapshot_id: UUID) -> None:
 # ---------------------------------------------------------------------------
 
 
-async def _chooser_entry(session: AsyncSession, snapshot_id: UUID, user_id: UUID) -> dict:
+async def _chooser_entry(session: AsyncSession, snapshot_id: UUID, user_id: UUID) -> dict[str, Any]:
     row = (
         (
             await session.execute(
@@ -796,7 +797,7 @@ async def _chooser_entry(session: AsyncSession, snapshot_id: UUID, user_id: UUID
 
 async def list_visible_candidates(
     session: AsyncSession, *, activity_id: UUID, user_id: UUID
-) -> dict:
+) -> dict[str, Any]:
     candidate_freeze_enabled()
     snapshot = await _active_snapshot(session, activity_id)
     snapshot_id = UUID(str(snapshot["id"]))
@@ -832,8 +833,8 @@ async def list_visible_candidates(
 
 
 async def submit_selection(
-    session: AsyncSession, *, activity_id: UUID, user_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, activity_id: UUID, user_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Create or replace a member's mutual-selection submission.
 
     Locks the submission row before validating so a double-tap cannot produce
@@ -862,9 +863,7 @@ async def submit_selection(
     now = _now()
     if existing and existing["status"] == "submitted":
         try:
-            ensure_selection_editable(
-                policy, submitted_at=existing["submitted_at"], now=now
-            )
+            ensure_selection_editable(policy, submitted_at=existing["submitted_at"], now=now)
         except PostEventRuleError as error:
             raise _fail(error, status_code=409) from error
 
@@ -1004,7 +1003,9 @@ async def submit_selection(
     return await get_my_selection(session, activity_id=activity_id, user_id=user_id)
 
 
-async def get_my_selection(session: AsyncSession, *, activity_id: UUID, user_id: UUID) -> dict:
+async def get_my_selection(
+    session: AsyncSession, *, activity_id: UUID, user_id: UUID
+) -> dict[str, Any]:
     snapshot = await _active_snapshot(session, activity_id)
     row = (
         (
@@ -1027,14 +1028,18 @@ async def get_my_selection(session: AsyncSession, *, activity_id: UUID, user_id:
             "selected_user_ids": [],
         }
     items = (
-        await session.execute(
-            text(
-                "SELECT chosen_user_id FROM activity_selection_items "
-                "WHERE submission_id=:id ORDER BY rank"
-            ),
-            {"id": str(row["id"])},
+        (
+            await session.execute(
+                text(
+                    "SELECT chosen_user_id FROM activity_selection_items "
+                    "WHERE submission_id=:id ORDER BY rank"
+                ),
+                {"id": str(row["id"])},
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     return {
         "snapshot_id": str(snapshot["id"]),
         "submission_id": str(row["id"]),
@@ -1078,14 +1083,18 @@ async def compute_matches(session: AsyncSession, snapshot_id: UUID) -> list[tupl
     # Members who submitted "nobody" still count as having submitted, which
     # matters for the no-match letter outcome below.
     empty = (
-        await session.execute(
-            text(
-                "SELECT chooser_user_id FROM activity_selection_submissions "
-                "WHERE snapshot_id=:snapshot_id AND status='submitted' AND selection_count=0"
-            ),
-            {"snapshot_id": str(snapshot_id)},
+        (
+            await session.execute(
+                text(
+                    "SELECT chooser_user_id FROM activity_selection_submissions "
+                    "WHERE snapshot_id=:snapshot_id AND status='submitted' AND selection_count=0"
+                ),
+                {"snapshot_id": str(snapshot_id)},
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     for user_id in empty:
         submissions.setdefault(UUID(str(user_id)), [])
     return compute_mutual_pairs(submissions)
@@ -1096,7 +1105,7 @@ async def compute_matches(session: AsyncSession, snapshot_id: UUID) -> list[tupl
 # ---------------------------------------------------------------------------
 
 
-def _question_spec(row: dict) -> QuestionSpec:
+def _question_spec(row: dict[str, Any]) -> QuestionSpec:
     """Rehydrate a frozen question row into its validated pure form."""
 
     config = row["config"] or {}
@@ -1117,8 +1126,8 @@ def _question_spec(row: dict) -> QuestionSpec:
 
 
 async def create_survey_definition(
-    session: AsyncSession, *, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Create a draft survey version with its questions.
 
     Ships no production questionnaire content: the code creates the structure,
@@ -1200,7 +1209,7 @@ async def create_survey_definition(
     return await get_survey_definition(session, definition_id)
 
 
-async def get_survey_definition(session: AsyncSession, definition_id: UUID) -> dict:
+async def get_survey_definition(session: AsyncSession, definition_id: UUID) -> dict[str, Any]:
     row = (
         (
             await session.execute(
@@ -1240,7 +1249,7 @@ async def get_survey_definition(session: AsyncSession, definition_id: UUID) -> d
 
 async def publish_survey_definition(
     session: AsyncSession, *, definition_id: UUID, actor_id: UUID
-) -> dict:
+) -> dict[str, Any]:
     """Publish a draft. Published versions are frozen: edits require a new version."""
 
     survey_enabled()
@@ -1251,7 +1260,7 @@ async def publish_survey_definition(
         ),
         {"id": str(definition_id), "actor": str(actor_id)},
     )
-    if updated.rowcount == 0:
+    if int(getattr(updated, "rowcount", 0) or 0) == 0:
         raise VavError(
             "SURVEY_NOT_DRAFT",
             "Only a draft survey version can be published.",
@@ -1262,8 +1271,8 @@ async def publish_survey_definition(
 
 
 async def assign_survey(
-    session: AsyncSession, *, activity_id: UUID, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, activity_id: UUID, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Bind a published survey version to an activity and generate member tasks."""
 
     survey_enabled()
@@ -1352,7 +1361,11 @@ async def generate_survey_tasks(
         .first()
     )
     if assignment is None:
-        raise VavError("SURVEY_ASSIGNMENT_NOT_FOUND", "Survey assignment not found.", 404)
+        raise VavError(
+            "SURVEY_ASSIGNMENT_NOT_FOUND",
+            "Survey assignment not found.",
+            status_code=404,
+        )
     records = await _load_attendance(session, UUID(str(assignment["activity_id"])))
     created = 0
     for record in records:
@@ -1376,13 +1389,13 @@ async def generate_survey_tasks(
                 "due_at": assignment["deadline_at"],
             },
         )
-        created += result.rowcount or 0
+        created += int(getattr(result, "rowcount", 0) or 0) or 0
     if commit:
         await session.commit()
     return created
 
 
-async def list_my_survey_tasks(session: AsyncSession, user_id: UUID) -> list[dict]:
+async def list_my_survey_tasks(session: AsyncSession, user_id: UUID) -> list[dict[str, Any]]:
     survey_enabled()
     rows = (
         (
@@ -1410,7 +1423,7 @@ async def list_my_survey_tasks(session: AsyncSession, user_id: UUID) -> list[dic
 
 async def get_survey_for_member(
     session: AsyncSession, *, assignment_id: UUID, user_id: UUID
-) -> dict:
+) -> dict[str, Any]:
     survey_enabled()
     assignment = await _member_assignment(session, assignment_id, user_id)
     definition = await get_survey_definition(session, UUID(str(assignment["definition_id"])))
@@ -1428,7 +1441,7 @@ async def get_survey_for_member(
         .mappings()
         .first()
     )
-    answers: list[dict] = []
+    answers: list[dict[str, Any]] = []
     if response is not None:
         rows = (
             (
@@ -1484,7 +1497,7 @@ async def get_survey_for_member(
 
 async def _member_assignment(
     session: AsyncSession, assignment_id: UUID, user_id: UUID
-) -> dict:
+) -> dict[str, Any]:
     row = (
         (
             await session.execute(
@@ -1509,8 +1522,8 @@ async def _member_assignment(
 
 
 async def _survey_subjects(
-    session: AsyncSession, assignment: dict, user_id: UUID
-) -> list[dict]:
+    session: AsyncSession, assignment: dict[str, Any], user_id: UUID
+) -> list[dict[str, Any]]:
     """The people this member may rate: the frozen visible candidate list."""
 
     if not assignment.get("snapshot_id"):
@@ -1550,8 +1563,8 @@ async def _survey_subjects(
 
 
 async def save_survey_response(
-    session: AsyncSession, *, assignment_id: UUID, user_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, assignment_id: UUID, user_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Autosave a draft or submit a survey response.
 
     Editing after submit is allowed until the deadline; after the deadline only
@@ -1603,9 +1616,7 @@ async def save_survey_response(
         for answer in payload["answers"]
     ]
     try:
-        validate_answers(
-            questions, submitted, subject_user_ids=subjects, partial=not is_submit
-        )
+        validate_answers(questions, submitted, subject_user_ids=subjects, partial=not is_submit)
     except PostEventRuleError as error:
         raise _fail(error) from error
 
@@ -1679,9 +1690,7 @@ async def save_survey_response(
                 "rating_value": answer.rating_value,
                 "boolean_value": answer.boolean_value,
                 "choice_values": _json(list(answer.choice_values)),
-                "text_value": (
-                    encrypt_private(answer.text_value) if answer.text_value else None
-                ),
+                "text_value": (encrypt_private(answer.text_value) if answer.text_value else None),
             },
         )
 
@@ -1724,8 +1733,13 @@ async def save_survey_response(
 
 
 async def reopen_survey_response(
-    session: AsyncSession, *, assignment_id: UUID, user_id: UUID, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession,
+    *,
+    assignment_id: UUID,
+    user_id: UUID,
+    actor_id: UUID,
+    payload: dict[str, Any],
+) -> dict[str, Any]:
     """Audited administrative override of a passed deadline (SUR-001)."""
 
     survey_enabled()
@@ -1741,7 +1755,7 @@ async def reopen_survey_response(
             "user_id": str(user_id),
         },
     )
-    if updated.rowcount == 0:
+    if int(getattr(updated, "rowcount", 0) or 0) == 0:
         raise VavError("SURVEY_RESPONSE_NOT_FOUND", "No response to reopen.", status_code=404)
     if payload.get("new_deadline_at"):
         await session.execute(
@@ -1778,7 +1792,11 @@ async def schedule_survey_reminders(session: AsyncSession, assignment_id: UUID) 
         .first()
     )
     if assignment is None:
-        raise VavError("SURVEY_ASSIGNMENT_NOT_FOUND", "Survey assignment not found.", 404)
+        raise VavError(
+            "SURVEY_ASSIGNMENT_NOT_FOUND",
+            "Survey assignment not found.",
+            status_code=404,
+        )
     tasks = (
         (
             await session.execute(
@@ -1811,12 +1829,12 @@ async def schedule_survey_reminders(session: AsyncSession, assignment_id: UUID) 
                     "scheduled_for": slot.scheduled_for,
                 },
             )
-            scheduled += result.rowcount or 0
+            scheduled += int(getattr(result, "rowcount", 0) or 0) or 0
     await session.commit()
     return scheduled
 
 
-async def survey_aggregate(session: AsyncSession, assignment_id: UUID) -> dict:
+async def survey_aggregate(session: AsyncSession, assignment_id: UUID) -> dict[str, Any]:
     """Aggregated results only. Raw open text is never returned here."""
 
     survey_enabled()
@@ -1879,8 +1897,8 @@ async def survey_aggregate(session: AsyncSession, assignment_id: UUID) -> dict:
 
 
 async def upsert_letter_template(
-    session: AsyncSession, *, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     result_letters_enabled()
     try:
         declared = sorted(
@@ -1920,7 +1938,7 @@ async def upsert_letter_template(
 
 async def publish_letter_template(
     session: AsyncSession, *, template_id: UUID, actor_id: UUID
-) -> dict:
+) -> dict[str, Any]:
     result_letters_enabled()
     updated = await session.execute(
         text(
@@ -1929,7 +1947,7 @@ async def publish_letter_template(
         ),
         {"id": str(template_id), "actor": str(actor_id)},
     )
-    if updated.rowcount == 0:
+    if int(getattr(updated, "rowcount", 0) or 0) == 0:
         raise VavError(
             "TEMPLATE_NOT_DRAFT", "Only a draft template can be published.", status_code=409
         )
@@ -1938,8 +1956,8 @@ async def publish_letter_template(
 
 
 async def generate_letters(
-    session: AsyncSession, *, activity_id: UUID, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, activity_id: UUID, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Generate one draft letter per eligible candidate.
 
     Existing approved or published letters are never overwritten: a regenerate
@@ -2095,7 +2113,9 @@ async def generate_letters(
     }
 
 
-async def _templates_by_outcome(session: AsyncSession, payload: dict) -> dict[LetterOutcome, dict]:
+async def _templates_by_outcome(
+    session: AsyncSession, payload: dict[str, Any]
+) -> dict[LetterOutcome, dict[str, Any]]:
     clause = " AND template_code=:code" if payload.get("template_code") else ""
     rows = (
         (
@@ -2121,7 +2141,7 @@ async def _templates_by_outcome(session: AsyncSession, payload: dict) -> dict[Le
 
 async def list_letters_for_review(
     session: AsyncSession, *, activity_id: UUID, status: str | None = None
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     result_letters_enabled()
     clause = " AND status=:status" if status else ""
     params: dict[str, Any] = {"activity_id": str(activity_id)}
@@ -2148,7 +2168,7 @@ async def list_letters_for_review(
     ]
 
 
-async def get_letter_for_review(session: AsyncSession, letter_id: UUID) -> dict:
+async def get_letter_for_review(session: AsyncSession, letter_id: UUID) -> dict[str, Any]:
     result_letters_enabled()
     row = (
         (
@@ -2184,7 +2204,7 @@ async def get_letter_for_review(session: AsyncSession, letter_id: UUID) -> dict:
 
 async def submit_letter_for_review(
     session: AsyncSession, *, letter_id: UUID, actor_id: UUID
-) -> dict:
+) -> dict[str, Any]:
     result_letters_enabled()
     letter = await get_letter_for_review(session, letter_id)
     try:
@@ -2209,8 +2229,8 @@ async def submit_letter_for_review(
 
 
 async def review_letter(
-    session: AsyncSession, *, letter_id: UUID, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, letter_id: UUID, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Record a reviewer decision.
 
     The reviewer submits the hash of the text they read. If the draft changed in
@@ -2293,8 +2313,8 @@ async def review_letter(
 
 
 async def publish_letter(
-    session: AsyncSession, *, letter_id: UUID, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, letter_id: UUID, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Publish an approved letter and write its immutable release row."""
 
     result_letters_enabled()
@@ -2386,8 +2406,8 @@ async def publish_letter(
 
 
 async def revoke_letter(
-    session: AsyncSession, *, letter_id: UUID, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, letter_id: UUID, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     result_letters_enabled()
     row = (
         (
@@ -2426,7 +2446,7 @@ async def revoke_letter(
     return {"letter_id": str(letter_id), "status": "revoked"}
 
 
-async def list_my_letters(session: AsyncSession, user_id: UUID) -> list[dict]:
+async def list_my_letters(session: AsyncSession, user_id: UUID) -> list[dict[str, Any]]:
     """Members only ever see published letters."""
 
     result_letters_enabled()
@@ -2450,7 +2470,9 @@ async def list_my_letters(session: AsyncSession, user_id: UUID) -> list[dict]:
     ]
 
 
-async def read_my_letter(session: AsyncSession, *, letter_id: UUID, user_id: UUID) -> dict:
+async def read_my_letter(
+    session: AsyncSession, *, letter_id: UUID, user_id: UUID
+) -> dict[str, Any]:
     """Return a published letter and mark it read.
 
     The status filter is part of the WHERE clause rather than a post-load check,

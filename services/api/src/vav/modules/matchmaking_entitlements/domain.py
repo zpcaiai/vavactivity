@@ -20,7 +20,13 @@ from uuid import UUID
 
 
 class MatchmakingRuleError(Exception):
-    def __init__(self, code: str, message: str, *, details: dict | None = None):
+    def __init__(
+        self,
+        code: str,
+        message: str,
+        *,
+        details: dict[str, object] | None = None,
+    ):
         super().__init__(message)
         self.code = code
         self.message = message
@@ -105,8 +111,7 @@ def validate_status_change(
     if locked_by_couple_binding and status_source is StatusSource.SELF_DECLARED:
         raise MatchmakingRuleError(
             "RELATIONSHIP_STATUS_LOCKED",
-            "This status is maintained by a confirmed partner binding. "
-            "Unbind first to change it.",
+            "This status is maintained by a confirmed partner binding. Unbind first to change it.",
         )
     if current is not None and current == target_status:
         raise MatchmakingRuleError(

@@ -216,10 +216,7 @@ def test_invalid_scope_inputs_are_rejected() -> None:
 def test_chinese_events_use_amap_and_others_use_google() -> None:
     from vav.modules.discovery.domain import select_map_provider
 
-    assert (
-        select_map_provider("CN", amap_enabled=True, google_enabled=True)
-        is MapProviderCode.AMAP
-    )
+    assert select_map_provider("CN", amap_enabled=True, google_enabled=True) is MapProviderCode.AMAP
     assert (
         select_map_provider("SG", amap_enabled=True, google_enabled=True)
         is MapProviderCode.GOOGLE_MAPS
@@ -267,7 +264,11 @@ def test_google_payload_is_normalized_into_the_same_shape() -> None:
 
 
 def test_provider_specific_keys_never_survive_normalization() -> None:
-    for provider, raw in ((MapProviderCode.AMAP, AMAP_RAW), (MapProviderCode.GOOGLE_MAPS, GOOGLE_RAW)):
+    provider_payloads = (
+        (MapProviderCode.AMAP, AMAP_RAW),
+        (MapProviderCode.GOOGLE_MAPS, GOOGLE_RAW),
+    )
+    for provider, raw in provider_payloads:
         payload = normalize_geocode_result(provider, raw).as_payload()
         assert "adcode" not in payload
         assert "place_id" not in payload
@@ -592,5 +593,6 @@ def test_a_qr_target_that_points_at_a_redirector_is_rejected() -> None:
     assert excinfo.value.code == "QR_TARGET_NOT_CANONICAL"
     with pytest.raises(DiscoveryRuleError):
         assert_qr_target_is_canonical(
-            "https://evil.example.com/events/42", canonical_url=canonical_event_url(BASE_URL, EVENT_ID)
+            "https://evil.example.com/events/42",
+            canonical_url=canonical_event_url(BASE_URL, EVENT_ID),
         )

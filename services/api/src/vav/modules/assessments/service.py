@@ -98,7 +98,9 @@ def enabled() -> None:
         )
 
 
-async def _publish(session: AsyncSession, topic: str, aggregate_id: UUID, payload: dict) -> None:
+async def _publish(
+    session: AsyncSession, topic: str, aggregate_id: UUID, payload: dict[str, Any]
+) -> None:
     await session.execute(
         text(
             "INSERT INTO outbox_events (topic,aggregate_type,aggregate_id,payload) "
@@ -113,7 +115,9 @@ async def _publish(session: AsyncSession, topic: str, aggregate_id: UUID, payloa
 # ---------------------------------------------------------------------------
 
 
-async def create_product(session: AsyncSession, *, actor_id: UUID, payload: dict) -> dict:
+async def create_product(
+    session: AsyncSession, *, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     enabled()
     product_id = uuid4()
     try:
@@ -141,7 +145,9 @@ async def create_product(session: AsyncSession, *, actor_id: UUID, payload: dict
     return {"product_id": str(product_id), "status": ProductStatus.DRAFT.value}
 
 
-async def activate_product(session: AsyncSession, *, product_id: UUID, actor_id: UUID) -> dict:
+async def activate_product(
+    session: AsyncSession, *, product_id: UUID, actor_id: UUID
+) -> dict[str, Any]:
     """A product goes on sale only once it has a published version.
 
     Otherwise the catalogue would advertise something nobody could buy, and the
@@ -168,7 +174,7 @@ async def activate_product(session: AsyncSession, *, product_id: UUID, actor_id:
         ),
         {"id": str(product_id)},
     )
-    if result.rowcount == 0:
+    if int(getattr(result, "rowcount", 0) or 0) == 0:
         raise VavError(
             "ASSESSMENT_PRODUCT_NOT_FOUND", "Product not found or already active.", status_code=409
         )
@@ -177,8 +183,8 @@ async def activate_product(session: AsyncSession, *, product_id: UUID, actor_id:
 
 
 async def create_version(
-    session: AsyncSession, *, product_id: UUID, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, product_id: UUID, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     enabled()
     version_id = uuid4()
     try:
@@ -214,8 +220,8 @@ async def create_version(
 
 
 async def verify_license(
-    session: AsyncSession, *, version_id: UUID, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, version_id: UUID, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Record who checked the licence and when.
 
     Split from version creation deliberately: the person authoring content and
@@ -238,7 +244,7 @@ async def verify_license(
             "id": str(version_id),
         },
     )
-    if result.rowcount == 0:
+    if int(getattr(result, "rowcount", 0) or 0) == 0:
         raise VavError(
             "ASSESSMENT_VERSION_NOT_DRAFT",
             "A licence can only be recorded against a draft version.",
@@ -249,8 +255,8 @@ async def verify_license(
 
 
 async def add_version_question(
-    session: AsyncSession, *, version_id: UUID, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, version_id: UUID, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     enabled()
     status = await session.scalar(
         text("SELECT status FROM assessment_versions WHERE id=:id FOR UPDATE"),
@@ -377,7 +383,9 @@ async def _load_version_spec(session: AsyncSession, version_id: UUID) -> Assessm
     )
 
 
-async def publish_version(session: AsyncSession, *, version_id: UUID, actor_id: UUID) -> dict:
+async def publish_version(
+    session: AsyncSession, *, version_id: UUID, actor_id: UUID
+) -> dict[str, Any]:
     """The publication gate (ASSESS-001).
 
     Refuses without a recorded, verified licence reference. The same rule is
@@ -420,7 +428,9 @@ async def publish_version(session: AsyncSession, *, version_id: UUID, actor_id: 
     return {"version_id": str(version_id), "status": VersionStatus.PUBLISHED.value}
 
 
-async def retire_version(session: AsyncSession, *, version_id: UUID, actor_id: UUID) -> dict:
+async def retire_version(
+    session: AsyncSession, *, version_id: UUID, actor_id: UUID
+) -> dict[str, Any]:
     """Stop new purchases without disturbing anybody who already bought it."""
 
     enabled()
@@ -445,7 +455,9 @@ async def retire_version(session: AsyncSession, *, version_id: UUID, actor_id: U
     return {"version_id": str(version_id), "status": VersionStatus.RETIRED.value}
 
 
-async def list_catalogue(session: AsyncSession, *, include_unpublished: bool = False) -> list[dict]:
+async def list_catalogue(
+    session: AsyncSession, *, include_unpublished: bool = False
+) -> list[dict[str, Any]]:
     rows = (
         (
             await session.execute(
@@ -462,7 +474,10 @@ async def list_catalogue(session: AsyncSession, *, include_unpublished: bool = F
         .mappings()
         .all()
     )
-    return [dict(row) for row in catalogue_view(rows, include_unpublished=include_unpublished)]
+    catalogue_rows = [dict(row) for row in rows]
+    return [
+        dict(row) for row in catalogue_view(catalogue_rows, include_unpublished=include_unpublished)
+    ]
 
 
 # ---------------------------------------------------------------------------
@@ -470,7 +485,9 @@ async def list_catalogue(session: AsyncSession, *, include_unpublished: bool = F
 # ---------------------------------------------------------------------------
 
 
-async def purchase(session: AsyncSession, *, user_id: UUID, payload: dict) -> dict:
+async def purchase(
+    session: AsyncSession, *, user_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Record a purchase and mint the entitlement bound to that exact version."""
 
     enabled()
@@ -490,6 +507,12 @@ async def purchase(session: AsyncSession, *, user_id: UUID, payload: dict) -> di
         .mappings()
         .first()
     )
+    if header is None:
+        raise VavError(
+            "ASSESSMENT_VERSION_NOT_FOUND",
+            "Assessment version not found.",
+            status_code=404,
+        )
     try:
         intent = build_purchase_intent(
             spec,
@@ -621,7 +644,7 @@ async def _load_entitlement(
     )
 
 
-async def list_my_entitlements(session: AsyncSession, user_id: UUID) -> list[dict]:
+async def list_my_entitlements(session: AsyncSession, user_id: UUID) -> list[dict[str, Any]]:
     enabled()
     rows = (
         (
@@ -647,7 +670,9 @@ async def list_my_entitlements(session: AsyncSession, user_id: UUID) -> list[dic
 # ---------------------------------------------------------------------------
 
 
-async def start_attempt(session: AsyncSession, *, entitlement_id: UUID, user_id: UUID) -> dict:
+async def start_attempt(
+    session: AsyncSession, *, entitlement_id: UUID, user_id: UUID
+) -> dict[str, Any]:
     enabled()
     state = await _load_entitlement(session, entitlement_id, lock=True)
     if state.user_id != user_id:
@@ -714,7 +739,7 @@ async def start_attempt(session: AsyncSession, *, entitlement_id: UUID, user_id:
 
 async def _attempt_for_member(
     session: AsyncSession, attempt_id: UUID, user_id: UUID, *, lock: bool = False
-) -> dict:
+) -> dict[str, Any]:
     suffix = " FOR UPDATE" if lock else ""
     row = (
         (
@@ -734,14 +759,12 @@ async def _attempt_for_member(
     return dict(row)
 
 
-async def get_attempt(session: AsyncSession, *, attempt_id: UUID, user_id: UUID) -> dict:
+async def get_attempt(session: AsyncSession, *, attempt_id: UUID, user_id: UUID) -> dict[str, Any]:
     """Serve the questions of the version this attempt is pinned to."""
 
     enabled()
     attempt = await _attempt_for_member(session, attempt_id, user_id)
-    entitlement = await _load_entitlement(
-        session, UUID(str(attempt["entitlement_id"])), lock=False
-    )
+    entitlement = await _load_entitlement(session, UUID(str(attempt["entitlement_id"])), lock=False)
     try:
         ensure_version_matches_entitlement(
             entitlement_version_id=entitlement.version_id,
@@ -778,8 +801,8 @@ async def get_attempt(session: AsyncSession, *, attempt_id: UUID, user_id: UUID)
 
 
 async def save_attempt_answers(
-    session: AsyncSession, *, attempt_id: UUID, user_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, attempt_id: UUID, user_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     enabled()
     attempt = await _attempt_for_member(session, attempt_id, user_id, lock=True)
     submit = bool(payload.get("submit", False))
@@ -837,7 +860,7 @@ async def save_attempt_answers(
 
 
 async def _score_and_report(
-    session: AsyncSession, *, attempt_id: UUID, spec: AssessmentVersionSpec, answers: dict
+    session: AsyncSession, *, attempt_id: UUID, spec: AssessmentVersionSpec, answers: dict[str, Any]
 ) -> str:
     """Score the attempt under its pinned version and store the report."""
 
@@ -875,7 +898,7 @@ async def _score_and_report(
     return str(report_id)
 
 
-async def get_report(session: AsyncSession, *, attempt_id: UUID, user_id: UUID) -> dict:
+async def get_report(session: AsyncSession, *, attempt_id: UUID, user_id: UUID) -> dict[str, Any]:
     enabled()
     row = (
         (
@@ -926,8 +949,8 @@ async def get_report(session: AsyncSession, *, attempt_id: UUID, user_id: UUID) 
 
 
 async def attach_advice(
-    session: AsyncSession, *, attempt_id: UUID, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, attempt_id: UUID, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     enabled()
     if not get_settings().paid_assessment_ai_advice_enabled:
         raise VavError(
@@ -978,8 +1001,8 @@ async def refund_purchase(
     purchase_id: UUID,
     actor_id: UUID | None,
     actor_kind: str,
-    payload: dict,
-) -> dict:
+    payload: dict[str, Any],
+) -> dict[str, Any]:
     """Apply the refund/revocation policy defined in the domain planner.
 
     Every branch is audited in ``assessment_refund_events``, including a refused
@@ -1006,9 +1029,7 @@ async def refund_purchase(
     trigger = str(payload["trigger"])
     if actor_kind == "member":
         if UUID(str(row["user_id"])) != actor_id:
-            raise VavError(
-                "ASSESSMENT_PURCHASE_NOT_FOUND", "Purchase not found.", status_code=404
-            )
+            raise VavError("ASSESSMENT_PURCHASE_NOT_FOUND", "Purchase not found.", status_code=404)
         try:
             ensure_refund_window_open(
                 purchased_at=row["purchased_at"],
@@ -1132,7 +1153,9 @@ async def refund_purchase(
     }
 
 
-async def admin_list_purchases(session: AsyncSession, *, user_id: UUID | None) -> list[dict]:
+async def admin_list_purchases(
+    session: AsyncSession, *, user_id: UUID | None
+) -> list[dict[str, Any]]:
     enabled()
     rows = (
         (
@@ -1152,7 +1175,7 @@ async def admin_list_purchases(session: AsyncSession, *, user_id: UUID | None) -
     return [dict(row) for row in rows]
 
 
-async def admin_license_audit(session: AsyncSession) -> list[dict]:
+async def admin_license_audit(session: AsyncSession) -> list[dict[str, Any]]:
     """Every published version and the licence reference behind it.
 
     Exposed as a route because "prove we are allowed to sell all of this" is a

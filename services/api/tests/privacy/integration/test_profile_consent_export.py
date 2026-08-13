@@ -227,9 +227,10 @@ async def test_profile_media_export_and_erasure_queue_physical_bytes() -> None:
         assert request_state["export_completed_at"] is None
         assert request_state["module_status"] == "manual_review"
         assert not request_state["result_manifest"]["complete"]
-        assert request_state["result_manifest"]["attachment_manifest"][
-            "binary_attachments_included"
-        ] is False
+        assert (
+            request_state["result_manifest"]["attachment_manifest"]["binary_attachments_included"]
+            is False
+        )
         with pytest.raises(VavError) as not_ready:
             await issue_export_download_token(session, user.id, request_id)
         assert not_ready.value.code == "PRIVACY_EXPORT_NOT_READY"
@@ -252,17 +253,13 @@ async def test_profile_media_export_and_erasure_queue_physical_bytes() -> None:
             {
                 "request_id": erasure_request_id,
                 "user_id": user.id,
-                "modules": json.dumps(
-                    [{"module_code": "profile_media", "operation": "delete"}]
-                ),
+                "modules": json.dumps([{"module_code": "profile_media", "operation": "delete"}]),
             },
         )
         await session.commit()
         assert plan_id is not None
 
-        first_erasure = await execute_erasure_plan(
-            session, UUID(str(plan_id)), actor_id=user.id
-        )
+        first_erasure = await execute_erasure_plan(session, UUID(str(plan_id)), actor_id=user.id)
         assert first_erasure["status"] == "partially_completed"
         assert first_erasure["modules"] == [
             {
@@ -333,9 +330,7 @@ async def test_profile_media_export_and_erasure_queue_physical_bytes() -> None:
             {"user_id": user.id},
         )
         await session.commit()
-        second_erasure = await execute_erasure_plan(
-            session, UUID(str(plan_id)), actor_id=user.id
-        )
+        second_erasure = await execute_erasure_plan(session, UUID(str(plan_id)), actor_id=user.id)
         assert second_erasure["status"] == "completed"
         assert second_erasure["modules"][0]["status"] == "completed"
         completed_state = (

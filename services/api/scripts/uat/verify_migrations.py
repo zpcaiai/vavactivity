@@ -133,8 +133,7 @@ def check_graph(report: Report, directory: str) -> list[str]:
             f"Duplicate revision id(s): {detail}.",
             command=command,
             remedy=(
-                "Two files claiming the same revision id makes the chain ambiguous; "
-                "renumber one."
+                "Two files claiming the same revision id makes the chain ambiguous; renumber one."
             ),
         )
 
@@ -306,8 +305,7 @@ def check_live(
             ),
             command="alembic current",
             remedy=(
-                "Some migration is not chain-idempotent; a retried deploy would "
-                "double-apply it."
+                "Some migration is not chain-idempotent; a retried deploy would double-apply it."
             ),
         )
         return

@@ -47,7 +47,9 @@ class ScopeVersionRequest(_Base):
 class ScopeQuestionRequest(_Base):
     """Administrator-authored question. The platform ships none (DEC-001)."""
 
-    question_code: Annotated[str, Field(min_length=1, max_length=64, pattern=r"^[a-z0-9][a-z0-9_-]*$")]
+    question_code: Annotated[
+        str, Field(min_length=1, max_length=64, pattern=r"^[a-z0-9][a-z0-9_-]*$")
+    ]
     dimension: Literal["support", "communication", "outlook", "partnership", "expectations"]
     prompt_text: Annotated[str, Field(min_length=1, max_length=2000)]
     weight: Annotated[int, Field(ge=1, le=10)] = 1

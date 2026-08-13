@@ -462,14 +462,16 @@ class QuestionSpec:
     per_subject: bool = False
 
     def __post_init__(self) -> None:
-        if self.question_type in (QuestionType.RATING, QuestionType.SEGMENT_RATING):
-            if not RATING_SCALE_FLOOR <= self.scale_min < self.scale_max <= RATING_SCALE_CEILING:
-                raise PostEventRuleError(
-                    "QUESTION_SCALE_INVALID",
-                    "Rating scale must satisfy "
-                    f"{RATING_SCALE_FLOOR} <= min < max <= {RATING_SCALE_CEILING}.",
-                    details={"question_code": self.question_code},
-                )
+        if self.question_type in (
+            QuestionType.RATING,
+            QuestionType.SEGMENT_RATING,
+        ) and not (RATING_SCALE_FLOOR <= self.scale_min < self.scale_max <= RATING_SCALE_CEILING):
+            raise PostEventRuleError(
+                "QUESTION_SCALE_INVALID",
+                "Rating scale must satisfy "
+                f"{RATING_SCALE_FLOOR} <= min < max <= {RATING_SCALE_CEILING}.",
+                details={"question_code": self.question_code},
+            )
         if self.question_type in (QuestionType.SINGLE_CHOICE, QuestionType.MULTI_CHOICE):
             if not self.options:
                 raise PostEventRuleError(
@@ -534,7 +536,7 @@ def validate_answers(
     for question in questions:
         if not question.is_required:
             continue
-        expected_subjects = subjects if question.per_subject else {None}
+        expected_subjects: set[UUID | None] = set(subjects) if question.per_subject else {None}
         for subject in expected_subjects:
             if (question.question_code, str(subject or "-")) not in seen:
                 raise PostEventRuleError(
@@ -598,8 +600,12 @@ def _validate_single_answer(
                 "An unknown option was submitted.",
                 details={"question_code": question.question_code, "values": unknown},
             )
-        limit = 1 if question.question_type is QuestionType.SINGLE_CHOICE else question.max_selections
-        floor = 1 if question.question_type is QuestionType.SINGLE_CHOICE else question.min_selections
+        limit = (
+            1 if question.question_type is QuestionType.SINGLE_CHOICE else question.max_selections
+        )
+        floor = (
+            1 if question.question_type is QuestionType.SINGLE_CHOICE else question.min_selections
+        )
         if not floor <= len(values) <= limit:
             raise PostEventRuleError(
                 "SURVEY_CHOICE_COUNT_INVALID",
@@ -795,9 +801,7 @@ def extract_template_variables(template: str) -> list[str]:
             break
         end = template.find(_TEMPLATE_TOKEN_END, start)
         if end == -1:
-            raise PostEventRuleError(
-                "LETTER_TEMPLATE_UNCLOSED", "A template token is not closed."
-            )
+            raise PostEventRuleError("LETTER_TEMPLATE_UNCLOSED", "A template token is not closed.")
         name = template[start + 2 : end].strip()
         if not name:
             raise PostEventRuleError("LETTER_TEMPLATE_EMPTY_TOKEN", "A template token is empty.")

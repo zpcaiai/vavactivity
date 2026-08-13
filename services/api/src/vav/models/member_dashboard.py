@@ -14,6 +14,7 @@ which stops a dismissal being forged against another section's row.
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import (
@@ -46,7 +47,7 @@ class MemberDashboardPreference(Base):
     user_id: Mapped[UUID] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("users.id"), primary_key=True
     )
-    hidden_sections: Mapped[list] = mapped_column(
+    hidden_sections: Mapped[list[Any]] = mapped_column(
         JSONB, nullable=False, server_default=text("'[]'::jsonb")
     )
     page_size: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("20"))

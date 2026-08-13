@@ -146,9 +146,7 @@ async def _audit(
 # ---------------------------------------------------------------------------
 
 
-async def _load_attendee_records(
-    session: AsyncSession, activity_id: UUID
-) -> list[AttendeeRecord]:
+async def _load_attendee_records(session: AsyncSession, activity_id: UUID) -> list[AttendeeRecord]:
     """Load every registration for an activity with its consent state.
 
     ``LEFT JOIN`` on the consent table is deliberate: a registration with no
@@ -390,7 +388,7 @@ async def set_preview_intro(
             },
         ),
     )
-    if updated.rowcount == 0:
+    if int(getattr(updated, "rowcount", 0) or 0) == 0:
         raise VavError(
             "PREVIEW_CONSENT_NOT_FOUND",
             "Answer the attendee preview prompt before adding an intro.",
@@ -506,7 +504,9 @@ async def follow_member(
     )
     following_count = int(
         await session.scalar(
-            text("SELECT count(*) FROM social_follows WHERE follower_id=:follower AND state='active'"),
+            text(
+                "SELECT count(*) FROM social_follows WHERE follower_id=:follower AND state='active'"
+            ),
             {"follower": str(follower_id)},
         )
         or 0
@@ -694,9 +694,7 @@ async def record_want_to_meet(
         "relation_kind": RelationKind.WANT_TO_MEET.value,
         "semantics": {
             "is_event_scoped": relation_semantics(RelationKind.WANT_TO_MEET).is_event_scoped,
-            "visible_to_target": relation_semantics(
-                RelationKind.WANT_TO_MEET
-            ).visible_to_target,
+            "visible_to_target": relation_semantics(RelationKind.WANT_TO_MEET).visible_to_target,
         },
     }
 
@@ -706,9 +704,7 @@ async def record_want_to_meet(
 # ---------------------------------------------------------------------------
 
 
-async def get_notification_preferences(
-    session: AsyncSession, user_id: UUID
-) -> dict[str, Any]:
+async def get_notification_preferences(session: AsyncSession, user_id: UUID) -> dict[str, Any]:
     row = (
         (
             await session.execute(
@@ -772,9 +768,7 @@ async def fan_out_followed_user_registered(
     )
     if activity is None:
         raise VavError("ACTIVITY_NOT_FOUND", "Activity not found.", status_code=404)
-    event_is_public = (
-        activity["status"] == "published" and activity["visibility"] == "public"
-    )
+    event_is_public = activity["status"] == "published" and activity["visibility"] == "public"
     registration_is_public = bool(
         await session.scalar(
             text(
@@ -847,7 +841,7 @@ async def fan_out_followed_user_registered(
                 },
             ),
         )
-        if not inserted.rowcount:
+        if not int(getattr(inserted, "rowcount", 0) or 0):
             # Another worker won the race; the constraint is the source of truth.
             suppressed["already_delivered"] = suppressed.get("already_delivered", 0) + 1
             continue
@@ -893,7 +887,10 @@ async def apply_block(
         actor_id=blocker_user_id,
         actor_kind="member",
         action="social.follows.severed_by_block",
-        metadata={"severed": result.rowcount or 0},
+        metadata={"severed": int(getattr(result, "rowcount", 0) or 0) or 0},
     )
     await session.commit()
-    return {"severed": result.rowcount or 0, "state": FollowState.BLOCKED.value}
+    return {
+        "severed": int(getattr(result, "rowcount", 0) or 0) or 0,
+        "state": FollowState.BLOCKED.value,
+    }

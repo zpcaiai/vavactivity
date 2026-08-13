@@ -683,9 +683,7 @@ async def release_registration(
         is_unlimited=working.is_unlimited,
         confirmed_seats=working.confirmed_seats,
         held_seats=working.held_seats,
-        waitlisted_count=max(
-            0, working.waitlisted_count - (1 if counted_in_waitlist else 0)
-        ),
+        waitlisted_count=max(0, working.waitlisted_count - (1 if counted_in_waitlist else 0)),
         waitlist_capacity=working.waitlist_capacity,
         sales_state=working.sales_state,
     )

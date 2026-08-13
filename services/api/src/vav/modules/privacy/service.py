@@ -697,9 +697,7 @@ async def process_export_request(session: AsyncSession, request_id: UUID) -> dic
             else:
                 module_status = "manual_review"
                 error_code = str(
-                    exported.get(
-                        "error_code", "PRIVACY_MODULE_EXPORT_MANUAL_REVIEW_REQUIRED"
-                    )
+                    exported.get("error_code", "PRIVACY_MODULE_EXPORT_MANUAL_REVIEW_REQUIRED")
                 )
                 failed.append(
                     {

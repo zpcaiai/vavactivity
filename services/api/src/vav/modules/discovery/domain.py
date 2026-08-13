@@ -442,9 +442,7 @@ def select_map_provider(
     if enabled[preferred]:
         return preferred
     alternative = (
-        MapProviderCode.GOOGLE_MAPS
-        if preferred is MapProviderCode.AMAP
-        else MapProviderCode.AMAP
+        MapProviderCode.GOOGLE_MAPS if preferred is MapProviderCode.AMAP else MapProviderCode.AMAP
     )
     if enabled[alternative]:
         return alternative
@@ -461,9 +459,7 @@ def _coordinate(value: object, *, label: str, low: float, high: float) -> float 
     try:
         number = float(value)  # type: ignore[arg-type]
     except (TypeError, ValueError) as exc:
-        raise DiscoveryRuleError(
-            "GEOCODE_COORDINATE_INVALID", f"{label} is not a number."
-        ) from exc
+        raise DiscoveryRuleError("GEOCODE_COORDINATE_INVALID", f"{label} is not a number.") from exc
     if not low <= number <= high:
         raise DiscoveryRuleError(
             "GEOCODE_COORDINATE_OUT_OF_RANGE",
@@ -590,9 +586,7 @@ def assert_no_provider_leakage(payload: Mapping[str, object]) -> None:
             details={"fields": extra},
         )
     secrets = sorted(
-        key
-        for key in payload
-        if any(marker in key.lower() for marker in SECRET_FIELD_MARKERS)
+        key for key in payload if any(marker in key.lower() for marker in SECRET_FIELD_MARKERS)
     )
     if secrets:  # pragma: no cover - unreachable while the field set is closed
         raise DiscoveryRuleError(
@@ -687,10 +681,7 @@ def display_link(place: NormalizedPlace | None, *, fallback_query: str) -> str |
                 f"?position={place.longitude},{place.latitude}"
                 f"&name={place.formatted_address or query}"
             )
-        return (
-            "https://www.google.com/maps/search/?api=1"
-            f"&query={place.latitude},{place.longitude}"
-        )
+        return f"https://www.google.com/maps/search/?api=1&query={place.latitude},{place.longitude}"
     if not (place.formatted_address or query):
         return None
     if place.provider == MapProviderCode.AMAP.value:
@@ -873,9 +864,7 @@ def canonical_event_url(base_url: str, event_id: UUID) -> str:
     if not base.startswith("https://"):
         # http:// share links would be rewritable in transit, and a share card
         # is exactly the thing an attacker would want to repoint.
-        raise DiscoveryRuleError(
-            "SHARE_BASE_URL_INSECURE", "The public base URL must use HTTPS."
-        )
+        raise DiscoveryRuleError("SHARE_BASE_URL_INSECURE", "The public base URL must use HTTPS.")
     return f"{base}/events/{event_id}"
 
 
@@ -965,9 +954,7 @@ def sign_share_token(payload: Mapping[str, object], *, secret: str) -> str:
     ).hexdigest()
 
 
-def verify_share_token(
-    payload: Mapping[str, object], signature: str, *, secret: str
-) -> bool:
+def verify_share_token(payload: Mapping[str, object], signature: str, *, secret: str) -> bool:
     """Constant-time signature check. Never short-circuits on the first byte."""
 
     return hmac.compare_digest(sign_share_token(payload, secret=secret), signature or "")

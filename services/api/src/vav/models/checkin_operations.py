@@ -14,6 +14,7 @@ write path needs to populate it.
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import (
@@ -129,7 +130,7 @@ class CheckinOperationEvent(Base):
     reason: Mapped[str | None] = mapped_column(Text)
     #: Masked only: outcome, window state, device, the ``••••1234`` form of a
     #: searched fragment. Never a phone number, a name or a registration number.
-    metadata_json: Mapped[dict] = mapped_column(
+    metadata_json: Mapped[dict[str, Any]] = mapped_column(
         "metadata", JSONB, nullable=False, server_default=text("'{}'::jsonb")
     )
     occurred_at: Mapped[datetime] = mapped_column(

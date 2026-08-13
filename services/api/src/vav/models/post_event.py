@@ -9,6 +9,7 @@ service layer; the columns themselves are opaque text here.
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import (
@@ -112,7 +113,7 @@ class ActivitySelectionPolicy(Base):
     allow_edit_after_submit: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=text("true")
     )
-    custom_rule: Mapped[dict] = mapped_column(
+    custom_rule: Mapped[dict[str, Any]] = mapped_column(
         JSONB, nullable=False, server_default=text("'{}'::jsonb")
     )
     updated_by: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), ForeignKey("users.id"))
@@ -207,7 +208,7 @@ class ActivitySelectionAudit(Base):
     action: Mapped[str] = mapped_column(String(64), nullable=False)
     subject_user_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True))
     reason: Mapped[str | None] = mapped_column(Text)
-    metadata_json: Mapped[dict] = mapped_column(
+    metadata_json: Mapped[dict[str, Any]] = mapped_column(
         "metadata", JSONB, nullable=False, server_default=text("'{}'::jsonb")
     )
     created_at: Mapped[datetime] = created_at()
@@ -250,18 +251,20 @@ class SurveyQuestion(Base):
 
     id: Mapped[UUID] = uuid_pk()
     definition_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), ForeignKey("survey_definitions.id", ondelete="CASCADE"), nullable=False
+        PGUUID(as_uuid=True),
+        ForeignKey("survey_definitions.id", ondelete="CASCADE"),
+        nullable=False,
     )
     question_code: Mapped[str] = mapped_column(String(64), nullable=False)
     question_type: Mapped[str] = mapped_column(String(32), nullable=False)
     prompt: Mapped[str] = mapped_column(Text, nullable=False)
     help_text: Mapped[str | None] = mapped_column(Text)
     is_required: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("true"))
-    per_subject: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("false")
-    )
+    per_subject: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
     position: Mapped[int] = mapped_column(Integer, nullable=False)
-    config: Mapped[dict] = mapped_column(JSONB, nullable=False, server_default=text("'{}'::jsonb"))
+    config: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, server_default=text("'{}'::jsonb")
+    )
     created_at: Mapped[datetime] = created_at()
 
 
@@ -276,7 +279,9 @@ class SurveyQuestionLocalization(Base):
     locale: Mapped[str] = mapped_column(String(16), nullable=False)
     prompt: Mapped[str] = mapped_column(Text, nullable=False)
     help_text: Mapped[str | None] = mapped_column(Text)
-    options: Mapped[dict] = mapped_column(JSONB, nullable=False, server_default=text("'{}'::jsonb"))
+    options: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, server_default=text("'{}'::jsonb")
+    )
     created_at: Mapped[datetime] = created_at()
 
 
@@ -304,7 +309,7 @@ class ActivitySurveyAssignment(Base):
     display_timezone: Mapped[str] = mapped_column(
         String(64), nullable=False, server_default=text("'Asia/Shanghai'")
     )
-    reminder_offsets_hours: Mapped[list] = mapped_column(
+    reminder_offsets_hours: Mapped[list[Any]] = mapped_column(
         JSONB, nullable=False, server_default=text("'[48, 12]'::jsonb")
     )
     created_by: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), ForeignKey("users.id"))
@@ -379,7 +384,7 @@ class SurveyAnswer(Base):
     subject_key: Mapped[str] = mapped_column(String(64), nullable=False, server_default=text("'-'"))
     rating_value: Mapped[int | None] = mapped_column(Integer)
     boolean_value: Mapped[bool | None] = mapped_column(Boolean)
-    choice_values: Mapped[list] = mapped_column(
+    choice_values: Mapped[list[Any]] = mapped_column(
         JSONB, nullable=False, server_default=text("'[]'::jsonb")
     )
     text_value_encrypted: Mapped[str | None] = mapped_column(Text)
@@ -420,7 +425,7 @@ class ResultLetterTemplate(Base):
     outcome: Mapped[str] = mapped_column(String(32), nullable=False)
     subject_template: Mapped[str] = mapped_column(Text, nullable=False)
     body_template: Mapped[str] = mapped_column(Text, nullable=False)
-    declared_variables: Mapped[list] = mapped_column(
+    declared_variables: Mapped[list[Any]] = mapped_column(
         JSONB, nullable=False, server_default=text("'[]'::jsonb")
     )
     status: Mapped[str] = mapped_column(String(16), nullable=False, server_default=text("'draft'"))
@@ -454,7 +459,7 @@ class ResultLetter(Base):
     subject_encrypted: Mapped[str] = mapped_column(Text, nullable=False)
     body_encrypted: Mapped[str] = mapped_column(Text, nullable=False)
     content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
-    matched_user_ids: Mapped[list] = mapped_column(
+    matched_user_ids: Mapped[list[Any]] = mapped_column(
         JSONB, nullable=False, server_default=text("'[]'::jsonb")
     )
     authored_by: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), ForeignKey("users.id"))

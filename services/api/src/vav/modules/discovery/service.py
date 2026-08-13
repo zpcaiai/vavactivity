@@ -120,7 +120,11 @@ def require_sharing_enabled() -> None:
 
 
 async def _publish(
-    session: AsyncSession, topic: str, aggregate_type: str, aggregate_id: UUID, payload: dict
+    session: AsyncSession,
+    topic: str,
+    aggregate_type: str,
+    aggregate_id: UUID,
+    payload: dict[str, Any],
 ) -> None:
     await session.execute(
         text(
@@ -145,7 +149,7 @@ async def _audit(
     actor_kind: str,
     action: str,
     reason: str | None = None,
-    metadata: dict | None = None,
+    metadata: dict[str, Any] | None = None,
 ) -> None:
     await session.execute(
         text(
@@ -170,7 +174,7 @@ async def _audit(
 # ---------------------------------------------------------------------------
 
 
-async def get_city_preference(session: AsyncSession, user_id: UUID) -> dict:
+async def get_city_preference(session: AsyncSession, user_id: UUID) -> dict[str, Any]:
     row = (
         (
             await session.execute(
@@ -191,7 +195,9 @@ async def get_city_preference(session: AsyncSession, user_id: UUID) -> dict:
     return dict(row)
 
 
-async def set_city_preference(session: AsyncSession, *, user_id: UUID, payload: dict) -> dict:
+async def set_city_preference(
+    session: AsyncSession, *, user_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Persist (or clear) the member's manual city preference.
 
     Only a manually confirmed choice reaches this table - the domain guard
@@ -283,7 +289,7 @@ async def resolve_location(
     """
 
     settings = get_settings()
-    stored: dict = {"city_code": None, "allow_ip_suggestion": True}
+    stored: dict[str, Any] = {"city_code": None, "allow_ip_suggestion": True}
     if user_id is not None:
         stored = await get_city_preference(session, user_id)
     manual = override_city_code or stored.get("city_code")
@@ -306,7 +312,7 @@ async def discovery_feed(
     override_city_code: str | None = None,
     limit: int = 20,
     offset: int = 0,
-) -> dict:
+) -> dict[str, Any]:
     """City-scoped event feed with an explained national fallback.
 
     The local count is measured first, the domain decides the scope, and only
@@ -571,7 +577,7 @@ async def geocode_address(
         raise _fail(error) from error
 
 
-async def geocode_preview(session: AsyncSession, *, payload: dict) -> dict:
+async def geocode_preview(session: AsyncSession, *, payload: dict[str, Any]) -> dict[str, Any]:
     """Operator-facing geocode preview used by the venue editor."""
 
     venue = await geocode_address(
@@ -582,7 +588,7 @@ async def geocode_preview(session: AsyncSession, *, payload: dict) -> dict:
     return _venue_payload(venue)
 
 
-def _venue_payload(venue: VenueLocation) -> dict:
+def _venue_payload(venue: VenueLocation) -> dict[str, Any]:
     place_payload = venue.place.as_payload() if venue.place else None
     if place_payload is not None:
         try:
@@ -599,7 +605,9 @@ def _venue_payload(venue: VenueLocation) -> dict:
     }
 
 
-async def save_venue_location(session: AsyncSession, *, actor_id: UUID, payload: dict) -> dict:
+async def save_venue_location(
+    session: AsyncSession, *, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Persist a venue location for an activity.
 
     ``place=None`` is a first-class outcome, not an error: the row is written
@@ -684,7 +692,7 @@ async def save_venue_location(session: AsyncSession, *, actor_id: UUID, payload:
     return _venue_payload(venue)
 
 
-async def get_venue_location(session: AsyncSession, activity_id: UUID) -> dict:
+async def get_venue_location(session: AsyncSession, activity_id: UUID) -> dict[str, Any]:
     row = (
         (
             await session.execute(
@@ -730,7 +738,7 @@ async def get_venue_location(session: AsyncSession, activity_id: UUID) -> dict:
 # ---------------------------------------------------------------------------
 
 
-async def _activity_share_state(session: AsyncSession, activity_id: UUID) -> dict:
+async def _activity_share_state(session: AsyncSession, activity_id: UUID) -> dict[str, Any]:
     row = (
         (
             await session.execute(
@@ -753,8 +761,8 @@ async def _activity_share_state(session: AsyncSession, activity_id: UUID) -> dic
 
 
 async def create_share_card(
-    session: AsyncSession, *, activity_id: UUID, actor_id: UUID | None, payload: dict
-) -> dict:
+    session: AsyncSession, *, activity_id: UUID, actor_id: UUID | None, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Build (or refresh) the deterministic share card and its signed link.
 
     Idempotent for a given ``(activity_id, card_version)``: the card payload and
@@ -859,7 +867,7 @@ async def create_share_card(
     }
 
 
-async def get_share_card(session: AsyncSession, *, activity_id: UUID) -> dict:
+async def get_share_card(session: AsyncSession, *, activity_id: UUID) -> dict[str, Any]:
     require_sharing_enabled()
     activity = await _activity_share_state(session, activity_id)
     try:
@@ -885,7 +893,11 @@ async def get_share_card(session: AsyncSession, *, activity_id: UUID) -> dict:
         .first()
     )
     if row is None:
-        raise VavError("SHARE_CARD_NOT_FOUND", "No share card has been generated.", 404)
+        raise VavError(
+            "SHARE_CARD_NOT_FOUND",
+            "No share card has been generated.",
+            status_code=404,
+        )
     link = (
         (
             await session.execute(
@@ -917,7 +929,7 @@ async def get_share_card(session: AsyncSession, *, activity_id: UUID) -> dict:
     }
 
 
-async def resolve_short_link(session: AsyncSession, *, short_code: str) -> dict:
+async def resolve_short_link(session: AsyncSession, *, short_code: str) -> dict[str, Any]:
     """Resolve a short code to the canonical event URL.
 
     Publication and visibility are re-checked here, not merely at issue time, so
@@ -991,7 +1003,7 @@ async def resolve_short_link(session: AsyncSession, *, short_code: str) -> dict:
 
 async def revoke_share_links(
     session: AsyncSession, *, activity_id: UUID, actor_id: UUID, reason: str
-) -> dict:
+) -> dict[str, Any]:
     """Revoke every live link for an activity.
 
     Used when an event is unpublished or its copy is corrected. Rows are marked
@@ -1014,22 +1026,25 @@ async def revoke_share_links(
         actor_kind="admin",
         action="share_links.revoked",
         reason=reason,
-        metadata={"revoked": result.rowcount or 0},
+        metadata={"revoked": int(getattr(result, "rowcount", 0) or 0) or 0},
     )
     await _publish(
         session,
         "activity.share_links.revoked.v1",
         "activity",
         activity_id,
-        {"activity_id": str(activity_id), "revoked": result.rowcount or 0},
+        {"activity_id": str(activity_id), "revoked": int(getattr(result, "rowcount", 0) or 0) or 0},
     )
     await session.commit()
-    return {"activity_id": str(activity_id), "revoked": result.rowcount or 0}
+    return {
+        "activity_id": str(activity_id),
+        "revoked": int(getattr(result, "rowcount", 0) or 0) or 0,
+    }
 
 
 async def upsert_map_provider_config(
-    session: AsyncSession, *, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Pin a country to a provider.
 
     Only the provider *choice* is stored. Credentials stay in server-side
@@ -1069,7 +1084,7 @@ async def upsert_map_provider_config(
     }
 
 
-async def list_map_provider_configs(session: AsyncSession) -> list[dict]:
+async def list_map_provider_configs(session: AsyncSession) -> list[dict[str, Any]]:
     rows = (
         (
             await session.execute(
@@ -1087,7 +1102,7 @@ async def list_map_provider_configs(session: AsyncSession) -> list[dict]:
 
 async def location_debug(
     session: AsyncSession, *, user_id: UUID | None, ip_city_code: str | None
-) -> dict:
+) -> dict[str, Any]:
     """Operator view of how a city was resolved, for support tickets."""
 
     resolved = await resolve_location(session, user_id=user_id, ip_city_code=ip_city_code)

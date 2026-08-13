@@ -40,7 +40,9 @@ class DeliveryHistoryResetRequest(_Base):
 
 
 class DisclaimerRequest(_Base):
-    disclaimer_code: Annotated[str, Field(min_length=2, max_length=128, pattern=r"^[a-z][a-z0-9_-]*$")]
+    disclaimer_code: Annotated[
+        str, Field(min_length=2, max_length=128, pattern=r"^[a-z][a-z0-9_-]*$")
+    ]
     semantic_version: Annotated[str, Field(min_length=1, max_length=32)]
     locale: Annotated[str, Field(min_length=2, max_length=16)]
     body: Annotated[str, Field(min_length=1, max_length=8000)]

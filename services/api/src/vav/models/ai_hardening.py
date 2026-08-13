@@ -18,6 +18,7 @@ module deploys and rolls back independently of the assistant module.
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import (
@@ -63,7 +64,7 @@ class AiProviderProfile(Base):
     priority: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("100"))
     #: Off by default: a newly added model is not silently put in front of members.
     is_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
-    capabilities: Mapped[list] = mapped_column(
+    capabilities: Mapped[list[Any]] = mapped_column(
         JSONB, nullable=False, server_default=text("'[]'::jsonb")
     )
     #: Optional pointer into the existing ai_model_profiles catalogue. No FK:
@@ -190,11 +191,13 @@ class AiPolicyDecision(Base):
     message_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True))
     surface: Mapped[str] = mapped_column(String(8), nullable=False)
     action: Mapped[str] = mapped_column(String(16), nullable=False)
-    matched_rule_codes: Mapped[list] = mapped_column(
+    matched_rule_codes: Mapped[list[Any]] = mapped_column(
         JSONB, nullable=False, server_default=text("'[]'::jsonb")
     )
     highest_severity: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
-    audit: Mapped[dict] = mapped_column(JSONB, nullable=False, server_default=text("'{}'::jsonb"))
+    audit: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, server_default=text("'{}'::jsonb")
+    )
     decided_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=text("now()")
     )

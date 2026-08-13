@@ -112,9 +112,7 @@ async def run_arrival_job(
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return success(
-        await service.notify_candidate_arrivals(
-            session, opportunity_key=payload.opportunity_key
-        ),
+        await service.notify_candidate_arrivals(session, opportunity_key=payload.opportunity_key),
         request_id_from_request(request),
     )
 

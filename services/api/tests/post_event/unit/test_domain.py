@@ -223,14 +223,17 @@ def test_policy_cannot_raise_the_ceiling_above_three() -> None:
 def test_at_most_three_selections_are_accepted() -> None:
     policy = SelectionPolicy()
     visible = [_uid(i) for i in range(2, 8)]
-    assert validate_selection(
-        policy,
-        chooser_id=_uid(1),
-        selected_ids=visible[:3],
-        visible_ids=visible,
-        no_selection_reason_code=None,
-        allowed_reason_codes=["not_ready"],
-    ) == visible[:3]
+    assert (
+        validate_selection(
+            policy,
+            chooser_id=_uid(1),
+            selected_ids=visible[:3],
+            visible_ids=visible,
+            no_selection_reason_code=None,
+            allowed_reason_codes=["not_ready"],
+        )
+        == visible[:3]
+    )
     with pytest.raises(PostEventRuleError) as excinfo:
         validate_selection(
             policy,
@@ -472,7 +475,10 @@ def test_duplicate_answer_for_the_same_question_is_rejected() -> None:
     with pytest.raises(PostEventRuleError) as excinfo:
         validate_answers(
             [question],
-            [SubmittedAnswer("overall", rating_value=3), SubmittedAnswer("overall", rating_value=4)],
+            [
+                SubmittedAnswer("overall", rating_value=3),
+                SubmittedAnswer("overall", rating_value=4),
+            ],
         )
     assert excinfo.value.code == "SURVEY_ANSWER_DUPLICATE"
 
@@ -512,9 +518,12 @@ def test_only_checked_in_confirmed_members_receive_a_task() -> None:
 
 def test_completed_task_plans_no_further_reminders() -> None:
     deadline = NOW + timedelta(days=3)
-    assert plan_reminders(
-        deadline_at=deadline, offsets_hours=[48, 24], now=NOW, task_status=TaskStatus.COMPLETED
-    ) == []
+    assert (
+        plan_reminders(
+            deadline_at=deadline, offsets_hours=[48, 24], now=NOW, task_status=TaskStatus.COMPLETED
+        )
+        == []
+    )
 
 
 def test_reminder_slots_are_deduplicated_ordered_and_never_in_the_past() -> None:

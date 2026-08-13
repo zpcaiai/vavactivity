@@ -403,9 +403,7 @@ def test_the_batch_migrations_chain_onto_each_other() -> None:
 def test_capacity_migrations_keep_inventory_mode_separate_from_zero_capacity() -> None:
     versions = Path(__file__).resolve().parents[3] / "migrations" / "versions"
     fresh = (versions / "20260812_0106_capacity_guard.py").read_text(encoding="utf-8")
-    corrective = (versions / "20260813_0111_explicit_capacity_mode.py").read_text(
-        encoding="utf-8"
-    )
+    corrective = (versions / "20260813_0111_explicit_capacity_mode.py").read_text(encoding="utf-8")
 
     assert "is_unlimited BOOLEAN NOT NULL DEFAULT false" in fresh
     assert "JOIN product_skus sku ON sku.id = t.catalog_sku_id" in fresh

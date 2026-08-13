@@ -131,9 +131,7 @@ async def unfollow_member(
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return success(
-        await service.unfollow_member(
-            session, follower_id=principal.user.id, followee_id=user_id
-        ),
+        await service.unfollow_member(session, follower_id=principal.user.id, followee_id=user_id),
         request_id_from_request(request),
     )
 

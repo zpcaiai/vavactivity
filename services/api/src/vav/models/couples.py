@@ -9,6 +9,7 @@ primary key, the free-benefit uniqueness on ``pair_key``) is expressed here
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import (
@@ -74,9 +75,7 @@ class CoupleRelationship(Base):
         PGUUID(as_uuid=True), ForeignKey("users.id"), nullable=False
     )
     relationship_kind: Mapped[str] = mapped_column(String(16), nullable=False)
-    state: Mapped[str] = mapped_column(
-        String(16), nullable=False, server_default=text("'active'")
-    )
+    state: Mapped[str] = mapped_column(String(16), nullable=False, server_default=text("'active'"))
     invitation_id: Mapped[UUID | None] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("couple_invitations.id")
     )
@@ -288,7 +287,7 @@ class ScopeReport(Base):
         PGUUID(as_uuid=True), ForeignKey("scope_assessment_versions.id"), nullable=False
     )
     algorithm_version: Mapped[str] = mapped_column(String(64), nullable=False)
-    scores: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    scores: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
     scores_fingerprint: Mapped[str] = mapped_column(String(64), nullable=False)
     idempotency_key: Mapped[str] = mapped_column(String(255), nullable=False)
     advice_status: Mapped[str] = mapped_column(
