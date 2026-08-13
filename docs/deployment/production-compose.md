@@ -15,3 +15,9 @@ docker compose -f deploy/compose/docker-compose.prod.yml config --quiet
 ```
 
 The migration service must complete before API traffic. Containers run read-only, drop all capabilities, use `no-new-privileges`, and separate edge/internal networks; only the API joins both networks, while migration and workers remain internal. Production activation still requires the readiness evidence and approval gates.
+
+`PROFILE_MEDIA_ENABLED` defaults to false. Storage-v2 activation is a separate
+quiesce/migrate/rollout/gate operation; use the exact procedure in
+[`profile-media-storage-v2.md`](profile-media-storage-v2.md). The API update
+policy pauses instead of automatically rolling back because a pre-0112 image
+cannot read objects finalized under the new key namespace.

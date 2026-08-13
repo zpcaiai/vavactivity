@@ -5,6 +5,7 @@ import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 
 import { profileMediaApiClient } from "@/features/profile-media/api";
+import { useMediaGrants } from "@/features/profile-media/composables/useMediaGrants";
 import { useMediaUpload } from "@/features/profile-media/composables/useMediaUpload";
 import type {
   MediaAsset,
@@ -27,44 +28,26 @@ const intro = ref("");
 const cityCode = ref("");
 
 const { uploading, progressPercent, error: uploadError, upload } = useMediaUpload();
+const { mediaUrls, loadMediaGrants, refreshAfterMediaError } = useMediaGrants();
 
-/**
- * Fetchable URLs, keyed by asset id.
- *
- * `media_path` is the asset's identity, not a URL — private media is only
- * readable through a short-lived viewer-bound grant. Binding the path to a
- * `src` was the original mistake here and produced broken images.
- */
-const mediaUrls = ref<Record<string, string>>({});
-
-async function loadMediaUrls(assets: MediaAsset[]) {
-  const entries = await Promise.all(
-    assets.map(async (asset) => {
-      try {
-        const grant = await profileMediaApiClient.grant(asset.asset_id);
-        return [asset.asset_id, grant.media_url] as const;
-      } catch {
-        // A grant that cannot be issued leaves the tile without an image
-        // rather than rendering a dead `src`; the asset's own state is still
-        // shown, which is what the member needs to act on.
-        return null;
-      }
-    })
-  );
-  mediaUrls.value = Object.fromEntries(entries.filter((entry) => entry !== null));
+async function refreshMediaView(): Promise<ProfileMediaView> {
+  const updated = await profileMediaApiClient.media();
+  view.value = updated;
+  await loadMediaGrants(updated.assets);
+  return updated;
 }
 
-async function onFileSelected(event: Event, kind: MediaKind) {
+async function onFileSelected(event: Event, kind: MediaKind, replaceAssetId?: string) {
   const input = event.target as HTMLInputElement;
   const file = input.files?.[0];
   if (!file) return;
-  const updated = await upload(file, kind);
+  const updated = await upload(file, kind, replaceAssetId);
   // Reset the input so re-picking the same file fires `change` again.
   input.value = "";
   if (updated) {
     view.value = updated;
-    notice.value = t("profileMedia.uploadDone");
-    await loadMediaUrls(updated.assets);
+    notice.value = t(replaceAssetId ? "profileMedia.replaceDone" : "profileMedia.uploadDone");
+    await loadMediaGrants(updated.assets);
   }
 }
 
@@ -107,11 +90,10 @@ async function load() {
   loading.value = true;
   error.value = null;
   try {
-    view.value = await profileMediaApiClient.media();
-    await loadMediaUrls(view.value.assets);
-    mbti.value = view.value.mbti ?? "";
-    intro.value = view.value.intro ?? "";
-    cityCode.value = view.value.city_code ?? "";
+    const updated = await refreshMediaView();
+    mbti.value = updated.mbti ?? "";
+    intro.value = updated.intro ?? "";
+    cityCode.value = updated.city_code ?? "";
     consent.value = await profileMediaApiClient.shareConsent().catch(() => null);
   } catch (caught) {
     error.value = (caught as Error).message;
@@ -142,8 +124,10 @@ async function removeAsset(asset: MediaAsset) {
   busy.value = true;
   error.value = null;
   try {
-    view.value = await profileMediaApiClient.remove(asset.asset_id);
-    await loadMediaUrls(view.value.assets);
+    // DELETE returns deletion metadata, not a media view. Reload the canonical
+    // projection before touching assets or grants.
+    await profileMediaApiClient.remove(asset.asset_id);
+    await refreshMediaView();
   } catch (caught) {
     error.value = (caught as Error).message;
   } finally {
@@ -266,6 +250,8 @@ onMounted(load);
                 class="media__thumb"
                 :src="mediaUrls[asset.asset_id]"
                 :alt="t('profileMedia.photoAlt')"
+                :data-testid="`profile-media-${asset.asset_id}`"
+                @error="refreshAfterMediaError(asset.asset_id)"
               >
               <p
                 v-else
@@ -283,9 +269,20 @@ onMounted(load);
               >
                 {{ rejectionLabel(asset) }}
               </p>
+              <label class="media__upload-control">
+                <span>{{ t("profileMedia.replacePhoto") }}</span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                  :data-testid="`replace-photo-${asset.asset_id}`"
+                  :disabled="uploading"
+                  @change="onFileSelected($event, 'photo', asset.asset_id)"
+                >
+              </label>
               <VButton
                 variant="secondary"
                 :loading="busy"
+                :disabled="uploading"
                 @click="removeAsset(asset)"
               >
                 {{ t("profileMedia.remove") }}
@@ -313,6 +310,8 @@ onMounted(load);
             :src="mediaUrls[video.asset_id]"
             controls
             preload="metadata"
+            :data-testid="`profile-media-${video.asset_id}`"
+            @error="refreshAfterMediaError(video.asset_id)"
           />
           <p
             v-else
@@ -324,9 +323,20 @@ onMounted(load);
             :tone="moderationTone[video.moderation_state] ?? 'neutral'"
             :label="t(`profileMedia.moderation.${video.moderation_state}`)"
           />
+          <label class="media__upload-control">
+            <span>{{ t("profileMedia.replaceVideo") }}</span>
+            <input
+              type="file"
+              accept="video/mp4,video/quicktime"
+              data-testid="replace-video"
+              :disabled="uploading"
+              @change="onFileSelected($event, 'video', video.asset_id)"
+            >
+          </label>
           <VButton
             variant="secondary"
             :loading="busy"
+            :disabled="uploading"
             @click="removeAsset(video)"
           >
             {{ t("profileMedia.remove") }}

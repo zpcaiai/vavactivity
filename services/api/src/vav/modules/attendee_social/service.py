@@ -20,10 +20,11 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, cast
 from uuid import UUID
 
 from sqlalchemy import text
+from sqlalchemy.engine import CursorResult
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from vav.common.exceptions import VavError
@@ -91,7 +92,11 @@ def follow_graph_enabled() -> None:
 
 
 async def _publish(
-    session: AsyncSession, topic: str, aggregate_type: str, aggregate_id: UUID, payload: dict
+    session: AsyncSession,
+    topic: str,
+    aggregate_type: str,
+    aggregate_id: UUID,
+    payload: dict[str, Any],
 ) -> None:
     await session.execute(
         text(
@@ -116,7 +121,7 @@ async def _audit(
     actor_kind: str,
     action: str,
     reason: str | None = None,
-    metadata: dict | None = None,
+    metadata: dict[str, Any] | None = None,
 ) -> None:
     await session.execute(
         text(
@@ -208,7 +213,7 @@ async def get_attendee_preview(
     activity_id: UUID,
     limit: int = 12,
     exclude_absent: bool = False,
-) -> dict:
+) -> dict[str, Any]:
     """Build the event-detail attendee preview.
 
     ``withheld_count`` is computed but never returned to members: publishing it
@@ -238,7 +243,7 @@ async def get_attendee_preview(
 
 async def get_my_consent(
     session: AsyncSession, *, registration_id: UUID, user_id: UUID
-) -> dict:
+) -> dict[str, Any]:
     row = (
         (
             await session.execute(
@@ -269,8 +274,12 @@ async def get_my_consent(
 
 
 async def set_preview_consent(
-    session: AsyncSession, *, registration_id: UUID, user_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession,
+    *,
+    registration_id: UUID,
+    user_id: UUID,
+    payload: dict[str, Any],
+) -> dict[str, Any]:
     """Record a consent decision and audit it.
 
     The row is locked before the transition is validated so a double-tap cannot
@@ -357,22 +366,29 @@ async def set_preview_consent(
 
 
 async def set_preview_intro(
-    session: AsyncSession, *, registration_id: UUID, user_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession,
+    *,
+    registration_id: UUID,
+    user_id: UUID,
+    payload: dict[str, Any],
+) -> dict[str, Any]:
     """Store the optional one-line intro, encrypted at rest."""
 
     preview_enabled()
     intro = (payload.get("intro_line") or "").strip() or None
-    updated = await session.execute(
-        text(
-            "UPDATE attendee_preview_consents SET intro_line_encrypted=:intro,updated_at=now() "
-            "WHERE registration_id=:registration_id AND user_id=:user_id"
+    updated = cast(
+        CursorResult[Any],
+        await session.execute(
+            text(
+                "UPDATE attendee_preview_consents SET intro_line_encrypted=:intro,updated_at=now() "
+                "WHERE registration_id=:registration_id AND user_id=:user_id"
+            ),
+            {
+                "intro": encrypt_private(intro) if intro else None,
+                "registration_id": str(registration_id),
+                "user_id": str(user_id),
+            },
         ),
-        {
-            "intro": encrypt_private(intro) if intro else None,
-            "registration_id": str(registration_id),
-            "user_id": str(user_id),
-        },
     )
     if updated.rowcount == 0:
         raise VavError(
@@ -385,8 +401,8 @@ async def set_preview_intro(
 
 
 async def admin_withdraw_consent(
-    session: AsyncSession, *, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Operator-side withdrawal (moderation, support request, legal takedown).
 
     There is no admin *grant*: an operator can only ever reduce visibility.
@@ -478,7 +494,7 @@ async def _blocked_either_way(session: AsyncSession, first: UUID, second: UUID) 
 
 async def follow_member(
     session: AsyncSession, *, follower_id: UUID, followee_id: UUID
-) -> dict:
+) -> dict[str, Any]:
     """Create a follow edge. Idempotent, block-aware and never a like."""
 
     follow_graph_enabled()
@@ -546,7 +562,7 @@ async def follow_member(
 
 async def unfollow_member(
     session: AsyncSession, *, follower_id: UUID, followee_id: UUID
-) -> dict:
+) -> dict[str, Any]:
     follow_graph_enabled()
     current = await session.scalar(
         text(
@@ -569,15 +585,24 @@ async def unfollow_member(
         "followee_id": str(followee_id),
         "state": plan.state.value,
         "action": plan.action.value,
+        # Keep every follow-graph response self-describing.  A client must not
+        # infer that an unfollow response belongs to the matchmaking/like graph.
+        "relation_kind": RelationKind.FOLLOW.value,
     }
 
 
-async def list_following(session: AsyncSession, *, user_id: UUID, limit: int = 50) -> list[dict]:
+async def list_following(
+    session: AsyncSession, *, user_id: UUID, limit: int = 50
+) -> list[dict[str, Any]]:
     rows = (
         (
             await session.execute(
                 text(
-                    "SELECT f.followee_id AS user_id, f.followed_at "
+                    "SELECT f.followee_id AS user_id, f.followed_at, "
+                    "EXISTS (SELECT 1 FROM social_follows reverse_edge "
+                    "WHERE reverse_edge.follower_id=f.followee_id "
+                    "AND reverse_edge.followee_id=f.follower_id "
+                    "AND reverse_edge.state='active') AS is_mutual "
                     "FROM social_follows f WHERE f.follower_id=:user_id AND f.state='active' "
                     "ORDER BY f.followed_at DESC LIMIT :limit"
                 ),
@@ -588,16 +613,28 @@ async def list_following(session: AsyncSession, *, user_id: UUID, limit: int = 5
         .all()
     )
     return [
-        {"user_id": str(row["user_id"]), "followed_at": row["followed_at"]} for row in rows
+        {
+            "user_id": str(row["user_id"]),
+            "followed_at": row["followed_at"],
+            "is_mutual": bool(row["is_mutual"]),
+            "relation_kind": RelationKind.FOLLOW.value,
+        }
+        for row in rows
     ]
 
 
-async def list_followers(session: AsyncSession, *, user_id: UUID, limit: int = 50) -> list[dict]:
+async def list_followers(
+    session: AsyncSession, *, user_id: UUID, limit: int = 50
+) -> list[dict[str, Any]]:
     rows = (
         (
             await session.execute(
                 text(
-                    "SELECT f.follower_id AS user_id, f.followed_at "
+                    "SELECT f.follower_id AS user_id, f.followed_at, "
+                    "EXISTS (SELECT 1 FROM social_follows reverse_edge "
+                    "WHERE reverse_edge.follower_id=f.followee_id "
+                    "AND reverse_edge.followee_id=f.follower_id "
+                    "AND reverse_edge.state='active') AS is_mutual "
                     "FROM social_follows f WHERE f.followee_id=:user_id AND f.state='active' "
                     "ORDER BY f.followed_at DESC LIMIT :limit"
                 ),
@@ -608,13 +645,19 @@ async def list_followers(session: AsyncSession, *, user_id: UUID, limit: int = 5
         .all()
     )
     return [
-        {"user_id": str(row["user_id"]), "followed_at": row["followed_at"]} for row in rows
+        {
+            "user_id": str(row["user_id"]),
+            "followed_at": row["followed_at"],
+            "is_mutual": bool(row["is_mutual"]),
+            "relation_kind": RelationKind.FOLLOW.value,
+        }
+        for row in rows
     ]
 
 
 async def record_want_to_meet(
-    session: AsyncSession, *, user_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, user_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Record event-scoped want-to-meet intent.
 
     Written to its own table with its own semantics. It is not a follow (it is
@@ -663,7 +706,9 @@ async def record_want_to_meet(
 # ---------------------------------------------------------------------------
 
 
-async def get_notification_preferences(session: AsyncSession, user_id: UUID) -> dict:
+async def get_notification_preferences(
+    session: AsyncSession, user_id: UUID
+) -> dict[str, Any]:
     row = (
         (
             await session.execute(
@@ -685,8 +730,8 @@ async def get_notification_preferences(session: AsyncSession, user_id: UUID) -> 
 
 
 async def set_notification_preferences(
-    session: AsyncSession, *, user_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, user_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     await session.execute(
         text(
             "INSERT INTO social_notification_preferences (user_id,followed_user_registered) "
@@ -705,7 +750,7 @@ async def set_notification_preferences(
 
 async def fan_out_followed_user_registered(
     session: AsyncSession, *, actor_id: UUID, activity_id: UUID
-) -> dict:
+) -> dict[str, Any]:
     """Notify the actor's followers that they registered for an activity.
 
     Every recipient is decided by the domain, which returns a suppression reason
@@ -784,20 +829,23 @@ async def fan_out_followed_user_registered(
                 suppressed.get(decision.suppression.value, 0) + 1
             )
             continue
-        inserted = await session.execute(
-            text(
-                "INSERT INTO social_notification_deliveries "
-                "(dedupe_key,recipient_id,actor_id,activity_id,notification_code) "
-                "VALUES (:dedupe_key,:recipient,:actor,:activity_id,:code) "
-                "ON CONFLICT (dedupe_key) DO NOTHING"
+        inserted = cast(
+            CursorResult[Any],
+            await session.execute(
+                text(
+                    "INSERT INTO social_notification_deliveries "
+                    "(dedupe_key,recipient_id,actor_id,activity_id,notification_code) "
+                    "VALUES (:dedupe_key,:recipient,:actor,:activity_id,:code) "
+                    "ON CONFLICT (dedupe_key) DO NOTHING"
+                ),
+                {
+                    "dedupe_key": decision.dedupe_key,
+                    "recipient": str(recipient_id),
+                    "actor": str(actor_id),
+                    "activity_id": str(activity_id),
+                    "code": FOLLOWED_USER_REGISTERED_PREFERENCE_KEY,
+                },
             ),
-            {
-                "dedupe_key": decision.dedupe_key,
-                "recipient": str(recipient_id),
-                "actor": str(actor_id),
-                "activity_id": str(activity_id),
-                "code": FOLLOWED_USER_REGISTERED_PREFERENCE_KEY,
-            },
         )
         if not inserted.rowcount:
             # Another worker won the race; the constraint is the source of truth.
@@ -822,18 +870,21 @@ async def fan_out_followed_user_registered(
 
 async def apply_block(
     session: AsyncSession, *, blocker_user_id: UUID, blocked_user_id: UUID
-) -> dict:
+) -> dict[str, Any]:
     """Sever follow edges in both directions when a block is created.
 
     Called by the moderation module after it writes the block row.
     """
 
-    result = await session.execute(
-        text(
-            "UPDATE social_follows SET state='blocked',unfollowed_at=now(),updated_at=now() "
-            "WHERE state='active' AND ((follower_id=:a AND followee_id=:b) OR (follower_id=:b AND followee_id=:a))"
+    result = cast(
+        CursorResult[Any],
+        await session.execute(
+            text(
+                "UPDATE social_follows SET state='blocked',unfollowed_at=now(),updated_at=now() "
+                "WHERE state='active' AND ((follower_id=:a AND followee_id=:b) OR (follower_id=:b AND followee_id=:a))"
+            ),
+            {"a": str(blocker_user_id), "b": str(blocked_user_id)},
         ),
-        {"a": str(blocker_user_id), "b": str(blocked_user_id)},
     )
     await _audit(
         session,

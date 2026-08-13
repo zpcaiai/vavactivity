@@ -37,11 +37,18 @@ from vav.modules.matchmaking_interactions import (
 from vav.modules.memberships import quota as membership_quota
 from vav.modules.memberships import projection as membership_projection
 from vav.modules.privacy.service import execute_erasure_plan, process_export_request
+from vav.modules.profile_media import service as profile_media_service
 from vav.modules.recommendations import batches as recommendation_batches
 from vav.modules.recommendations import service as recommendation_service
 from vav.modules.trust_safety import service as trust_safety_service
 from vav_worker.celery_app import celery_app
 from vav_worker.skill_adapters import configured_registry
+
+PRIVACY_ERASURE_RUNNABLE_STATUSES = (
+    "ready",
+    "processing",
+    "partially_completed",
+)
 
 
 async def _publish_scheduled() -> int:
@@ -389,9 +396,10 @@ async def _process_privacy_erasures() -> int:
             (
                 await session.execute(
                     text(
-                        "SELECT id,approved_by FROM privacy_erasure_plans WHERE status='ready' "
+                        "SELECT id,approved_by FROM privacy_erasure_plans WHERE status=ANY(:statuses) "
                         "AND approved_by IS NOT NULL ORDER BY approved_at FOR UPDATE SKIP LOCKED LIMIT 10"
-                    )
+                    ),
+                    {"statuses": list(PRIVACY_ERASURE_RUNNABLE_STATUSES)},
                 )
             )
             .mappings()
@@ -409,6 +417,20 @@ async def _process_privacy_erasures() -> int:
 @celery_app.task(name="vav.privacy.erasures")  # type: ignore[misc]
 def process_privacy_erasures() -> dict[str, int]:
     return {"processed": asyncio.run(_process_privacy_erasures())}
+
+
+async def _maintain_profile_media_storage() -> dict[str, int]:
+    async with session_factory() as session:
+        expired = await profile_media_service.expire_stale_uploads(session)
+    async with session_factory() as session:
+        deletions = await profile_media_service.process_storage_deletions(session)
+    await get_engine().dispose()
+    return {"expired_uploads": expired, **deletions}
+
+
+@celery_app.task(name="vav.profile_media.maintain_storage")  # type: ignore[misc]
+def maintain_profile_media_storage() -> dict[str, int]:
+    return asyncio.run(_maintain_profile_media_storage())
 
 
 async def _evaluate_privacy_retention() -> dict[str, int]:

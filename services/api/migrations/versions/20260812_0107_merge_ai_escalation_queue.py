@@ -216,11 +216,21 @@ def downgrade() -> None:
           CHECK (status NOT IN ('resolved','cancelled') OR resolved_at IS NOT NULL)
         );
 
+        CREATE INDEX IF NOT EXISTS ai_human_escalations_queue_idx
+          ON ai_human_escalations (severity DESC, opened_at)
+          WHERE status IN ('open','acknowledged');
+
         DROP INDEX IF EXISTS ai_human_referrals_open_idx;
 
         ALTER TABLE ai_human_referrals
           DROP COLUMN IF EXISTS severity,
           DROP COLUMN IF EXISTS runbook_id,
           DROP COLUMN IF EXISTS geography_code;
+
+        -- ai_human_escalation_orphans is deliberately retained. Those rows
+        -- could not satisfy ai_human_referrals.conversation_id and are safety
+        -- records, not disposable migration scratch data. Downgrade restores
+        -- 0103's writable queue shape but does not pretend an absent parent
+        -- conversation has reappeared or silently discard the quarantine.
         """
     )

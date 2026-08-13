@@ -51,12 +51,16 @@ export interface FollowResult {
   action: FollowAction;
   /** Always `"follow"` here. Stated by the server so it cannot be mistaken
    *  for a mutual-selection signal. */
-  relation_kind: string;
+  relation_kind: "follow";
 }
 
 export interface FollowEdge {
   user_id: string;
   followed_at: string;
+  /** Computed from the reverse active edge by the server, not from this page. */
+  is_mutual: boolean;
+  /** Lists are self-describing so they cannot be confused with likes/matches. */
+  relation_kind: "follow";
 }
 
 export interface WantToMeetResult {

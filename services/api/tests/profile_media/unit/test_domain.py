@@ -200,9 +200,7 @@ def test_an_oversized_video_is_rejected() -> None:
 
 def test_an_empty_file_is_rejected() -> None:
     with pytest.raises(ProfileMediaRuleError) as excinfo:
-        validate_upload(
-            _photo_request(byte_size=0), existing_photo_count=0, existing_video_count=0
-        )
+        validate_upload(_photo_request(byte_size=0), existing_photo_count=0, existing_video_count=0)
     assert excinfo.value.code == "MEDIA_FILE_EMPTY"
 
 
@@ -380,9 +378,7 @@ def test_a_private_media_url_never_embeds_a_guessable_identifier() -> None:
     assert path == f"/media/private/{token}"
     assert_url_is_not_predictable(path, asset_id=_uid(1), owner_id=OWNER_ID)
     with pytest.raises(ProfileMediaRuleError) as excinfo:
-        assert_url_is_not_predictable(
-            f"/media/{_uid(1)}.jpg", asset_id=_uid(1), owner_id=OWNER_ID
-        )
+        assert_url_is_not_predictable(f"/media/{_uid(1)}.jpg", asset_id=_uid(1), owner_id=OWNER_ID)
     assert excinfo.value.code == "MEDIA_URL_PREDICTABLE"
     with pytest.raises(ProfileMediaRuleError):
         assert_url_is_not_predictable(
@@ -398,17 +394,13 @@ def test_a_malformed_token_is_rejected_before_it_reaches_storage() -> None:
 
 def test_a_grant_round_trips_for_the_right_viewer() -> None:
     token = derive_asset_token(_uid(1), secret=SECRET)
-    grant = issue_access_grant(
-        access_token=token, viewer_id=_uid(5), now=NOW, secret=SECRET
-    )
+    grant = issue_access_grant(access_token=token, viewer_id=_uid(5), now=NOW, secret=SECRET)
     verify_access_grant(grant, viewer_id=_uid(5), now=NOW + timedelta(seconds=10), secret=SECRET)
 
 
 def test_a_grant_is_bound_to_one_viewer() -> None:
     token = derive_asset_token(_uid(1), secret=SECRET)
-    grant = issue_access_grant(
-        access_token=token, viewer_id=_uid(5), now=NOW, secret=SECRET
-    )
+    grant = issue_access_grant(access_token=token, viewer_id=_uid(5), now=NOW, secret=SECRET)
     with pytest.raises(ProfileMediaRuleError) as excinfo:
         verify_access_grant(grant, viewer_id=_uid(6), now=NOW, secret=SECRET)
     assert excinfo.value.code == "MEDIA_GRANT_WRONG_VIEWER"
@@ -428,9 +420,7 @@ def test_a_grant_expires() -> None:
 
 def test_a_forged_grant_signature_is_rejected() -> None:
     token = derive_asset_token(_uid(1), secret=SECRET)
-    grant = issue_access_grant(
-        access_token=token, viewer_id=_uid(5), now=NOW, secret=SECRET
-    )
+    grant = issue_access_grant(access_token=token, viewer_id=_uid(5), now=NOW, secret=SECRET)
     forged = AccessGrant(
         access_token=grant.access_token,
         viewer_id=grant.viewer_id,
@@ -523,9 +513,7 @@ def test_sharing_is_off_by_default() -> None:
     assert consent.share_video is False
     assert consent.share_mbti is False
     with pytest.raises(ProfileMediaRuleError) as excinfo:
-        build_share_projection(
-            user_id=OWNER_ID, display_name="Ada", consent=consent, assets=[]
-        )
+        build_share_projection(user_id=OWNER_ID, display_name="Ada", consent=consent, assets=[])
     assert excinfo.value.code == "PROFILE_SHARE_NOT_CONSENTED"
 
 

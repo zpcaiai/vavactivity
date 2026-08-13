@@ -23,6 +23,9 @@ PRODUCTION_BASE: dict[str, object] = {
     "DEBUG": "false",
     "APP_CORS_ORIGINS": ["https://app.example.com"],
     "MEDIA_S3_ENDPOINT": "https://s3.example.com",
+    "MEDIA_S3_PUBLIC_ENDPOINT": "https://media.example.com",
+    "MEDIA_S3_ACCESS_KEY": "production-media-access-key",
+    "MEDIA_S3_SECRET_KEY": "production-media-secret-key",
     "BACKUP_ENCRYPTION_KEY": "production-backup-key",
     "AUTH_REFRESH_TOKEN_PEPPER": "production-refresh-pepper",
     "AUTH_COOKIE_SECURE": "true",
@@ -49,6 +52,11 @@ NEW_SECRETS = {
     "DISCOVERY_IP_MARKER_SALT": "production-ip-marker-salt",
 }
 
+OBJECT_STORAGE_CREDENTIALS = {
+    "MEDIA_S3_ACCESS_KEY": "media_s3_access_key",
+    "MEDIA_S3_SECRET_KEY": "media_s3_secret_key",
+}
+
 
 def _production(**overrides: object) -> Settings:
     return Settings(**{**PRODUCTION_BASE, **NEW_SECRETS, **overrides})  # type: ignore[arg-type]
@@ -73,6 +81,37 @@ def test_production_rejects_the_shipped_default_secret(name: str) -> None:
 def test_production_rejects_a_blank_secret(name: str) -> None:
     with pytest.raises(ValidationError) as error:
         _production(**{name: "   "})
+    assert name in str(error.value)
+
+
+@pytest.mark.parametrize("name", sorted(OBJECT_STORAGE_CREDENTIALS))
+def test_production_requires_explicit_object_storage_credentials(
+    name: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv(name, raising=False)
+    values = {**PRODUCTION_BASE, **NEW_SECRETS}
+    values.pop(name)
+
+    with pytest.raises(ValidationError) as error:
+        Settings(_env_file=None, **values)  # type: ignore[arg-type]
+    assert name in str(error.value)
+
+
+@pytest.mark.parametrize("name", sorted(OBJECT_STORAGE_CREDENTIALS))
+@pytest.mark.parametrize("kind", ["blank", "shipped_default", "shipped_default_with_whitespace"])
+def test_production_rejects_unsafe_object_storage_credentials(name: str, kind: str) -> None:
+    attribute = OBJECT_STORAGE_CREDENTIALS[name]
+    shipped_default = getattr(Settings(_env_file=None), attribute).get_secret_value()
+    value = (
+        "   "
+        if kind == "blank"
+        else f"  {shipped_default}  "
+        if kind == "shipped_default_with_whitespace"
+        else shipped_default
+    )
+
+    with pytest.raises(ValidationError) as error:
+        _production(**{name: value})
     assert name in str(error.value)
 
 

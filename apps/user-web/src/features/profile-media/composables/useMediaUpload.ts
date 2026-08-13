@@ -33,7 +33,9 @@ export function useMediaUpload() {
       element.preload = "metadata";
       element.onloadedmetadata = () => {
         URL.revokeObjectURL(element.src);
-        resolve(Number.isFinite(element.duration) ? Math.round(element.duration) : null);
+        // Keep the measured fractional seconds. Rounding 30.4 down to 30 would
+        // let a client declaration slip past the 30-second boundary.
+        resolve(Number.isFinite(element.duration) ? element.duration : null);
       };
       // A file whose duration cannot be read is not quietly sent as 0. The
       // server rejects a video with no duration, which is the honest outcome
@@ -73,17 +75,27 @@ export function useMediaUpload() {
     });
   }
 
-  async function upload(file: File, kind: MediaKind): Promise<ProfileMediaView | null> {
+  async function upload(
+    file: File,
+    kind: MediaKind,
+    replaceAssetId?: string
+  ): Promise<ProfileMediaView | null> {
     reset();
     uploading.value = true;
     try {
       const duration = await probeDuration(file);
-      const registered = await profileMediaApiClient.registerUpload({
+      const declaration = {
         kind,
         mime_type: file.type,
         byte_size: file.size,
         duration_seconds: duration
-      });
+      };
+      // Replacement registration creates a new staged asset. The old asset is
+      // intentionally untouched until finalize succeeds, so a storage or
+      // inspection failure cannot blank the member's current profile.
+      const registered = replaceAssetId
+        ? await profileMediaApiClient.replace(replaceAssetId, declaration)
+        : await profileMediaApiClient.registerUpload(declaration);
 
       await postToStorage(registered.upload, file);
 

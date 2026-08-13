@@ -1167,7 +1167,8 @@
       "followBack": "回關",
       "notificationHeading": "關注提醒",
       "notifyOnRegistration": "我關注的人報名活動時通知我",
-      "notifyHint": "只在對方同意公開出現在參與者列表時才會通知。"
+      "notifyHint": "只在對方同意公開出現在參與者列表時才會通知。",
+      "preferenceLoadFailed": "關注提醒設定載入失敗"
     }
   },
   "couples": {
@@ -1360,9 +1361,12 @@
     },
     "addPhoto": "新增照片",
     "addVideo": "新增影片",
+    "replacePhoto": "替換這張照片",
+    "replaceVideo": "替換這段影片",
     "uploadLimits": "最多 3 張照片(單張 10MB 以內)和 1 段影片(100MB、3–30 秒以內)。",
     "uploadProgress": "上傳中 {percent}%",
     "uploadDone": "上傳完成,等待審核。",
+    "replaceDone": "替換檔案已上傳，新檔案正在等待審核。",
     "uploadFailed": "上傳失敗",
     "previewUnavailable": "預覽暫時不可用,檔案本身未受影響。"
   }

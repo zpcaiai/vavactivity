@@ -14,6 +14,7 @@ signed URL constrains what may be uploaded, and a missing object is detectable.
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 from uuid import uuid4
 
@@ -67,7 +68,8 @@ def test_object_key_is_derived_from_the_token_and_nothing_else() -> None:
 
     key = storage.object_key(token)
 
-    assert key == f"profile-media/{token}"
+    assert key == f"profile-media/assets/{token}"
+    assert storage.upload_object_key(token) == f"profile-media/uploads/{token}"
     assert str(asset_id) not in key
     assert str(owner_id) not in key
 
@@ -75,6 +77,13 @@ def test_object_key_is_derived_from_the_token_and_nothing_else() -> None:
 def test_an_empty_token_is_refused_rather_than_writing_to_the_prefix_root() -> None:
     with pytest.raises(VavError):
         storage.object_key("   ")
+
+
+@pytest.mark.parametrize("token", ["a" * 26, "A" * 25, "A/../../private-object"])
+def test_a_non_base32_token_is_refused(token: str) -> None:
+    with pytest.raises(VavError) as error:
+        storage.object_key(token)
+    assert error.value.code == "MEDIA_TOKEN_INVALID"
 
 
 def test_an_upload_round_trips_and_is_then_measurable_and_readable(s3) -> None:
@@ -88,19 +97,36 @@ def test_an_upload_round_trips_and_is_then_measurable_and_readable(s3) -> None:
 
     upload = storage.presigned_upload(token, mime_type="image/jpeg", max_bytes=10 * 1024 * 1024)
     assert upload["method"] == "POST"
-    assert storage.object_key(token) == upload["fields"]["key"]
+    assert storage.upload_object_key(token) == upload["fields"]["key"]
 
     s3.put_object(
-        Bucket=BUCKET, Key=storage.object_key(token), Body=payload, ContentType="image/jpeg"
+        Bucket=BUCKET,
+        Key=storage.upload_object_key(token),
+        Body=payload,
+        ContentType="image/jpeg",
     )
 
     assert storage.object_exists(token) is True
 
     # Measured from storage, which is what makes the finalize check meaningful.
     measured = storage.measure_object(token)
-    assert measured == {"byte_size": len(payload), "mime_type": "image/jpeg"}
+    assert measured is not None
+    assert measured["byte_size"] == len(payload)
+    assert measured["mime_type"] == "image/jpeg"
+    assert measured["storage_key"] == storage.upload_object_key(token)
+    assert measured["etag"]
 
-    read_url = storage.presigned_read_url(token, ttl_seconds=300)
+    finalized = storage.write_final_object(
+        token,
+        content=payload,
+        mime_type="image/jpeg",
+        checksum_sha256="0" * 64,
+    )
+    assert finalized["storage_key"] == storage.object_key(token)
+
+    read_url = storage.presigned_read_url(
+        token, storage_key=storage.object_key(token), ttl_seconds=300
+    )
     assert storage.object_key(token) in read_url
 
     stored = s3.get_object(Bucket=BUCKET, Key=storage.object_key(token))["Body"].read()
@@ -124,6 +150,77 @@ def test_the_upload_policy_carries_a_size_ceiling_storage_enforces(s3) -> None:
     assert ["content-length-range", 1, 1024] in conditions
     assert {"Content-Type": "image/png"} in conditions
     assert upload["max_bytes"] == 1024
+    assert upload["fields"]["key"].startswith("profile-media/uploads/")
+
+
+def test_an_upload_policy_cannot_overwrite_the_final_read_key(s3) -> None:
+    token = derive_asset_token(uuid4(), secret="a-server-secret")
+
+    upload = storage.presigned_upload(token, mime_type="image/jpeg", max_bytes=1024)
+    final_key = storage.object_key(token)
+
+    assert upload["fields"]["key"] == storage.upload_object_key(token)
+    assert upload["fields"]["key"] != final_key
+    policy = json.loads(base64.b64decode(str(upload["fields"]["policy"])))
+    assert {"key": storage.upload_object_key(token)} in policy["conditions"]
+    assert {"key": final_key} not in policy["conditions"]
+
+
+def test_the_final_object_is_immutable_but_an_identical_retry_is_idempotent(s3) -> None:
+    token = derive_asset_token(uuid4(), secret="a-server-secret")
+    first = b"first inspected payload"
+    checksum = hashlib.sha256(first).hexdigest()
+
+    initial = storage.write_final_object(
+        token, content=first, mime_type="image/jpeg", checksum_sha256=checksum
+    )
+    retried = storage.write_final_object(
+        token, content=first, mime_type="image/jpeg", checksum_sha256=checksum
+    )
+    assert retried["etag"] == initial["etag"]
+
+    replacement = b"different inspected payload"
+    with pytest.raises(VavError) as error:
+        storage.write_final_object(
+            token,
+            content=replacement,
+            mime_type="image/jpeg",
+            checksum_sha256=hashlib.sha256(replacement).hexdigest(),
+        )
+    assert error.value.code == "MEDIA_FINAL_OBJECT_CONFLICT"
+    stored = s3.get_object(Bucket=BUCKET, Key=storage.object_key(token))["Body"].read()
+    assert stored == first
+
+
+def test_delete_removes_all_versions_and_delete_markers(s3) -> None:
+    token = derive_asset_token(uuid4(), secret="a-server-secret")
+    key = storage.object_key(token)
+    s3.put_bucket_versioning(
+        Bucket=BUCKET,
+        VersioningConfiguration={"Status": "Enabled"},
+    )
+    for payload in (b"first private bytes", b"second private bytes"):
+        s3.put_object(Bucket=BUCKET, Key=key, Body=payload, ContentType="image/jpeg")
+    s3.delete_object(Bucket=BUCKET, Key=key)
+
+    storage.delete_storage_key(token, storage_key=key)
+
+    versions = s3.list_object_versions(Bucket=BUCKET, Prefix=key)
+    assert [item for item in versions.get("Versions", []) if item["Key"] == key] == []
+    assert [item for item in versions.get("DeleteMarkers", []) if item["Key"] == key] == []
+
+
+def test_uploads_fail_closed_when_the_staging_bucket_is_versioned(s3) -> None:
+    token = derive_asset_token(uuid4(), secret="a-server-secret")
+    s3.put_bucket_versioning(
+        Bucket=BUCKET,
+        VersioningConfiguration={"Status": "Enabled"},
+    )
+
+    with pytest.raises(VavError) as error:
+        storage.presigned_upload(token, mime_type="image/jpeg", max_bytes=1024)
+
+    assert error.value.code == "MEDIA_STORAGE_CONFIGURATION_INVALID"
 
 
 def test_a_photo_and_a_video_get_different_ceilings(s3) -> None:
@@ -142,8 +239,8 @@ def test_read_urls_carry_the_requested_lifetime(s3) -> None:
 
     token = derive_asset_token(uuid4(), secret="a-server-secret")
 
-    short = storage.presigned_read_url(token, ttl_seconds=30)
-    long = storage.presigned_read_url(token, ttl_seconds=900)
+    short = storage.presigned_read_url(token, storage_key=storage.object_key(token), ttl_seconds=30)
+    long = storage.presigned_read_url(token, storage_key=storage.object_key(token), ttl_seconds=900)
 
     assert "X-Amz-Expires=30" in short
     assert "X-Amz-Expires=900" in long

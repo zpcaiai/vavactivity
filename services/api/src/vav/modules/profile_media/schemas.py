@@ -28,9 +28,9 @@ class _Base(BaseModel):
 class MediaUploadRequest(_Base):
     """Register an intended upload and receive a storage target.
 
-    ``byte_size``, ``mime_type`` and ``duration_seconds`` are declared by the
-    client and re-verified server-side once the bytes land; the values here only
-    let the server reject an impossible upload before it starts.
+    ``byte_size``, ``mime_type`` and ``duration_seconds`` are declarations used
+    only for early UX rejection and the bounded storage policy. Finalization
+    decodes/parses the staged bytes and ignores these claims as proof.
     """
 
     kind: Literal["photo", "video"]
@@ -52,7 +52,12 @@ class MediaReplaceRequest(_Base):
 
 
 class MediaFinalizeRequest(_Base):
-    """Confirm an upload completed, with the values measured server-side."""
+    """Signal that the staged upload completed.
+
+    The fields remain for backward-compatible clients but are not trusted by the
+    service. Storage size, decoded type and video duration are measured from the
+    object bytes.
+    """
 
     byte_size: Annotated[int, Field(ge=1, le=200 * 1024 * 1024)]
     mime_type: Annotated[str, Field(min_length=3, max_length=128)]

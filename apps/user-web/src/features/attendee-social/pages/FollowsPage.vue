@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { VAlert, VButton, VCard, VChip, VPageState, VSection } from "@vav/ui-core";
 import { UserPageLayout } from "@vav/ui-user";
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 
 import { socialApiClient } from "@/features/attendee-social/api";
@@ -15,25 +15,24 @@ const preferences = ref<SocialNotificationPreferences | null>(null);
 const loading = ref(true);
 const busy = ref(false);
 const error = ref<string | null>(null);
+const preferenceError = ref<string | null>(null);
 const notice = ref<string | null>(null);
 const busyUserId = ref<string | null>(null);
-
-const followingIds = computed(() => new Set(following.value.map((edge) => edge.user_id)));
-
-/**
- * Following someone does not mean they follow you, and the page says so
- * explicitly. A "mutual" badge is the only claim about the other direction
- * that this data supports — it is emphatically not a match signal, which is a
- * separate relation with separate visibility (SOC-001).
- */
-function isMutual(edge: FollowEdge): boolean {
-  return followingIds.value.has(edge.user_id);
-}
 
 function followedAtLabel(edge: FollowEdge): string {
   return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(
     new Date(edge.followed_at)
   );
+}
+
+async function loadPreferences() {
+  preferenceError.value = null;
+  try {
+    preferences.value = await socialApiClient.notificationPreferences();
+  } catch (caught) {
+    preferences.value = null;
+    preferenceError.value = (caught as Error).message;
+  }
 }
 
 async function load() {
@@ -46,7 +45,7 @@ async function load() {
     ]);
     following.value = out.items;
     followers.value = back.items;
-    preferences.value = await socialApiClient.notificationPreferences().catch(() => null);
+    await loadPreferences();
   } catch (caught) {
     error.value = (caught as Error).message;
   } finally {
@@ -147,6 +146,20 @@ onMounted(load);
           {{ t("social.follows.notifyHint") }}
         </p>
       </VCard>
+      <VAlert
+        v-else-if="preferenceError"
+        tone="danger"
+        :title="t('social.follows.preferenceLoadFailed')"
+      >
+        <p>{{ preferenceError }}</p>
+        <VButton
+          variant="secondary"
+          :loading="busy"
+          @click="loadPreferences"
+        >
+          {{ t("common.retry") }}
+        </VButton>
+      </VAlert>
 
       <VSection
         :level="2"
@@ -233,7 +246,7 @@ onMounted(load);
                 </div>
                 <div class="follows__actions">
                   <VChip
-                    v-if="isMutual(edge)"
+                    v-if="edge.is_mutual"
                     tone="success"
                     :label="t('social.follows.mutual')"
                   />

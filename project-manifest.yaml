@@ -435,7 +435,7 @@ quality:
 production_assembly:
   architecture_version: "1.0.0"
   minimum_supported_schema_version: 83
-  migration_head: "20260813_0110"
+  migration_head: "20260813_0112"
   modules:
     - activities
     - admin_platform

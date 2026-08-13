@@ -16,6 +16,9 @@ def production_values() -> dict[str, Any]:
         "DATABASE_URL": ("postgresql+asyncpg://user:secret@db.example/vav?sslmode=require"),
         "REDIS_URL": "rediss://redis.example/0",
         "MEDIA_S3_ENDPOINT": "https://s3.example",
+        "MEDIA_S3_PUBLIC_ENDPOINT": "https://media.example",
+        "MEDIA_S3_ACCESS_KEY": "production-media-access-key",
+        "MEDIA_S3_SECRET_KEY": "production-media-secret-key",
         "BACKUP_ENCRYPTION_KEY": "render-generated-backup-key",
         "AUTH_REFRESH_TOKEN_PEPPER": "render-generated-refresh-pepper",
         "AUTH_COOKIE_SECURE": True,
@@ -75,6 +78,21 @@ def test_complete_render_production_baseline_is_accepted() -> None:
 
     assert settings.environment == "production"
     assert settings.payment_test_fake_enabled is False
+
+
+@pytest.mark.parametrize("value", [None, "http://media.example"])
+def test_production_requires_an_explicit_https_browser_storage_endpoint(
+    value: str | None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("MEDIA_S3_PUBLIC_ENDPOINT", raising=False)
+    values = production_values()
+    if value is None:
+        values.pop("MEDIA_S3_PUBLIC_ENDPOINT")
+    else:
+        values["MEDIA_S3_PUBLIC_ENDPOINT"] = value
+
+    with pytest.raises(ValidationError, match="MEDIA_S3_PUBLIC_ENDPOINT"):
+        Settings(_env_file=None, **values)
 
 
 def test_production_cannot_disable_email_verification() -> None:

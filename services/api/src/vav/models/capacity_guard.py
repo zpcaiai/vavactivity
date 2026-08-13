@@ -13,6 +13,7 @@ from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     DateTime,
     ForeignKey,
@@ -38,15 +39,19 @@ class ActivityCapacityCounter(Base):
     of rows on every reservation, which turns the door queue into a convoy. One
     row, one lock, constant cost.
 
-    ``capacity = 0`` means *no cap*, matching the activities schema. It does not
-    mean sold out - see ``domain.is_unlimited``.
+    ``is_unlimited`` carries the mode explicitly. ``capacity = 0`` with that
+    flag false is a bounded ticket type with no seats available.
     """
 
     __tablename__ = "activity_capacity_counters"
     __table_args__ = (
         CheckConstraint(
-            "capacity = 0 OR confirmed_seats + held_seats <= capacity",
+            "is_unlimited OR confirmed_seats + held_seats <= capacity",
             name="activity_capacity_counters_not_oversold",
+        ),
+        CheckConstraint(
+            "NOT is_unlimited OR capacity = 0",
+            name="activity_capacity_counters_unlimited_zero",
         ),
         CheckConstraint(
             "confirmed_seats >= 0 AND held_seats >= 0",
@@ -61,6 +66,10 @@ class ActivityCapacityCounter(Base):
         PGUUID(as_uuid=True), ForeignKey("activities.id"), nullable=False
     )
     capacity: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
+    #: Catalog-derived mode. Finite capacity 0 means sold out, not unlimited.
+    is_unlimited: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("false")
+    )
     #: People who are coming.
     confirmed_seats: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
     #: Seats reserved by an in-flight registration or a live promotion offer.
@@ -212,7 +221,7 @@ class ActivityCapacityEvent(Base):
     seats: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
     actor_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), ForeignKey("users.id"))
     reason: Mapped[str | None] = mapped_column(Text)
-    metadata_json: Mapped[dict] = mapped_column(
+    metadata_json: Mapped[dict[str, object]] = mapped_column(
         "metadata", JSONB, nullable=False, server_default=text("'{}'::jsonb")
     )
     occurred_at: Mapped[datetime] = mapped_column(

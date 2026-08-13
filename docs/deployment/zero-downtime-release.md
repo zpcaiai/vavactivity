@@ -9,4 +9,10 @@
 7. Stop expansion on alert. Roll application digest back when schema-compatible; otherwise keep traffic constrained and forward-fix.
 8. Contract old schema only in a later release after every old workload and backfill is complete.
 
+Profile-media storage v2 has a protocol-level compatibility boundary in
+addition to its expand migration. Follow
+[`profile-media-storage-v2.md`](profile-media-storage-v2.md): keep the feature
+off through migration and the complete backend rollout, run its activation
+gate, and never auto-rollback to a pre-0112 image after activation.
+
 Keep the rejected release, logs, traces, manifest, and incident record. Never delete evidence to make a retry appear clean.

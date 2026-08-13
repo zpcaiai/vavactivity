@@ -200,9 +200,7 @@ DEFAULT_MODERATION_STATE = ModerationState.PENDING
 
 #: The only state in which an asset may be shown to anyone but its owner and a
 #: moderator.
-PUBLISHABLE_MODERATION_STATES: frozenset[ModerationState] = frozenset(
-    {ModerationState.APPROVED}
-)
+PUBLISHABLE_MODERATION_STATES: frozenset[ModerationState] = frozenset({ModerationState.APPROVED})
 
 _MODERATION_TRANSITIONS: dict[ModerationState, frozenset[ModerationState]] = {
     ModerationState.PENDING: frozenset(
@@ -287,9 +285,7 @@ def validate_asset_transition(current: str, target: str) -> None:
         current_state = AssetState(current)
         target_state = AssetState(target)
     except ValueError as exc:
-        raise ProfileMediaRuleError(
-            "ASSET_STATE_UNKNOWN", f"Unknown asset state: {exc}"
-        ) from exc
+        raise ProfileMediaRuleError("ASSET_STATE_UNKNOWN", f"Unknown asset state: {exc}") from exc
     if target_state not in _ASSET_TRANSITIONS[current_state]:
         raise ProfileMediaRuleError(
             "ASSET_TRANSITION_INVALID",
@@ -353,11 +349,7 @@ def plan_delete(
         raise ProfileMediaRuleError("ASSET_NOT_FOUND", "That media asset does not exist.")
     validate_asset_transition(target.state.value, AssetState.DELETED.value)
     remaining = len(
-        [
-            asset
-            for asset in active_assets(assets, MediaKind.PHOTO)
-            if asset.asset_id != asset_id
-        ]
+        [asset for asset in active_assets(assets, MediaKind.PHOTO) if asset.asset_id != asset_id]
     )
     below_minimum = remaining < MIN_PHOTOS
     if target.kind is MediaKind.PHOTO and below_minimum and profile_is_published:
@@ -385,12 +377,14 @@ class ReplacePlan:
 def plan_replace(
     assets: Sequence[MediaAsset], *, asset_id: UUID, request: UploadRequest
 ) -> ReplacePlan:
-    """Plan a replace: the old asset becomes ``replaced``, the new one starts
-    ``pending`` moderation and inherits the slot position.
+    """Plan a replace: the candidate starts ``pending`` moderation and inherits
+    the slot position; the old asset becomes ``replaced`` only on approval.
 
     Inheriting the position keeps the member's chosen ordering. Resetting
     moderation is the whole point: a replaced photo has not been reviewed, and
-    carrying the old approval over would be a trivial moderation bypass.
+    carrying the old approval over would be a trivial moderation bypass. The
+    old approved bytes remain current while review is pending so a rejection
+    cannot break an already-published profile.
     """
 
     target = next((asset for asset in assets if asset.asset_id == asset_id), None)
@@ -440,9 +434,7 @@ def derive_asset_token(asset_id: UUID, *, secret: str) -> str:
     """
 
     if not secret:
-        raise ProfileMediaRuleError(
-            "MEDIA_SECRET_REQUIRED", "A media token secret is required."
-        )
+        raise ProfileMediaRuleError("MEDIA_SECRET_REQUIRED", "A media token secret is required.")
     digest = hmac.new(secret.encode("utf-8"), str(asset_id).encode("utf-8"), hashlib.sha256)
     return base64.b32encode(digest.digest()).decode("ascii").rstrip("=")[:ASSET_TOKEN_LENGTH]
 
@@ -451,9 +443,11 @@ def private_media_path(access_token: str) -> str:
     """The only path shape private media is served from."""
 
     token = (access_token or "").strip()
-    if len(token) != ASSET_TOKEN_LENGTH:
+    if len(token) != ASSET_TOKEN_LENGTH or any(
+        character not in "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567" for character in token
+    ):
         raise ProfileMediaRuleError(
-            "MEDIA_TOKEN_INVALID", "A private media token has a fixed length."
+            "MEDIA_TOKEN_INVALID", "A private media token must be a fixed base32 value."
         )
     return f"/media/private/{token}"
 
@@ -478,7 +472,11 @@ def assert_url_is_not_predictable(url: str, *, asset_id: UUID, owner_id: UUID) -
 
 @dataclass(frozen=True)
 class AccessGrant:
-    """A short-lived, viewer-bound permission to fetch one private asset."""
+    """Short-lived API authorization evidence for one viewer and asset.
+
+    A storage presigned URL issued after this check is still a bearer capability
+    during its TTL; this signature does not magically bind S3 to the viewer.
+    """
 
     access_token: str
     viewer_id: UUID
@@ -500,9 +498,9 @@ def issue_access_grant(
 ) -> AccessGrant:
     """Mint a signed grant.
 
-    The grant is bound to a viewer as well as an asset, so a leaked URL cannot
-    be replayed by a third party, and it expires in minutes, so a leaked URL
-    stops working before it can be posted anywhere useful.
+    The signed authorization record is bound to a viewer and asset and expires
+    in minutes. A resulting direct S3 URL is transferable, so callers must treat
+    it as a secret bearer capability and refresh it only after reauthorization.
     """
 
     if now.tzinfo is None:
@@ -514,9 +512,7 @@ def issue_access_grant(
             details={"ttl_seconds": ttl_seconds},
         )
     if not secret:
-        raise ProfileMediaRuleError(
-            "MEDIA_SECRET_REQUIRED", "A media token secret is required."
-        )
+        raise ProfileMediaRuleError("MEDIA_SECRET_REQUIRED", "A media token secret is required.")
     expires_at = now + timedelta(seconds=ttl_seconds)
     signature = hmac.new(
         secret.encode("utf-8"), _grant_message(access_token, viewer_id, expires_at), hashlib.sha256
@@ -529,9 +525,7 @@ def issue_access_grant(
     )
 
 
-def verify_access_grant(
-    grant: AccessGrant, *, viewer_id: UUID, now: datetime, secret: str
-) -> None:
+def verify_access_grant(grant: AccessGrant, *, viewer_id: UUID, now: datetime, secret: str) -> None:
     """Validate a grant at fetch time. Raises with a distinct code per failure."""
 
     if now.tzinfo is None:
@@ -565,10 +559,22 @@ def verify_access_grant(
 #: so the tag stays filterable and cannot become a second bio field.
 MBTI_TYPES: frozenset[str] = frozenset(
     {
-        "ISTJ", "ISFJ", "INFJ", "INTJ",
-        "ISTP", "ISFP", "INFP", "INTP",
-        "ESTP", "ESFP", "ENFP", "ENTP",
-        "ESTJ", "ESFJ", "ENFJ", "ENTJ",
+        "ISTJ",
+        "ISFJ",
+        "INFJ",
+        "INTJ",
+        "ISTP",
+        "ISFP",
+        "INFP",
+        "INTP",
+        "ESTP",
+        "ESFP",
+        "ENFP",
+        "ENTP",
+        "ESTJ",
+        "ESFJ",
+        "ENFJ",
+        "ENTJ",
     }
 )
 
@@ -723,8 +729,7 @@ def build_share_projection(
         )
     payload: dict[str, object] = {
         "user_id": str(user_id),
-        "display_name": (display_name or "").strip()[:64]
-        or f"member-{str(user_id)[:8]}",
+        "display_name": (display_name or "").strip()[:64] or f"member-{str(user_id)[:8]}",
         "completeness_percent": int(completeness_percent),
     }
     if consent.share_photos:

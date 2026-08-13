@@ -172,7 +172,8 @@ async def _lock_counter(session: AsyncSession, ticket_type_id: UUID) -> dict[str
             (
                 await session.execute(
                     text(
-                        "SELECT ticket_type_id,activity_id,capacity,confirmed_seats,held_seats,"
+                        "SELECT ticket_type_id,activity_id,capacity,is_unlimited,"
+                        "confirmed_seats,held_seats,"
                         "waitlisted_count,waitlist_capacity,sales_state,version "
                         "FROM activity_capacity_counters WHERE ticket_type_id=:id FOR UPDATE"
                     ),
@@ -191,12 +192,13 @@ async def _lock_counter(session: AsyncSession, ticket_type_id: UUID) -> dict[str
         await session.execute(
             text(
                 "INSERT INTO activity_capacity_counters "
-                "(ticket_type_id,activity_id,capacity) "
+                "(ticket_type_id,activity_id,capacity,is_unlimited) "
                 "SELECT t.id,t.activity_id,"
                 "CASE WHEN s.inventory_policy='unlimited' THEN 0 ELSE "
                 "GREATEST(0,COALESCE(i.total_capacity,0)-COALESCE(i.safety_stock,0)+"
                 "CASE WHEN COALESCE(i.overselling_allowed,false) "
-                "THEN COALESCE(i.oversell_limit,0) ELSE 0 END) END "
+                "THEN COALESCE(i.oversell_limit,0) ELSE 0 END) END,"
+                "(s.inventory_policy='unlimited') "
                 "FROM activity_ticket_types t "
                 "JOIN product_skus s ON s.id=t.catalog_sku_id "
                 "LEFT JOIN inventory_items i ON i.sku_id=s.id "
@@ -218,6 +220,7 @@ async def _lock_counter(session: AsyncSession, ticket_type_id: UUID) -> dict[str
 def _snapshot(row: dict[str, Any]) -> CapacitySnapshot:
     return CapacitySnapshot(
         capacity=int(row["capacity"]),
+        is_unlimited=bool(row["is_unlimited"]),
         confirmed_seats=int(row["confirmed_seats"]),
         held_seats=int(row["held_seats"]),
         waitlisted_count=int(row["waitlisted_count"]),
@@ -247,13 +250,15 @@ async def _write_counter(
         CursorResult[Any],
         await session.execute(
             text(
-                "UPDATE activity_capacity_counters SET capacity=:capacity,confirmed_seats=:confirmed,"
+                "UPDATE activity_capacity_counters SET capacity=:capacity,"
+                "is_unlimited=:is_unlimited,confirmed_seats=:confirmed,"
                 "held_seats=:held,waitlisted_count=:waitlisted,waitlist_capacity=:waitlist_capacity,"
                 "sales_state=:sales_state,version=version+1,updated_at=now() "
                 "WHERE ticket_type_id=:id AND version=:expected_version"
             ),
             {
                 "capacity": snapshot.capacity,
+                "is_unlimited": snapshot.is_unlimited,
                 "confirmed": snapshot.confirmed_seats,
                 "held": snapshot.held_seats,
                 "waitlisted": snapshot.waitlisted_count,
@@ -368,6 +373,7 @@ async def reserve_seat(
         waitlist_entry_id = uuid4()
         updated = CapacitySnapshot(
             capacity=snapshot.capacity,
+            is_unlimited=snapshot.is_unlimited,
             confirmed_seats=snapshot.confirmed_seats,
             held_seats=snapshot.held_seats,
             waitlisted_count=snapshot.waitlisted_count + 1,
@@ -674,6 +680,7 @@ async def release_registration(
         working = apply_seat_release(working, seats=int(position["seats"]), from_hold=True)
     working = CapacitySnapshot(
         capacity=working.capacity,
+        is_unlimited=working.is_unlimited,
         confirmed_seats=working.confirmed_seats,
         held_seats=working.held_seats,
         waitlisted_count=max(
@@ -998,6 +1005,7 @@ async def respond_to_offer(
         updated = apply_seat_release(snapshot, seats=resolution.seats_released, from_hold=True)
         updated = CapacitySnapshot(
             capacity=updated.capacity,
+            is_unlimited=updated.is_unlimited,
             confirmed_seats=updated.confirmed_seats,
             held_seats=updated.held_seats,
             waitlisted_count=max(0, updated.waitlisted_count - 1),
@@ -1007,6 +1015,7 @@ async def respond_to_offer(
     else:
         updated = CapacitySnapshot(
             capacity=snapshot.capacity,
+            is_unlimited=snapshot.is_unlimited,
             confirmed_seats=snapshot.confirmed_seats,
             held_seats=snapshot.held_seats,
             waitlisted_count=max(0, snapshot.waitlisted_count - 1),
@@ -1155,7 +1164,8 @@ async def get_capacity(session: AsyncSession, ticket_type_id: UUID) -> dict[str,
         (
             await session.execute(
                 text(
-                    "SELECT ticket_type_id,activity_id,capacity,confirmed_seats,held_seats,"
+                    "SELECT ticket_type_id,activity_id,capacity,is_unlimited,"
+                    "confirmed_seats,held_seats,"
                     "waitlisted_count,waitlist_capacity,sales_state,version "
                     "FROM activity_capacity_counters WHERE ticket_type_id=:id"
                 ),
@@ -1173,11 +1183,14 @@ async def get_capacity(session: AsyncSession, ticket_type_id: UUID) -> dict[str,
     payload = {
         "ticket_type_id": str(ticket_type_id),
         "capacity": snapshot.capacity,
+        "is_unlimited": snapshot.is_unlimited,
         "confirmed_seats": snapshot.confirmed_seats,
         "held_seats": snapshot.held_seats,
         "waitlisted_count": snapshot.waitlisted_count,
         "sales_state": snapshot.sales_state.value,
-        "unlimited": is_unlimited(snapshot),
+        # Keep the legacy response alias for existing clients while exposing the
+        # stored mode by its canonical name.
+        "unlimited": snapshot.is_unlimited,
     }
     if not is_unlimited(snapshot):
         payload["remaining_seats"] = max(0, snapshot.capacity - snapshot.taken_seats)
@@ -1209,7 +1222,21 @@ async def adjust_capacity(
     row = await _lock_counter(session, ticket_type_id)
     snapshot = _snapshot(row)
     new_capacity = int(payload["capacity"])
-    if new_capacity != 0 and new_capacity < snapshot.taken_seats:
+    expected_mode = payload.get("is_unlimited")
+    if expected_mode is not None and bool(expected_mode) != snapshot.is_unlimited:
+        raise VavError(
+            "CAPACITY_MODE_CONFLICT",
+            "The ticket type capacity mode changed since it was loaded.",
+            status_code=409,
+            details=[{"is_unlimited": snapshot.is_unlimited}],
+        )
+    if snapshot.is_unlimited and new_capacity != 0:
+        raise VavError(
+            "CAPACITY_UNLIMITED_VALUE_INVALID",
+            "An unlimited ticket type must keep zero as its numeric capacity placeholder.",
+            status_code=409,
+        )
+    if not snapshot.is_unlimited and new_capacity < snapshot.taken_seats:
         raise VavError(
             "CAPACITY_BELOW_CONFIRMED",
             "The new capacity is below the seats already sold or held.",
@@ -1224,6 +1251,7 @@ async def adjust_capacity(
         )
     updated = CapacitySnapshot(
         capacity=new_capacity,
+        is_unlimited=snapshot.is_unlimited,
         confirmed_seats=snapshot.confirmed_seats,
         held_seats=snapshot.held_seats,
         waitlisted_count=snapshot.waitlisted_count,
@@ -1264,7 +1292,12 @@ async def adjust_capacity(
         max_offers=int(get_settings().waitlist_promotion_batch_size),
         dry_run=False,
     )
-    return {"ticket_type_id": str(ticket_type_id), "capacity": new_capacity, **promotions}
+    return {
+        "ticket_type_id": str(ticket_type_id),
+        "capacity": new_capacity,
+        "is_unlimited": snapshot.is_unlimited,
+        **promotions,
+    }
 
 
 async def set_sales_state(
@@ -1275,6 +1308,7 @@ async def set_sales_state(
     snapshot = _snapshot(row)
     updated = CapacitySnapshot(
         capacity=snapshot.capacity,
+        is_unlimited=snapshot.is_unlimited,
         confirmed_seats=snapshot.confirmed_seats,
         held_seats=snapshot.held_seats,
         waitlisted_count=snapshot.waitlisted_count,

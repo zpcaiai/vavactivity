@@ -385,6 +385,64 @@ def test_the_batch_migrations_chain_onto_each_other() -> None:
     assert second.revision == "20260812_0106"
     assert second.down_revision == first.revision
 
+    corrective = migrations_script.parse_revision(
+        str(versions / "20260813_0111_explicit_capacity_mode.py")
+    )
+    assert corrective is not None
+    assert corrective.revision == "20260813_0111"
+    assert corrective.down_revision == "20260813_0110"
+
+    storage_integrity = migrations_script.parse_revision(
+        str(versions / "20260813_0112_profile_media_storage_integrity.py")
+    )
+    assert storage_integrity is not None
+    assert storage_integrity.revision == "20260813_0112"
+    assert storage_integrity.down_revision == corrective.revision
+
+
+def test_capacity_migrations_keep_inventory_mode_separate_from_zero_capacity() -> None:
+    versions = Path(__file__).resolve().parents[3] / "migrations" / "versions"
+    fresh = (versions / "20260812_0106_capacity_guard.py").read_text(encoding="utf-8")
+    corrective = (versions / "20260813_0111_explicit_capacity_mode.py").read_text(
+        encoding="utf-8"
+    )
+
+    assert "is_unlimited BOOLEAN NOT NULL DEFAULT false" in fresh
+    assert "JOIN product_skus sku ON sku.id = t.catalog_sku_id" in fresh
+    assert "LEFT JOIN inventory_items inv ON inv.sku_id = sku.id" in fresh
+    assert "CASE WHEN derived.is_unlimited THEN 0" in fresh
+    assert "WHERE NOT c.is_unlimited AND c.capacity > derived.cap" in fresh
+
+    assert "ADD COLUMN IF NOT EXISTS is_unlimited BOOLEAN NOT NULL DEFAULT false" in corrective
+    assert "WHEN target_is_unlimited THEN 0" in corrective
+    assert "GREATEST(catalogue_capacity, confirmed_seats + held_seats)" in corrective
+    assert "'migration', '20260813_0111'" in corrective
+
+
+def test_ai_escalation_partial_downgrade_restores_queue_index_and_keeps_quarantine() -> None:
+    migration = (
+        Path(__file__).resolve().parents[3]
+        / "migrations"
+        / "versions"
+        / "20260812_0107_merge_ai_escalation_queue.py"
+    ).read_text(encoding="utf-8")
+
+    assert "CREATE INDEX IF NOT EXISTS ai_human_escalations_queue_idx" in migration
+    assert "ai_human_escalation_orphans is deliberately retained" in migration
+
+
+def test_profile_media_migration_preserves_physical_deletion_obligations() -> None:
+    migration = (
+        Path(__file__).resolve().parents[3]
+        / "migrations"
+        / "versions"
+        / "20260813_0112_profile_media_storage_integrity.py"
+    ).read_text(encoding="utf-8")
+
+    assert "profile_media_storage_deletions" in migration
+    assert "DROP TABLE" not in migration
+    assert "CREATE TABLE IF NOT EXISTS profile_media_storage_deletions" in migration
+
 
 def test_the_live_check_refuses_to_migrate_without_an_explicit_flag() -> None:
     report = common.Report("t")

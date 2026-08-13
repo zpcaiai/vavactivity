@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 _STRICT = ConfigDict(extra="forbid")
 
@@ -51,15 +51,27 @@ class WaitlistWithdrawRequest(_Base):
 class CapacityAdjustRequest(_Base):
     """Change a ticket type's cap.
 
-    A reason is mandatory in both directions: raising a cap changes who gets in,
+    A finite capacity of zero means sold out; unlimited is an explicit,
+    catalog-derived mode rather than a magic number. A reason is mandatory in
+    both directions: raising a cap changes who gets in,
     lowering one is refused outright if it would put the ticket type below the
     seats already sold (``CAPACITY_BELOW_CONFIRMED``) - the guard never resolves
     that by cancelling somebody's registration on an administrator's behalf.
     """
 
     capacity: Annotated[int, Field(ge=0, le=1_000_000)]
+    #: Optional optimistic assertion of the catalog-derived mode. It does not
+    #: switch modes; it prevents a stale admin screen from applying a bounded
+    #: value after the SKU has become unlimited (or vice versa).
+    is_unlimited: bool | None = None
     waitlist_capacity: Annotated[int, Field(ge=0, le=1_000_000)] | None = None
     reason: Annotated[str, Field(min_length=4, max_length=1000)]
+
+    @model_validator(mode="after")
+    def validate_unlimited_placeholder(self) -> CapacityAdjustRequest:
+        if self.is_unlimited is True and self.capacity != 0:
+            raise ValueError("unlimited capacity must use zero as its numeric placeholder")
+        return self
 
 
 class SalesStateRequest(_Base):

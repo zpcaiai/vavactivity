@@ -1,9 +1,11 @@
 import { resolveApiBaseUrl } from "@/config/api";
 import type {
+  DeleteAssetResult,
   MediaGrant,
   MediaKind,
   ProfileMediaView,
   ProfileShareCard,
+  ReplacementUploadTarget,
   ShareConsent,
   UploadTarget
 } from "@/features/profile-media/types";
@@ -66,20 +68,23 @@ export const profileMediaApiClient = {
   replace(
     assetId: string,
     payload: { kind: MediaKind; mime_type: string; byte_size: number; duration_seconds?: number | null }
-  ): Promise<ProfileMediaView> {
-    return profileMediaApi<ProfileMediaView>(`/account/profile-media/assets/${assetId}`, {
+  ): Promise<ReplacementUploadTarget> {
+    return profileMediaApi<ReplacementUploadTarget>(`/account/profile-media/assets/${assetId}`, {
       method: "PUT",
       body: JSON.stringify(payload)
     });
   },
 
-  remove(assetId: string): Promise<ProfileMediaView> {
-    return profileMediaApi<ProfileMediaView>(`/account/profile-media/assets/${assetId}`, {
+  remove(assetId: string): Promise<DeleteAssetResult> {
+    return profileMediaApi<DeleteAssetResult>(`/account/profile-media/assets/${assetId}`, {
       method: "DELETE"
     });
   },
 
-  /** Short-lived signed grant for one private asset, bound to one viewer. */
+  /**
+   * Request a short-lived storage URL after viewer-specific authorization.
+   * The returned storage URL itself is bearer access until it expires.
+   */
   grant(assetId: string, ttlSeconds = 300): Promise<MediaGrant> {
     return profileMediaApi<MediaGrant>(
       `/account/profile-media/assets/${assetId}/access-grants`,

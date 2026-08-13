@@ -21,6 +21,7 @@ dependencies = [
   "opentelemetry-instrumentation-fastapi==0.57b0",
   "opentelemetry-sdk==1.36.0",
   "pillow==12.3.0",
+  "pillow-heif==1.5.0",
   "pydantic==2.11.7",
   "pydantic-settings==2.10.1",
   "pyjwt==2.13.0",
@@ -68,5 +69,5 @@ plugins = ["pydantic.mypy"]
 packages = ["vav"]
 
 [[tool.mypy.overrides]]
-module = ["alembic.*", "boto3.*", "botocore.*", "celery.*", "yaml.*"]
+module = ["alembic.*", "boto3.*", "botocore.*", "celery.*", "pillow_heif.*", "yaml.*"]
 ignore_missing_imports = true

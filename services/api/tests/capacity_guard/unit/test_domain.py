@@ -102,19 +102,35 @@ def test_remaining_seats_never_goes_negative() -> None:
     assert remaining_seats(snapshot) == 1
 
 
-def test_capacity_zero_means_unlimited_not_sold_out() -> None:
-    snapshot = CapacitySnapshot(capacity=0, confirmed_seats=500)
+def test_explicit_unlimited_mode_accepts_seats_without_a_ceiling() -> None:
+    snapshot = CapacitySnapshot(capacity=0, is_unlimited=True, confirmed_seats=500)
     assert is_unlimited(snapshot)
     decision = evaluate_fit(snapshot, requested_seats=4)
     assert decision.outcome is FitOutcome.FITS
+
+
+def test_finite_zero_capacity_is_sold_out_not_unlimited() -> None:
+    snapshot = CapacitySnapshot(capacity=0, is_unlimited=False)
+
+    assert not is_unlimited(snapshot)
+    assert remaining_seats(snapshot) == 0
+    decision = evaluate_fit(snapshot, requested_seats=1, waitlist_enabled=False)
+    assert decision.outcome is FitOutcome.REJECTED
+    assert decision.reason_code == "CAPACITY_FULL"
 
 
 def test_remaining_seats_refuses_to_answer_for_an_uncapped_ticket_type() -> None:
     """A sentinel integer here would silently poison every comparison."""
 
     with pytest.raises(CapacityRuleError) as excinfo:
-        remaining_seats(CapacitySnapshot(capacity=0))
+        remaining_seats(CapacitySnapshot(capacity=0, is_unlimited=True))
     assert excinfo.value.code == "CAPACITY_UNLIMITED"
+
+
+def test_unlimited_mode_requires_zero_numeric_placeholder() -> None:
+    with pytest.raises(CapacityRuleError) as excinfo:
+        CapacitySnapshot(capacity=10, is_unlimited=True)
+    assert excinfo.value.code == "CAPACITY_UNLIMITED_VALUE_INVALID"
 
 
 def test_negative_counts_are_refused_at_construction() -> None:
@@ -398,7 +414,9 @@ def test_a_plan_promotes_when_the_head_of_the_queue_fits() -> None:
 def test_an_uncapped_ticket_type_drains_its_queue() -> None:
     """Nobody should be queued for an event with no cap in the first place."""
 
-    plan = plan_promotions_after_release(CapacitySnapshot(capacity=0), [_entry(1), _entry(2)])
+    plan = plan_promotions_after_release(
+        CapacitySnapshot(capacity=0, is_unlimited=True), [_entry(1), _entry(2)]
+    )
     assert len(plan.promotions) == 2
 
 

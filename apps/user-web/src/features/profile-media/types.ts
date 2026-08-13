@@ -26,8 +26,9 @@ export interface MediaAsset {
   duration_seconds: number | null;
   /**
    * The asset's logical identity, token-derived. It is deliberately NOT a
-   * fetchable URL — private media is only readable through a short-lived,
-   * viewer-bound grant, so binding this to a `src` yields a broken image.
+   * fetchable URL — private media is only readable through a short-lived URL
+   * issued after API authorization, so binding this to a `src` yields a broken
+   * image.
    */
   media_path: string;
   is_publishable: boolean;
@@ -55,23 +56,42 @@ export interface UploadPolicy {
   expires_in_seconds: number;
 }
 
-export interface UploadTarget {
+interface BaseUploadTarget {
   asset_id: string;
   /** Logical identity of the asset. Not fetchable; do not use as a `src`. */
   upload_path: string;
   upload: UploadPolicy;
-  state: AssetState;
+  upload_expires_at: string;
   moderation_state: ModerationState;
+}
+
+export interface UploadTarget extends BaseUploadTarget {
+  state: AssetState;
+}
+
+/** A new staged asset that will replace the named active asset at finalize. */
+export interface ReplacementUploadTarget extends BaseUploadTarget {
+  replaced_asset_id: string;
+}
+
+export interface DeleteAssetResult {
+  asset_id: string;
+  remaining_photos: number;
+  profile_falls_below_minimum: boolean;
 }
 
 export interface MediaGrant {
   /** Logical identity. Not fetchable — see `media_url`. */
   media_path: string;
-  /** The short-lived, fetchable URL. This is what a `src` binds to. */
+  /**
+   * The short-lived, fetchable storage URL. This is a bearer URL: the API made
+   * a viewer-specific authorization decision before issuing it, but storage
+   * does not re-authenticate the viewer on each GET.
+   */
   media_url: string;
   expires_at: string;
   signature: string;
-  /** Echoed so a caller can prove which viewer the grant is bound to. */
+  /** Echoes the viewer the API authorized before issuing this response. */
   viewer_id: string;
 }
 

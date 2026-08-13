@@ -6,6 +6,9 @@ from typing import Literal
 from pydantic import AliasChoices, AnyHttpUrl, Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+_DEFAULT_MEDIA_S3_ACCESS_KEY = "vav_minio_local"
+_DEFAULT_MEDIA_S3_SECRET_KEY = "vav_minio_local_development_only"
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -141,10 +144,10 @@ class Settings(BaseSettings):
     )
     media_s3_region: str = Field(default="us-east-1", validation_alias="MEDIA_S3_REGION")
     media_s3_access_key: SecretStr = Field(
-        default=SecretStr("vav_minio_local"), validation_alias="MEDIA_S3_ACCESS_KEY"
+        default=SecretStr(_DEFAULT_MEDIA_S3_ACCESS_KEY), validation_alias="MEDIA_S3_ACCESS_KEY"
     )
     media_s3_secret_key: SecretStr = Field(
-        default=SecretStr("vav_minio_local_development_only"),
+        default=SecretStr(_DEFAULT_MEDIA_S3_SECRET_KEY),
         validation_alias="MEDIA_S3_SECRET_KEY",
     )
     media_bucket_public: str = Field(
@@ -1730,6 +1733,37 @@ class Settings(BaseSettings):
             raise ValueError("production CORS origins require HTTPS")
         if production_like and not self.media_s3_endpoint.startswith("https://"):
             raise ValueError("production object storage requires HTTPS")
+        if production_like and (
+            "media_s3_public_endpoint" not in self.model_fields_set
+            or not self.media_s3_public_endpoint.startswith("https://")
+        ):
+            raise ValueError("production requires an explicit HTTPS MEDIA_S3_PUBLIC_ENDPOINT")
+        if production_like:
+            invalid_storage_credentials = sorted(
+                environment_name
+                for field_name, environment_name, secret, shipped_default in (
+                    (
+                        "media_s3_access_key",
+                        "MEDIA_S3_ACCESS_KEY",
+                        self.media_s3_access_key,
+                        _DEFAULT_MEDIA_S3_ACCESS_KEY,
+                    ),
+                    (
+                        "media_s3_secret_key",
+                        "MEDIA_S3_SECRET_KEY",
+                        self.media_s3_secret_key,
+                        _DEFAULT_MEDIA_S3_SECRET_KEY,
+                    ),
+                )
+                if field_name not in self.model_fields_set
+                or not secret.get_secret_value().strip()
+                or secret.get_secret_value().strip() == shipped_default
+            )
+            if invalid_storage_credentials:
+                raise ValueError(
+                    "production requires explicit dedicated object storage credentials for: "
+                    + ", ".join(invalid_storage_credentials)
+                )
         if production_like and "change-me" in self.backup_encryption_key.get_secret_value():
             raise ValueError("production requires a dedicated backup encryption key")
         if production_like and (

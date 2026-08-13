@@ -88,6 +88,10 @@ class CapacitySnapshot:
     """
 
     capacity: int
+    #: Catalog-derived mode. Zero is a valid finite cap, so the number cannot
+    #: carry this meaning without making "sold out" indistinguishable from
+    #: "uncapped".
+    is_unlimited: bool = False
     confirmed_seats: int = 0
     held_seats: int = 0
     waitlisted_count: int = 0
@@ -99,6 +103,12 @@ class CapacitySnapshot:
             raise CapacityRuleError(
                 "CAPACITY_INVALID",
                 "Capacity cannot be negative.",
+                details={"capacity": self.capacity},
+            )
+        if self.is_unlimited and self.capacity != 0:
+            raise CapacityRuleError(
+                "CAPACITY_UNLIMITED_VALUE_INVALID",
+                "Unlimited capacity must store zero as its numeric placeholder.",
                 details={"capacity": self.capacity},
             )
         for name in ("confirmed_seats", "held_seats", "waitlisted_count"):
@@ -120,13 +130,8 @@ class CapacitySnapshot:
         return self.confirmed_seats + self.held_seats
 
 
-#: A capacity of zero means "no seat cap configured", which is how unlimited
-#: events are represented in the activities schema. It is *not* "sold out".
-UNLIMITED_CAPACITY = 0
-
-
 def is_unlimited(snapshot: CapacitySnapshot) -> bool:
-    return snapshot.capacity == UNLIMITED_CAPACITY
+    return snapshot.is_unlimited
 
 
 def remaining_seats(snapshot: CapacitySnapshot) -> int:
@@ -248,6 +253,7 @@ def apply_seat_grant(
     if hold:
         updated = CapacitySnapshot(
             capacity=snapshot.capacity,
+            is_unlimited=snapshot.is_unlimited,
             confirmed_seats=snapshot.confirmed_seats,
             held_seats=snapshot.held_seats + seats,
             waitlisted_count=snapshot.waitlisted_count,
@@ -257,6 +263,7 @@ def apply_seat_grant(
     else:
         updated = CapacitySnapshot(
             capacity=snapshot.capacity,
+            is_unlimited=snapshot.is_unlimited,
             confirmed_seats=snapshot.confirmed_seats + seats,
             held_seats=snapshot.held_seats,
             waitlisted_count=snapshot.waitlisted_count,
@@ -285,6 +292,7 @@ def apply_seat_release(
         )
     return CapacitySnapshot(
         capacity=snapshot.capacity,
+        is_unlimited=snapshot.is_unlimited,
         confirmed_seats=snapshot.confirmed_seats - (0 if from_hold else seats),
         held_seats=snapshot.held_seats - (seats if from_hold else 0),
         waitlisted_count=snapshot.waitlisted_count,
@@ -304,6 +312,7 @@ def confirm_held_seats(snapshot: CapacitySnapshot, *, seats: int) -> CapacitySna
         )
     updated = CapacitySnapshot(
         capacity=snapshot.capacity,
+        is_unlimited=snapshot.is_unlimited,
         confirmed_seats=snapshot.confirmed_seats + seats,
         held_seats=snapshot.held_seats - seats,
         waitlisted_count=snapshot.waitlisted_count,

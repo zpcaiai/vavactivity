@@ -75,6 +75,11 @@ services:
         value: "true"
       - key: PRIVACY_EXPORT_ENCRYPTION_ENABLED
         value: "true"
+      # Storage v2 activation is a separate operation after Neon is at 0112 and
+      # this exact backend image is healthy. A pre-0112 rollback cannot read
+      # objects finalized in the new namespace.
+      - key: PROFILE_MEDIA_ENABLED
+        value: "false"
       - key: QUALITY_ENABLED
         value: "false"
 

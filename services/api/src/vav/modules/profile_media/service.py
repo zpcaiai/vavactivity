@@ -5,12 +5,14 @@ Design notes:
 * All business rules live in :mod:`vav.modules.profile_media.domain` so they are
   testable without a database or object storage; this layer only loads state,
   calls domain and persists.
-* Upload limits are enforced twice: once when the upload is registered, and
-  again when it is finalized with the values the server actually measured. A
-  client that lies about ``byte_size`` is caught at finalize.
+* Registration checks the declared shape before issuing a bounded POST policy.
+  Finalization downloads the staged bytes, decodes/parses them server-side,
+  normalizes photos and writes a different final key. Client metadata is never
+  treated as proof of MIME type, size or video duration.
 * Private media never has a predictable URL. The stored ``access_token`` is an
-  HMAC of the asset id under a server secret, and every fetch additionally
-  requires a short-lived, viewer-bound signed grant.
+  HMAC of the asset id under a server secret. The API authorizes each grant;
+  the resulting short-lived storage URL is explicitly treated as a bearer
+  capability, not as viewer-bound transport.
 * Free-text member input (the intro) is stored through
   :mod:`vav.modules.privacy.crypto`.
 """
@@ -19,9 +21,11 @@ Design notes:
 
 from __future__ import annotations
 
+import asyncio
 import json
-from datetime import UTC, datetime
-from typing import Any
+from collections.abc import Mapping
+from datetime import UTC, datetime, timedelta
+from typing import Any, cast
 from uuid import UUID
 
 from sqlalchemy import text
@@ -35,6 +39,7 @@ from vav.modules.profile_media.domain import (
     MAX_VIDEO_BYTES,
     AssetState,
     CompletenessInput,
+    CompletenessScore,
     MediaAsset,
     MediaKind,
     ModerationState,
@@ -58,11 +63,25 @@ from vav.modules.profile_media.domain import (
     validate_upload,
     verify_access_grant,
 )
+from vav.modules.profile_media.inspection import inspect_media
 from vav.modules.profile_media.storage import (
+    UPLOAD_URL_TTL_SECONDS,
+    delete_storage_key,
     measure_object,
+    object_key,
     presigned_read_url,
     presigned_upload,
+    read_object,
+    upload_object_key,
+    validate_storage_key,
+    write_final_object,
 )
+
+MAX_PENDING_PHOTO_UPLOADS = 3
+MAX_PENDING_VIDEO_UPLOADS = 1
+UPLOAD_FINALIZE_GRACE_SECONDS = 300
+MEDIA_INSPECTION_QUEUE_TIMEOUT_SECONDS = 5
+_MEDIA_INSPECTION_SLOT = asyncio.Semaphore(1)
 
 # ---------------------------------------------------------------------------
 # Shared helpers
@@ -114,7 +133,11 @@ def _media_secret() -> str:
 
 
 async def _publish(
-    session: AsyncSession, topic: str, aggregate_type: str, aggregate_id: UUID, payload: dict
+    session: AsyncSession,
+    topic: str,
+    aggregate_type: str,
+    aggregate_id: UUID,
+    payload: dict[str, Any],
 ) -> None:
     await session.execute(
         text(
@@ -139,7 +162,7 @@ async def _audit(
     actor_kind: str,
     action: str,
     reason: str | None = None,
-    metadata: dict | None = None,
+    metadata: dict[str, Any] | None = None,
 ) -> None:
     await session.execute(
         text(
@@ -159,12 +182,157 @@ async def _audit(
     )
 
 
+async def _lock_owner(session: AsyncSession, owner_id: UUID) -> None:
+    """Serialize every slot-changing operation for one member.
+
+    Partial unique indexes catch the final collision, but a database error is a
+    poor user-facing capacity control and does not protect the published-profile
+    minimum during two concurrent deletes. The transaction-scoped advisory lock
+    gives register/finalize/replace/delete one shared ordering point.
+    """
+
+    await session.execute(
+        text("SELECT pg_advisory_xact_lock(hashtextextended(:key, 0))"),
+        {"key": f"profile-media:{owner_id}"},
+    )
+
+
+async def _require_active_owner(session: AsyncSession, owner_id: UUID) -> None:
+    """Recheck account state after acquiring the media write lock.
+
+    Authentication happens before a request waits on the advisory lock.  A
+    privacy erasure can commit while that old request is waiting, so trusting
+    the dependency's earlier user snapshot would allow media/profile rows to be
+    recreated after an erasure completed.
+    """
+
+    status = await session.scalar(
+        text("SELECT status FROM users WHERE id=:user_id"),
+        {"user_id": str(owner_id)},
+    )
+    if status != "active":
+        raise VavError(
+            "PROFILE_MEDIA_ACCOUNT_INACTIVE",
+            "Profile media cannot be changed for an inactive account.",
+            status_code=409,
+        )
+
+
+async def _queue_storage_deletion(
+    session: AsyncSession,
+    *,
+    asset_id: UUID | None,
+    owner_id: UUID | None = None,
+    access_token: str,
+    storage_key: str,
+    not_before: datetime | None = None,
+) -> None:
+    key = validate_storage_key(access_token, storage_key)
+    due_at = not_before or _now()
+    await session.execute(
+        text(
+            "INSERT INTO profile_media_storage_deletions "
+            "(asset_id,owner_id,access_token,storage_key,state,next_attempt_at) "
+            "VALUES (:asset_id,:owner_id,:access_token,:storage_key,'pending',:due_at) "
+            "ON CONFLICT (storage_key) DO UPDATE SET "
+            "owner_id=COALESCE(EXCLUDED.owner_id,profile_media_storage_deletions.owner_id),"
+            "state=CASE WHEN profile_media_storage_deletions.state='completed' "
+            "THEN 'completed' ELSE 'pending' END,"
+            "last_error=CASE WHEN profile_media_storage_deletions.state='completed' "
+            "THEN profile_media_storage_deletions.last_error ELSE NULL END,"
+            "next_attempt_at=CASE WHEN profile_media_storage_deletions.state='completed' "
+            "THEN profile_media_storage_deletions.next_attempt_at "
+            "ELSE GREATEST(profile_media_storage_deletions.next_attempt_at,:due_at) END,"
+            "updated_at=now()"
+        ),
+        {
+            "asset_id": str(asset_id) if asset_id else None,
+            "owner_id": str(owner_id) if owner_id else None,
+            "access_token": access_token,
+            "storage_key": key,
+            "due_at": due_at,
+        },
+    )
+
+
+async def _queue_asset_storage_cleanup(
+    session: AsyncSession,
+    *,
+    asset_id: UUID,
+    owner_id: UUID,
+    access_token: str,
+    storage_key: str | None,
+    upload_expires_at: datetime | None,
+) -> None:
+    """Queue every key an upload may have written.
+
+    The browser POST policy remains replayable until it expires, even after a
+    successful DeleteObject.  Staging deletion is therefore delayed until the
+    policy/grace deadline.  The derived immutable key is always queued too: a
+    worker or database failure after the final PUT but before commit otherwise
+    leaves bytes that no database row knows how to find.
+    """
+
+    keys: dict[str, datetime | None] = {
+        upload_object_key(access_token): upload_expires_at,
+        object_key(access_token): None,
+    }
+    if storage_key:
+        keys.setdefault(storage_key, None)
+    for key, not_before in keys.items():
+        await _queue_storage_deletion(
+            session,
+            asset_id=asset_id,
+            owner_id=owner_id,
+            access_token=access_token,
+            storage_key=key,
+            not_before=not_before,
+        )
+
+
+async def _expire_owner_uploads(session: AsyncSession, owner_id: UUID) -> int:
+    rows = list(
+        (
+            await session.execute(
+                text(
+                    "SELECT id,access_token,storage_key,upload_expires_at "
+                    "FROM profile_media_assets "
+                    "WHERE owner_id=:owner_id AND state='uploading' "
+                    "AND storage_verified_at IS NULL "
+                    "AND upload_expires_at IS NOT NULL AND upload_expires_at < now() "
+                    "FOR UPDATE"
+                ),
+                {"owner_id": str(owner_id)},
+            )
+        )
+        .mappings()
+        .all()
+    )
+    for row in rows:
+        await session.execute(
+            text(
+                "UPDATE profile_media_assets SET state='deleted',deleted_at=now(),updated_at=now() "
+                "WHERE id=:id AND state='uploading'"
+            ),
+            {"id": str(row["id"])},
+        )
+        await _queue_asset_storage_cleanup(
+            session,
+            asset_id=UUID(str(row["id"])),
+            owner_id=owner_id,
+            access_token=str(row["access_token"]),
+            storage_key=str(row["storage_key"]) if row["storage_key"] else None,
+            upload_expires_at=row["upload_expires_at"],
+        )
+    return len(rows)
+
+
 # ---------------------------------------------------------------------------
 # Loading assets
 # ---------------------------------------------------------------------------
 
 
-def _asset_from_row(row: dict) -> MediaAsset:
+def _asset_from_row(row: dict[str, Any]) -> MediaAsset:
     return MediaAsset(
         asset_id=UUID(str(row["id"])),
         kind=MediaKind(row["kind"]),
@@ -181,7 +349,9 @@ def _asset_from_row(row: dict) -> MediaAsset:
     )
 
 
-async def _load_assets(session: AsyncSession, owner_id: UUID) -> list[MediaAsset]:
+async def _load_assets(
+    session: AsyncSession, owner_id: UUID, *, for_update: bool = False
+) -> list[MediaAsset]:
     rows = (
         (
             await session.execute(
@@ -189,7 +359,7 @@ async def _load_assets(session: AsyncSession, owner_id: UUID) -> list[MediaAsset
                     "SELECT id,kind,state,moderation_state,position,mime_type,byte_size,"
                     "access_token,duration_seconds,rejection_reason_code "
                     "FROM profile_media_assets WHERE owner_id=:owner_id AND state <> 'deleted' "
-                    "ORDER BY kind, position, created_at"
+                    "ORDER BY kind, position, created_at" + (" FOR UPDATE" if for_update else "")
                 ),
                 {"owner_id": str(owner_id)},
             )
@@ -200,7 +370,7 @@ async def _load_assets(session: AsyncSession, owner_id: UUID) -> list[MediaAsset
     return [_asset_from_row(dict(row)) for row in rows]
 
 
-def _asset_payload(asset: MediaAsset, *, owner_id: UUID) -> dict:
+def _asset_payload(asset: MediaAsset, *, owner_id: UUID) -> dict[str, Any]:
     """Owner-facing asset payload.
 
     ``media_path`` is derived from the opaque token, never from the asset id,
@@ -227,16 +397,23 @@ def _asset_payload(asset: MediaAsset, *, owner_id: UUID) -> dict:
 # ---------------------------------------------------------------------------
 
 
-async def register_upload(session: AsyncSession, *, owner_id: UUID, payload: dict) -> dict:
+async def register_upload(
+    session: AsyncSession, *, owner_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Register a new upload slot and return its opaque token.
 
-    The row is created in ``uploading`` / ``pending`` state. It occupies no slot
-    until it is finalized, so an abandoned upload cannot lock a member out of
-    their own photo limit.
+    The row is created in ``uploading`` / ``pending`` state with the same expiry
+    as its storage policy plus a short finalization grace window. Expired rows
+    are reaped, but live pending rows do occupy a slot; otherwise one account
+    could register and upload an unbounded number of never-finalized 100 MB
+    objects.
     """
 
     media_enabled()
-    assets = await _load_assets(session, owner_id)
+    await _lock_owner(session, owner_id)
+    await _require_active_owner(session, owner_id)
+    await _expire_owner_uploads(session, owner_id)
+    assets = await _load_assets(session, owner_id, for_update=True)
     request = UploadRequest(
         kind=MediaKind(payload["kind"]),
         mime_type=payload["mime_type"],
@@ -252,14 +429,64 @@ async def register_upload(session: AsyncSession, *, owner_id: UUID, payload: dic
     except ProfileMediaRuleError as error:
         raise _fail(error) from error
 
-    position = payload.get("position") or (len(active_assets(assets, request.kind)) + 1)
+    pending_rows = list(
+        (
+            await session.execute(
+                text(
+                    "SELECT kind,position FROM profile_media_assets "
+                    "WHERE owner_id=:owner_id AND state='uploading' "
+                    "AND storage_verified_at IS NULL "
+                    "AND (upload_expires_at IS NULL OR upload_expires_at >= now()) FOR UPDATE"
+                ),
+                {"owner_id": str(owner_id)},
+            )
+        )
+        .mappings()
+        .all()
+    )
+    active_of_kind = active_assets(assets, request.kind)
+    pending_of_kind = [row for row in pending_rows if row["kind"] == request.kind.value]
+    pending_limit = (
+        MAX_PENDING_PHOTO_UPLOADS if request.kind is MediaKind.PHOTO else MAX_PENDING_VIDEO_UPLOADS
+    )
+    if len(active_of_kind) + len(pending_of_kind) >= pending_limit:
+        raise VavError(
+            "MEDIA_UPLOAD_SLOT_UNAVAILABLE",
+            "All upload slots for this media type are already active or pending.",
+            status_code=409,
+        )
+    if request.kind is MediaKind.PHOTO:
+        occupied = {asset.position for asset in active_of_kind} | {
+            int(row["position"]) for row in pending_of_kind
+        }
+        requested_position = payload.get("position")
+        if requested_position is not None and int(requested_position) in occupied:
+            raise VavError(
+                "MEDIA_POSITION_OCCUPIED",
+                "That photo position is already active or pending.",
+                status_code=409,
+            )
+        position = (
+            int(requested_position)
+            if requested_position is not None
+            else next(
+                slot for slot in range(1, MAX_PENDING_PHOTO_UPLOADS + 1) if slot not in occupied
+            )
+        )
+    else:
+        position = 1
+    upload_expires_at = _now() + timedelta(
+        seconds=UPLOAD_URL_TTL_SECONDS + UPLOAD_FINALIZE_GRACE_SECONDS
+    )
     asset_id = UUID(
         str(
             await session.scalar(
                 text(
                     "INSERT INTO profile_media_assets "
-                    "(owner_id,kind,state,moderation_state,position,mime_type,byte_size,duration_seconds,access_token) "
-                    "VALUES (:owner_id,:kind,'uploading','pending',:position,:mime_type,:byte_size,:duration,'') RETURNING id"
+                    "(owner_id,kind,state,moderation_state,position,mime_type,byte_size,duration_seconds,"
+                    "access_token,storage_key,upload_expires_at) "
+                    "VALUES (:owner_id,:kind,'uploading','pending',:position,:mime_type,:byte_size,"
+                    ":duration,'','',:upload_expires_at) RETURNING id"
                 ),
                 {
                     "owner_id": str(owner_id),
@@ -268,14 +495,18 @@ async def register_upload(session: AsyncSession, *, owner_id: UUID, payload: dic
                     "mime_type": request.mime_type,
                     "byte_size": request.byte_size,
                     "duration": request.duration_seconds,
+                    "upload_expires_at": upload_expires_at,
                 },
             )
         )
     )
     token = derive_asset_token(asset_id, secret=_media_secret())
+    storage_key = upload_object_key(token)
     await session.execute(
-        text("UPDATE profile_media_assets SET access_token=:token WHERE id=:id"),
-        {"token": token, "id": str(asset_id)},
+        text(
+            "UPDATE profile_media_assets SET access_token=:token,storage_key=:storage_key WHERE id=:id"
+        ),
+        {"token": token, "storage_key": storage_key, "id": str(asset_id)},
     )
     await _audit(
         session,
@@ -286,6 +517,9 @@ async def register_upload(session: AsyncSession, *, owner_id: UUID, payload: dic
         action="profile_media.upload.registered",
         metadata={"kind": request.kind.value, "position": position},
     )
+    upload = presigned_upload(
+        token, mime_type=request.mime_type, max_bytes=_upload_ceiling(request.kind)
+    )
     await session.commit()
     return {
         "asset_id": str(asset_id),
@@ -295,30 +529,29 @@ async def register_upload(session: AsyncSession, *, owner_id: UUID, payload: dic
         # Where the bytes actually go. Presigned so they never pass through the
         # API, and carrying a size condition storage itself enforces — the
         # declared byte_size is the member's claim, this is the ceiling.
-        "upload": presigned_upload(
-            token, mime_type=request.mime_type, max_bytes=_upload_ceiling(request.kind)
-        ),
+        "upload": upload,
+        "upload_expires_at": upload_expires_at,
         "state": AssetState.UPLOADING.value,
         "moderation_state": ModerationState.PENDING.value,
     }
 
 
 async def finalize_upload(
-    session: AsyncSession, *, owner_id: UUID, asset_id: UUID, payload: dict
-) -> dict:
-    """Confirm an upload with the values the server measured.
-
-    The constraints are re-run here against the *measured* bytes, mime type and
-    duration, which is what makes the limits real rather than advisory.
-    """
+    session: AsyncSession, *, owner_id: UUID, asset_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
+    """Inspect staged bytes and atomically activate their immutable final copy."""
 
     media_enabled()
+    await _lock_owner(session, owner_id)
+    await _require_active_owner(session, owner_id)
     row = (
         (
             await session.execute(
                 text(
                     "SELECT id,kind,state,moderation_state,position,mime_type,byte_size,"
-                    "access_token,duration_seconds,rejection_reason_code "
+                    "access_token,duration_seconds,rejection_reason_code,replaces_asset_id,"
+                    "storage_key,storage_etag,checksum_sha256,storage_verified_at,"
+                    "upload_expires_at "
                     "FROM profile_media_assets WHERE id=:id AND owner_id=:owner_id FOR UPDATE"
                 ),
                 {"id": str(asset_id), "owner_id": str(owner_id)},
@@ -330,51 +563,189 @@ async def finalize_upload(
     if row is None:
         raise VavError("ASSET_NOT_FOUND", "That media asset does not exist.", status_code=404)
     asset = _asset_from_row(dict(row))
-    assets = [item for item in await _load_assets(session, owner_id) if item.asset_id != asset_id]
-    # Measured from storage, not taken from the request body. Re-checking the
-    # client's own numbers would be the same trust boundary as registration, so
-    # "enforced twice" would have meant "the same claim checked twice".
-    #
-    # A missing object means the member abandoned the upload: without this an
-    # asset goes ``active`` backed by nothing, renders as a broken image, and
-    # occupies one of the member's three photo slots.
-    measured = measure_object(asset.access_token)
-    if measured is None:
+    if (
+        asset.state in {AssetState.ACTIVE, AssetState.UPLOADING}
+        and row["storage_verified_at"] is not None
+    ):
+        # The database commit may have succeeded even if its acknowledgement
+        # never reached the client. Treat a retry as success only after binding
+        # it back to the same immutable bytes; this removes the false-failure
+        # 409 without weakening integrity.
+        finalized_key = validate_storage_key(asset.access_token, str(row["storage_key"] or ""))
+        measured = await asyncio.to_thread(
+            measure_object,
+            asset.access_token,
+            storage_key=finalized_key,
+        )
+        if (
+            measured is None
+            or int(str(measured["byte_size"])) != asset.byte_size
+            or (row["storage_etag"] and measured["etag"] != row["storage_etag"])
+            or (row["checksum_sha256"] and measured["checksum_sha256"] != row["checksum_sha256"])
+        ):
+            raise VavError(
+                "MEDIA_STORAGE_INTEGRITY_MISMATCH",
+                "The stored media no longer matches the finalized asset.",
+                status_code=409,
+            )
+        return await get_my_media(session, owner_id=owner_id)
+    if asset.state is not AssetState.UPLOADING:
         raise VavError(
-            "MEDIA_BYTES_MISSING",
-            "No uploaded content was found for this asset.",
+            "MEDIA_UPLOAD_ALREADY_FINALIZED",
+            "Only an uploading asset can be finalized.",
             status_code=409,
         )
-
+    if row["upload_expires_at"] is not None and row["upload_expires_at"] < _now():
+        await _expire_owner_uploads(session, owner_id)
+        await session.commit()
+        raise VavError("MEDIA_UPLOAD_EXPIRED", "The upload window has expired.", status_code=409)
+    try:
+        await asyncio.wait_for(
+            _MEDIA_INSPECTION_SLOT.acquire(),
+            timeout=MEDIA_INSPECTION_QUEUE_TIMEOUT_SECONDS,
+        )
+    except TimeoutError as error:
+        raise VavError(
+            "MEDIA_INSPECTION_BUSY",
+            "Media inspection is at capacity. Retry shortly.",
+            status_code=503,
+        ) from error
+    staged_key = validate_storage_key(asset.access_token, str(row["storage_key"] or ""))
+    try:
+        staged = await asyncio.to_thread(
+            read_object,
+            asset.access_token,
+            storage_key=staged_key,
+            max_bytes=_upload_ceiling(asset.kind),
+        )
+        try:
+            inspected = await asyncio.to_thread(
+                inspect_media,
+                kind=asset.kind,
+                payload=cast(bytes, staged["content"]),
+                # The value persisted at registration is the declared type signed into
+                # the POST policy. Object ContentType is also uploader-controlled and is
+                # deliberately ignored here.
+                declared_mime_type=asset.mime_type,
+            )
+        except ProfileMediaRuleError as error:
+            status_code = (
+                503
+                if error.code
+                in {"MEDIA_VIDEO_INSPECTION_UNAVAILABLE", "MEDIA_VIDEO_INSPECTION_TIMEOUT"}
+                else 422
+            )
+            raise _fail(error, status_code=status_code) from error
+    finally:
+        _MEDIA_INSPECTION_SLOT.release()
     request = UploadRequest(
         kind=asset.kind,
-        mime_type=str(measured["mime_type"]) or payload["mime_type"],
-        byte_size=int(measured["byte_size"]),
-        # Duration is not derivable from object metadata, so it stays a client
-        # value — bounded by the domain rules, and the honest limit of what can
-        # be verified without decoding the file here.
-        duration_seconds=payload.get("duration_seconds"),
+        mime_type=inspected.mime_type,
+        byte_size=inspected.byte_size,
+        duration_seconds=inspected.duration_seconds,
     )
+    assets = [
+        item
+        for item in await _load_assets(session, owner_id, for_update=True)
+        if item.asset_id != asset_id
+    ]
+    replacement = None
+    replacing_kind: MediaKind | None = None
+    if row["replaces_asset_id"] is not None:
+        replacement = (
+            (
+                await session.execute(
+                    text(
+                        "SELECT id,kind,state,access_token,storage_key,upload_expires_at "
+                        "FROM profile_media_assets "
+                        "WHERE id=:id AND owner_id=:owner_id FOR UPDATE"
+                    ),
+                    {
+                        "id": str(row["replaces_asset_id"]),
+                        "owner_id": str(owner_id),
+                    },
+                )
+            )
+            .mappings()
+            .first()
+        )
+        if replacement is None or replacement["state"] != AssetState.ACTIVE.value:
+            raise VavError(
+                "MEDIA_REPLACE_TARGET_CHANGED",
+                "The media being replaced is no longer active.",
+                status_code=409,
+            )
+        replacing_kind = MediaKind(str(replacement["kind"]))
     try:
         validate_asset_transition(asset.state.value, AssetState.ACTIVE.value)
         validate_upload(
             request,
             existing_photo_count=len(active_assets(assets, MediaKind.PHOTO)),
             existing_video_count=len(active_assets(assets, MediaKind.VIDEO)),
+            replacing_asset_kind=replacing_kind,
         )
     except ProfileMediaRuleError as error:
         raise _fail(error) from error
 
+    finalized = await asyncio.to_thread(
+        write_final_object,
+        asset.access_token,
+        content=inspected.content,
+        mime_type=inspected.mime_type,
+        checksum_sha256=inspected.checksum_sha256,
+    )
+
+    # A normal upload becomes active/pending. A finalized replacement remains
+    # a verified `uploading` row until moderation: the old approved asset stays
+    # live, and approval later swaps both rows atomically. Rejection therefore
+    # cannot leave a published profile with no public photo/video.
+    finalized_state = (
+        AssetState.UPLOADING.value if replacement is not None else AssetState.ACTIVE.value
+    )
     await session.execute(
         text(
-            "UPDATE profile_media_assets SET state='active',mime_type=:mime_type,byte_size=:byte_size,"
-            "duration_seconds=:duration,moderation_state='pending',updated_at=now() WHERE id=:id"
+            "UPDATE profile_media_assets SET state=:state,mime_type=:mime_type,byte_size=:byte_size,"
+            "duration_seconds=:duration,moderation_state='pending',storage_key=:storage_key,"
+            "storage_etag=:storage_etag,storage_version_id=:storage_version_id,"
+            "checksum_sha256=:checksum,storage_verified_at=now(),"
+            "updated_at=now() WHERE id=:id"
         ),
         {
+            "state": finalized_state,
             "mime_type": request.mime_type,
             "byte_size": request.byte_size,
             "duration": request.duration_seconds,
+            "storage_key": str(finalized["storage_key"]),
+            "storage_etag": str(finalized["etag"]),
+            "storage_version_id": finalized.get("version_id"),
+            "checksum": inspected.checksum_sha256,
             "id": str(asset_id),
+        },
+    )
+    await _queue_storage_deletion(
+        session,
+        asset_id=asset_id,
+        owner_id=owner_id,
+        access_token=asset.access_token,
+        storage_key=staged_key,
+        # A presigned POST is a bearer capability and can recreate a deleted
+        # object until it expires.  Delete only after its grace deadline.
+        not_before=row["upload_expires_at"],
+    )
+    await _audit(
+        session,
+        asset_id=asset_id,
+        owner_id=owner_id,
+        actor_id=owner_id,
+        actor_kind="member",
+        action="profile_media.upload.finalized",
+        metadata={
+            "kind": asset.kind.value,
+            "byte_size": inspected.byte_size,
+            "checksum_sha256": inspected.checksum_sha256,
+            "replaces_asset_id": str(row["replaces_asset_id"])
+            if row["replaces_asset_id"]
+            else None,
         },
     )
     await _publish(
@@ -390,12 +761,15 @@ async def finalize_upload(
 
 
 async def replace_asset(
-    session: AsyncSession, *, owner_id: UUID, asset_id: UUID, payload: dict
-) -> dict:
-    """Replace an asset in its slot, resetting moderation to ``pending``."""
+    session: AsyncSession, *, owner_id: UUID, asset_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
+    """Register a replacement candidate while retaining the reviewed asset."""
 
     media_enabled()
-    assets = await _load_assets(session, owner_id)
+    await _lock_owner(session, owner_id)
+    await _require_active_owner(session, owner_id)
+    await _expire_owner_uploads(session, owner_id)
+    assets = await _load_assets(session, owner_id, for_update=True)
     request = UploadRequest(
         kind=MediaKind(payload["kind"]),
         mime_type=payload["mime_type"],
@@ -407,12 +781,23 @@ async def replace_asset(
     except ProfileMediaRuleError as error:
         raise _fail(error) from error
 
-    await session.execute(
+    pending_replacement = await session.scalar(
         text(
-            "UPDATE profile_media_assets SET state='replaced',updated_at=now() "
-            "WHERE id=:id AND owner_id=:owner_id"
+            "SELECT id FROM profile_media_assets WHERE owner_id=:owner_id "
+            "AND replaces_asset_id=:asset_id AND state='uploading' "
+            "AND (storage_verified_at IS NOT NULL OR upload_expires_at IS NULL "
+            "OR upload_expires_at >= now()) FOR UPDATE"
         ),
-        {"id": str(asset_id), "owner_id": str(owner_id)},
+        {"owner_id": str(owner_id), "asset_id": str(asset_id)},
+    )
+    if pending_replacement is not None:
+        raise VavError(
+            "MEDIA_REPLACEMENT_ALREADY_PENDING",
+            "A replacement upload is already pending for this asset.",
+            status_code=409,
+        )
+    upload_expires_at = _now() + timedelta(
+        seconds=UPLOAD_URL_TTL_SECONDS + UPLOAD_FINALIZE_GRACE_SECONDS
     )
     new_id = UUID(
         str(
@@ -420,8 +805,9 @@ async def replace_asset(
                 text(
                     "INSERT INTO profile_media_assets "
                     "(owner_id,kind,state,moderation_state,position,mime_type,byte_size,duration_seconds,"
-                    "access_token,replaces_asset_id) "
-                    "VALUES (:owner_id,:kind,'uploading',:moderation,:position,:mime_type,:byte_size,:duration,'',:replaces) RETURNING id"
+                    "access_token,replaces_asset_id,storage_key,upload_expires_at) "
+                    "VALUES (:owner_id,:kind,'uploading',:moderation,:position,:mime_type,:byte_size,"
+                    ":duration,'',:replaces,'',:upload_expires_at) RETURNING id"
                 ),
                 {
                     "owner_id": str(owner_id),
@@ -432,14 +818,18 @@ async def replace_asset(
                     "byte_size": request.byte_size,
                     "duration": request.duration_seconds,
                     "replaces": str(asset_id),
+                    "upload_expires_at": upload_expires_at,
                 },
             )
         )
     )
     token = derive_asset_token(new_id, secret=_media_secret())
+    storage_key = upload_object_key(token)
     await session.execute(
-        text("UPDATE profile_media_assets SET access_token=:token WHERE id=:id"),
-        {"token": token, "id": str(new_id)},
+        text(
+            "UPDATE profile_media_assets SET access_token=:token,storage_key=:storage_key WHERE id=:id"
+        ),
+        {"token": token, "storage_key": storage_key, "id": str(new_id)},
     )
     await _audit(
         session,
@@ -447,27 +837,44 @@ async def replace_asset(
         owner_id=owner_id,
         actor_id=owner_id,
         actor_kind="member",
-        action="profile_media.asset.replaced",
+        action="profile_media.replacement.registered",
         metadata={"replaced_asset_id": str(asset_id), "position": plan.new_position},
     )
-    await _refresh_completeness(session, owner_id)
+    upload = presigned_upload(
+        token, mime_type=request.mime_type, max_bytes=_upload_ceiling(request.kind)
+    )
     await session.commit()
     return {
         "asset_id": str(new_id),
         "replaced_asset_id": str(asset_id),
         "upload_path": private_media_path(token),
-        "upload": presigned_upload(
-            token, mime_type=request.mime_type, max_bytes=_upload_ceiling(request.kind)
-        ),
+        "upload": upload,
+        "upload_expires_at": upload_expires_at,
         "moderation_state": plan.new_moderation_state.value,
     }
 
 
-async def delete_asset(session: AsyncSession, *, owner_id: UUID, asset_id: UUID) -> dict:
+async def delete_asset(session: AsyncSession, *, owner_id: UUID, asset_id: UUID) -> dict[str, Any]:
     """Delete an asset. Terminal - there is no undelete."""
 
     media_enabled()
-    assets = await _load_assets(session, owner_id)
+    await _lock_owner(session, owner_id)
+    await _require_active_owner(session, owner_id)
+    await _expire_owner_uploads(session, owner_id)
+    assets = await _load_assets(session, owner_id, for_update=True)
+    storage_row = (
+        (
+            await session.execute(
+                text(
+                    "SELECT access_token,storage_key,upload_expires_at FROM profile_media_assets "
+                    "WHERE id=:id AND owner_id=:owner_id FOR UPDATE"
+                ),
+                {"id": str(asset_id), "owner_id": str(owner_id)},
+            )
+        )
+        .mappings()
+        .first()
+    )
     published = bool(
         await session.scalar(
             text("SELECT is_published FROM profile_media_profiles WHERE user_id=:user_id"),
@@ -487,6 +894,15 @@ async def delete_asset(session: AsyncSession, *, owner_id: UUID, asset_id: UUID)
         ),
         {"id": str(asset_id), "owner_id": str(owner_id)},
     )
+    if storage_row is not None:
+        await _queue_asset_storage_cleanup(
+            session,
+            asset_id=asset_id,
+            owner_id=owner_id,
+            access_token=str(storage_row["access_token"]),
+            storage_key=(str(storage_row["storage_key"]) if storage_row["storage_key"] else None),
+            upload_expires_at=storage_row["upload_expires_at"],
+        )
     await _audit(
         session,
         asset_id=asset_id,
@@ -512,27 +928,179 @@ async def delete_asset(session: AsyncSession, *, owner_id: UUID, asset_id: UUID)
     }
 
 
+async def expire_stale_uploads(session: AsyncSession, *, limit: int = 200) -> int:
+    """Mark expired upload registrations deleted and enqueue object cleanup."""
+
+    owner_ids = list(
+        (
+            await session.scalars(
+                text(
+                    "SELECT DISTINCT owner_id FROM profile_media_assets "
+                    "WHERE state='uploading' AND upload_expires_at IS NOT NULL "
+                    "AND storage_verified_at IS NULL "
+                    "AND upload_expires_at < now() ORDER BY owner_id LIMIT :limit"
+                ),
+                {"limit": limit},
+            )
+        ).all()
+    )
+    expired = 0
+    for raw_owner_id in owner_ids:
+        owner_id = UUID(str(raw_owner_id))
+        await _lock_owner(session, owner_id)
+        expired += await _expire_owner_uploads(session, owner_id)
+    await session.commit()
+    return expired
+
+
+async def process_storage_deletions(session: AsyncSession, *, limit: int = 20) -> dict[str, int]:
+    """Delete queued objects with retry state durable in PostgreSQL."""
+
+    rows = list(
+        (
+            await session.execute(
+                text(
+                    "SELECT id,access_token,storage_key,attempts FROM "
+                    "profile_media_storage_deletions WHERE state IN ('pending','failed') "
+                    "AND next_attempt_at <= now() ORDER BY next_attempt_at,created_at "
+                    "FOR UPDATE SKIP LOCKED LIMIT :limit"
+                ),
+                {"limit": limit},
+            )
+        )
+        .mappings()
+        .all()
+    )
+    completed = 0
+    failed = 0
+    for row in rows:
+        try:
+            await asyncio.to_thread(
+                delete_storage_key,
+                str(row["access_token"]),
+                storage_key=str(row["storage_key"]),
+            )
+        except VavError as error:
+            failed += 1
+            await session.execute(
+                text(
+                    "UPDATE profile_media_storage_deletions SET attempts=attempts+1,"
+                    # Private-byte deletion never becomes terminal merely
+                    # because a provider/credential outage lasted ten tries.
+                    # Existing `failed` rows are selected above and revived;
+                    # after repeated failures the retry cadence simply slows.
+                    "state='pending',"
+                    "last_error=:error,next_attempt_at=now()+"
+                    "make_interval(secs => LEAST(21600, "
+                    "(30 * power(2, LEAST(attempts, 10)))::int)),"
+                    "updated_at=now() WHERE id=:id"
+                ),
+                {"id": str(row["id"]), "error": error.code},
+            )
+        else:
+            completed += 1
+            await session.execute(
+                text(
+                    "UPDATE profile_media_storage_deletions SET state='completed',"
+                    "attempts=attempts+1,last_error=NULL,completed_at=now(),updated_at=now() "
+                    "WHERE id=:id"
+                ),
+                {"id": str(row["id"])},
+            )
+    await session.commit()
+    return {"completed": completed, "failed": failed}
+
+
 # ---------------------------------------------------------------------------
 # Private access grants
 # ---------------------------------------------------------------------------
 
 
+async def _build_media_grant(
+    row: Mapping[str, Any], *, viewer_id: UUID, ttl_seconds: int
+) -> dict[str, Any]:
+    """Verify the finalized object and mint its short-lived bearer URL."""
+
+    try:
+        grant = issue_access_grant(
+            access_token=str(row["access_token"]),
+            viewer_id=viewer_id,
+            now=_now(),
+            secret=_media_secret(),
+            ttl_seconds=ttl_seconds,
+        )
+    except ProfileMediaRuleError as error:
+        raise _fail(error) from error
+    storage_key = validate_storage_key(str(row["access_token"]), str(row["storage_key"] or ""))
+    measured = await asyncio.to_thread(
+        measure_object, str(row["access_token"]), storage_key=storage_key
+    )
+    if measured is None:
+        raise VavError(
+            "MEDIA_BYTES_MISSING",
+            "The finalized media object is unavailable.",
+            status_code=409,
+        )
+    if (
+        (row["storage_etag"] and str(measured["etag"]) != str(row["storage_etag"]))
+        or (row.get("checksum_sha256") and measured["checksum_sha256"] != row["checksum_sha256"])
+        or int(str(measured["byte_size"])) != int(row["byte_size"])
+    ):
+        raise VavError(
+            "MEDIA_STORAGE_INTEGRITY_MISMATCH",
+            "The stored media no longer matches the finalized asset.",
+            status_code=409,
+        )
+    return {
+        "media_path": private_media_path(grant.access_token),
+        "media_url": presigned_read_url(
+            grant.access_token, storage_key=storage_key, ttl_seconds=ttl_seconds
+        ),
+        "expires_at": grant.expires_at,
+        "signature": grant.signature,
+        "viewer_id": str(viewer_id),
+    }
+
+
 async def issue_media_grant(
     session: AsyncSession, *, viewer_id: UUID, asset_id: UUID, ttl_seconds: int = 300
-) -> dict:
-    """Issue a short-lived grant for one private asset.
+) -> dict[str, Any]:
+    """Issue a short-lived bearer URL after authorizing one viewer.
 
     The viewer must be the owner, or the asset must be approved *and* covered by
     the owner's share consent. Anything else is a 404, not a 403: a stranger
     must not learn that a hidden asset exists.
+
+    S3 presigned URLs are bearer capabilities; the ``viewer_id`` signature is
+    useful audit evidence but cannot stop somebody who receives the final URL
+    from replaying it during its short TTL. The API therefore does not describe
+    the storage URL itself as viewer-bound.
     """
 
     media_enabled()
+    owner_id_raw = await session.scalar(
+        text("SELECT owner_id FROM profile_media_assets WHERE id=:id"),
+        {"id": str(asset_id)},
+    )
+    if owner_id_raw is None:
+        raise VavError("ASSET_NOT_FOUND", "That media asset does not exist.", status_code=404)
+    owner_id = UUID(str(owner_id_raw))
+    await _lock_owner(session, owner_id)
+    owner_status = await session.scalar(
+        text("SELECT status FROM users WHERE id=:user_id"),
+        {"user_id": str(owner_id)},
+    )
+    if owner_status != "active":
+        # Preserve the endpoint's non-enumeration contract for non-owners: an
+        # inactive/erased owner's asset is indistinguishable from a missing one.
+        raise VavError("ASSET_NOT_FOUND", "That media asset does not exist.", status_code=404)
     row = (
         (
             await session.execute(
                 text(
                     "SELECT a.owner_id,a.access_token,a.state,a.moderation_state,a.kind,"
+                    "a.storage_key,a.storage_etag,a.checksum_sha256,a.byte_size,a.mime_type,"
+                    "a.storage_verified_at,a.replaces_asset_id,"
                     "COALESCE(c.share_enabled,false) AS share_enabled,"
                     "COALESCE(c.share_photos,false) AS share_photos,"
                     "COALESCE(c.share_video,false) AS share_video "
@@ -546,7 +1114,19 @@ async def issue_media_grant(
         .mappings()
         .first()
     )
-    if row is None or row["state"] == AssetState.DELETED.value:
+    owner_previewable = (
+        row is not None
+        and owner_id == viewer_id
+        and (
+            row["state"] == AssetState.ACTIVE.value
+            or (
+                row["state"] == AssetState.UPLOADING.value
+                and row["storage_verified_at"] is not None
+                and row["replaces_asset_id"] is not None
+            )
+        )
+    )
+    if row is None or (row["state"] != AssetState.ACTIVE.value and not owner_previewable):
         raise VavError("ASSET_NOT_FOUND", "That media asset does not exist.", status_code=404)
     owner_id = UUID(str(row["owner_id"]))
     if owner_id != viewer_id:
@@ -559,27 +1139,50 @@ async def issue_media_grant(
         )
         if not shareable:
             raise VavError("ASSET_NOT_FOUND", "That media asset does not exist.", status_code=404)
-    try:
-        grant = issue_access_grant(
-            access_token=row["access_token"],
-            viewer_id=viewer_id,
-            now=_now(),
-            secret=_media_secret(),
-            ttl_seconds=ttl_seconds,
+    return await _build_media_grant(dict(row), viewer_id=viewer_id, ttl_seconds=ttl_seconds)
+
+
+async def issue_admin_media_grant(
+    session: AsyncSession, *, viewer_id: UUID, asset_id: UUID, ttl_seconds: int = 300
+) -> dict[str, Any]:
+    """Mint a grant for an authorized moderator, including pending assets."""
+
+    media_enabled()
+    owner_id_raw = await session.scalar(
+        text("SELECT owner_id FROM profile_media_assets WHERE id=:id"),
+        {"id": str(asset_id)},
+    )
+    if owner_id_raw is None:
+        raise VavError("ASSET_NOT_FOUND", "That media asset does not exist.", status_code=404)
+    owner_id = UUID(str(owner_id_raw))
+    await _lock_owner(session, owner_id)
+    await _require_active_owner(session, owner_id)
+    row = (
+        (
+            await session.execute(
+                text(
+                    "SELECT owner_id,access_token,state,storage_key,storage_etag,"
+                    "checksum_sha256,byte_size,storage_verified_at,replaces_asset_id "
+                    "FROM profile_media_assets WHERE id=:id"
+                ),
+                {"id": str(asset_id)},
+            )
         )
-    except ProfileMediaRuleError as error:
-        raise _fail(error) from error
-    return {
-        "media_path": private_media_path(grant.access_token),
-        # The fetchable form. The authorization decision was made above; this
-        # only turns it into a URL, and is deliberately produced nowhere else.
-        "media_url": presigned_read_url(grant.access_token, ttl_seconds=ttl_seconds),
-        "expires_at": grant.expires_at,
-        "signature": grant.signature,
-        # Echoed so a caller can prove which viewer the grant is bound to; the
-        # signature covers it, so it cannot be swapped.
-        "viewer_id": str(viewer_id),
-    }
+        .mappings()
+        .first()
+    )
+    reviewable = row is not None and (
+        row["state"] == AssetState.ACTIVE.value
+        or (
+            row["state"] == AssetState.UPLOADING.value
+            and row["storage_verified_at"] is not None
+            and row["replaces_asset_id"] is not None
+        )
+    )
+    if not reviewable:
+        raise VavError("ASSET_NOT_FOUND", "That media asset does not exist.", status_code=404)
+    assert row is not None
+    return await _build_media_grant(dict(row), viewer_id=viewer_id, ttl_seconds=ttl_seconds)
 
 
 def verify_media_grant(
@@ -610,7 +1213,7 @@ def verify_media_grant(
 # ---------------------------------------------------------------------------
 
 
-async def get_my_media(session: AsyncSession, *, owner_id: UUID) -> dict:
+async def get_my_media(session: AsyncSession, *, owner_id: UUID) -> dict[str, Any]:
     media_enabled()
     assets = await _load_assets(session, owner_id)
     profile = await _load_profile(session, owner_id)
@@ -631,7 +1234,7 @@ async def get_my_media(session: AsyncSession, *, owner_id: UUID) -> dict:
     }
 
 
-async def _load_profile(session: AsyncSession, owner_id: UUID) -> dict:
+async def _load_profile(session: AsyncSession, owner_id: UUID) -> dict[str, Any]:
     row = (
         (
             await session.execute(
@@ -656,7 +1259,7 @@ async def _load_profile(session: AsyncSession, owner_id: UUID) -> dict:
     }
 
 
-def _completeness(assets: list[MediaAsset], profile: dict):
+def _completeness(assets: list[MediaAsset], profile: dict[str, Any]) -> CompletenessScore:
     approved_photos = [
         asset
         for asset in active_assets(assets, MediaKind.PHOTO)
@@ -696,13 +1299,17 @@ async def _refresh_completeness(session: AsyncSession, owner_id: UUID) -> int:
         ),
         {"user_id": str(owner_id), "percent": score.percent},
     )
-    return score.percent
+    return int(score.percent)
 
 
-async def set_profile_tags(session: AsyncSession, *, owner_id: UUID, payload: dict) -> dict:
+async def set_profile_tags(
+    session: AsyncSession, *, owner_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Store the MBTI tag, intro and city."""
 
     media_enabled()
+    await _lock_owner(session, owner_id)
+    await _require_active_owner(session, owner_id)
     try:
         mbti = normalize_mbti(payload.get("mbti"))
     except ProfileMediaRuleError as error:
@@ -727,7 +1334,7 @@ async def set_profile_tags(session: AsyncSession, *, owner_id: UUID, payload: di
     return await get_my_media(session, owner_id=owner_id)
 
 
-async def get_share_consent(session: AsyncSession, owner_id: UUID) -> dict:
+async def get_share_consent(session: AsyncSession, owner_id: UUID) -> dict[str, Any]:
     row = (
         (
             await session.execute(
@@ -754,8 +1361,12 @@ async def get_share_consent(session: AsyncSession, owner_id: UUID) -> dict:
     return {key: bool(value) for key, value in row.items()}
 
 
-async def set_share_consent(session: AsyncSession, *, owner_id: UUID, payload: dict) -> dict:
+async def set_share_consent(
+    session: AsyncSession, *, owner_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     media_enabled()
+    await _lock_owner(session, owner_id)
+    await _require_active_owner(session, owner_id)
     await session.execute(
         text(
             "INSERT INTO profile_share_consents "
@@ -781,7 +1392,7 @@ async def set_share_consent(session: AsyncSession, *, owner_id: UUID, payload: d
     return await get_share_consent(session, owner_id)
 
 
-async def get_share_card(session: AsyncSession, *, owner_id: UUID) -> dict:
+async def get_share_card(session: AsyncSession, *, owner_id: UUID) -> dict[str, Any]:
     """Build the consent-scoped share card.
 
     Two independent gates apply per field: moderation state and consent. The
@@ -822,7 +1433,7 @@ async def get_share_card(session: AsyncSession, *, owner_id: UUID) -> dict:
 
 async def moderation_queue(
     session: AsyncSession, *, state: str = "pending", limit: int = 50
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     rows = (
         (
             await session.execute(
@@ -830,7 +1441,9 @@ async def moderation_queue(
                     "SELECT id,owner_id,kind,state,moderation_state,position,mime_type,byte_size,"
                     "access_token,duration_seconds,rejection_reason_code,created_at "
                     "FROM profile_media_assets "
-                    "WHERE moderation_state=:state AND state='active' "
+                    "WHERE moderation_state=:state AND (state='active' OR "
+                    "(state='uploading' AND storage_verified_at IS NOT NULL "
+                    "AND replaces_asset_id IS NOT NULL)) "
                     "ORDER BY created_at LIMIT :limit"
                 ),
                 {"state": state, "limit": limit},
@@ -850,8 +1463,8 @@ async def moderation_queue(
 
 
 async def decide_moderation(
-    session: AsyncSession, *, asset_id: UUID, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, asset_id: UUID, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Approve, reject or re-queue one asset.
 
     A rejection must carry a machine reason code, and approval does not survive
@@ -859,12 +1472,24 @@ async def decide_moderation(
     """
 
     media_enabled()
+    owner_id_raw = await session.scalar(
+        text("SELECT owner_id FROM profile_media_assets WHERE id=:id"),
+        {"id": str(asset_id)},
+    )
+    if owner_id_raw is None:
+        raise VavError("ASSET_NOT_FOUND", "That media asset does not exist.", status_code=404)
+    owner_id = UUID(str(owner_id_raw))
+    await _lock_owner(session, owner_id)
+    await _require_active_owner(session, owner_id)
     row = (
         (
             await session.execute(
                 text(
-                    "SELECT owner_id,moderation_state,kind FROM profile_media_assets "
-                    "WHERE id=:id FOR UPDATE"
+                    "SELECT owner_id,moderation_state,kind,state,replaces_asset_id,"
+                    "access_token,storage_key,upload_expires_at "
+                    "FROM profile_media_assets WHERE id=:id AND (state='active' OR "
+                    "(state='uploading' AND storage_verified_at IS NOT NULL "
+                    "AND replaces_asset_id IS NOT NULL)) FOR UPDATE"
                 ),
                 {"id": str(asset_id)},
             )
@@ -878,24 +1503,94 @@ async def decide_moderation(
     reason_code: str | None = None
     try:
         validate_moderation_transition(row["moderation_state"], target)
+        if row["state"] == AssetState.UPLOADING.value and target == ModerationState.PENDING.value:
+            raise ProfileMediaRuleError(
+                "MODERATION_TRANSITION_INVALID",
+                "A replacement candidate is already pending review.",
+            )
         if target == ModerationState.REJECTED.value:
             reason_code = require_rejection_reason(payload.get("reason_code"))
     except ProfileMediaRuleError as error:
         raise _fail(error, status_code=409) from error
 
+    replacement_target = None
+    is_replacement = row["state"] == AssetState.UPLOADING.value
+    if is_replacement and target == ModerationState.APPROVED.value:
+        replacement_target = (
+            (
+                await session.execute(
+                    text(
+                        "SELECT id,state,access_token,storage_key,upload_expires_at "
+                        "FROM profile_media_assets WHERE id=:id AND owner_id=:owner_id FOR UPDATE"
+                    ),
+                    {
+                        "id": str(row["replaces_asset_id"]),
+                        "owner_id": str(owner_id),
+                    },
+                )
+            )
+            .mappings()
+            .first()
+        )
+        if replacement_target is None or replacement_target["state"] != AssetState.ACTIVE.value:
+            raise VavError(
+                "MEDIA_REPLACE_TARGET_CHANGED",
+                "The media being replaced is no longer active.",
+                status_code=409,
+            )
+
+    if is_replacement and target == ModerationState.APPROVED.value:
+        assert replacement_target is not None
+        await session.execute(
+            text(
+                "UPDATE profile_media_assets SET state='replaced',updated_at=now() "
+                "WHERE id=:id AND state='active'"
+            ),
+            {"id": str(replacement_target["id"])},
+        )
+        await _queue_asset_storage_cleanup(
+            session,
+            asset_id=UUID(str(replacement_target["id"])),
+            owner_id=owner_id,
+            access_token=str(replacement_target["access_token"]),
+            storage_key=(
+                str(replacement_target["storage_key"])
+                if replacement_target["storage_key"]
+                else None
+            ),
+            upload_expires_at=replacement_target["upload_expires_at"],
+        )
+        next_asset_state = AssetState.ACTIVE.value
+        deleted_at_sql = "NULL"
+    elif is_replacement and target == ModerationState.REJECTED.value:
+        next_asset_state = AssetState.DELETED.value
+        deleted_at_sql = "now()"
+        await _queue_asset_storage_cleanup(
+            session,
+            asset_id=asset_id,
+            owner_id=owner_id,
+            access_token=str(row["access_token"]),
+            storage_key=str(row["storage_key"]) if row["storage_key"] else None,
+            upload_expires_at=row["upload_expires_at"],
+        )
+    else:
+        next_asset_state = str(row["state"])
+        deleted_at_sql = "deleted_at"
+
     await session.execute(
         text(
-            "UPDATE profile_media_assets SET moderation_state=:state,rejection_reason_code=:reason_code,"
-            "moderated_by=:actor,moderated_at=now(),updated_at=now() WHERE id=:id"
+            "UPDATE profile_media_assets SET state=:asset_state,moderation_state=:state,"
+            "rejection_reason_code=:reason_code,moderated_by=:actor,moderated_at=now(),"
+            f"deleted_at={deleted_at_sql},updated_at=now() WHERE id=:id"
         ),
         {
+            "asset_state": next_asset_state,
             "state": target,
             "reason_code": reason_code,
             "actor": str(actor_id),
             "id": str(asset_id),
         },
     )
-    owner_id = UUID(str(row["owner_id"]))
     await _audit(
         session,
         asset_id=asset_id,
@@ -927,7 +1622,9 @@ async def decide_moderation(
     }
 
 
-async def admin_remove_asset(session: AsyncSession, *, actor_id: UUID, payload: dict) -> dict:
+async def admin_remove_asset(
+    session: AsyncSession, *, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Operator takedown. Uses the same terminal delete transition as a member."""
 
     media_enabled()
@@ -938,7 +1635,21 @@ async def admin_remove_asset(session: AsyncSession, *, actor_id: UUID, payload: 
     if owner_id_raw is None:
         raise VavError("ASSET_NOT_FOUND", "That media asset does not exist.", status_code=404)
     owner_id = UUID(str(owner_id_raw))
-    assets = await _load_assets(session, owner_id)
+    await _lock_owner(session, owner_id)
+    assets = await _load_assets(session, owner_id, for_update=True)
+    storage_row = (
+        (
+            await session.execute(
+                text(
+                    "SELECT access_token,storage_key,upload_expires_at FROM profile_media_assets "
+                    "WHERE id=:id FOR UPDATE"
+                ),
+                {"id": str(asset_id)},
+            )
+        )
+        .mappings()
+        .first()
+    )
     try:
         # ``profile_is_published=False``: a takedown is not blocked by the
         # minimum-photo rule, because leaving a violating photo up is worse.
@@ -952,6 +1663,15 @@ async def admin_remove_asset(session: AsyncSession, *, actor_id: UUID, payload: 
         ),
         {"id": str(asset_id)},
     )
+    if storage_row is not None:
+        await _queue_asset_storage_cleanup(
+            session,
+            asset_id=asset_id,
+            owner_id=owner_id,
+            access_token=str(storage_row["access_token"]),
+            storage_key=(str(storage_row["storage_key"]) if storage_row["storage_key"] else None),
+            upload_expires_at=storage_row["upload_expires_at"],
+        )
     await _audit(
         session,
         asset_id=asset_id,

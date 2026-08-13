@@ -1,6 +1,6 @@
 module: {code: capacity_guard, owner: activities, version: "1.0.0"}
 dependencies: {required: [activities, commerce, identity, notifications]}
-database: {revisions: [106]}
+database: {revisions: [106, 111]}
 events:
   publishes:
     - activity.capacity.seat_held.v1

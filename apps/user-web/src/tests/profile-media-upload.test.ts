@@ -61,7 +61,23 @@ const policy = {
 function stubApi(overrides: { finalizeFails?: boolean } = {}) {
   vi.stubGlobal(
     "fetch",
-    vi.fn(async (url: string) => {
+    vi.fn(async (url: string, init: RequestInit = {}) => {
+      if (url.includes("/assets/old-asset") && init.method === "PUT") {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            data: {
+              asset_id: "replacement-asset",
+              replaced_asset_id: "old-asset",
+              upload_path: "/media/private/REPLACEMENT",
+              upload: policy,
+              upload_expires_at: "2026-08-13T00:15:00Z",
+              moderation_state: "pending"
+            }
+          })
+        };
+      }
       if (url.includes("/uploads")) {
         return {
           ok: true,
@@ -71,6 +87,7 @@ function stubApi(overrides: { finalizeFails?: boolean } = {}) {
               asset_id: "asset-1",
               upload_path: "/media/private/TOKEN",
               upload: policy,
+              upload_expires_at: "2026-08-13T00:15:00Z",
               state: "uploading",
               moderation_state: "pending"
             }
@@ -145,6 +162,29 @@ describe("profile media upload", () => {
     expect(sent[0]?.fields.key).toBe(policy.fields.key);
     expect(sent[0]?.fields.policy).toBe(policy.fields.policy);
     expect(sent[0]?.fields.signature).toBe(policy.fields.signature);
+  });
+
+  it("registers a replacement with PUT and finalizes the returned staged asset", async () => {
+    stubApi();
+    const uploader = useMediaUpload();
+
+    const result = await uploader.upload(pngFile(), "photo", "old-asset");
+
+    const calls = vi.mocked(fetch).mock.calls;
+    const replacement = calls.find(
+      ([url, init]) => String(url).includes("/assets/old-asset") && init?.method === "PUT"
+    );
+    expect(replacement).toBeDefined();
+    expect(JSON.parse(String(replacement?.[1]?.body))).toMatchObject({
+      kind: "photo",
+      mime_type: "image/png",
+      byte_size: 2048
+    });
+    expect(calls.some(([url]) => String(url).includes("/assets/replacement-asset/finalize"))).toBe(
+      true
+    );
+    expect(sent).toHaveLength(1);
+    expect(result).not.toBeNull();
   });
 
   it("does not finalize when storage rejects the upload", async () => {

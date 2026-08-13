@@ -185,6 +185,16 @@ def test_production_kubernetes_has_isolation_and_availability_guards() -> None:
         pod = deployment["spec"]["template"]["spec"]
         assert pod.get("securityContext", {}).get("runAsNonRoot") is True
 
+    runtime_config = next(
+        document
+        for document in documents
+        if document
+        and document["kind"] == "ConfigMap"
+        and document["metadata"]["name"] == "vav-runtime"
+    )["data"]
+    assert runtime_config["MEDIA_S3_ENDPOINT"].startswith("https://")
+    assert runtime_config["MEDIA_S3_PUBLIC_ENDPOINT"].startswith("https://")
+
 
 def test_no_production_secret_values_are_committed() -> None:
     candidates = [
@@ -331,8 +341,31 @@ def test_kubernetes_queue_arguments_remain_single_arguments() -> None:
     external_secret = next(
         value for value in documents if value.get("kind") == "ExternalSecret"
     )
-    references = [item["remoteRef"]["key"] for item in external_secret["spec"]["data"]]
-    assert len(references) == 16
+    secret_data = external_secret["spec"]["data"]
+    references = [item["remoteRef"]["key"] for item in secret_data]
+    assert {item["secretKey"] for item in secret_data} == {
+        "DATABASE_URL",
+        "REDIS_URL",
+        "AUTH_REFRESH_TOKEN_PEPPER",
+        "PRIVACY_SEARCH_HMAC_PEPPER",
+        "CHECKIN_LAST_FOUR_HMAC_KEY",
+        "CHECKIN_TOKEN_SIGNING_KEY",
+        "SHARE_LINK_SECRET",
+        "PROFILE_MEDIA_TOKEN_SECRET",
+        "DISCOVERY_IP_MARKER_SALT",
+        "BACKUP_ENCRYPTION_KEY",
+        "auth-private.pem",
+        "auth-public.pem",
+        "MEDIA_S3_ACCESS_KEY",
+        "MEDIA_S3_SECRET_KEY",
+        "STRIPE_SECRET_KEY",
+        "STRIPE_WEBHOOK_SECRET",
+        "PAYPAL_CLIENT_ID",
+        "PAYPAL_CLIENT_SECRET",
+        "PAYPAL_WEBHOOK_ID",
+        "NOTIFICATION_EMAIL_PROVIDER_WEBHOOK_SECRET",
+        "GEMINI_API_KEY",
+    }
     assert all(reference.startswith("vav/production/") for reference in references)
     backend_names = {
         "api",

@@ -100,9 +100,10 @@ def upgrade() -> None:
         CREATE TABLE activity_capacity_counters (
           ticket_type_id UUID PRIMARY KEY REFERENCES activity_ticket_types(id),
           activity_id UUID NOT NULL REFERENCES activities(id),
-          -- 0 means "no cap", matching the activities schema. It does not mean
-          -- sold out.
+          -- The mode is explicit. A finite ticket type may legitimately have a
+          -- zero cap (sold out); unlimited is not inferred from the number.
           capacity INTEGER NOT NULL DEFAULT 0,
+          is_unlimited BOOLEAN NOT NULL DEFAULT false,
           confirmed_seats INTEGER NOT NULL DEFAULT 0,
           held_seats INTEGER NOT NULL DEFAULT 0,
           waitlisted_count INTEGER NOT NULL DEFAULT 0,
@@ -115,7 +116,10 @@ def upgrade() -> None:
           CHECK (confirmed_seats >= 0),
           CHECK (held_seats >= 0),
           CHECK (waitlisted_count >= 0),
-          CHECK (capacity = 0 OR confirmed_seats + held_seats <= capacity),
+          CONSTRAINT activity_capacity_counters_not_oversold
+            CHECK (is_unlimited OR confirmed_seats + held_seats <= capacity),
+          CONSTRAINT activity_capacity_counters_unlimited_zero
+            CHECK (NOT is_unlimited OR capacity = 0),
           CHECK (sales_state IN ('open','closed','suspended'))
         );
         CREATE INDEX activity_capacity_counters_activity_idx
@@ -243,24 +247,32 @@ def upgrade() -> None:
     # rule* — it rejected a state the inventory model explicitly permits, and
     # the whole migration aborted on any deployment that had ever oversold.
     #
-    # An `unlimited` sku maps to capacity 0, which in this table means "no cap"
-    # rather than "sold out". Filtering on `total_capacity IS NOT NULL` was not
-    # the same test: an unlimited sku may still carry a non-null number, and
-    # capping it would close sales that are supposed to be open.
+    # An `unlimited` sku maps to ``is_unlimited=true`` and a numeric placeholder
+    # of 0. The flag matters: a finite zero-cap sku is sold out. Filtering on
+    # `total_capacity IS NOT NULL` was never the same test, and unlimited SKUs
+    # normally have no inventory row at all.
     op.execute(
         """
         INSERT INTO activity_capacity_counters
-          (ticket_type_id, activity_id, capacity, confirmed_seats, held_seats, waitlisted_count)
+          (ticket_type_id, activity_id, capacity, is_unlimited,
+           confirmed_seats, held_seats, waitlisted_count)
         SELECT t.id, t.activity_id,
                -- Never below what is already committed. Historical oversell is
                -- a fact: those people hold seats and will arrive. Clamping the
                -- counter down instead would tell operations fewer people are
                -- coming than actually are — someone shows up and is not on the
                -- list. The discrepancy is recorded below rather than erased.
-               GREATEST(derived.cap, derived.confirmed + derived.held),
+               CASE WHEN derived.is_unlimited THEN 0
+                    ELSE GREATEST(derived.cap, derived.confirmed + derived.held) END,
+               derived.is_unlimited,
                derived.confirmed, derived.held, derived.waitlisted
         FROM activity_ticket_types t
-        JOIN inventory_items inv ON inv.sku_id = t.catalog_sku_id
+        -- The SKU owns the inventory policy. Unlimited SKUs normally have no
+        -- inventory row at all, so an inner join here used to omit their
+        -- counters completely. A missing row for any bounded policy now fails
+        -- closed as a finite zero-cap counter instead of becoming unlimited.
+        JOIN product_skus sku ON sku.id = t.catalog_sku_id
+        LEFT JOIN inventory_items inv ON inv.sku_id = sku.id
         LEFT JOIN (
           SELECT ticket_type_id,
                  count(*) FILTER (WHERE status = 'confirmed') AS confirmed,
@@ -273,18 +285,19 @@ def upgrade() -> None:
         CROSS JOIN LATERAL (
           SELECT
             CASE
-              WHEN inv.inventory_policy = 'unlimited' THEN 0
+              WHEN sku.inventory_policy = 'unlimited' THEN 0
               ELSE GREATEST(0, COALESCE(inv.total_capacity, 0)
                    - COALESCE(inv.safety_stock, 0)
                    + CASE WHEN inv.overselling_allowed
                           THEN COALESCE(inv.oversell_limit, 0) ELSE 0 END)
             END AS cap,
+            (sku.inventory_policy = 'unlimited') AS is_unlimited,
             COALESCE(counts.confirmed, 0) AS confirmed,
             COALESCE(counts.held, 0) AS held,
             COALESCE(counts.waitlisted, 0) AS waitlisted
         ) derived
-        -- An uncapped sku still gets a counter, with capacity 0 meaning
-        -- "no cap", so the guard can track seats without closing sales.
+        -- An uncapped sku still gets a counter with an explicit mode, so the
+        -- guard can track seats without closing sales.
         ON CONFLICT (ticket_type_id) DO NOTHING;
         """
     )
@@ -310,17 +323,21 @@ def upgrade() -> None:
                )
         FROM activity_capacity_counters c
         JOIN activity_ticket_types t ON t.id = c.ticket_type_id
-        JOIN inventory_items inv ON inv.sku_id = t.catalog_sku_id
+        JOIN product_skus sku ON sku.id = t.catalog_sku_id
+        LEFT JOIN inventory_items inv ON inv.sku_id = sku.id
         CROSS JOIN LATERAL (
           SELECT CASE
-                   WHEN inv.inventory_policy = 'unlimited' THEN 0
+                   WHEN sku.inventory_policy = 'unlimited' THEN 0
                    ELSE GREATEST(0, COALESCE(inv.total_capacity, 0)
                         - COALESCE(inv.safety_stock, 0)
                         + CASE WHEN inv.overselling_allowed
                                THEN COALESCE(inv.oversell_limit, 0) ELSE 0 END)
                  END AS cap
         ) derived
-        WHERE c.capacity > derived.cap;
+        -- Unlimited has no catalogue ceiling to exceed. Its historical seats
+        -- are real, but recording a capacity adjustment from 0 to N would turn
+        -- an uncapped ticket into a finite, full one in the operator's audit.
+        WHERE NOT c.is_unlimited AND c.capacity > derived.cap;
         """
     )
 

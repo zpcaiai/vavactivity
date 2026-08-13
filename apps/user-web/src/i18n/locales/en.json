@@ -1167,7 +1167,8 @@
       "followBack": "Follow back",
       "notificationHeading": "Follow notifications",
       "notifyOnRegistration": "Tell me when someone I follow registers for an event",
-      "notifyHint": "Only sent when that member agreed to appear in the attendee list."
+      "notifyHint": "Only sent when that member agreed to appear in the attendee list.",
+      "preferenceLoadFailed": "Follow notification settings could not be loaded"
     }
   },
   "couples": {
@@ -1360,9 +1361,12 @@
     },
     "addPhoto": "Add a photo",
     "addVideo": "Add a video",
+    "replacePhoto": "Replace this photo",
+    "replaceVideo": "Replace this video",
     "uploadLimits": "Up to 3 photos (10 MB each) and 1 video (100 MB, 3–30 seconds).",
     "uploadProgress": "Uploading {percent}%",
     "uploadDone": "Uploaded. Awaiting review.",
+    "replaceDone": "Replacement uploaded. The new file is awaiting review.",
     "uploadFailed": "Upload failed",
     "previewUnavailable": "Preview unavailable right now; the file itself is unaffected."
   }

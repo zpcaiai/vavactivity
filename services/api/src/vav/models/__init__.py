@@ -269,6 +269,7 @@ from vav.models.profile_media import (
     ProfileMediaAsset,
     ProfileMediaAudit,
     ProfileMediaProfile,
+    ProfileMediaStorageDeletion,
     ProfileShareConsent,
 )
 from vav.models.system import (
@@ -338,6 +339,7 @@ __all__ = [
     "ProfileMediaAsset",
     "ProfileMediaAudit",
     "ProfileMediaProfile",
+    "ProfileMediaStorageDeletion",
     "ProfileShareConsent",
     "ScopeAssessment",
     "ScopeAssessmentQuestion",

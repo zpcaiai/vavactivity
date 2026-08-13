@@ -1167,7 +1167,8 @@
       "followBack": "回关",
       "notificationHeading": "关注提醒",
       "notifyOnRegistration": "我关注的人报名活动时通知我",
-      "notifyHint": "只在对方同意公开出现在参与者列表时才会通知。"
+      "notifyHint": "只在对方同意公开出现在参与者列表时才会通知。",
+      "preferenceLoadFailed": "关注提醒设置加载失败"
     }
   },
   "couples": {
@@ -1360,9 +1361,12 @@
     },
     "addPhoto": "添加照片",
     "addVideo": "添加视频",
+    "replacePhoto": "替换这张照片",
+    "replaceVideo": "替换这段视频",
     "uploadLimits": "最多 3 张照片(单张 10MB 以内)和 1 段视频(100MB、3–30 秒以内)。",
     "uploadProgress": "上传中 {percent}%",
     "uploadDone": "上传完成,等待审核。",
+    "replaceDone": "替换文件已上传，新文件正在等待审核。",
     "uploadFailed": "上传失败",
     "previewUnavailable": "预览暂时不可用,文件本身未受影响。"
   }

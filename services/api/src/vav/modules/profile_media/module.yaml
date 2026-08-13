@@ -1,6 +1,6 @@
 module: {code: profile_media, owner: matchmaking, version: "1.0.0"}
 dependencies: {required: [content, identity, matchmaking_profiles, privacy, trust_safety]}
-database: {revisions: [99]}
+database: {revisions: [99, 112]}
 events:
   publishes:
     - profile_media.asset.submitted.v1
