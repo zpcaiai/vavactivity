@@ -431,7 +431,7 @@ onMounted(load);
         {{ reasonDialog.title }}
       </template>
     </VModal>
-</section>
+  </section>
 </template>
 
 <style scoped>
