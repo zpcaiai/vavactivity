@@ -59,16 +59,26 @@ def test_seed_manifest_registers_admin_showcase_as_non_production_data() -> None
     assert "vav.cli.seed_admin_showcase" not in production_prefix
 
 
-def test_neon_staging_runs_admin_showcase_after_business_showcase() -> None:
+def test_neon_staging_runs_complete_admin_showcase_after_migrations() -> None:
     workflow = yaml.safe_load(Path(".github/workflows/backend-ci.yml").read_text(encoding="utf-8"))
     steps = workflow["jobs"]["neon-migrations"]["steps"]
-    migration_step = next(
-        step for step in steps if step.get("name") == "Apply pending migrations to Neon"
+    migration_index = next(
+        index
+        for index, step in enumerate(steps)
+        if step.get("name") == "Apply pending migrations to Neon"
     )
-    commands = migration_step["run"]
+    showcase_index = next(
+        index
+        for index, step in enumerate(steps)
+        if step.get("name") == "Seed deterministic staging showcases"
+    )
+    commands = steps[showcase_index]["run"]
 
-    business = "python -m vav.cli.seed_test_showcase"
-    administration = "python -m vav.cli.seed_admin_showcase"
-    assert commands.index(business) < commands.index(administration)
+    assert migration_index < showcase_index
+    assert "python -m vav.cli.seed_admin_showcase" in commands
+    assert "python -m vav.cli.seed_test_showcase" not in commands
+    assert "business_counts = await seed_test_showcase()" in Path(
+        "services/api/src/vav/cli/seed_admin_showcase.py"
+    ).read_text(encoding="utf-8")
     assert "--email admin@vav.com" in commands
     assert "--confirm-admin-showcase" in commands

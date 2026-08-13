@@ -113,7 +113,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: backend
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     concurrency:
       group: neon-production-migrations
       cancel-in-progress: false
@@ -135,29 +135,7 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
           APP_ENV: staging
-        run: |
-          uv run --package vav-platform-api alembic -c services/api/alembic.ini upgrade head
-          uv run --package vav-platform-api python -m vav.cli.seed_permissions
-          uv run --package vav-platform-api python -m vav.cli.seed_cms
-          uv run --package vav-platform-api python -m vav.cli.seed_ai_assistant
-          uv run --package vav-platform-api python -m vav.cli.seed_notification_templates
-          uv run --package vav-platform-api python -m vav.cli.seed_notifications
-          uv run --package vav-platform-api python -m vav.cli.seed_privacy
-          uv run --package vav-platform-api python -m vav.cli.seed_privacy_inventory
-          uv run --package vav-platform-api python -m vav.cli.seed_quality
-          uv run --package vav-platform-api python -m vav.cli.seed_experience
-          uv run --package vav-platform-api python -m vav.cli.seed_process_governance
-          uv run --package vav-platform-api python -m vav.cli.seed_data_governance
-          uv run --package vav-platform-api python -m vav.cli.seed_admin_platform
-          uv run --package vav-platform-api python -m vav.cli.seed_memberships
-          uv run --package vav-platform-api python -m vav.cli.seed_trust_safety
-          uv run --package vav-platform-api python -m vav.cli.seed_test_user \
-            --confirm-insecure-test-account
-          uv run --package vav-platform-api python -m vav.cli.seed_test_showcase \
-            --confirm-test-showcase
-          uv run --package vav-platform-api python -m vav.cli.seed_admin_showcase \
-            --email admin@vav.com \
-            --confirm-admin-showcase
+        run: uv run --package vav-platform-api alembic -c services/api/alembic.ini upgrade head
       - name: Verify the live Neon schema
         env:
           DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
@@ -165,3 +143,11 @@ jobs:
           current_revision="$(uv run --package vav-platform-api alembic -c services/api/alembic.ini current)"
           printf '%s\n' "$current_revision"
           grep -Fq '(head)' <<< "$current_revision"
+      - name: Seed deterministic staging showcases
+        env:
+          DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+          APP_ENV: staging
+        run: |
+          uv run --package vav-platform-api python -m vav.cli.seed_admin_showcase \
+            --email admin@vav.com \
+            --confirm-admin-showcase
