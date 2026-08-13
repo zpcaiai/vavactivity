@@ -66,6 +66,15 @@ def test_business_showcase_pins_every_published_content_revision() -> None:
     assert source.count("published_revision_number=COALESCE(") == 3
 
 
+def test_business_showcase_reuses_the_test_users_active_cart() -> None:
+    source = Path("services/api/src/vav/cli/seed_test_showcase.py").read_text(encoding="utf-8")
+
+    lookup = "SELECT id FROM carts WHERE user_id=:user AND currency_code='USD'"
+    assert lookup in source
+    assert 'cart_id = cast(UUID, existing_cart_id or _id("cart"))' in source
+    assert '_id(f"cart-item:{cart_id}:{index}")' in source
+
+
 def test_neon_staging_runs_complete_admin_showcase_after_migrations() -> None:
     workflow = yaml.safe_load(Path(".github/workflows/backend-ci.yml").read_text(encoding="utf-8"))
     steps = workflow["jobs"]["neon-migrations"]["steps"]
