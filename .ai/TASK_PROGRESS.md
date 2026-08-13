@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-last_updated: 2026-08-13T23:12:35+08:00
+last_updated: 2026-08-13T23:39:33+08:00
 repository: /Users/stephen/Documents/Projects/python/vavactivity
 canonical: true
 ---
@@ -57,8 +57,8 @@ so another agent can continue without guessing.
   admin indentation corrections, restore the versioned Claude
   Code/Codex shared ledger, integrate frontend commits `c539120` and `c379b16`,
   and merge the approved backend/frontend pull requests.
-- Branch: final writeback on `codex/ai-merge-record`, based on backend `main`
-  merge `74785173ca617233f5e6876869c0c5d18c138c5c`
+- Branch: final writeback on `codex/ai-merge-record`; the branch is rebased
+  onto the current backend `main` before its pull request is opened
 - Snapshot basis: backend PR 4 merged as
   `bee990d35d2b6c0d8115b5845e9a0b9db26f3119`; backend PR 5 head
   `97bfe85a6e8914b16a06797c7c85644a743c84f7` merged as
@@ -82,7 +82,8 @@ so another agent can continue without guessing.
   resolved to `bc4840c` at the post-merge verification. This final writeback is
   intentionally not self-recording its own commit SHA; use Git history for the
   ledger-only record commit.
-- Remote CI: `PASSED` for every required backend PR 5 and frontend PR 11 check.
+- Remote CI: `PASSED` for every reported non-conditional backend PR 5 and
+  frontend PR 11 check; GitHub reported no branch-protection required checks.
   The conditional backend `Apply migrations to Neon` job was `SKIPPED` by its
   workflow condition and was not a required merge check.
 - Remaining gates: production deployment, browser/device acceptance, customer
@@ -114,9 +115,9 @@ snapshot. Their presence is not proof that every associated external gate ran.
   `1456d9d`, and security follow-up `8967e4f`.
 - Backend PR 4 is green: Backend CI, Secret Scan, Integration CI, Docker Build,
   Security Tests, assembly contracts, and migration compatibility all passed.
-- Backend PR 5 passed all required checks at `97bfe85` and merged as
-  `74785173`. Frontend PR 11 passed dependency installation, lint, typecheck,
-  tests, build, and Vercel at `c379b16`, then merged as `bc4840c`.
+- Backend PR 5 passed all reported non-conditional checks at `97bfe85` and
+  merged as `74785173`. Frontend PR 11 passed dependency installation, lint,
+  typecheck, tests, build, and Vercel at `c379b16`, then merged as `bc4840c`.
 - Fetched both remote default branches after merge and verified backend `main`
   contains `97bfe85` and frontend `main` contains `c379b16`.
 - Confirmed the long-running VAV admin-web dev server on port 5174 had no
