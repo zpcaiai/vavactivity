@@ -86,12 +86,15 @@ def _record(
 
 def test_the_default_consent_state_is_not_asked() -> None:
     assert DEFAULT_PREVIEW_CONSENT_STATE is PreviewConsentState.NOT_ASKED
-    assert AttendeeRecord(
-        user_id=_uid(1),
-        registration_id=_uid(2),
-        registration_status="confirmed",
-        payment_state="paid",
-    ).consent_state == PreviewConsentState.NOT_ASKED.value
+    assert (
+        AttendeeRecord(
+            user_id=_uid(1),
+            registration_id=_uid(2),
+            registration_status="confirmed",
+            payment_state="paid",
+        ).consent_state
+        == PreviewConsentState.NOT_ASKED.value
+    )
 
 
 def test_a_member_who_never_answered_is_not_shown() -> None:
@@ -126,7 +129,7 @@ def test_an_explicitly_consented_confirmed_paid_attendee_is_shown() -> None:
 
 
 def test_only_confirmed_registrations_can_be_previewed() -> None:
-    assert CONFIRMED_REGISTRATION_STATUSES == frozenset({"confirmed"})
+    assert frozenset({"confirmed"}) == CONFIRMED_REGISTRATION_STATUSES
 
 
 @pytest.mark.parametrize(
@@ -258,9 +261,7 @@ def test_every_preview_item_passes_the_projection_guard() -> None:
 
 
 def test_granting_consent_records_a_timestamp_and_an_audit_action() -> None:
-    change = apply_consent_decision(
-        current_state="not_asked", target_state="granted", now=NOW
-    )
+    change = apply_consent_decision(current_state="not_asked", target_state="granted", now=NOW)
     assert change.state is PreviewConsentState.GRANTED
     assert change.granted_at == NOW
     assert change.removes_future_display is False
@@ -268,18 +269,14 @@ def test_granting_consent_records_a_timestamp_and_an_audit_action() -> None:
 
 
 def test_withdrawal_removes_future_display_and_is_audited() -> None:
-    change = apply_consent_decision(
-        current_state="granted", target_state="withdrawn", now=NOW
-    )
+    change = apply_consent_decision(current_state="granted", target_state="withdrawn", now=NOW)
     assert change.removes_future_display is True
     assert change.withdrawn_at == NOW
     assert change.audit_action == "attendee_preview.consent.withdrawn.member"
 
 
 def test_a_withdrawn_member_may_opt_back_in() -> None:
-    change = apply_consent_decision(
-        current_state="withdrawn", target_state="granted", now=NOW
-    )
+    change = apply_consent_decision(current_state="withdrawn", target_state="granted", now=NOW)
     assert change.state is PreviewConsentState.GRANTED
 
 

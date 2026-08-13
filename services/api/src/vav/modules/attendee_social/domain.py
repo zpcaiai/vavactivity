@@ -68,9 +68,7 @@ class PreviewConsentState(StrEnum):
 DEFAULT_PREVIEW_CONSENT_STATE = PreviewConsentState.NOT_ASKED
 
 #: The only consent state that permits public display (ATT-001 / DEC-002).
-CONSENTED_PREVIEW_STATES: frozenset[PreviewConsentState] = frozenset(
-    {PreviewConsentState.GRANTED}
-)
+CONSENTED_PREVIEW_STATES: frozenset[PreviewConsentState] = frozenset({PreviewConsentState.GRANTED})
 
 
 class PaymentState(StrEnum):
@@ -97,9 +95,7 @@ CONFIRMED_REGISTRATION_STATUSES: frozenset[str] = frozenset({"confirmed"})
 #: Attendance states meaning the person did not actually turn up. Mirrors
 #: ``vav.modules.activities.domain.AttendanceStatus``. Attendance is a separate
 #: column from registration status, so both are consulted.
-ABSENT_ATTENDANCE_STATUSES: frozenset[str] = frozenset(
-    {"no_show", "checkin_revoked"}
-)
+ABSENT_ATTENDANCE_STATUSES: frozenset[str] = frozenset({"no_show", "checkin_revoked"})
 
 
 class PreviewExclusionReason(StrEnum):
@@ -544,9 +540,7 @@ def plan_follow(
             "FOLLOW_SELF_NOT_ALLOWED", "A member cannot follow themselves."
         )
     if follower_blocks_followee or followee_blocks_follower:
-        raise AttendeeSocialRuleError(
-            "FOLLOW_BLOCKED", "This member cannot be followed."
-        )
+        raise AttendeeSocialRuleError("FOLLOW_BLOCKED", "This member cannot be followed.")
     if current_state == FollowState.ACTIVE.value:
         return FollowPlan(
             action=FollowAction.UNCHANGED,
@@ -678,9 +672,7 @@ def decide_followed_user_registered(
     if not event_is_public:
         return NotificationDecision(False, NotificationSuppression.EVENT_NOT_PUBLIC, None)
     if not actor_registration_is_public:
-        return NotificationDecision(
-            False, NotificationSuppression.REGISTRATION_NOT_VISIBLE, None
-        )
+        return NotificationDecision(False, NotificationSuppression.REGISTRATION_NOT_VISIBLE, None)
     key = followed_user_registered_dedupe_key(
         recipient_id=recipient_id, actor_id=actor_id, activity_id=activity_id
     )

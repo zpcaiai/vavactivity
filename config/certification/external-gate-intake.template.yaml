@@ -1,0 +1,170 @@
+schema_version: "1.0.0"
+
+# The currently deployed production artifact is the only target with a complete
+# deployment identity. Selecting latest_feature requires deploying it first and
+# starts new 24h/7d/30d observation windows.
+certification_target: current_production
+targets:
+  current_production:
+    backend_git_commit: 2cfe5210e737a3ff8cfcab533d440142de540c1d
+    frontend_git_commit: 96c0f8ac57e39cdbe9170b621971eccbeba28a2a
+    backend_deployment_id: dep-d9tfcd2jobas73crurc0
+    frontend_deployment_id: dpl_7sPfWEXmvGQu2G2nruzApfnMMvwj
+    release_version: 0.1.0
+    api_url: https://vav-platform-api.onrender.com
+    api_readiness_url: https://vav-platform-api.onrender.com/api/v1/health/ready
+    user_url: https://vavactivity.vercel.app/zh-CN/auth/login
+    admin_url: https://vavactivity.vercel.app/admin/login
+    artifacts:
+      backend:
+        kind: source_deployment
+        digest: not_applicable
+        reason: Render builds directly from the bound Git commit, not an OCI image.
+      frontend:
+        kind: static_deployment
+        digest: not_applicable
+        reason: Vercel serves a static deployment bound to the Git commit.
+  latest_feature:
+    backend_git_commit: 7c60e8b1bfa96725b73c4a2e5293fc45727a6f48
+    frontend_git_commit: 37b36b0d296452114e6e36062183c5204b33b270
+    backend_deployment_id: ""
+    frontend_deployment_id: dpl_9QYmGK9gvWjoPTqVmtM7nijrx75q
+    release_version: 0.1.0-candidate
+    api_url: https://vav-platform-api.onrender.com
+    api_readiness_url: https://vav-platform-api.onrender.com/api/v1/health/ready
+    user_url: https://vavactivity-nfcrymvd2-zpchoney-6160s-projects.vercel.app/zh-CN/auth/login
+    admin_url: https://vavactivity-nfcrymvd2-zpchoney-6160s-projects.vercel.app/admin/login
+    artifacts:
+      backend: {kind: source_deployment, digest: not_applicable}
+      frontend: {kind: static_deployment, digest: not_applicable}
+
+security_authorization:
+  approved: false
+  authorization_id: ""
+  authorizing_owner: ""
+  owner_organization: ""
+  starts_at: ""
+  ends_at: ""
+  target_urls:
+    - https://vav-platform-api.onrender.com
+    - https://vavactivity.vercel.app/zh-CN/auth/login
+    - https://vavactivity.vercel.app/admin/login
+  allowed_test_types: [authenticated_dast, schema_fuzz, independent_penetration]
+  max_requests_per_second: 2
+  max_concurrency: 2
+  source_ip_cidrs: []
+  forbidden_operations:
+    - denial_of_service
+    - destructive_data_mutation
+    - data_exfiltration
+    - persistence
+    - social_engineering
+  independent_test_provider:
+    organization: ""
+    lead_tester: ""
+  emergency_stop_contact:
+    name: ""
+    contact: ""
+  written_authorization_evidence:
+    path: ../../build/certification/intake/security-authorization.pdf
+    sha256: ""
+
+# Only environment-variable names belong here. Never commit usernames,
+# passwords, cookies, API keys, tokens or production personal data.
+test_accounts:
+  synthetic_data_only: true
+  contains_real_personal_data: false
+  accounts:
+    - type: user
+      username_env: VAV_CERT_USER_EMAIL
+      password_env: VAV_CERT_USER_PASSWORD
+      roles: [member]
+      expires_at: ""
+    - type: admin
+      username_env: VAV_CERT_ADMIN_EMAIL
+      password_env: VAV_CERT_ADMIN_PASSWORD
+      roles: [platform_admin]
+      expires_at: ""
+    - type: role_specific
+      username_env: VAV_CERT_SECURITY_REVIEWER_EMAIL
+      password_env: VAV_CERT_SECURITY_REVIEWER_PASSWORD
+      roles: [security_reviewer]
+      expires_at: ""
+
+device_uat:
+  require_physical_ios: true
+  require_physical_android: true
+  required_journeys: [user_login, admin_login, service_catalog]
+  device_cloud:
+    provider: ""
+    credential_env: VAV_DEVICE_CLOUD_TOKEN
+
+infrastructure_access:
+  platform: render_vercel
+  render:
+    service_id: srv-d9srrvnavr4c73f50ju0
+    api_token_env: RENDER_API_KEY
+  kubernetes:
+    kubeconfig_env: VAV_PRODUCTION_KUBECONFIG
+    production_context: ""
+  postgresql:
+    credential_env: VAV_PRODUCTION_DATABASE_URL
+    capabilities: [pitr_restore, replica_failover, isolated_restore, metrics_read]
+  redis:
+    mode: disabled
+    not_applicable_approved: false
+    decision_evidence:
+      path: ../../build/certification/intake/redis-not-applicable-approval.pdf
+      sha256: ""
+  object_storage:
+    credential_env: VAV_PRODUCTION_OBJECT_STORAGE_CREDENTIALS
+    capabilities: [backup_read, isolated_restore, inventory, kms_decrypt]
+  regional_dr:
+    secondary_region: ""
+    dns_failover_access: false
+    load_balancer_access: false
+
+owner_approvals:
+  production_owner:
+    approved: false
+    approver: ""
+    approved_at: ""
+    target_fingerprint: ""
+    evidence:
+      path: ../../build/certification/intake/approval-production-owner.pdf
+      sha256: ""
+  security_owner:
+    approved: false
+    approver: ""
+    approved_at: ""
+    target_fingerprint: ""
+    evidence:
+      path: ../../build/certification/intake/approval-security-owner.pdf
+      sha256: ""
+  data_governance_owner:
+    approved: false
+    approver: ""
+    approved_at: ""
+    target_fingerprint: ""
+    evidence:
+      path: ../../build/certification/intake/approval-data-governance-owner.pdf
+      sha256: ""
+
+load_test_authorization:
+  approved: false
+  starts_at: ""
+  ends_at: ""
+  target_url: https://vav-platform-api.onrender.com
+  max_concurrency: 20
+  max_requests_per_second: 20
+  peak_model:
+    expected_peak_concurrency: 0
+    expected_peak_requests_per_second: 0
+    duration_minutes: 0
+  alert_contact:
+    name: ""
+    contact: ""
+  telemetry_access_env: VAV_PRODUCTION_TELEMETRY_TOKEN
+  written_authorization_evidence:
+    path: ../../build/certification/intake/load-test-authorization.pdf
+    sha256: ""

@@ -94,7 +94,12 @@
     "loading": "正在加载",
     "pleaseWait": "请稍候。",
     "yes": "是",
-    "no": "否"
+    "no": "否",
+    "save": "保存",
+    "errorTitle": "出错了",
+    "unknownError": "未知错误",
+    "saved": "已保存",
+    "listSeparator": "、"
   },
   "nav": {
     "primary": "主导航"
@@ -172,7 +177,17 @@
       "notificationPreferences": "通知偏好",
       "privacy": "隐私与数据",
       "safety": "安全中心",
-      "sessions": "登录会话"
+      "sessions": "登录会话",
+      "surveyTasks": "活动问卷",
+      "matchmakingEntitlement": "推荐额度",
+      "resultLetters": "结果信",
+      "relationshipStatus": "情感状态",
+      "memberDashboard": "我的看板",
+      "discovery": "同城发现",
+      "assessments": "测评",
+      "profileMedia": "档案照片与视频",
+      "couple": "伴侣关系",
+      "follows": "关注"
     },
     "public": {
       "activities": "活动",
@@ -849,5 +864,510 @@
     "submitted": "第 {version} 版已提交审核，该版本不可再修改。",
     "paused": "档案已暂停，已退出推荐池。",
     "reactivated": "档案已重新启用。"
+  },
+  "postEvent": {
+    "eyebrow": "活动之后",
+    "selection": {
+      "title": "双方互选",
+      "description": "从当天到场的伙伴中，最多选择 {max} 位。也可以谁都不选。",
+      "loadingMessage": "正在读取当天的名单…",
+      "chosen": "已选择",
+      "candidatesTitle": "到场伙伴",
+      "counter": "已选 {selected} / {max}",
+      "limitHint": "最多可选 {max} 位，还可再选 {remaining} 位。",
+      "emptyTitle": "暂时没有可选的伙伴",
+      "emptyMessage": "名单冻结后，符合条件的伙伴会出现在这里。",
+      "notEligibleTitle": "你不在本次互选名单中",
+      "notEligibleMessage": "互选只面向当天完成签到的参与者。如果你认为这是误判，请联系工作人员。",
+      "submittedTitle": "已提交",
+      "submittedMessage": "你的选择已经记录。",
+      "editableUntil": "在 {time} 之前你还可以修改。",
+      "lockedTitle": "已截止",
+      "lockedMessage": "修改窗口已经关闭，本次选择不能再更改。",
+      "draftSavedTitle": "草稿已保存",
+      "draftSavedMessage": "还没有正式提交，你可以随时回来继续。",
+      "reasonTitle": "这次谁都没有选",
+      "reasonDescription": "选一个最接近的原因，这只会用于改进活动安排。",
+      "reasonNoteLabel": "补充说明",
+      "reasonNoteHint": "这一项需要一句话说明。",
+      "saveDraft": "保存草稿",
+      "submit": "提交选择",
+      "submitNone": "提交（不选择任何人）"
+    },
+    "survey": {
+      "title": "活动问卷",
+      "description": "你的反馈只用于改进活动。",
+      "loadingMessage": "正在读取问卷…",
+      "notFoundTitle": "没有找到这份问卷",
+      "notFoundMessage": "这份问卷不属于你，或者尚未开放。",
+      "notOpenTitle": "问卷还未开放",
+      "notOpenMessage": "开放后你会收到通知。",
+      "closedTitle": "问卷已截止",
+      "closedMessage": "截止时间是 {deadline}，现在只能查看。",
+      "deadlineTitle": "填写截止时间",
+      "deadlineMessage": "请在 {deadline}（{timezone}）之前提交。",
+      "submittedTitle": "已提交",
+      "submittedEditable": "截止之前你仍然可以修改。",
+      "charactersLeft": "还可输入 {count} 字",
+      "noSubjects": "本次没有可评价的伙伴。",
+      "missingRequired": "还有 {count} 项必答题没有填写。",
+      "savedAt": "已于 {time} 保存",
+      "saveDraft": "保存草稿",
+      "submit": "提交问卷"
+    },
+    "tasks": {
+      "title": "活动问卷",
+      "description": "参加过的活动会在这里生成问卷任务。",
+      "loadingMessage": "正在读取任务…",
+      "dueAt": "截止 {time}",
+      "emptyTitle": "暂时没有问卷",
+      "emptyMessage": "参加并完成签到后，问卷会出现在这里。",
+      "status": {
+        "pending": "待填写",
+        "in_progress": "填写中",
+        "completed": "已完成",
+        "expired": "已过期",
+        "waived": "已豁免"
+      }
+    },
+    "letters": {
+      "title": "结果信",
+      "description": "活动结束后的结果会以信件形式送达。",
+      "detailTitle": "结果信",
+      "loadingMessage": "正在读取…",
+      "emptyTitle": "还没有结果信",
+      "emptyMessage": "结果信发布后会出现在这里。",
+      "notFoundTitle": "没有找到这封信",
+      "notFoundMessage": "这封信不存在，或者尚未发布。",
+      "publishedAt": "发布于 {time}",
+      "read": "已读",
+      "unread": "未读",
+      "outcome": {
+        "mutual_match": "有互选结果",
+        "no_match": "本次没有互选成功",
+        "not_eligible": "本次未参与互选"
+      }
+    },
+    "passReasons": {}
+  },
+  "matchmakingAccess": {
+    "eyebrow": "缘分",
+    "status": {
+      "title": "情感状态",
+      "description": "只有单身状态才会开放推荐与互选。",
+      "loadingMessage": "正在读取…",
+      "openTitle": "推荐已开放",
+      "openMessage": "你可以使用推荐与互选功能。",
+      "closedTitle": "推荐已关闭",
+      "closedMessage": "把状态改为「单身」后，推荐功能会重新开放。",
+      "lockedTitle": "由伴侣绑定维护",
+      "lockedMessage": "这个状态来自已确认的伴侣绑定。需要先解除绑定才能修改。",
+      "savedTitle": "已保存",
+      "savedMessage": "状态已更新。",
+      "fieldLabel": "当前状态",
+      "fieldHint": "这个信息不会公开展示。",
+      "reasonLabel": "变更说明（可选）",
+      "reasonHint": "只有你和管理员能看到。",
+      "values": {
+        "undisclosed": "未填写",
+        "single": "单身",
+        "dating": "恋爱中",
+        "engaged": "已订婚",
+        "married": "已婚",
+        "separated": "分居",
+        "widowed": "丧偶"
+      }
+    },
+    "entitlement": {
+      "title": "推荐额度",
+      "description": "每位成员有三次免费推荐机会。",
+      "loadingMessage": "正在读取额度…",
+      "unavailableTitle": "推荐暂未开放",
+      "unavailableMessage": "推荐功能只面向单身成员。你可以在「情感状态」中更新。",
+      "remaining": "剩余次数",
+      "remainingHint": "共 {granted} 次",
+      "used": "已使用",
+      "perAttempt": "每次最多推荐",
+      "perAttemptHint": "位候选人",
+      "generate": "获取推荐",
+      "exhausted": "免费次数已用完。",
+      "noNewTitle": "暂时没有新的候选人",
+      "noNewMessage": "这次没有消耗你的次数。有新人加入时我们会通知你。",
+      "deliveredTitle": "已生成推荐",
+      "deliveredMessage": "本次推荐了 {count} 位候选人。",
+      "ledgerTitle": "额度记录",
+      "ledgerDescription": "每一次变化都有据可查。",
+      "reason": {
+        "grant": "发放",
+        "consume": "使用",
+        "refund": "退回",
+        "expire": "过期",
+        "admin_adjust": "人工调整"
+      }
+    },
+    "waitPool": {
+      "title": "你在等待名单中",
+      "message": "有新的合适候选人时，我们会通知你。"
+    }
+  },
+  "memberDashboard": {
+    "eyebrow": "会员空间",
+    "title": "我的看板",
+    "description": "把各个模块的待办汇总到一处。每一项的状态仍由所属模块决定。",
+    "loadingMessage": "正在读取各模块状态。",
+    "openTasks": "待处理事项",
+    "urgentCount": "{count} 项紧急",
+    "degradedTitle": "部分内容暂时读不到",
+    "degradedMessage": "以下板块暂时无法读取：{sections}。下面的列表并不完整。",
+    "countExcludesDegraded": "读不到的板块不计入上面的数字。",
+    "emptyTitle": "暂时没有待办",
+    "emptyMessage": "有新的问卷、结果信或活动提醒时会出现在这里。",
+    "sectionEmpty": "这个板块暂时没有内容。",
+    "sectionUnavailableTitle": "暂时读不到",
+    "sectionUnavailableMessage": "这个板块的来源模块暂时没有响应，稍后再试。",
+    "hideSection": "收起",
+    "showSection": "显示「{section}」",
+    "hiddenTitle": "已收起的板块",
+    "dismiss": "忽略",
+    "loadMore": "加载更多",
+    "dueAt": "截止 {time}",
+    "sections": {
+      "survey_tasks": "问卷任务",
+      "result_letters": "结果信",
+      "registrations": "活动报名",
+      "mutual_selection": "互选",
+      "matchmaking": "婚恋额度",
+      "notifications": "通知"
+    },
+    "taskTypes": {
+      "survey_pending": "待填写的问卷",
+      "mutual_selection_pending": "待提交的互选",
+      "result_letter_unread": "未读结果信",
+      "registration_upcoming": "即将开始的活动",
+      "matchmaking_attempt_available": "可用的婚恋额度",
+      "notification_unread": "未读通知"
+    },
+    "priority": {
+      "urgent": "紧急",
+      "high": "较高",
+      "normal": "普通",
+      "low": "较低"
+    }
+  },
+  "discovery": {
+    "eyebrow": "同城发现",
+    "title": "同城活动",
+    "description": "按城市筛选活动。城市来源和筛选是否生效都会写在页面上。",
+    "loadingMessage": "正在读取活动列表。",
+    "cityUnknown": "未确定的城市",
+    "untitled": "未命名活动",
+    "cityLabel": "城市",
+    "cityPlaceholder": "输入城市代码",
+    "applyCity": "设为我的城市",
+    "clearCity": "清除城市偏好",
+    "loadMore": "加载更多",
+    "emptyTitle": "没有找到活动",
+    "emptyMessage": "换一个城市，或清除城市偏好看看全国的活动。",
+    "scopeSummary": "当前范围：{scope}（{city}），该城市共有 {count} 场活动。",
+    "scope": {
+      "local": "本地",
+      "national": "全国"
+    },
+    "ipSuggestionTitle": "这个城市是猜的",
+    "ipSuggestionMessage": "我们根据网络位置猜测你在{city}，你还没有确认过。",
+    "confirmCity": "就用{city}",
+    "disableIpSuggestion": "不要再根据网络位置猜测",
+    "switchCityTitle": "要换一个城市吗",
+    "switchCityMessage": "根据网络位置，你现在可能在{city}。",
+    "switchCity": "改用{city}",
+    "nationalFallbackTitle": "已改为显示全国活动",
+    "fallback": {
+      "not_applied": "城市筛选正常生效。",
+      "no_city_resolved": "还没有确定城市，因此显示全国的活动。",
+      "local_results_empty": "这个城市暂时没有活动，因此显示全国的活动。",
+      "local_below_minimum": "这个城市的活动太少，因此补充显示全国的活动。"
+    },
+    "location": {
+      "title": "活动地点",
+      "description": "地址以主办方填写的为准；地图定位失败时地址依然有效。",
+      "loadingMessage": "正在读取地点信息。",
+      "noneTitle": "尚未填写地点",
+      "noneMessage": "主办方还没有填写这场活动的地址。",
+      "addressHeading": "地址",
+      "approximateTitle": "地图定位不可用",
+      "coordinates": "坐标 {lat}, {lon}",
+      "openMap": "在地图中打开",
+      "searchMap": "在地图中搜索这个地址"
+    },
+    "geocodeStatus": {
+      "resolved": "已定位",
+      "failed": "定位失败，下面的地址是主办方填写的原文。",
+      "skipped": "未进行定位，下面的地址是主办方填写的原文。"
+    },
+    "share": {
+      "heading": "分享这场活动",
+      "copyLink": "复制链接",
+      "copied": "已复制",
+      "openQrTarget": "打开二维码目标页",
+      "unavailableTitle": "暂时不能分享",
+      "unavailableMessage": "这场活动尚未发布或已关闭分享。",
+      "fallbackCover": "这张封面是默认图，主办方还没有上传。"
+    }
+  },
+  "social": {
+    "eyebrow": "同场参与者",
+    "preview": {
+      "title": "参与者预览",
+      "description": "只显示同意出现在这里的参与者。",
+      "loadingMessage": "正在读取参与者。",
+      "emptyTitle": "还没有可显示的参与者",
+      "emptyMessage": "还没有人同意公开出现在参与者列表里。",
+      "additional": "还有 {count} 位同意公开的参与者。"
+    },
+    "consent": {
+      "heading": "是否出现在参与者列表",
+      "explanation": "默认不出现。只有你明确同意后，其他参与者才会看到你。",
+      "state": {
+        "not_asked": "未选择（不会出现）",
+        "granted": "已同意出现",
+        "declined": "已拒绝",
+        "withdrawn": "已撤回"
+      },
+      "grant": "同意出现",
+      "decline": "不出现",
+      "withdraw": "撤回同意",
+      "saved": {
+        "granted": "你现在会出现在参与者列表里。",
+        "declined": "你不会出现在参与者列表里。",
+        "withdrawn": "已撤回，你不再出现在列表里。"
+      },
+      "introLabel": "一句话介绍",
+      "introPlaceholder": "选填",
+      "introHint": "最多 {max} 个字符，会和头像一起显示。",
+      "saveIntro": "保存介绍",
+      "introSaved": "介绍已保存。"
+    },
+    "follow": "关注",
+    "unfollow": "取消关注",
+    "wantToMeet": {
+      "action": "想认识",
+      "done": "已表达",
+      "recorded": "已记录。这只针对这场活动，与关注和喜欢都不同。"
+    },
+    "follows": {
+      "title": "关注",
+      "description": "关注是单向的,和互选、喜欢都不是一回事。",
+      "loadingMessage": "正在读取关注列表。",
+      "followingHeading": "我关注的人",
+      "followersHeading": "关注我的人",
+      "followingEmpty": "还没有关注任何人。",
+      "followersEmpty": "还没有人关注你。",
+      "since": "自 {date}",
+      "mutual": "互相关注",
+      "followBack": "回关",
+      "notificationHeading": "关注提醒",
+      "notifyOnRegistration": "我关注的人报名活动时通知我",
+      "notifyHint": "只在对方同意公开出现在参与者列表时才会通知。",
+      "preferenceLoadFailed": "关注提醒设置加载失败"
+    }
+  },
+  "couples": {
+    "eyebrow": "伴侣",
+    "title": "伴侣关系",
+    "description": "绑定需要双方都确认。发出邀请本身不会建立关系。",
+    "loadingMessage": "正在读取关系状态。",
+    "kind": {
+      "dating": "恋爱中",
+      "engaged": "已订婚",
+      "married": "已婚"
+    },
+    "relationship": {
+      "heading": "当前关系",
+      "partner": "伴侣：{id}",
+      "unbindReasonLabel": "解除原因（选填）",
+      "unbindHint": "解除后双方都会收到记录，历史不会被删除。",
+      "unbind": "解除关系",
+      "unbound": "关系已解除。"
+    },
+    "invite": {
+      "heading": "邀请伴侣绑定",
+      "explanation": "发出邀请不会建立关系，需要对方接受后才生效。",
+      "inviteeLabel": "对方的用户 ID",
+      "kindLabel": "关系类型",
+      "noteLabel": "留言（选填）",
+      "noteHint": "留言会加密保存，只有对方能看到。",
+      "send": "发送邀请",
+      "sentPending": "邀请已发出，等待对方确认后关系才会建立。",
+      "responded": {
+        "accept": "已接受邀请。",
+        "reject": "已拒绝邀请。"
+      }
+    },
+    "invitations": {
+      "heading": "邀请记录",
+      "empty": "暂时没有邀请。",
+      "direction": {
+        "incoming": "收到的邀请",
+        "outgoing": "发出的邀请"
+      },
+      "status": {
+        "pending": "待回应",
+        "accepted": "已接受",
+        "rejected": "已拒绝",
+        "cancelled": "已取消",
+        "expired": "已过期"
+      },
+      "expiresAt": "有效期至 {time}",
+      "accept": "接受",
+      "reject": "拒绝",
+      "cancel": "撤回"
+    }
+  },
+  "scope": {
+    "title": "伴侣测评",
+    "description": "双方都提交后才会生成报告，中途不会有任何分数。",
+    "loadingMessage": "正在读取测评状态。",
+    "start": {
+      "heading": "开始一次测评",
+      "noVersions": "暂时没有可用的测评版本。",
+      "algorithm": "算法版本 {version}",
+      "action": "开始"
+    },
+    "progress": {
+      "heading": "进度",
+      "partner": "伴侣：{status}"
+    },
+    "participant": {
+      "not_started": "未开始",
+      "in_progress": "填写中",
+      "submitted": "已提交"
+    },
+    "waiting": {
+      "title": "等待伴侣提交",
+      "default": "你已提交。报告要等伴侣也提交后才会生成。"
+    },
+    "answers": {
+      "heading": "作答",
+      "hint": "你的作答只有你自己能看到，伴侣看不到具体答案。",
+      "empty": "这个版本还没有题目。",
+      "saveDraft": "保存草稿",
+      "submit": "提交"
+    },
+    "draftSaved": "草稿已保存。",
+    "submitted": "已提交。",
+    "report": {
+      "heading": "报告",
+      "generatedAt": "生成于 {time}",
+      "adviceHeading": "解读",
+      "advicePending": "解读尚未生成。"
+    },
+    "dimensions": {
+      "support": "支持",
+      "communication": "沟通",
+      "outlook": "期待",
+      "partnership": "协作",
+      "expectations": "预期"
+    }
+  },
+  "assessments": {
+    "eyebrow": "测评",
+    "title": "测评",
+    "description": "购买后按购买时的版本作答与计分，版本不会中途变更。",
+    "loadingMessage": "正在读取测评目录。",
+    "emptyTitle": "暂时没有上架的测评",
+    "emptyMessage": "有新的测评上架时会出现在这里。",
+    "questionCount": "{count} 道题",
+    "alreadyOwned": "已拥有",
+    "purchaseViaCheckout": "前往结算",
+    "purchaseHint": "购买在结算页完成，完成后这里会出现你的作答入口。",
+    "owned": {
+      "heading": "我的测评",
+      "attempts": "剩余 {remaining} / 共 {granted} 次"
+    },
+    "contentSource": {
+      "administrator_authored": "平台自编",
+      "licensed_third_party": "第三方授权",
+      "public_domain": "公有领域",
+      "partner_supplied": "合作方提供"
+    },
+    "attempt": {
+      "title": "作答",
+      "description": "作答与计分都基于你购买的版本。",
+      "loadingMessage": "正在读取题目。",
+      "missingTitle": "找不到作答记录",
+      "missingMessage": "请从「我的测评」重新进入。",
+      "status": {
+        "in_progress": "填写中",
+        "submitted": "已提交",
+        "expired": "已过期",
+        "abandoned": "已放弃"
+      },
+      "remaining": "还有 {count} 题未作答。",
+      "saveDraft": "保存草稿",
+      "submit": "提交",
+      "draftSaved": "草稿已保存。",
+      "submitted": "已提交，报告已生成。"
+    },
+    "report": {
+      "heading": "报告",
+      "generatedAt": "生成于 {time}",
+      "algorithm": "算法版本 {version}",
+      "adviceHeading": "解读"
+    }
+  },
+  "profileMedia": {
+    "eyebrow": "婚恋档案",
+    "title": "照片与视频",
+    "description": "私密存储，链接不可猜测。审核通过后才会对外可见。",
+    "loadingMessage": "正在读取你的素材。",
+    "completeness": {
+      "heading": "完成度"
+    },
+    "published": "已发布",
+    "notPublished": "未发布",
+    "photos": {
+      "heading": "照片",
+      "empty": "还没有上传照片。"
+    },
+    "video": {
+      "heading": "视频",
+      "empty": "还没有上传视频。"
+    },
+    "photoAlt": "档案照片",
+    "remove": "删除",
+    "pending": "有 {count} 个文件正在上传。",
+    "moderation": {
+      "pending": "待审核",
+      "approved": "已通过",
+      "rejected": "未通过"
+    },
+    "tags": {
+      "heading": "标签与自我介绍",
+      "mbtiLabel": "MBTI",
+      "introLabel": "自我介绍",
+      "cityLabel": "城市"
+    },
+    "tagsSaved": "已保存。",
+    "share": {
+      "heading": "分享名片",
+      "explanation": "逐项授权。未打开的项目不会出现在名片上，也不会显示为空白。",
+      "enabled": "启用分享名片",
+      "share_photos": "包含照片",
+      "share_video": "包含视频",
+      "share_mbti": "包含 MBTI",
+      "share_intro": "包含自我介绍",
+      "share_city": "包含城市",
+      "disabledHint": "分享名片未启用，逐项设置暂时不生效。"
+    },
+    "addPhoto": "添加照片",
+    "addVideo": "添加视频",
+    "replacePhoto": "替换这张照片",
+    "replaceVideo": "替换这段视频",
+    "uploadLimits": "最多 3 张照片(单张 10MB 以内)和 1 段视频(100MB、3–30 秒以内)。",
+    "uploadProgress": "上传中 {percent}%",
+    "uploadDone": "上传完成,等待审核。",
+    "replaceDone": "替换文件已上传，新文件正在等待审核。",
+    "uploadFailed": "上传失败",
+    "previewUnavailable": "预览暂时不可用,文件本身未受影响。"
   }
 }

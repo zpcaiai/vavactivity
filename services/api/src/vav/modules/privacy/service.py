@@ -682,16 +682,40 @@ async def process_export_request(session: AsyncSession, request_id: UUID) -> dic
     failed: list[dict[str, str]] = []
     for module in sorted(requested_modules):
         provider = provider_registry()[module]
+        exported: dict[str, Any] | None = None
         try:
             async with session.begin_nested():
-                exports[module] = await provider.export(session, UUID(str(row["user_id"])))
-            completed.append(module)
-            module_status = "completed"
-            error_code = None
+                exported = await provider.export(session, UUID(str(row["user_id"])))
+                provider_status = str(exported.get("status", "completed"))
+                if provider_status not in {"completed", "manual_review"}:
+                    raise ValueError("privacy provider returned an unsupported export status")
+            exports[module] = exported
+            if provider_status == "completed":
+                completed.append(module)
+                module_status = "completed"
+                error_code = None
+            else:
+                module_status = "manual_review"
+                error_code = str(
+                    exported.get("error_code", "PRIVACY_MODULE_EXPORT_MANUAL_REVIEW_REQUIRED")
+                )
+                failed.append(
+                    {
+                        "module_code": module,
+                        "status": module_status,
+                        "error_code": error_code,
+                    }
+                )
         except Exception:
             module_status = "failed"
             error_code = "PRIVACY_MODULE_EXPORT_FAILED"
             failed.append({"module_code": module, "error_code": error_code})
+        result_manifest: dict[str, Any] = {
+            "included": exported is not None,
+            "complete": module_status == "completed",
+        }
+        if exported is not None and "attachment_manifest" in exported:
+            result_manifest["attachment_manifest"] = exported["attachment_manifest"]
         await session.execute(
             text(
                 "INSERT INTO privacy_module_request_results "
@@ -707,7 +731,7 @@ async def process_export_request(session: AsyncSession, request_id: UUID) -> dic
                 "module": module,
                 "status": module_status,
                 "version": provider.schema_version,
-                "manifest": json_value({"included": module_status == "completed"}),
+                "manifest": json_value(result_manifest),
                 "error": error_code,
                 "completed_at": utcnow() if module_status == "completed" else None,
             },
@@ -728,10 +752,11 @@ async def process_export_request(session: AsyncSession, request_id: UUID) -> dic
             "(data_subject_request_id,status,export_format,module_manifest,completed_modules,failed_modules,"
             "archive_encrypted,archive_checksum_sha256,encryption_mode,archive_expires_at,started_at,completed_at) "
             "VALUES (:request_id,:status,:format,CAST(:manifest AS jsonb),CAST(:completed AS jsonb),"
-            "CAST(:failed AS jsonb),:archive,:checksum,'fernet',:expires,now(),now()) "
+            "CAST(:failed AS jsonb),:archive,:checksum,'fernet',:expires,now(),:completed_at) "
             "ON CONFLICT (data_subject_request_id) DO UPDATE SET status=EXCLUDED.status,module_manifest=EXCLUDED.module_manifest,"
             "completed_modules=EXCLUDED.completed_modules,failed_modules=EXCLUDED.failed_modules,archive_encrypted=EXCLUDED.archive_encrypted,"
-            "archive_checksum_sha256=EXCLUDED.archive_checksum_sha256,archive_expires_at=EXCLUDED.archive_expires_at,completed_at=now(),updated_at=now()"
+            "archive_checksum_sha256=EXCLUDED.archive_checksum_sha256,archive_expires_at=EXCLUDED.archive_expires_at,"
+            "completed_at=EXCLUDED.completed_at,updated_at=now()"
         ),
         {
             "request_id": request_id,
@@ -744,6 +769,7 @@ async def process_export_request(session: AsyncSession, request_id: UUID) -> dic
             "checksum": checksum,
             "expires": utcnow()
             + timedelta(days=get_settings().privacy_export_archive_retention_days),
+            "completed_at": utcnow() if status == "completed" else None,
         },
     )
     await session.execute(
@@ -993,7 +1019,9 @@ async def execute_erasure_plan(
     )
     await session.execute(
         text(
-            "UPDATE users SET status='deletion_pending',auth_version=auth_version+1,updated_at=now() WHERE id=:user_id"
+            "UPDATE users SET status='deletion_pending',"
+            "auth_version=auth_version+CASE WHEN status='deletion_pending' THEN 0 ELSE 1 END,"
+            "updated_at=now() WHERE id=:user_id"
         ),
         {"user_id": plan["user_id"]},
     )

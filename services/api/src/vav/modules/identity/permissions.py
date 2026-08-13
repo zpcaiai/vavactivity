@@ -831,6 +831,34 @@ USABILITY_PERMISSIONS = {
     "usability.certifications.evaluate",
 }
 
+OPERATIONS_HARDENING_PERMISSIONS = {
+    "activities.capacity.manage",
+    "activities.capacity.read",
+    "activities.checkin.audit.read",
+    "activities.checkin.operate",
+    "activities.checkin.override_window",
+    "activities.checkin.policy.manage",
+    "activities.waitlist.promote",
+    "ai.audit.read",
+    "ai.budgets.manage",
+    "ai.crisis_resources.manage",
+    "ai.crisis_resources.verify",
+    "ai.escalations.handle",
+    "ai.launch_gates.manage",
+    "ai.launch_gates.read",
+    "ai.policies.manage",
+    "ai.runbooks.manage",
+    "cms.entries.manage",
+    "cms.entries.publish",
+    "cms.previews.grant",
+    "cms.revisions.read",
+    "cms.revisions.rollback",
+    "member_dashboard.incidents.read",
+    "member_dashboard.preview.read",
+    "member_dashboard.task_types.manage",
+    "privacy.contact_points.backfill",
+}
+
 P1_EXPERIENCE_PERMISSIONS = {
     # B13 discovery / maps / sharing
     "discovery.location.read",
@@ -906,6 +934,7 @@ ALL_PERMISSIONS = (
     | MATCHMAKING_ENTITLEMENT_PERMISSIONS
     | P1_EXPERIENCE_PERMISSIONS
     | PHASE_TWO_PERMISSIONS
+    | OPERATIONS_HARDENING_PERMISSIONS
     | COURSE_PERMISSIONS
     | COUNSELING_PERMISSIONS
     | KNOWLEDGE_PERMISSIONS

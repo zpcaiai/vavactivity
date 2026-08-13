@@ -26,7 +26,10 @@ spec:
             - {name: tmp, mountPath: /tmp}
             - {name: runtime-auth, mountPath: /run/secrets, readOnly: true}
       volumes:
-        - {name: tmp, emptyDir: {sizeLimit: 256Mi}}
+        # One bounded inspection may hold a 100 MiB input plus its sanitized
+        # container and FFmpeg scratch data. The application semaphore permits
+        # one per API process; the volume cap prevents unbounded node pressure.
+        - {name: tmp, emptyDir: {sizeLimit: 384Mi}}
         - name: runtime-auth
           secret:
             secretName: vav-runtime-secrets

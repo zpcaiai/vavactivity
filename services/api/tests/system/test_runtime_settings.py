@@ -16,6 +16,9 @@ def production_values() -> dict[str, Any]:
         "DATABASE_URL": ("postgresql+asyncpg://user:secret@db.example/vav?sslmode=require"),
         "REDIS_URL": "rediss://redis.example/0",
         "MEDIA_S3_ENDPOINT": "https://s3.example",
+        "MEDIA_S3_PUBLIC_ENDPOINT": "https://media.example",
+        "MEDIA_S3_ACCESS_KEY": "production-media-access-key",
+        "MEDIA_S3_SECRET_KEY": "production-media-secret-key",
         "BACKUP_ENCRYPTION_KEY": "render-generated-backup-key",
         "AUTH_REFRESH_TOKEN_PEPPER": "render-generated-refresh-pepper",
         "AUTH_COOKIE_SECURE": True,
@@ -30,6 +33,17 @@ def production_values() -> dict[str, Any]:
         "NOTIFICATION_EMAIL_PROVIDER": "transactional",
         "NOTIFICATION_EMAIL_PROVIDER_WEBHOOK_SECRET": "render-generated-webhook-secret",
         "PRIVACY_SEARCH_HMAC_PEPPER": "render-generated-privacy-pepper",
+        # Batch B13-B19 secrets. Each is the only thing making a capability
+        # unforgeable, so production refuses to boot on the repository default
+        # and the deployment config (render.yaml, the Kubernetes secret
+        # reference, the compose file and config/env/*.yaml) provisions all
+        # five. This baseline mirrors that config: if a key is added here it
+        # has to exist there too, or "complete baseline" stops being true.
+        "CHECKIN_LAST_FOUR_HMAC_KEY": "render-generated-last-four-key",
+        "CHECKIN_TOKEN_SIGNING_KEY": "render-generated-checkin-token-key",
+        "SHARE_LINK_SECRET": "render-generated-share-link-secret",
+        "PROFILE_MEDIA_TOKEN_SECRET": "render-generated-profile-media-secret",
+        "DISCOVERY_IP_MARKER_SALT": "render-generated-ip-marker-salt",
     }
 
 
@@ -64,6 +78,21 @@ def test_complete_render_production_baseline_is_accepted() -> None:
 
     assert settings.environment == "production"
     assert settings.payment_test_fake_enabled is False
+
+
+@pytest.mark.parametrize("value", [None, "http://media.example"])
+def test_production_requires_an_explicit_https_browser_storage_endpoint(
+    value: str | None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("MEDIA_S3_PUBLIC_ENDPOINT", raising=False)
+    values = production_values()
+    if value is None:
+        values.pop("MEDIA_S3_PUBLIC_ENDPOINT")
+    else:
+        values["MEDIA_S3_PUBLIC_ENDPOINT"] = value
+
+    with pytest.raises(ValidationError, match="MEDIA_S3_PUBLIC_ENDPOINT"):
+        Settings(_env_file=None, **values)
 
 
 def test_production_cannot_disable_email_verification() -> None:

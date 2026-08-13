@@ -151,6 +151,28 @@ export const systemSectionPermissions: Record<string, string> = {
   capacity: "system.capacity.read"
 };
 
+/**
+ * Section keys mirror the backend's PERMISSIONS map in usability/admin_router.py.
+ * A key that does not exist there resolves to `usability.dashboard.read` and
+ * then 404s on the section query, so these must stay in step.
+ */
+export const usabilitySectionPermissions: Record<string, string> = {
+  dashboard: "usability.dashboard.read",
+  scenarios: "uat.scenarios.read",
+  runs: "uat.runs.read",
+  "synthetic-data": "usability.synthetic.read",
+  demo: "usability.demo.read",
+  compatibility: "usability.compatibility.read",
+  localization: "usability.localization.read",
+  drafts: "usability.drafts.read",
+  notifications: "usability.notifications.read",
+  imports: "usability.imports.read",
+  studies: "usability.studies.read",
+  support: "usability.support.read",
+  certifications: "usability.certifications.read",
+  release: "usability.certifications.read"
+};
+
 export const skillSectionPermissions: Record<string, string> = {
   dashboard: "skills.analytics.read",
   catalog: "skills.registry.read",
@@ -287,6 +309,12 @@ export const privacySectionPermissions: Record<string, string> = {
   audit: "privacy.audit.read"
 };
 
+export const postEventSectionPermissions: Record<string, string> = {
+  candidates: "activities.post_event.read",
+  surveys: "surveys.definitions.manage",
+  letters: "result_letters.review"
+};
+
 function sectionsOf(permissions: Record<string, string>): AdminSection[] {
   return Object.entries(permissions).map(([key, permission]) => section(key, permission));
 }
@@ -397,6 +425,14 @@ export const adminGroups: AdminGroup[] = [
     glyph: "✦",
     modules: [
       { key: "activities", labelKey: "menu.activities", base: "/admin/activities", permission: "activities.read", sections: [] },
+      {
+        key: "post-event",
+        labelKey: "menu.postEvent",
+        base: "/admin/post-event",
+        landing: "candidates",
+        permission: "activities.post_event.read",
+        sections: sectionsOf(postEventSectionPermissions)
+      },
       { key: "courses", labelKey: "menu.courses", base: "/admin/courses", permission: "courses.read", sections: [] },
       { key: "counseling", labelKey: "menu.counseling", base: "/admin/counseling", permission: "counseling.appointments.read", sections: [] },
       { key: "knowledge", labelKey: "menu.knowledge", base: "/admin/knowledge", permission: "knowledge.spaces.read", sections: [] },
@@ -550,6 +586,14 @@ export const adminGroups: AdminGroup[] = [
         landing: "dashboard",
         permission: "skills.analytics.read",
         sections: sectionsOf(skillSectionPermissions)
+      },
+      {
+        key: "usability",
+        labelKey: "menu.usability",
+        base: "/admin/usability",
+        landing: "dashboard",
+        permission: "usability.dashboard.read",
+        sections: sectionsOf(usabilitySectionPermissions)
       }
     ]
   }

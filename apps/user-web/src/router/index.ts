@@ -63,6 +63,23 @@ import CourseCertificatesPage from "@/features/courses/pages/CourseCertificatesP
 import CounselingAppointmentsPage from "@/features/counseling/pages/CounselingAppointmentsPage.vue";
 import CommerceListPage from "@/features/commerce/pages/CommerceListPage.vue";
 import OrderDetailPage from "@/features/commerce/pages/OrderDetailPage.vue";
+import MutualSelectionPage from "@/features/post-event/pages/MutualSelectionPage.vue";
+import SurveyTaskListPage from "@/features/post-event/pages/SurveyTaskListPage.vue";
+import SurveyPage from "@/features/post-event/pages/SurveyPage.vue";
+import ResultLetterListPage from "@/features/post-event/pages/ResultLetterListPage.vue";
+import ResultLetterPage from "@/features/post-event/pages/ResultLetterPage.vue";
+import MemberDashboardPage from "@/features/member-dashboard/pages/DashboardPage.vue";
+import DiscoveryFeedPage from "@/features/discovery/pages/DiscoveryFeedPage.vue";
+import ActivityLocationPage from "@/features/discovery/pages/ActivityLocationPage.vue";
+import AttendeePreviewPage from "@/features/attendee-social/pages/AttendeePreviewPage.vue";
+import FollowsPage from "@/features/attendee-social/pages/FollowsPage.vue";
+import ProfileMediaPage from "@/features/profile-media/pages/ProfileMediaPage.vue";
+import CoupleRelationshipPage from "@/features/couples/pages/CoupleRelationshipPage.vue";
+import ScopeAssessmentPage from "@/features/couples/pages/ScopeAssessmentPage.vue";
+import AssessmentCataloguePage from "@/features/assessments/pages/AssessmentCataloguePage.vue";
+import AssessmentAttemptPage from "@/features/assessments/pages/AssessmentAttemptPage.vue";
+import RelationshipStatusPage from "@/features/matchmaking-access/pages/RelationshipStatusPage.vue";
+import MatchmakingEntitlementPage from "@/features/matchmaking-access/pages/MatchmakingEntitlementPage.vue";
 import RecommendationListPage from "@/features/recommendations/pages/RecommendationListPage.vue";
 import RecommendationDetailPage from "@/features/recommendations/pages/RecommendationDetailPage.vue";
 import RecommendationPreferencesPage from "@/features/recommendations/pages/RecommendationPreferencesPage.vue";
@@ -191,6 +208,48 @@ const appRoutes: RouteRecordRaw[] = [
   { path: "account/membership/history", name: "account-membership-history", component: MembershipHistoryPage, meta: authed },
 
   { path: "account/dating-profile", name: "account-dating-profile", component: ProfileOverviewPage, meta: verified },
+  // B09/B10/B11 post-event closure. The survey and the result letter are NOT
+  // gated on `requiresSingle`: someone who attended an event is entitled to
+  // finish their questionnaire and read their letter whatever their current
+  // relationship status. Only the candidate board is matchmaking.
+  { path: "account/activities/:activityId/selection", name: "activity-mutual-selection", component: MutualSelectionPage, meta: authed },
+  { path: "account/survey-tasks", name: "account-survey-tasks", component: SurveyTaskListPage, meta: authed },
+  { path: "account/surveys/:assignmentId", name: "account-survey", component: SurveyPage, meta: authed },
+  { path: "account/result-letters", name: "account-result-letters", component: ResultLetterListPage, meta: authed },
+  { path: "account/result-letters/:letterId", name: "account-result-letter", component: ResultLetterPage, meta: authed },
+
+  // B12. The status page itself must stay reachable for everyone — it is how a
+  // member re-opens matchmaking — so it carries no requiresSingle guard.
+  { path: "account/relationship-status", name: "account-relationship-status", component: RelationshipStatusPage, meta: authed },
+  { path: "account/matchmaking/entitlement", name: "account-matchmaking-entitlement", component: MatchmakingEntitlementPage, meta: { ...authed, requiresSingle: true } },
+
+  // B13 discovery. The city filter is a member-visible default, not a gate, so
+  // these routes carry no eligibility guard beyond being signed in.
+  { path: "account/discovery", name: "account-discovery", component: DiscoveryFeedPage, meta: authed },
+  { path: "account/activities/:activityId/location", name: "activity-location", component: ActivityLocationPage, meta: authed },
+
+  // B14 attendee preview. Appearing in it is opt-in; viewing it is not
+  // matchmaking, so it is open to every attendee.
+  { path: "account/activities/:activityId/attendees", name: "activity-attendees", component: AttendeePreviewPage, meta: authed },
+  { path: "account/follows", name: "account-follows", component: FollowsPage, meta: authed },
+
+  // B15 profile media.
+  { path: "account/profile-media", name: "account-profile-media", component: ProfileMediaPage, meta: verified },
+
+  // B16 couples and SCOPE. Deliberately NOT requiresSingle: this is the
+  // surface for members who are *not* single.
+  { path: "account/couple", name: "account-couple", component: CoupleRelationshipPage, meta: authed },
+  { path: "account/couple/scope", name: "account-couple-scope", component: ScopeAssessmentPage, meta: authed },
+  { path: "account/couple/scope/:assessmentId", name: "account-couple-scope-assessment", component: ScopeAssessmentPage, meta: authed },
+
+  // B17 paid assessments.
+  { path: "account/assessments", name: "account-assessments", component: AssessmentCataloguePage, meta: authed },
+  { path: "account/assessments/entitlements/:entitlementId", name: "account-assessment-start", component: AssessmentAttemptPage, meta: authed },
+  { path: "account/assessments/attempts/:attemptId", name: "account-assessment-attempt", component: AssessmentAttemptPage, meta: authed },
+
+  // B18 member dashboard.
+  { path: "account/dashboard", name: "account-dashboard", component: MemberDashboardPage, meta: authed },
+
   { path: "recommendations", name: "recommendations", component: RecommendationListPage, meta: { ...authed, requiresSingle: true } },
   { path: "recommendations/:recommendationItemId", name: "recommendation-detail", component: RecommendationDetailPage, meta: { ...authed, requiresSingle: true } },
   { path: "account/recommendation-preferences", name: "account-recommendation-preferences", component: RecommendationPreferencesPage, meta: authed },

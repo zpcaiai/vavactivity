@@ -21,4 +21,9 @@ secrets:
   payment_webhook_secret: cloud://production/payment-webhook-secret
   email_provider_secret: cloud://production/email-provider-secret
   ai_provider_api_key: cloud://production/ai-provider-key
+  checkin_last_four_hmac_key: cloud://production/checkin-last-four-key
+  checkin_token_signing_key: cloud://production/checkin-token-key
+  share_link_secret: cloud://production/share-link-secret
+  profile_media_token_secret: cloud://production/profile-media-secret
+  discovery_ip_marker_salt: cloud://production/ip-marker-salt
 feature_flags: {version: production-approved}

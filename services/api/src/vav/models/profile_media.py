@@ -63,6 +63,14 @@ class ProfileMediaAsset(Base):
     duration_seconds: Mapped[float | None] = mapped_column(Numeric(8, 2))
     #: Opaque, unguessable handle. The *only* way private media is addressed.
     access_token: Mapped[str] = mapped_column(String(64), nullable=False)
+    #: Temporary while uploading, immutable final key after inspection. Existing
+    #: pre-hardening rows retain their legacy key through the forward migration.
+    storage_key: Mapped[str | None] = mapped_column(String(512))
+    storage_etag: Mapped[str | None] = mapped_column(String(255))
+    storage_version_id: Mapped[str | None] = mapped_column(String(255))
+    checksum_sha256: Mapped[str | None] = mapped_column(String(64))
+    storage_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    upload_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     #: Set on a replacement so the audit trail links old bytes to new.
     replaces_asset_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True))
     rejection_reason_code: Mapped[str | None] = mapped_column(String(64))
@@ -110,18 +118,10 @@ class ProfileShareConsent(Base):
     share_photos: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=text("false")
     )
-    share_video: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("false")
-    )
-    share_mbti: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("false")
-    )
-    share_intro: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("false")
-    )
-    share_city: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("false")
-    )
+    share_video: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
+    share_mbti: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
+    share_intro: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
+    share_city: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
     created_at: Mapped[datetime] = created_at()
     updated_at: Mapped[datetime] = updated_at()
 
@@ -138,7 +138,29 @@ class ProfileMediaAudit(Base):
     actor_kind: Mapped[str] = mapped_column(String(16), nullable=False)
     action: Mapped[str] = mapped_column(String(128), nullable=False)
     reason: Mapped[str | None] = mapped_column(Text)
-    metadata_json: Mapped[dict] = mapped_column(
+    metadata_json: Mapped[dict[str, object]] = mapped_column(
         "metadata", JSONB, nullable=False, server_default=text("'{}'::jsonb")
     )
     created_at: Mapped[datetime] = created_at()
+
+
+class ProfileMediaStorageDeletion(Base):
+    """Durable retry record for physically removing private object bytes."""
+
+    __tablename__ = "profile_media_storage_deletions"
+
+    id: Mapped[UUID] = uuid_pk()
+    asset_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True))
+    # Deliberately no FK: deletion proof must survive account-row erasure.
+    owner_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True))
+    access_token: Mapped[str] = mapped_column(String(64), nullable=False)
+    storage_key: Mapped[str] = mapped_column(String(512), nullable=False, unique=True)
+    state: Mapped[str] = mapped_column(String(16), nullable=False, server_default=text("'pending'"))
+    attempts: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
+    last_error: Mapped[str | None] = mapped_column(Text)
+    next_attempt_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=text("now()")
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = created_at()
+    updated_at: Mapped[datetime] = updated_at()

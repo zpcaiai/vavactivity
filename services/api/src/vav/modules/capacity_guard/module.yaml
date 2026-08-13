@@ -1,0 +1,14 @@
+module: {code: capacity_guard, owner: activities, version: "1.0.0"}
+dependencies: {required: [activities, commerce, identity, notifications]}
+database: {revisions: [106, 111]}
+events:
+  publishes:
+    - activity.capacity.seat_held.v1
+    - activity.capacity.seat_released.v1
+    - activity.waitlist.joined.v1
+    - activity.waitlist.promotion_offered.v1
+    - activity.waitlist.promotion_expired.v1
+  consumes: [payment.order.paid.v1, payment.order.expired.v1, activity.registration.cancelled.v1]
+permissions: {prefixes: [activities.capacity., activities.waitlist.]}
+configuration: {prefixes: [CAPACITY_, WAITLIST_]}
+health: {checks: [counter_matches_registrations, no_oversold_ticket_types, stale_promotion_offer_sweep]}

@@ -5,6 +5,29 @@ from typing import Any
 
 from celery import Celery
 
+TASK_ROUTES: dict[str, dict[str, str]] = {
+    "vav.content.*": {"queue": "default"},
+    "vav.inventory.*": {"queue": "commerce"},
+    "vav.commerce.*": {"queue": "commerce"},
+    "vav.activities.*": {"queue": "activities"},
+    "vav.checkin.*": {"queue": "activities"},
+    "vav.courses.*": {"queue": "courses"},
+    "vav.counseling.*": {"queue": "counseling"},
+    "vav.notifications.*": {"queue": "notifications"},
+    "vav.privacy.*": {"queue": "privacy"},
+    # Profile-media expiry and physical deletion are privacy lifecycle work.
+    # The privacy queue is consumed in dev, production Compose, and Kubernetes.
+    "vav.profile_media.*": {"queue": "privacy"},
+    "vav.recommendations.*": {"queue": "recommendations"},
+    "vav.matchmaking_interactions.*": {"queue": "recommendations"},
+    "vav.relationships.*": {"queue": "notifications"},
+    "vav.memberships.*": {"queue": "commerce"},
+    "vav.safety.*": {"queue": "safety"},
+    "vav.skills.*": {"queue": "ai"},
+    "vav.data.*": {"queue": "default"},
+    "vav.system.*": {"queue": "default"},
+}
+
 celery_app = Celery(
     "vav",
     broker=os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/1"),
@@ -12,6 +35,8 @@ celery_app = Celery(
     include=["vav_worker.tasks"],
 )
 celery_app.conf.update(
+    task_default_queue="default",
+    task_routes=TASK_ROUTES,
     task_serializer="json",
     result_serializer="json",
     accept_content=["json"],
@@ -35,6 +60,10 @@ celery_app.conf.update(
         "advance-activity-lifecycle-and-waitlist": {
             "task": "vav.activities.advance",
             "schedule": 60.0,
+        },
+        "process-checkin-last-four-backfills": {
+            "task": "vav.checkin.process_last_four_backfill",
+            "schedule": 30.0,
         },
         "advance-course-publication-and-completion": {
             "task": "vav.courses.advance",
@@ -74,6 +103,10 @@ celery_app.conf.update(
         },
         "process-approved-privacy-erasures": {
             "task": "vav.privacy.erasures",
+            "schedule": 60.0,
+        },
+        "maintain-profile-media-storage": {
+            "task": "vav.profile_media.maintain_storage",
             "schedule": 60.0,
         },
         "evaluate-privacy-retention": {

@@ -8,6 +8,8 @@ Revision ID: 20260812_0097
 Revises: 20260812_0096
 """
 
+import re
+
 from alembic import op
 
 revision = "20260812_0097"
@@ -16,10 +18,71 @@ branch_labels = None
 depends_on = None
 
 
+def _split_statements(script: str) -> list[str]:
+    """Split a SQL script on statement boundaries.
+
+    A naive ``script.split(";")`` breaks on any semicolon, including ones
+    inside a ``--`` comment or a string literal — which silently turns the
+    remainder of a comment into a bogus statement. Postgres then fails on
+    something like ``syntax error at or near "it"``, pointing at a line that
+    looks perfectly fine.
+
+    This walks the script instead, skipping over line comments, block
+    comments, single-quoted strings and dollar-quoted bodies.
+    """
+
+    statements: list[str] = []
+    buffer: list[str] = []
+    index = 0
+    length = len(script)
+    while index < length:
+        char = script[index]
+        pair = script[index : index + 2]
+        if pair == "--":
+            end = script.find("\n", index)
+            index = length if end == -1 else end
+            continue
+        if pair == "/*":
+            end = script.find("*/", index + 2)
+            index = length if end == -1 else end + 2
+            continue
+        if char == "'":
+            buffer.append(char)
+            index += 1
+            while index < length:
+                buffer.append(script[index])
+                if script[index] == "'":
+                    if script[index : index + 2] == "''":
+                        buffer.append(script[index + 1])
+                        index += 2
+                        continue
+                    index += 1
+                    break
+                index += 1
+            continue
+        if char == "$":
+            match = re.match(r"\$[A-Za-z_]*\$", script[index:])
+            if match:
+                tag = match.group(0)
+                end = script.find(tag, index + len(tag))
+                stop = length if end == -1 else end + len(tag)
+                buffer.append(script[index:stop])
+                index = stop
+                continue
+        if char == ";":
+            statements.append("".join(buffer))
+            buffer = []
+            index += 1
+            continue
+        buffer.append(char)
+        index += 1
+    statements.append("".join(buffer))
+    return [item.strip() for item in statements if item.strip()]
+
+
 def _run(script: str) -> None:
-    for statement in script.split(";"):
-        if statement.strip():
-            op.execute(statement)
+    for statement in _split_statements(script):
+        op.execute(statement)
 
 
 def upgrade() -> None:

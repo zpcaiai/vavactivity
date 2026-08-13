@@ -9,6 +9,8 @@ from uuid import UUID
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from vav.modules.privacy.crypto import decrypt_private
+
 
 @dataclass(frozen=True)
 class PrivacyInventoryResult:
@@ -108,7 +110,231 @@ class FixedModulePrivacyProvider:
         }
 
 
+class ProfileMediaPrivacyProvider:
+    """Export and erase profile media without stranding private object bytes."""
+
+    module_code = "profile_media"
+    schema_version = "1.0"
+    operation = "delete"
+
+    async def inventory(self, session: AsyncSession, user_id: UUID) -> PrivacyInventoryResult:
+        assets = int(
+            await session.scalar(
+                text("SELECT count(*) FROM profile_media_assets WHERE owner_id=:user_id"),
+                {"user_id": user_id},
+            )
+            or 0
+        )
+        profiles = int(
+            await session.scalar(
+                text("SELECT count(*) FROM profile_media_profiles WHERE user_id=:user_id"),
+                {"user_id": user_id},
+            )
+            or 0
+        )
+        return PrivacyInventoryResult(
+            self.module_code,
+            self.schema_version,
+            [
+                {"asset_code": "profile_media.assets", "record_count": assets},
+                {"asset_code": "profile_media.profile", "record_count": profiles},
+            ],
+        )
+
+    async def export(self, session: AsyncSession, user_id: UUID) -> dict[str, Any]:
+        assets = list(
+            (
+                await session.execute(
+                    text(
+                        "SELECT id,kind,state,moderation_state,position,mime_type,byte_size,"
+                        "duration_seconds,rejection_reason_code,moderated_at,deleted_at,"
+                        "checksum_sha256,created_at,updated_at "
+                        "FROM profile_media_assets WHERE owner_id=:user_id ORDER BY created_at"
+                    ),
+                    {"user_id": user_id},
+                )
+            )
+            .mappings()
+            .all()
+        )
+        profile_row = (
+            (
+                await session.execute(
+                    text(
+                        "SELECT mbti,intro_encrypted,city_code,is_published,completeness_percent,"
+                        "created_at,updated_at FROM profile_media_profiles WHERE user_id=:user_id"
+                    ),
+                    {"user_id": user_id},
+                )
+            )
+            .mappings()
+            .first()
+        )
+        consent_row = (
+            (
+                await session.execute(
+                    text(
+                        "SELECT share_enabled,share_photos,share_video,share_mbti,share_intro,"
+                        "share_city,created_at,updated_at FROM profile_share_consents "
+                        "WHERE user_id=:user_id"
+                    ),
+                    {"user_id": user_id},
+                )
+            )
+            .mappings()
+            .first()
+        )
+        profile = dict(profile_row) if profile_row is not None else None
+        if profile is not None:
+            encrypted_intro = profile.pop("intro_encrypted", None)
+            profile["intro"] = (
+                decrypt_private(str(encrypted_intro)) if encrypted_intro is not None else None
+            )
+        asset_metadata: list[dict[str, Any]] = []
+        attachment_items: list[dict[str, Any]] = []
+        for row in assets:
+            asset = dict(row)
+            checksum = asset.pop("checksum_sha256", None)
+            asset_metadata.append(asset)
+            attachment_items.append(
+                {
+                    "asset_id": str(asset["id"]),
+                    "mime_type": asset["mime_type"],
+                    "byte_size": asset["byte_size"],
+                    "checksum_sha256": checksum,
+                    "checksum_status": "verified" if checksum else "unavailable",
+                    "included": False,
+                }
+            )
+
+        result: dict[str, Any] = {
+            "module": self.module_code,
+            "schema_version": self.schema_version,
+            "data": {
+                # Opaque access tokens, storage keys and integrity values are
+                # implementation secrets/capabilities, not user-facing data.
+                "assets": asset_metadata,
+                "profile": profile,
+                "share_consent": dict(consent_row) if consent_row is not None else None,
+            },
+            "attachment_manifest": {
+                "binary_attachments_included": False,
+                "attachment_count": len(attachment_items),
+                "items": attachment_items,
+            },
+        }
+        if attachment_items:
+            # Privacy archives are currently a single JSON value encrypted in
+            # memory. They have no bounded streaming attachment channel, so
+            # claiming completion here would silently omit the user's bytes.
+            result.update(
+                {
+                    "status": "manual_review",
+                    "error_code": "PRIVACY_EXPORT_BINARY_ATTACHMENTS_UNAVAILABLE",
+                }
+            )
+        else:
+            result["status"] = "completed"
+        return result
+
+    async def plan_erasure(self, session: AsyncSession, user_id: UUID) -> ModuleErasurePlan:
+        del session, user_id
+        return ModuleErasurePlan(
+            module_code=self.module_code,
+            operation=self.operation,
+            blockers=[],
+            retained_assets=[],
+        )
+
+    async def execute_erasure(
+        self, session: AsyncSession, user_id: UUID, operation: str
+    ) -> dict[str, Any]:
+        if operation != self.operation:
+            return {
+                "status": "manual_review",
+                "error_code": "PRIVACY_ERASURE_OPERATION_MISMATCH",
+                "retained_assets": [],
+            }
+        # Serialize erasure with register/finalize/replace/delete.  Without the
+        # same transaction-scoped owner lock, a final object PUT could race the
+        # candidate-key snapshot and recreate media while the privacy workflow
+        # is deleting its database rows.
+        await session.execute(
+            text("SELECT pg_advisory_xact_lock(hashtextextended(:key, 0))"),
+            {"key": f"profile-media:{user_id}"},
+        )
+        # Object deletion is durable and retried independently. Enqueue before
+        # deleting the database rows so no storage address is lost on success.
+        await session.execute(
+            text(
+                "WITH candidates AS ("
+                "SELECT id AS asset_id,access_token,storage_key,now() AS due_at "
+                "FROM profile_media_assets WHERE owner_id=:user_id "
+                "AND access_token <> '' AND COALESCE(storage_key,'') <> '' "
+                "UNION ALL "
+                "SELECT id,access_token,'profile-media/uploads/' || access_token,"
+                "GREATEST(now(),COALESCE(upload_expires_at,now())) "
+                "FROM profile_media_assets WHERE owner_id=:user_id AND access_token <> '' "
+                "UNION ALL "
+                "SELECT id,access_token,'profile-media/assets/' || access_token,now() "
+                "FROM profile_media_assets WHERE owner_id=:user_id AND access_token <> ''"
+                "), unique_keys AS ("
+                "SELECT DISTINCT ON (storage_key) asset_id,access_token,storage_key,due_at "
+                "FROM candidates ORDER BY storage_key,due_at DESC"
+                ") "
+                "INSERT INTO profile_media_storage_deletions "
+                "(asset_id,owner_id,access_token,storage_key,state,next_attempt_at) "
+                "SELECT asset_id,:user_id,access_token,storage_key,'pending',due_at FROM unique_keys "
+                "ON CONFLICT (storage_key) DO UPDATE SET "
+                "owner_id=EXCLUDED.owner_id,"
+                "state=CASE WHEN profile_media_storage_deletions.state='completed' "
+                "THEN 'completed' ELSE 'pending' END,last_error=NULL,"
+                "next_attempt_at=CASE WHEN profile_media_storage_deletions.state='completed' "
+                "THEN profile_media_storage_deletions.next_attempt_at "
+                "ELSE GREATEST(profile_media_storage_deletions.next_attempt_at,"
+                "EXCLUDED.next_attempt_at) END,updated_at=now()"
+            ),
+            {"user_id": user_id},
+        )
+        affected = 0
+        for statement in (
+            "DELETE FROM profile_share_consents WHERE user_id=:user_id",
+            "DELETE FROM profile_media_profiles WHERE user_id=:user_id",
+            "DELETE FROM profile_media_assets WHERE owner_id=:user_id",
+        ):
+            result = await session.execute(text(statement), {"user_id": user_id})
+            affected += max(int(getattr(result, "rowcount", 0) or 0), 0)
+        # Keep operational audit events but sever their user links. asset_id is
+        # a random UUID and remains useful for tracing the queued byte deletion.
+        await session.execute(
+            text("UPDATE profile_media_audits SET owner_id=NULL WHERE owner_id=:user_id"),
+            {"user_id": user_id},
+        )
+        await session.execute(
+            text("UPDATE profile_media_audits SET actor_id=NULL WHERE actor_id=:user_id"),
+            {"user_id": user_id},
+        )
+        pending_deletions = int(
+            await session.scalar(
+                text(
+                    "SELECT count(*) FROM profile_media_storage_deletions "
+                    "WHERE owner_id=:user_id AND state<>'completed'"
+                ),
+                {"user_id": user_id},
+            )
+            or 0
+        )
+        return {
+            "status": "processing" if pending_deletions else "completed",
+            "affected_records": affected,
+            "retained_assets": [],
+            "physical_deletion": "pending" if pending_deletions else "completed",
+            "pending_physical_deletions": pending_deletions,
+        }
+
+
 PROVIDERS: dict[str, PrivacyDataProvider] = {
+    "profile_media": ProfileMediaPrivacyProvider(),
     "identity": FixedModulePrivacyProvider(
         module_code="identity",
         inventory_queries={

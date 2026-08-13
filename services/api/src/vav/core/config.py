@@ -6,6 +6,11 @@ from typing import Literal
 from pydantic import AliasChoices, AnyHttpUrl, Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+_DEFAULT_MEDIA_S3_ACCESS_KEY = "vav_minio_local"
+_DEFAULT_MEDIA_S3_SECRET_KEY = "vav_minio_local_development_only"
+_UNSAFE_MEDIA_S3_ACCESS_KEYS = frozenset({_DEFAULT_MEDIA_S3_ACCESS_KEY, "vav_minio_ci"})
+_UNSAFE_MEDIA_S3_SECRET_KEYS = frozenset({_DEFAULT_MEDIA_S3_SECRET_KEY, "vav_minio_ci_only"})
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -141,10 +146,10 @@ class Settings(BaseSettings):
     )
     media_s3_region: str = Field(default="us-east-1", validation_alias="MEDIA_S3_REGION")
     media_s3_access_key: SecretStr = Field(
-        default=SecretStr("vav_minio_local"), validation_alias="MEDIA_S3_ACCESS_KEY"
+        default=SecretStr(_DEFAULT_MEDIA_S3_ACCESS_KEY), validation_alias="MEDIA_S3_ACCESS_KEY"
     )
     media_s3_secret_key: SecretStr = Field(
-        default=SecretStr("vav_minio_local_development_only"),
+        default=SecretStr(_DEFAULT_MEDIA_S3_SECRET_KEY),
         validation_alias="MEDIA_S3_SECRET_KEY",
     )
     media_bucket_public: str = Field(
@@ -360,9 +365,7 @@ class Settings(BaseSettings):
         default_factory=lambda: [48, 12],
         validation_alias="POST_EVENT_SURVEY_REMINDER_OFFSETS_HOURS",
     )
-    result_letters_enabled: bool = Field(
-        default=True, validation_alias="RESULT_LETTERS_ENABLED"
-    )
+    result_letters_enabled: bool = Field(default=True, validation_alias="RESULT_LETTERS_ENABLED")
     #: Four-eyes review is a privacy control, not a convenience. Turning it off
     #: is only meaningful in a local development stack.
     result_letter_require_review: bool = Field(
@@ -392,9 +395,7 @@ class Settings(BaseSettings):
     )
 
     # --- B13 discovery, maps and sharing -------------------------------------
-    discovery_geo_enabled: bool = Field(
-        default=True, validation_alias="DISCOVERY_GEO_ENABLED"
-    )
+    discovery_geo_enabled: bool = Field(default=True, validation_alias="DISCOVERY_GEO_ENABLED")
     #: An IP-derived city is only ever a *suggestion* (GEO-001). Turning this
     #: off makes the platform rely purely on the member's manual choice.
     discovery_ip_suggestion_enabled: bool = Field(
@@ -418,9 +419,12 @@ class Settings(BaseSettings):
     map_google_api_key: SecretStr | None = Field(
         default=None, validation_alias="MAP_GOOGLE_API_KEY", repr=False
     )
-    event_sharing_enabled: bool = Field(
-        default=True, validation_alias="EVENT_SHARING_ENABLED"
+    #: Geocoding happens while an operator waits on a save. Fail fast and keep
+    #: the typed address rather than holding the request open.
+    map_geocode_timeout_seconds: float = Field(
+        default=8.0, gt=0, le=60, validation_alias="MAP_GEOCODE_TIMEOUT_SECONDS"
     )
+    event_sharing_enabled: bool = Field(default=True, validation_alias="EVENT_SHARING_ENABLED")
     #: Canonical origin every share link and QR code resolves to.
     share_public_base_url: str = Field(
         default="http://localhost:5173", validation_alias="SHARE_PUBLIC_BASE_URL"
@@ -440,17 +444,13 @@ class Settings(BaseSettings):
     attendee_preview_enabled: bool = Field(
         default=True, validation_alias="ATTENDEE_PREVIEW_ENABLED"
     )
-    social_follow_enabled: bool = Field(
-        default=True, validation_alias="SOCIAL_FOLLOW_ENABLED"
-    )
+    social_follow_enabled: bool = Field(default=True, validation_alias="SOCIAL_FOLLOW_ENABLED")
     social_max_following: int = Field(
         default=2000, ge=1, le=100000, validation_alias="SOCIAL_MAX_FOLLOWING"
     )
 
     # --- B15 profile media ---------------------------------------------------
-    profile_media_enabled: bool = Field(
-        default=True, validation_alias="PROFILE_MEDIA_ENABLED"
-    )
+    profile_media_enabled: bool = Field(default=True, validation_alias="PROFILE_MEDIA_ENABLED")
     #: Signs the opaque per-asset access grants. Private media must not be
     #: reachable through a guessable URL (PROFILE-001).
     profile_media_token_secret: SecretStr = Field(
@@ -461,9 +461,7 @@ class Settings(BaseSettings):
 
     # --- B16 couples and SCOPE (DEC-001: off until approved) -----------------
     couples_enabled: bool = Field(default=False, validation_alias="COUPLES_ENABLED")
-    couple_scope_enabled: bool = Field(
-        default=False, validation_alias="COUPLE_SCOPE_ENABLED"
-    )
+    couple_scope_enabled: bool = Field(default=False, validation_alias="COUPLE_SCOPE_ENABLED")
     couple_invitation_ttl_hours: int = Field(
         default=168, ge=1, le=8760, validation_alias="COUPLE_INVITATION_TTL_HOURS"
     )
@@ -485,6 +483,102 @@ class Settings(BaseSettings):
     )
     paid_assessment_ai_advice_enabled: bool = Field(
         default=False, validation_alias="PAID_ASSESSMENT_AI_ADVICE_ENABLED"
+    )
+
+    # --- B18 unified member dashboard ---------------------------------------
+    member_dashboard_enabled: bool = Field(
+        default=True, validation_alias="MEMBER_DASHBOARD_ENABLED"
+    )
+
+    # --- B19 AI hardening ----------------------------------------------------
+    ai_hardening_enabled: bool = Field(default=True, validation_alias="AI_HARDENING_ENABLED")
+    #: When true an unconfigured budget scope refuses the request instead of
+    #: being treated as unlimited. Leave on: an unset budget is not a licence
+    #: to spend (AI-001).
+    ai_budget_require_all_scopes: bool = Field(
+        default=True, validation_alias="AI_BUDGET_REQUIRE_ALL_SCOPES"
+    )
+    ai_provider_failure_threshold: int = Field(
+        default=5, ge=1, le=100, validation_alias="AI_PROVIDER_FAILURE_THRESHOLD"
+    )
+    ai_provider_circuit_open_minutes: int = Field(
+        default=10, ge=1, le=1440, validation_alias="AI_PROVIDER_CIRCUIT_OPEN_MINUTES"
+    )
+    ai_crisis_routing_enabled: bool = Field(
+        default=True, validation_alias="AI_CRISIS_ROUTING_ENABLED"
+    )
+    ai_launch_gate_max_age_days: int = Field(
+        default=90, ge=1, le=3650, validation_alias="AI_LAUNCH_GATE_MAX_AGE_DAYS"
+    )
+    #: Empty until an operator approves the wording, which keeps the
+    #: "limitation label configured" launch gate red on a fresh deployment.
+    ai_limitation_label_version: str = Field(
+        default="", validation_alias="AI_LIMITATION_LABEL_VERSION"
+    )
+
+    # --- B19 CMS publishing --------------------------------------------------
+    cms_publishing_enabled: bool = Field(default=True, validation_alias="CMS_PUBLISHING_ENABLED")
+
+    # --- B08 onsite check-in operations --------------------------------------
+    checkin_operations_enabled: bool = Field(
+        default=True, validation_alias="CHECKIN_OPERATIONS_ENABLED"
+    )
+    checkin_last_four_lookup_enabled: bool = Field(
+        default=True, validation_alias="CHECKIN_LAST_FOUR_LOOKUP_ENABLED"
+    )
+    #: Keys the last-four HMAC. Separate from the general privacy search pepper
+    #: so a leak of one does not enable phone enumeration through the other.
+    checkin_last_four_hmac_key: SecretStr = Field(
+        default=SecretStr("local-checkin-last-four-key-change-me"),
+        validation_alias="CHECKIN_LAST_FOUR_HMAC_KEY",
+        repr=False,
+    )
+    checkin_last_four_salt_version: str = Field(
+        default="v1", validation_alias="CHECKIN_LAST_FOUR_SALT_VERSION"
+    )
+    checkin_token_signing_key: SecretStr = Field(
+        default=SecretStr("local-checkin-token-key-change-me"),
+        validation_alias="CHECKIN_TOKEN_SIGNING_KEY",
+        repr=False,
+    )
+    checkin_lookup_ttl_seconds: int = Field(
+        default=180, ge=30, le=1800, validation_alias="CHECKIN_LOOKUP_TTL_SECONDS"
+    )
+    checkin_confirmation_ttl_seconds: int = Field(
+        default=120, ge=15, le=600, validation_alias="CHECKIN_CONFIRMATION_TTL_SECONDS"
+    )
+    checkin_undo_window_minutes: int = Field(
+        default=15, ge=0, le=240, validation_alias="CHECKIN_UNDO_WINDOW_MINUTES"
+    )
+    checkin_window_early_minutes: int = Field(
+        default=60, ge=0, le=1440, validation_alias="CHECKIN_WINDOW_EARLY_MINUTES"
+    )
+    checkin_window_late_minutes: int = Field(
+        default=120, ge=0, le=1440, validation_alias="CHECKIN_WINDOW_LATE_MINUTES"
+    )
+    checkin_operator_rate_max_events: int = Field(
+        default=120, ge=1, le=10000, validation_alias="CHECKIN_OPERATOR_RATE_MAX_EVENTS"
+    )
+    checkin_operator_rate_window_seconds: int = Field(
+        default=60, ge=1, le=3600, validation_alias="CHECKIN_OPERATOR_RATE_WINDOW_SECONDS"
+    )
+
+    # --- B06 capacity and waitlist guard -------------------------------------
+    capacity_guard_enabled: bool = Field(default=True, validation_alias="CAPACITY_GUARD_ENABLED")
+    waitlist_promotion_enabled: bool = Field(
+        default=True, validation_alias="WAITLIST_PROMOTION_ENABLED"
+    )
+    waitlist_promotion_ttl_minutes: int = Field(
+        default=30, ge=1, le=1440, validation_alias="WAITLIST_PROMOTION_TTL_MINUTES"
+    )
+    waitlist_promotion_batch_size: int = Field(
+        default=10, ge=1, le=500, validation_alias="WAITLIST_PROMOTION_BATCH_SIZE"
+    )
+    #: When a party size exceeds the remaining seats, skip to the next eligible
+    #: entry instead of stalling the queue. Off by default: skipping changes the
+    #: fairness contract and should be an explicit choice.
+    waitlist_allow_skip_oversized: bool = Field(
+        default=False, validation_alias="WAITLIST_ALLOW_SKIP_OVERSIZED"
     )
     activity_grouping_require_checkin: bool = Field(
         default=False, validation_alias="ACTIVITY_GROUPING_REQUIRE_CHECKIN"
@@ -1641,6 +1735,37 @@ class Settings(BaseSettings):
             raise ValueError("production CORS origins require HTTPS")
         if production_like and not self.media_s3_endpoint.startswith("https://"):
             raise ValueError("production object storage requires HTTPS")
+        if production_like and (
+            "media_s3_public_endpoint" not in self.model_fields_set
+            or not self.media_s3_public_endpoint.startswith("https://")
+        ):
+            raise ValueError("production requires an explicit HTTPS MEDIA_S3_PUBLIC_ENDPOINT")
+        if production_like:
+            invalid_storage_credentials = sorted(
+                environment_name
+                for field_name, environment_name, secret, shipped_defaults in (
+                    (
+                        "media_s3_access_key",
+                        "MEDIA_S3_ACCESS_KEY",
+                        self.media_s3_access_key,
+                        _UNSAFE_MEDIA_S3_ACCESS_KEYS,
+                    ),
+                    (
+                        "media_s3_secret_key",
+                        "MEDIA_S3_SECRET_KEY",
+                        self.media_s3_secret_key,
+                        _UNSAFE_MEDIA_S3_SECRET_KEYS,
+                    ),
+                )
+                if field_name not in self.model_fields_set
+                or not secret.get_secret_value().strip()
+                or secret.get_secret_value().strip() in shipped_defaults
+            )
+            if invalid_storage_credentials:
+                raise ValueError(
+                    "production requires explicit dedicated object storage credentials for: "
+                    + ", ".join(invalid_storage_credentials)
+                )
         if production_like and "change-me" in self.backup_encryption_key.get_secret_value():
             raise ValueError("production requires a dedicated backup encryption key")
         if production_like and (
@@ -1826,6 +1951,35 @@ class Settings(BaseSettings):
             or "change-me" in self.privacy_search_hmac_pepper.get_secret_value()
         ):
             raise ValueError("production requires privacy encryption and a strong HMAC pepper")
+        # Secrets introduced by batches B13-B19. Every one of them is the sole
+        # thing standing between an attacker and a forgeable capability, so a
+        # deployment that forgot to set them must fail to boot rather than run
+        # on a key that ships in this repository:
+        #
+        # * last-four HMAC — a known key turns the check-in lookup column into
+        #   a phone-number enumeration oracle over a ten-thousand-entry space.
+        # * check-in token — signs the confirm/undo capability an operator
+        #   holds; forging one is forging an attendance record.
+        # * share link / profile media — signed URLs that grant read access to
+        #   member-visible content.
+        # * IP marker salt — a known salt re-identifies the markers it exists
+        #   to pseudonymize.
+        if production_like:
+            weak_secrets = sorted(
+                name
+                for name, secret in (
+                    ("CHECKIN_LAST_FOUR_HMAC_KEY", self.checkin_last_four_hmac_key),
+                    ("CHECKIN_TOKEN_SIGNING_KEY", self.checkin_token_signing_key),
+                    ("SHARE_LINK_SECRET", self.share_link_secret),
+                    ("PROFILE_MEDIA_TOKEN_SECRET", self.profile_media_token_secret),
+                    ("DISCOVERY_IP_MARKER_SALT", self.discovery_ip_marker_salt),
+                )
+                if "change-me" in secret.get_secret_value() or not secret.get_secret_value().strip()
+            )
+            if weak_secrets:
+                raise ValueError(
+                    "production requires dedicated secrets for: " + ", ".join(weak_secrets)
+                )
         return self
 
     def public_summary(self) -> dict[str, object]:

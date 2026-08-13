@@ -2,7 +2,9 @@ name: vav-platform-production
 
 x-security: &security
   read_only: true
-  tmpfs: [/tmp]
+  # Two uvicorn workers each allow one bounded media inspection. Input plus
+  # sanitized output is capped by the 100 MiB upload policy per worker.
+  tmpfs: [/tmp:size=768m,mode=1777]
   cap_drop: [ALL]
   security_opt: [no-new-privileges:true]
 
@@ -16,6 +18,15 @@ x-backend: &backend
     AUTH_REFRESH_TOKEN_PEPPER: ${AUTH_REFRESH_TOKEN_PEPPER:?inject AUTH_REFRESH_TOKEN_PEPPER}
     BACKUP_ENCRYPTION_KEY: ${BACKUP_ENCRYPTION_KEY:?inject BACKUP_ENCRYPTION_KEY}
     PRIVACY_SEARCH_HMAC_PEPPER: ${PRIVACY_SEARCH_HMAC_PEPPER:?inject PRIVACY_SEARCH_HMAC_PEPPER}
+    CHECKIN_LAST_FOUR_HMAC_KEY: ${CHECKIN_LAST_FOUR_HMAC_KEY:?inject CHECKIN_LAST_FOUR_HMAC_KEY}
+    CHECKIN_TOKEN_SIGNING_KEY: ${CHECKIN_TOKEN_SIGNING_KEY:?inject CHECKIN_TOKEN_SIGNING_KEY}
+    SHARE_LINK_SECRET: ${SHARE_LINK_SECRET:?inject SHARE_LINK_SECRET}
+    PROFILE_MEDIA_TOKEN_SECRET: ${PROFILE_MEDIA_TOKEN_SECRET:?inject PROFILE_MEDIA_TOKEN_SECRET}
+    # Storage v2 changes browser upload targets and final object keys. Keep the
+    # feature quiesced until the 0112 migration and every backend replica use
+    # the approved image; activation is a separate, gated deployment.
+    PROFILE_MEDIA_ENABLED: "${PROFILE_MEDIA_ENABLED:-false}"
+    DISCOVERY_IP_MARKER_SALT: ${DISCOVERY_IP_MARKER_SALT:?inject DISCOVERY_IP_MARKER_SALT}
     MEDIA_S3_ACCESS_KEY: ${MEDIA_S3_ACCESS_KEY:?inject MEDIA_S3_ACCESS_KEY}
     MEDIA_S3_SECRET_KEY: ${MEDIA_S3_SECRET_KEY:?inject MEDIA_S3_SECRET_KEY}
     STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:?inject STRIPE_SECRET_KEY}
@@ -40,7 +51,10 @@ services:
     <<: *backend
     command: [uvicorn, vav.main:app, --host, 0.0.0.0, --port, "8000", --workers, "2"]
     depends_on: {migration: {condition: service_completed_successfully}}
-    deploy: {replicas: 2, update_config: {order: start-first, failure_action: rollback}}
+    # A pre-0112 automatic rollback cannot read assets finalized under the v2
+    # object namespace. Pause on failure so an operator can select a
+    # schema-compatible digest instead of silently restoring an unsafe image.
+    deploy: {replicas: 2, update_config: {order: stop-first, failure_action: pause}}
     healthcheck:
       test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/ready', timeout=3)"]
       interval: 10s

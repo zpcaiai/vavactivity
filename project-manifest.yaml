@@ -35,6 +35,7 @@ module_registry:
   activities: {owner: product, status: foundation_in_progress, phase: phase_1}
   courses: {owner: product, status: foundation_in_progress, phase: phase_1}
   counseling: {owner: product, status: planned, phase: phase_1}
+  couples: {owner: relationships, status: foundation_in_progress, phase: phase_2}
   ai_assistant: {owner: ai, status: foundation_in_progress, phase: phase_1}
   notifications: {owner: platform, status: foundation_in_progress, phase: phase_1}
   privacy: {owner: privacy_and_platform, status: foundation_in_progress, phase: phase_1}
@@ -56,6 +57,17 @@ module_registry:
   process_governance: {owner: platform_operations, status: foundation_in_progress, phase: phase_1}
   data_governance: {owner: data_platform, status: foundation_in_progress, phase: phase_1}
   admin_platform: {owner: platform_operations, status: foundation_in_progress, phase: phase_1}
+  ai_hardening: {owner: trust_and_safety, status: foundation_in_progress, phase: phase_1}
+  assessments: {owner: growth, status: foundation_in_progress, phase: phase_1}
+  attendee_social: {owner: activities, status: foundation_in_progress, phase: phase_2}
+  capacity_guard: {owner: activities, status: foundation_in_progress, phase: phase_1}
+  checkin_operations: {owner: activities, status: foundation_in_progress, phase: phase_1}
+  cms_publishing: {owner: content, status: foundation_in_progress, phase: phase_1}
+  discovery: {owner: activities, status: foundation_in_progress, phase: phase_1}
+  matchmaking_entitlements: {owner: matchmaking, status: foundation_in_progress, phase: phase_2}
+  member_dashboard: {owner: member_experience, status: foundation_in_progress, phase: phase_1}
+  post_event: {owner: activities, status: foundation_in_progress, phase: phase_2}
+  profile_media: {owner: matchmaking, status: foundation_in_progress, phase: phase_2}
 
 phases:
   phase_1:
@@ -77,6 +89,13 @@ phases:
       - process_governance
       - data_governance
       - admin_platform
+      - ai_hardening
+      - assessments
+      - capacity_guard
+      - checkin_operations
+      - cms_publishing
+      - discovery
+      - member_dashboard
   phase_2:
     objective: 完成建档、推荐、互选、认识期和安全治理闭环
     modules:
@@ -90,6 +109,11 @@ phases:
       - relationship_state
       - memberships
       - moderation
+      - attendee_social
+      - couples
+      - matchmaking_entitlements
+      - post_event
+      - profile_media
 
 pending_decisions:
   safety_automated_moderation_provider:
@@ -411,28 +435,40 @@ quality:
 production_assembly:
   architecture_version: "1.0.0"
   minimum_supported_schema_version: 83
-  migration_head: "20260808_0094"
+  migration_head: "20260813_0112"
   modules:
     - activities
     - admin_platform
     - ai_assistant
+    - ai_hardening
+    - assessments
+    - attendee_social
+    - capacity_guard
     - catalog
+    - checkin_operations
+    - cms_publishing
     - commerce
     - content
     - counseling
+    - couples
     - courses
     - data_governance
+    - discovery
     - experience
     - health
     - identity
     - knowledge
+    - matchmaking_entitlements
     - matchmaking_interactions
     - matchmaking_profiles
+    - member_dashboard
     - memberships
     - notifications
     - performance
+    - post_event
     - privacy
     - process_governance
+    - profile_media
     - quality
     - recommendations
     - regression

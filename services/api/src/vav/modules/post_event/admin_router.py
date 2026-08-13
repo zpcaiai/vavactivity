@@ -104,9 +104,7 @@ async def freeze_candidates(
     activity_id: UUID,
     payload: FreezeCandidatesRequest,
     request: Request,
-    principal: AuthenticatedPrincipal = Depends(
-        require_permission("activities.candidates.freeze")
-    ),
+    principal: AuthenticatedPrincipal = Depends(require_permission("activities.candidates.freeze")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return success(
@@ -125,9 +123,7 @@ async def snapshot_detail(
     snapshot_id: UUID,
     request: Request,
     include_excluded: bool = Query(default=True),
-    _principal: AuthenticatedPrincipal = Depends(
-        require_permission("activities.post_event.read")
-    ),
+    _principal: AuthenticatedPrincipal = Depends(require_permission("activities.post_event.read")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     snapshot = await service.get_snapshot(session, snapshot_id)
@@ -202,9 +198,7 @@ async def snapshot_matches(
 async def create_survey_definition(
     payload: SurveyDefinitionRequest,
     request: Request,
-    principal: AuthenticatedPrincipal = Depends(
-        require_permission("surveys.definitions.manage")
-    ),
+    principal: AuthenticatedPrincipal = Depends(require_permission("surveys.definitions.manage")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return success(
@@ -219,9 +213,7 @@ async def create_survey_definition(
 async def survey_definition(
     definition_id: UUID,
     request: Request,
-    _principal: AuthenticatedPrincipal = Depends(
-        require_permission("surveys.definitions.manage")
-    ),
+    _principal: AuthenticatedPrincipal = Depends(require_permission("surveys.definitions.manage")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return success(
@@ -234,9 +226,7 @@ async def survey_definition(
 async def publish_survey_definition(
     definition_id: UUID,
     request: Request,
-    principal: AuthenticatedPrincipal = Depends(
-        require_permission("surveys.definitions.manage")
-    ),
+    principal: AuthenticatedPrincipal = Depends(require_permission("surveys.definitions.manage")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return success(
@@ -252,9 +242,7 @@ async def assign_survey(
     activity_id: UUID,
     payload: SurveyAssignmentRequest,
     request: Request,
-    principal: AuthenticatedPrincipal = Depends(
-        require_permission("surveys.assignments.manage")
-    ),
+    principal: AuthenticatedPrincipal = Depends(require_permission("surveys.assignments.manage")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return success(
@@ -272,9 +260,7 @@ async def assign_survey(
 async def regenerate_survey_tasks(
     assignment_id: UUID,
     request: Request,
-    _principal: AuthenticatedPrincipal = Depends(
-        require_permission("surveys.assignments.manage")
-    ),
+    _principal: AuthenticatedPrincipal = Depends(require_permission("surveys.assignments.manage")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     created = await service.generate_survey_tasks(session, assignment_id=assignment_id)
@@ -285,9 +271,7 @@ async def regenerate_survey_tasks(
 async def schedule_reminders(
     assignment_id: UUID,
     request: Request,
-    _principal: AuthenticatedPrincipal = Depends(
-        require_permission("surveys.assignments.manage")
-    ),
+    _principal: AuthenticatedPrincipal = Depends(require_permission("surveys.assignments.manage")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     scheduled = await service.schedule_survey_reminders(session, assignment_id)
@@ -315,9 +299,7 @@ async def reopen_response(
     user_id: UUID,
     payload: SurveyReopenRequest,
     request: Request,
-    principal: AuthenticatedPrincipal = Depends(
-        require_permission("surveys.responses.override")
-    ),
+    principal: AuthenticatedPrincipal = Depends(require_permission("surveys.responses.override")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return success(
@@ -393,7 +375,11 @@ async def list_letters(
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return success(
-        {"items": await service.list_letters_for_review(session, activity_id=activity_id, status=status)},
+        {
+            "items": await service.list_letters_for_review(
+                session, activity_id=activity_id, status=status
+            )
+        },
         request_id_from_request(request),
     )
 

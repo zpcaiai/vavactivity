@@ -74,7 +74,9 @@ def enabled() -> None:
         )
 
 
-async def _publish(session: AsyncSession, topic: str, aggregate_id: UUID, payload: dict) -> None:
+async def _publish(
+    session: AsyncSession, topic: str, aggregate_id: UUID, payload: dict[str, Any]
+) -> None:
     await session.execute(
         text(
             "INSERT INTO outbox_events (topic,aggregate_type,aggregate_id,payload) "
@@ -89,7 +91,7 @@ async def _publish(session: AsyncSession, topic: str, aggregate_id: UUID, payloa
 # ---------------------------------------------------------------------------
 
 
-async def get_relationship_status(session: AsyncSession, user_id: UUID) -> dict:
+async def get_relationship_status(session: AsyncSession, user_id: UUID) -> dict[str, Any]:
     row = (
         (
             await session.execute(
@@ -139,7 +141,7 @@ async def require_matchmaking_eligibility(session: AsyncSession, user_id: UUID) 
         ensure_matchmaking_allowed(current["status"])
     except MatchmakingRuleError as error:
         raise _fail(error, status_code=403) from error
-    return current["status"]
+    return str(current["status"])
 
 
 async def set_relationship_status(
@@ -152,7 +154,7 @@ async def set_relationship_status(
     actor_kind: str,
     reason: str | None = None,
     couple_relationship_id: UUID | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Write a relationship status and record the change in history.
 
     Moving away from an eligible status closes matchmaking immediately: any
@@ -370,7 +372,7 @@ async def ensure_initial_grant(session: AsyncSession, user_id: UUID) -> Entitlem
     return granted
 
 
-async def get_entitlement(session: AsyncSession, user_id: UUID) -> dict:
+async def get_entitlement(session: AsyncSession, user_id: UUID) -> dict[str, Any]:
     enabled()
     status = await get_relationship_status(session, user_id)
     if not status["matchmaking_available"]:
@@ -407,8 +409,8 @@ async def get_entitlement(session: AsyncSession, user_id: UUID) -> dict:
 
 
 async def admin_adjust_entitlement(
-    session: AsyncSession, *, user_id: UUID, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, user_id: UUID, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     enabled()
     state = await _load_state(session, user_id, lock=True)
     try:
@@ -452,14 +454,18 @@ async def admin_adjust_entitlement(
 async def _delivered_candidate_ids(session: AsyncSession, user_id: UUID) -> list[UUID]:
     generation = await _reset_generation(session, user_id)
     rows = (
-        await session.execute(
-            text(
-                "SELECT candidate_user_id FROM matchmaking_delivery_history "
-                "WHERE user_id=:user_id AND reset_generation=:generation"
-            ),
-            {"user_id": str(user_id), "generation": generation},
+        (
+            await session.execute(
+                text(
+                    "SELECT candidate_user_id FROM matchmaking_delivery_history "
+                    "WHERE user_id=:user_id AND reset_generation=:generation"
+                ),
+                {"user_id": str(user_id), "generation": generation},
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     return [UUID(str(item)) for item in rows]
 
 
@@ -472,7 +478,9 @@ async def _reset_generation(session: AsyncSession, user_id: UUID) -> int:
     """
 
     value = await session.scalar(
-        text("SELECT delivery_reset_generation FROM matchmaking_entitlements WHERE user_id=:user_id"),
+        text(
+            "SELECT delivery_reset_generation FROM matchmaking_entitlements WHERE user_id=:user_id"
+        ),
         {"user_id": str(user_id)},
     )
     return int(value or 1)
@@ -487,24 +495,28 @@ async def _eligible_candidate_ids(session: AsyncSession, user_id: UUID) -> list[
     """
 
     rows = (
-        await session.execute(
-            text(
-                "SELECT p.user_id FROM recommendation_pool_entries p "
-                "JOIN member_relationship_statuses s ON s.user_id=p.user_id "
-                "WHERE p.eligible=true AND p.user_id <> :user_id "
-                "  AND s.status IN ('single','separated','widowed') "
-                "  AND NOT EXISTS (SELECT 1 FROM activity_interaction_restrictions r "
-                "        WHERE r.status='active' AND ((r.user_a_id=:user_id AND r.user_b_id=p.user_id) "
-                "           OR (r.user_b_id=:user_id AND r.user_a_id=p.user_id))) "
-                "ORDER BY p.updated_at DESC LIMIT 200"
-            ),
-            {"user_id": str(user_id)},
+        (
+            await session.execute(
+                text(
+                    "SELECT p.user_id FROM recommendation_pool_entries p "
+                    "JOIN member_relationship_statuses s ON s.user_id=p.user_id "
+                    "WHERE p.eligible=true AND p.user_id <> :user_id "
+                    "  AND s.status IN ('single','separated','widowed') "
+                    "  AND NOT EXISTS (SELECT 1 FROM activity_interaction_restrictions r "
+                    "        WHERE r.status='active' AND ((r.user_a_id=:user_id AND r.user_b_id=p.user_id) "
+                    "           OR (r.user_b_id=:user_id AND r.user_a_id=p.user_id))) "
+                    "ORDER BY p.updated_at DESC LIMIT 200"
+                ),
+                {"user_id": str(user_id)},
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     return [UUID(str(item)) for item in rows]
 
 
-async def generate_recommendations(session: AsyncSession, *, user_id: UUID) -> dict:
+async def generate_recommendations(session: AsyncSession, *, user_id: UUID) -> dict[str, Any]:
     """One free-attempt generation.
 
     Order matters and is deliberate:
@@ -625,7 +637,7 @@ async def _exit_wait_pool(session: AsyncSession, user_id: UUID, *, reason: str) 
     )
 
 
-async def get_wait_pool_state(session: AsyncSession, user_id: UUID) -> dict:
+async def get_wait_pool_state(session: AsyncSession, user_id: UUID) -> dict[str, Any]:
     enabled()
     await require_matchmaking_eligibility(session, user_id)
     row = (
@@ -646,7 +658,9 @@ async def get_wait_pool_state(session: AsyncSession, user_id: UUID) -> dict:
     return dict(row)
 
 
-async def notify_candidate_arrivals(session: AsyncSession, *, opportunity_key: str) -> dict:
+async def notify_candidate_arrivals(
+    session: AsyncSession, *, opportunity_key: str
+) -> dict[str, Any]:
     """Background job: tell waiting members that new candidates exist.
 
     Idempotent on two levels — the domain cooldown suppresses repeats, and the
@@ -712,7 +726,7 @@ async def notify_candidate_arrivals(session: AsyncSession, *, opportunity_key: s
 
 async def reset_delivery_history(
     session: AsyncSession, *, user_id: UUID, actor_id: UUID, reason: str
-) -> dict:
+) -> dict[str, Any]:
     """Start a new de-duplication generation.
 
     Nothing is deleted: previous generations stay queryable, so it is always
@@ -766,7 +780,9 @@ async def reset_delivery_history(
     }
 
 
-async def published_disclaimer(session: AsyncSession, locale: str = "zh-CN") -> dict | None:
+async def published_disclaimer(
+    session: AsyncSession, locale: str = "zh-CN"
+) -> dict[str, Any] | None:
     """Approved V1.6 disclaimer copy, or ``None`` if none is published yet.
 
     Returning ``None`` rather than a placeholder keeps unapproved wording off
@@ -790,7 +806,9 @@ async def published_disclaimer(session: AsyncSession, locale: str = "zh-CN") -> 
     return dict(row) if row else None
 
 
-async def upsert_disclaimer(session: AsyncSession, *, actor_id: UUID, payload: dict) -> dict:
+async def upsert_disclaimer(
+    session: AsyncSession, *, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     enabled()
     await session.execute(
         text(
@@ -810,7 +828,9 @@ async def upsert_disclaimer(session: AsyncSession, *, actor_id: UUID, payload: d
     return {"disclaimer_code": payload["disclaimer_code"], "status": "draft"}
 
 
-async def publish_disclaimer(session: AsyncSession, *, disclaimer_id: UUID, actor_id: UUID) -> dict:
+async def publish_disclaimer(
+    session: AsyncSession, *, disclaimer_id: UUID, actor_id: UUID
+) -> dict[str, Any]:
     enabled()
     updated = await session.execute(
         text(
@@ -819,7 +839,7 @@ async def publish_disclaimer(session: AsyncSession, *, disclaimer_id: UUID, acto
         ),
         {"actor": str(actor_id), "id": str(disclaimer_id)},
     )
-    if updated.rowcount == 0:
+    if int(getattr(updated, "rowcount", 0) or 0) == 0:
         raise VavError(
             "DISCLAIMER_NOT_DRAFT", "Only a draft disclaimer can be published.", status_code=409
         )

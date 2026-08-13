@@ -38,6 +38,7 @@ backups/
 restore-reports/
 performance-results/
 .vavctl/
+config/certification/external-gate-intake.yaml
 
 # local delivery / transfer artifacts
 _to_delete/

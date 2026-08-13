@@ -39,9 +39,7 @@ router = APIRouter(prefix="/admin")
 async def list_relationships(
     request: Request,
     state: str | None = Query(default=None),
-    _principal: AuthenticatedPrincipal = Depends(
-        require_permission("couples.relationships.read")
-    ),
+    _principal: AuthenticatedPrincipal = Depends(require_permission("couples.relationships.read")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return success(
@@ -54,9 +52,7 @@ async def list_relationships(
 async def relationship_events(
     relationship_id: UUID,
     request: Request,
-    _principal: AuthenticatedPrincipal = Depends(
-        require_permission("couples.relationships.read")
-    ),
+    _principal: AuthenticatedPrincipal = Depends(require_permission("couples.relationships.read")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return success(
@@ -70,9 +66,7 @@ async def admin_unbind(
     relationship_id: UUID,
     payload: AdminUnbindRequest,
     request: Request,
-    principal: AuthenticatedPrincipal = Depends(
-        require_permission("couples.relationships.unbind")
-    ),
+    principal: AuthenticatedPrincipal = Depends(require_permission("couples.relationships.unbind")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return success(
@@ -90,9 +84,7 @@ async def admin_unbind(
 async def free_benefit(
     pair_key: str,
     request: Request,
-    _principal: AuthenticatedPrincipal = Depends(
-        require_permission("couples.free_benefits.read")
-    ),
+    _principal: AuthenticatedPrincipal = Depends(require_permission("couples.free_benefits.read")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     """Support answer to "why is their SCOPE not free?" — the pair already used it."""

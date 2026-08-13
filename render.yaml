@@ -75,6 +75,11 @@ services:
         value: "true"
       - key: PRIVACY_EXPORT_ENCRYPTION_ENABLED
         value: "true"
+      # Storage v2 activation is a separate operation after Neon is at 0112 and
+      # this exact backend image is healthy. A pre-0112 rollback cannot read
+      # objects finalized in the new namespace.
+      - key: PROFILE_MEDIA_ENABLED
+        value: "false"
       - key: QUALITY_ENABLED
         value: "false"
 
@@ -104,4 +109,19 @@ services:
       - key: PRIVACY_SEARCH_HMAC_PEPPER
         generateValue: true
       - key: NOTIFICATION_EMAIL_PROVIDER_WEBHOOK_SECRET
+        generateValue: true
+      # Salts the check-in last-four lookup; a known key makes that column a phone enumeration oracle.
+      - key: CHECKIN_LAST_FOUR_HMAC_KEY
+        generateValue: true
+      # Signs the operator confirm/undo capability; forging one forges an attendance record.
+      - key: CHECKIN_TOKEN_SIGNING_KEY
+        generateValue: true
+      # Signs share links.
+      - key: SHARE_LINK_SECRET
+        generateValue: true
+      # Signs per-asset private media access grants.
+      - key: PROFILE_MEDIA_TOKEN_SECRET
+        generateValue: true
+      # Pseudonymizes the coarse IP marker; a known salt re-identifies it.
+      - key: DISCOVERY_IP_MARKER_SALT
         generateValue: true

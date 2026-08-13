@@ -176,10 +176,14 @@ def ensure_license_recorded(record: LicenseRecord, *, now: datetime) -> None:
             "The licence verification timestamp is in the future.",
             details={"license_verified_at": record.license_verified_at.isoformat()},
         )
-    if record.content_source in (
-        ContentSource.LICENSED_THIRD_PARTY,
-        ContentSource.PARTNER_SUPPLIED,
-    ) and not (record.licensor_name or "").strip():
+    if (
+        record.content_source
+        in (
+            ContentSource.LICENSED_THIRD_PARTY,
+            ContentSource.PARTNER_SUPPLIED,
+        )
+        and not (record.licensor_name or "").strip()
+    ):
         raise AssessmentRuleError(
             "ASSESSMENT_LICENSOR_REQUIRED",
             "Third-party and partner-supplied content must name the licensor.",
@@ -242,9 +246,7 @@ class AssessmentVersionSpec:
                 "Question codes must be unique within a version.",
             )
         if self.price_minor_units < 0:
-            raise AssessmentRuleError(
-                "ASSESSMENT_PRICE_INVALID", "A price cannot be negative."
-            )
+            raise AssessmentRuleError("ASSESSMENT_PRICE_INVALID", "A price cannot be negative.")
         if len(self.currency) != 3 or not self.currency.isupper():
             raise AssessmentRuleError(
                 "ASSESSMENT_CURRENCY_INVALID", "Currency must be a 3-letter uppercase code."
@@ -441,9 +443,7 @@ def ensure_entitlement_usable(state: EntitlementState, *, now: datetime) -> None
             details={"entitlement_id": str(state.entitlement_id)},
         )
     if state.status is EntitlementStatus.EXPIRED or state.is_expired(now):
-        raise AssessmentRuleError(
-            "ASSESSMENT_ENTITLEMENT_EXPIRED", "This entitlement has expired."
-        )
+        raise AssessmentRuleError("ASSESSMENT_ENTITLEMENT_EXPIRED", "This entitlement has expired.")
     if state.attempts_remaining <= 0:
         raise AssessmentRuleError(
             "ASSESSMENT_ENTITLEMENT_EXHAUSTED",
@@ -825,9 +825,7 @@ def plan_revocation(
     )
 
 
-def ensure_refund_window_open(
-    *, purchased_at: datetime, now: datetime, window_hours: int
-) -> None:
+def ensure_refund_window_open(*, purchased_at: datetime, now: datetime, window_hours: int) -> None:
     """Self-service refunds are time-boxed; administrators are not.
 
     Separated from :func:`plan_revocation` so an administrative refund can

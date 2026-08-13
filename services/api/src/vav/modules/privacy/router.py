@@ -131,17 +131,35 @@ async def create_contact_point(
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     enabled()
+    # A phone also gets `last_four_hmac`, the narrowing column onsite check-in
+    # searches (CHK-002). Deriving it needs the plaintext, which only exists
+    # here — a migration cannot compute it from ciphertext later, so a write
+    # that skips it leaves the number permanently unfindable by last four.
+    last_four_digest: str | None = None
+    if payload.contact_type == "phone":
+        try:
+            from vav.modules.checkin_operations.service import contact_point_write_values
+
+            last_four_digest = contact_point_write_values(payload.value)["last_four_hmac"]
+        except VavError:
+            # The lookup salt is not configured. Storing the contact point is
+            # still correct; it simply will not be searchable by last four
+            # until the salt is set and the backfill job runs.
+            last_four_digest = None
+
     value = await session.scalar(
         text(
             "INSERT INTO user_contact_points "
-            "(user_id,contact_type,value_encrypted,value_hmac,status,visibility) "
-            "VALUES (:user_id,:type,:value,:hash,'pending_verification','private') RETURNING id"
+            "(user_id,contact_type,value_encrypted,value_hmac,last_four_hmac,status,visibility) "
+            "VALUES (:user_id,:type,:value,:hash,:last_four,'pending_verification','private') "
+            "RETURNING id"
         ),
         {
             "user_id": principal.user.id,
             "type": payload.contact_type,
             "value": encrypt_private(payload.value.strip()),
             "hash": searchable_hmac(payload.value),
+            "last_four": last_four_digest,
         },
     )
     contact_id = UUID(str(value))

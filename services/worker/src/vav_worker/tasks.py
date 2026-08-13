@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from sqlalchemy import select, text
 
 from vav.core.database import get_engine, session_factory
+from vav.cli.backfill_last_four_hmac import run as run_last_four_backfill
 from vav.core.config import get_settings
 from vav.models.content import ContentEntry
 from vav.models.courses import Course, CourseEnrollment
@@ -36,11 +37,18 @@ from vav.modules.matchmaking_interactions import (
 from vav.modules.memberships import quota as membership_quota
 from vav.modules.memberships import projection as membership_projection
 from vav.modules.privacy.service import execute_erasure_plan, process_export_request
+from vav.modules.profile_media import service as profile_media_service
 from vav.modules.recommendations import batches as recommendation_batches
 from vav.modules.recommendations import service as recommendation_service
 from vav.modules.trust_safety import service as trust_safety_service
 from vav_worker.celery_app import celery_app
 from vav_worker.skill_adapters import configured_registry
+
+PRIVACY_ERASURE_RUNNABLE_STATUSES = (
+    "ready",
+    "processing",
+    "partially_completed",
+)
 
 
 async def _publish_scheduled() -> int:
@@ -115,6 +123,100 @@ async def _advance_activities() -> dict[str, int]:
 @celery_app.task(name="vav.activities.advance")  # type: ignore[misc]
 def advance_activities() -> dict[str, int]:
     return asyncio.run(_advance_activities())
+
+
+async def _process_last_four_backfill() -> dict[str, int]:
+    """Claim and execute one explicitly requested plaintext-touching run."""
+
+    run_row = None
+    async with session_factory() as session:
+        run_row = (
+            (
+                await session.execute(
+                    text(
+                        "SELECT id,batch_size,salt_version,dry_run "
+                        "FROM checkin_last_four_backfill_runs "
+                        "WHERE status='queued' ORDER BY created_at "
+                        "FOR UPDATE SKIP LOCKED LIMIT 1"
+                    )
+                )
+            )
+            .mappings()
+            .first()
+        )
+        if run_row is None:
+            return {"claimed": 0, "processed": 0, "remaining": 0}
+        await session.execute(
+            text(
+                "UPDATE checkin_last_four_backfill_runs "
+                "SET status='running',started_at=now(),updated_at=now() WHERE id=:id"
+            ),
+            {"id": str(run_row["id"])},
+        )
+        await session.commit()
+
+    run_id = str(run_row["id"])
+    try:
+        configured_salt = get_settings().checkin_last_four_salt_version
+        if str(run_row["salt_version"]) != configured_salt:
+            raise ValueError(
+                "requested salt version does not match the active configuration"
+            )
+        processed = await run_last_four_backfill(
+            batch_size=int(run_row["batch_size"]),
+            apply=not bool(run_row["dry_run"]),
+            limit=None,
+        )
+        async with session_factory() as session:
+            remaining = int(
+                await session.scalar(
+                    text(
+                        "SELECT count(*) FROM user_contact_points "
+                        "WHERE contact_type='phone' AND value_encrypted IS NOT NULL "
+                        "AND (last_four_hmac IS NULL OR last_four_hmac NOT LIKE :prefix)"
+                    ),
+                    {"prefix": f"{configured_salt}:%"},
+                )
+                or 0
+            )
+            note = (
+                "dry run completed; no rows were changed"
+                if bool(run_row["dry_run"])
+                else f"completed with {remaining} row(s) still pending or unfixable"
+            )
+            await session.execute(
+                text(
+                    "UPDATE checkin_last_four_backfill_runs "
+                    "SET status='completed',processed_rows=:processed,pending_rows=:remaining,"
+                    "note=:note,finished_at=now(),updated_at=now() WHERE id=:id"
+                ),
+                {
+                    "id": run_id,
+                    "processed": processed,
+                    "remaining": remaining,
+                    "note": note,
+                },
+            )
+            await session.commit()
+        return {"claimed": 1, "processed": processed, "remaining": remaining}
+    except Exception as error:
+        async with session_factory() as session:
+            await session.execute(
+                text(
+                    "UPDATE checkin_last_four_backfill_runs "
+                    "SET status='failed',note=:note,finished_at=now(),updated_at=now() WHERE id=:id"
+                ),
+                {"id": run_id, "note": f"worker failed: {type(error).__name__}"},
+            )
+            await session.commit()
+        raise
+    finally:
+        await get_engine().dispose()
+
+
+@celery_app.task(name="vav.checkin.process_last_four_backfill")  # type: ignore[misc]
+def process_last_four_backfill() -> dict[str, int]:
+    return asyncio.run(_process_last_four_backfill())
 
 
 async def _advance_courses() -> dict[str, int]:
@@ -294,9 +396,10 @@ async def _process_privacy_erasures() -> int:
             (
                 await session.execute(
                     text(
-                        "SELECT id,approved_by FROM privacy_erasure_plans WHERE status='ready' "
+                        "SELECT id,approved_by FROM privacy_erasure_plans WHERE status=ANY(:statuses) "
                         "AND approved_by IS NOT NULL ORDER BY approved_at FOR UPDATE SKIP LOCKED LIMIT 10"
-                    )
+                    ),
+                    {"statuses": list(PRIVACY_ERASURE_RUNNABLE_STATUSES)},
                 )
             )
             .mappings()
@@ -314,6 +417,20 @@ async def _process_privacy_erasures() -> int:
 @celery_app.task(name="vav.privacy.erasures")  # type: ignore[misc]
 def process_privacy_erasures() -> dict[str, int]:
     return {"processed": asyncio.run(_process_privacy_erasures())}
+
+
+async def _maintain_profile_media_storage() -> dict[str, int]:
+    async with session_factory() as session:
+        expired = await profile_media_service.expire_stale_uploads(session)
+    async with session_factory() as session:
+        deletions = await profile_media_service.process_storage_deletions(session)
+    await get_engine().dispose()
+    return {"expired_uploads": expired, **deletions}
+
+
+@celery_app.task(name="vav.profile_media.maintain_storage")  # type: ignore[misc]
+def maintain_profile_media_storage() -> dict[str, int]:
+    return asyncio.run(_maintain_profile_media_storage())
 
 
 async def _evaluate_privacy_retention() -> dict[str, int]:

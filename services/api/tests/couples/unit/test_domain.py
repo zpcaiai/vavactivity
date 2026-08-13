@@ -703,9 +703,7 @@ def test_ai_advice_is_stored_separately_from_the_deterministic_scores() -> None:
 def test_a_report_without_advice_still_carries_the_full_scores() -> None:
     version = _version()
     scores = {ALICE: score_scope(version, {f"q{index}": 4 for index in range(1, 6)})}
-    payload = assemble_report_payload(
-        scores=scores, alignment=(), advice=None, generated_at=NOW
-    )
+    payload = assemble_report_payload(scores=scores, alignment=(), advice=None, generated_at=NOW)
     assert payload["advice"] is None
     assert payload["advice_status"] == "absent"
     assert payload["scores"]["members"][0]["fingerprint"]

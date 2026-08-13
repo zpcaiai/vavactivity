@@ -48,7 +48,16 @@ class ContentEntry(Base):
     scheduled_publish_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    #: Head of ``content_versions`` for this entry — the number of the most
+    #: recent revision, whichever console appended it.
     current_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("1"))
+    #: The revision members are currently served. ``None`` until first publish.
+    #: Kept separate from ``current_version`` on purpose: an entry can have
+    #: unpublished revisions ahead of the live one, and conflating the two made
+    #: the two editing consoles renumber over each other (migration 0110).
+    published_revision_number: Mapped[int | None] = mapped_column(Integer)
+    #: Optimistic-lock counter for concurrent edits. Unrelated to either of the
+    #: revision numbers above.
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("1"))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()

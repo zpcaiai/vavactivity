@@ -238,7 +238,9 @@ def validate_invitation_creation(
     return key, kind
 
 
-def ensure_invitation_actor(*, target: str, actor_id: UUID, inviter_id: UUID, invitee_id: UUID) -> None:
+def ensure_invitation_actor(
+    *, target: str, actor_id: UUID, inviter_id: UUID, invitee_id: UUID
+) -> None:
     """Who may move an invitation, and in which direction.
 
     This is the rule that makes the binding two-sided in the strict sense: only
@@ -632,9 +634,7 @@ class ScopeVersionSpec:
             )
 
     def questions_for(self, dimension: ScopeDimension) -> tuple[ScopeQuestionSpec, ...]:
-        return tuple(
-            question for question in self.questions if question.dimension is dimension
-        )
+        return tuple(question for question in self.questions if question.dimension is dimension)
 
 
 def ensure_version_publishable(version: ScopeVersionSpec) -> None:
@@ -765,9 +765,7 @@ class AssessmentState(StrEnum):
 
 _ASSESSMENT_TRANSITIONS: dict[AssessmentState, frozenset[AssessmentState]] = {
     AssessmentState.COLLECTING: frozenset({AssessmentState.COMPLETED, AssessmentState.CANCELLED}),
-    AssessmentState.COMPLETED: frozenset(
-        {AssessmentState.REPORT_READY, AssessmentState.CANCELLED}
-    ),
+    AssessmentState.COMPLETED: frozenset({AssessmentState.REPORT_READY, AssessmentState.CANCELLED}),
     AssessmentState.REPORT_READY: frozenset(),
     AssessmentState.CANCELLED: frozenset(),
 }
@@ -924,8 +922,7 @@ def score_scope(version: ScopeVersionSpec, answers: Mapping[str, int]) -> ScopeS
             )
         )
     composite = (
-        sum((score.normalized for score in dimensions), start=Decimal(0))
-        / Decimal(len(dimensions))
+        sum((score.normalized for score in dimensions), start=Decimal(0)) / Decimal(len(dimensions))
     ).quantize(SCORE_QUANTUM, rounding=ROUND_HALF_UP)
     return ScopeScoreSet(
         algorithm_version=version.algorithm_version,
@@ -960,9 +957,7 @@ class AlignmentScore:
     alignment: Decimal
 
 
-def compute_alignment(
-    first: ScopeScoreSet, second: ScopeScoreSet
-) -> tuple[AlignmentScore, ...]:
+def compute_alignment(first: ScopeScoreSet, second: ScopeScoreSet) -> tuple[AlignmentScore, ...]:
     """Pair-level view: how close the two partners scored on each dimension.
 
     This is intentionally the *only* cross-partner number produced. It exposes a

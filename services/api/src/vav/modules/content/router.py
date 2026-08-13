@@ -399,7 +399,6 @@ async def update_page(
     if entry.status == ContentStatus.PUBLISHED:
         entry.status = ContentStatus.DRAFT
     entry.version += 1
-    entry.current_version += 1
     await session.flush()
     await content_service.snapshot(
         session,
@@ -675,7 +674,6 @@ async def restore_content_version(
                 if field not in {"locale", "cover_media_id"} and hasattr(existing, field):
                     setattr(existing, field, value)
     entry.version += 1
-    entry.current_version += 1
     await session.flush()
     await content_service.snapshot(
         session,
@@ -881,7 +879,6 @@ async def _update_typed_entry(
     if entry.status == ContentStatus.PUBLISHED:
         entry.status = ContentStatus.DRAFT
     entry.version += 1
-    entry.current_version += 1
     await session.flush()
     await content_service.snapshot(
         session,

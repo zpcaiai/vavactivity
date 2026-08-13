@@ -36,6 +36,7 @@ from vav.modules.identity.permissions import require_permission
 from vav.modules.profile_media import service
 from vav.modules.profile_media.schemas import (
     AdminAssetRemovalRequest,
+    MediaAccessRequest,
     ModerationDecisionRequest,
 )
 
@@ -79,13 +80,34 @@ async def decide_moderation(
     )
 
 
+@router.post("/assets/{asset_id}/access-grants")
+async def issue_moderation_access_grant(
+    asset_id: UUID,
+    payload: MediaAccessRequest,
+    request: Request,
+    principal: AuthenticatedPrincipal = Depends(
+        require_permission("profile_media.moderation.read")
+    ),
+    session: AsyncSession = Depends(get_database_session),
+) -> dict[str, Any]:
+    """Let an authorized moderator inspect an active queue asset."""
+
+    return success(
+        await service.issue_admin_media_grant(
+            session,
+            viewer_id=principal.user.id,
+            asset_id=asset_id,
+            ttl_seconds=payload.ttl_seconds,
+        ),
+        request_id_from_request(request),
+    )
+
+
 @router.post("/assets/remove")
 async def remove_asset(
     payload: AdminAssetRemovalRequest,
     request: Request,
-    principal: AuthenticatedPrincipal = Depends(
-        require_permission("profile_media.assets.remove")
-    ),
+    principal: AuthenticatedPrincipal = Depends(require_permission("profile_media.assets.remove")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return success(
@@ -100,9 +122,7 @@ async def remove_asset(
 async def member_media(
     user_id: UUID,
     request: Request,
-    _principal: AuthenticatedPrincipal = Depends(
-        require_permission("profile_media.assets.read")
-    ),
+    _principal: AuthenticatedPrincipal = Depends(require_permission("profile_media.assets.read")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return success(

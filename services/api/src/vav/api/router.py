@@ -4,44 +4,52 @@ from vav.modules.activities.router import router as activities_router
 from vav.modules.admin_platform.admin_router import router as admin_platform_router
 from vav.modules.ai_assistant.admin_router import router as ai_assistant_admin_router
 from vav.modules.ai_assistant.router import router as ai_assistant_router
+from vav.modules.ai_hardening.admin_router import router as ai_hardening_admin_router
+from vav.modules.ai_hardening.router import router as ai_hardening_router
 from vav.modules.assessments.admin_router import router as assessments_admin_router
 from vav.modules.assessments.router import router as assessments_router
 from vav.modules.attendee_social.admin_router import router as attendee_social_admin_router
 from vav.modules.attendee_social.router import router as attendee_social_router
-from vav.modules.couples.admin_router import router as couples_admin_router
-from vav.modules.couples.router import router as couples_router
-from vav.modules.discovery.admin_router import router as discovery_admin_router
-from vav.modules.discovery.router import router as discovery_router
-from vav.modules.profile_media.admin_router import router as profile_media_admin_router
-from vav.modules.profile_media.router import router as profile_media_router
+from vav.modules.capacity_guard.admin_router import router as capacity_guard_admin_router
+from vav.modules.capacity_guard.router import router as capacity_guard_router
 from vav.modules.catalog.router import router as catalog_router
+from vav.modules.checkin_operations.admin_router import router as checkin_operations_admin_router
+from vav.modules.checkin_operations.router import router as checkin_operations_router
+from vav.modules.cms_publishing.admin_router import router as cms_publishing_admin_router
+from vav.modules.cms_publishing.router import router as cms_publishing_router
 from vav.modules.commerce.router import router as commerce_router
 from vav.modules.content.router import router as content_router
 from vav.modules.counseling.router import router as counseling_router
+from vav.modules.couples.admin_router import router as couples_admin_router
+from vav.modules.couples.router import router as couples_router
 from vav.modules.courses.router import router as courses_router
 from vav.modules.data_governance.admin_router import router as data_governance_admin_router
+from vav.modules.discovery.admin_router import router as discovery_admin_router
+from vav.modules.discovery.router import router as discovery_router
 from vav.modules.experience.admin_router import router as experience_admin_router
 from vav.modules.experience.router import public_router as experience_public_router
 from vav.modules.experience.router import router as experience_router
 from vav.modules.health.router import router as health_router
 from vav.modules.identity.router import router as identity_router
 from vav.modules.knowledge.router import router as knowledge_router
-from vav.modules.matchmaking_interactions.admin_router import (
-    router as matchmaking_interactions_admin_router,
-)
-from vav.modules.matchmaking_interactions.router import (
-    router as matchmaking_interactions_router,
-)
 from vav.modules.matchmaking_entitlements.admin_router import (
     router as matchmaking_entitlements_admin_router,
 )
 from vav.modules.matchmaking_entitlements.router import (
     router as matchmaking_entitlements_router,
 )
+from vav.modules.matchmaking_interactions.admin_router import (
+    router as matchmaking_interactions_admin_router,
+)
+from vav.modules.matchmaking_interactions.router import (
+    router as matchmaking_interactions_router,
+)
 from vav.modules.matchmaking_profiles.admin_router import (
     router as matchmaking_profiles_admin_router,
 )
 from vav.modules.matchmaking_profiles.router import router as matchmaking_profiles_router
+from vav.modules.member_dashboard.admin_router import router as member_dashboard_admin_router
+from vav.modules.member_dashboard.router import router as member_dashboard_router
 from vav.modules.memberships.admin_router import router as memberships_admin_router
 from vav.modules.memberships.admin_router import version_router as membership_versions_admin_router
 from vav.modules.memberships.router import router as memberships_router
@@ -52,6 +60,8 @@ from vav.modules.post_event.router import router as post_event_router
 from vav.modules.privacy.admin_router import router as privacy_admin_router
 from vav.modules.privacy.router import router as privacy_router
 from vav.modules.process_governance.admin_router import router as process_governance_admin_router
+from vav.modules.profile_media.admin_router import router as profile_media_admin_router
+from vav.modules.profile_media.router import router as profile_media_router
 from vav.modules.quality.admin_router import router as quality_admin_router
 from vav.modules.quality.design_router import router as design_system_admin_router
 from vav.modules.recommendations.admin_router import router as recommendations_admin_router
@@ -75,6 +85,16 @@ api_router.include_router(skills_platform_router, tags=["skills"])
 api_router.include_router(skills_platform_admin_router, tags=["skills-admin"])
 api_router.include_router(identity_router, tags=["identity"])
 api_router.include_router(content_router, tags=["content"])
+api_router.include_router(ai_hardening_router, tags=["ai-hardening"])
+api_router.include_router(ai_hardening_admin_router, tags=["ai-hardening-admin"])
+api_router.include_router(capacity_guard_router, tags=["capacity-guard"])
+api_router.include_router(capacity_guard_admin_router, tags=["capacity-guard-admin"])
+api_router.include_router(checkin_operations_router, tags=["checkin-operations"])
+api_router.include_router(checkin_operations_admin_router, tags=["checkin-operations-admin"])
+api_router.include_router(cms_publishing_router, tags=["cms-publishing"])
+api_router.include_router(cms_publishing_admin_router, tags=["cms-publishing-admin"])
+api_router.include_router(member_dashboard_router, tags=["member-dashboard"])
+api_router.include_router(member_dashboard_admin_router, tags=["member-dashboard-admin"])
 api_router.include_router(assessments_router, tags=["assessments"])
 api_router.include_router(assessments_admin_router, tags=["assessments-admin"])
 api_router.include_router(attendee_social_router, tags=["attendee-social"])

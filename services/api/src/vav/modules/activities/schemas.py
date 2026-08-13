@@ -155,6 +155,7 @@ class ActivityTransitionRequest(BaseModel):
 
 class RegistrationCreateRequest(BaseModel):
     ticket_type_id: UUID
+    idempotency_key: str | None = Field(default=None, min_length=8, max_length=128)
     locale: str = "zh-CN"
     currency_code: str = Field(default="USD", pattern=r"^[A-Z]{3}$")
     form_response: dict[str, Any] = Field(default_factory=dict)

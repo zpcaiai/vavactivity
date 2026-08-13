@@ -51,7 +51,9 @@ class LicenseVerificationRequest(_Base):
 class VersionQuestionRequest(_Base):
     """Administrator-supplied item. No licensed instrument ships here."""
 
-    question_code: Annotated[str, Field(min_length=1, max_length=64, pattern=r"^[a-z0-9][a-z0-9_-]*$")]
+    question_code: Annotated[
+        str, Field(min_length=1, max_length=64, pattern=r"^[a-z0-9][a-z0-9_-]*$")
+    ]
     dimension_code: Annotated[str, Field(min_length=1, max_length=64)]
     prompt_text: Annotated[str, Field(min_length=1, max_length=2000)]
     weight: Annotated[int, Field(ge=1, le=10)] = 1
@@ -77,9 +79,7 @@ class AttemptAnswersRequest(_Base):
 class RefundRequest(_Base):
     """Refund / revocation. See ``domain.plan_revocation`` for the policy."""
 
-    trigger: Literal[
-        "member_request", "payment_reversal", "admin_goodwill", "license_withdrawn"
-    ]
+    trigger: Literal["member_request", "payment_reversal", "admin_goodwill", "license_withdrawn"]
     reason: Annotated[str, Field(max_length=1000)] | None = None
     #: Required to refund a purchase whose report has already been delivered.
     admin_override: bool = False

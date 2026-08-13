@@ -45,7 +45,9 @@
     "adminPlatform": "Admin platform",
     "settings": "Site settings",
     "admins": "Administrators",
-    "audit": "Audit log"
+    "audit": "Audit log",
+    "usability": "Usability Console",
+    "postEvent": "Post-event closure"
   },
   "group": {
     "workbench": "Workbench",
@@ -230,6 +232,17 @@
     "admins": "Admins",
     "roles": "Roles",
     "invitations-admin": "Invitations",
-    "auth": "Authentication audit"
+    "auth": "Authentication audit",
+    "scenarios": "UAT scenarios",
+    "runs": "UAT runs",
+    "synthetic-data": "Synthetic data",
+    "demo": "Demo environments",
+    "compatibility": "Compatibility",
+    "localization": "Localization",
+    "drafts": "Draft recovery",
+    "notifications": "Notification cases",
+    "imports": "Import jobs",
+    "studies": "Usability studies",
+    "letters": "Result letters"
   }
 }

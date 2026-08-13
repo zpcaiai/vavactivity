@@ -15,6 +15,12 @@ DATABASE_URL="postgresql+asyncpg://architecture:placeholder@database.invalid/vav
 REDIS_URL="rediss://redis.invalid/0" AUTH_REFRESH_TOKEN_PEPPER="architecture-placeholder-pepper" \
 BACKUP_ENCRYPTION_KEY="architecture-placeholder-backup-key" \
 PRIVACY_SEARCH_HMAC_PEPPER="architecture-placeholder-privacy-pepper" \
+DISCOVERY_IP_MARKER_SALT="architecture-placeholder-ip-marker-salt" \
+SHARE_LINK_SECRET="architecture-placeholder-share-link-secret" \
+PROFILE_MEDIA_TOKEN_SECRET="architecture-placeholder-profile-media-token-secret" \
+CHECKIN_TOKEN_SIGNING_KEY="architecture-placeholder-checkin-token-signing-key" \
+CHECKIN_LAST_FOUR_HMAC_KEY="architecture-placeholder-checkin-last-four-hmac-key" \
+GEMINI_API_KEY="architecture-placeholder-gemini-api-key" \
 MEDIA_S3_ACCESS_KEY="architecture-placeholder-access" MEDIA_S3_SECRET_KEY="architecture-placeholder-secret" \
 STRIPE_SECRET_KEY="architecture-placeholder-stripe" STRIPE_WEBHOOK_SECRET="architecture-placeholder-stripe-hook" \
 PAYPAL_CLIENT_ID="architecture-placeholder-paypal" PAYPAL_CLIENT_SECRET="architecture-placeholder-paypal-secret" \

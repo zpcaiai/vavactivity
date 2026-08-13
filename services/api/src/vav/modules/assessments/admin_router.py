@@ -59,9 +59,7 @@ async def activate_product(
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return success(
-        await service.activate_product(
-            session, product_id=product_id, actor_id=principal.user.id
-        ),
+        await service.activate_product(session, product_id=product_id, actor_id=principal.user.id),
         request_id_from_request(request),
     )
 
@@ -151,9 +149,7 @@ async def publish_version(
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return success(
-        await service.publish_version(
-            session, version_id=version_id, actor_id=principal.user.id
-        ),
+        await service.publish_version(session, version_id=version_id, actor_id=principal.user.id),
         request_id_from_request(request),
     )
 

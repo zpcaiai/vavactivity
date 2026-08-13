@@ -16,6 +16,7 @@ Two structural decisions carry the requirements:
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import (
@@ -114,9 +115,7 @@ class SocialFollow(Base):
     followee_id: Mapped[UUID] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("users.id"), nullable=False
     )
-    state: Mapped[str] = mapped_column(
-        String(16), nullable=False, server_default=text("'active'")
-    )
+    state: Mapped[str] = mapped_column(String(16), nullable=False, server_default=text("'active'"))
     followed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     unfollowed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = created_at()
@@ -198,7 +197,7 @@ class AttendeeSocialAudit(Base):
     actor_kind: Mapped[str] = mapped_column(String(16), nullable=False)
     action: Mapped[str] = mapped_column(String(128), nullable=False)
     reason: Mapped[str | None] = mapped_column(Text)
-    metadata_json: Mapped[dict] = mapped_column(
+    metadata_json: Mapped[dict[str, Any]] = mapped_column(
         "metadata", JSONB, nullable=False, server_default=text("'{}'::jsonb")
     )
     created_at: Mapped[datetime] = created_at()

@@ -13,4 +13,9 @@ data:
   AI_ENABLED: "true"
   AI_MODEL_PROVIDER: gemini
   AI_MODEL_NAME: gemini-3.6-flash
+  MEDIA_S3_ENDPOINT: https://object-storage.internal
+  MEDIA_S3_PUBLIC_ENDPOINT: https://media.vav.example
+  # Enable only after 0112 is applied and every API/worker/scheduler pod is on
+  # the approved storage-v2 image. Kubernetes does not auto-rollback Deployments.
+  PROFILE_MEDIA_ENABLED: "false"
   OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.observability.svc:4318

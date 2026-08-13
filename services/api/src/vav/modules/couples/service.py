@@ -115,7 +115,9 @@ def scope_enabled() -> None:
         )
 
 
-async def _publish(session: AsyncSession, topic: str, aggregate_id: UUID, payload: dict) -> None:
+async def _publish(
+    session: AsyncSession, topic: str, aggregate_id: UUID, payload: dict[str, Any]
+) -> None:
     await session.execute(
         text(
             "INSERT INTO outbox_events (topic,aggregate_type,aggregate_id,payload) "
@@ -244,7 +246,9 @@ async def _active_relationship_id(session: AsyncSession, user_id: UUID) -> UUID 
 # ---------------------------------------------------------------------------
 
 
-async def create_invitation(session: AsyncSession, *, inviter_id: UUID, payload: dict) -> dict:
+async def create_invitation(
+    session: AsyncSession, *, inviter_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Send an invitation. This does not bind anybody (COUPLE-001)."""
 
     couples_enabled()
@@ -347,7 +351,7 @@ async def create_invitation(session: AsyncSession, *, inviter_id: UUID, payload:
     }
 
 
-async def list_my_invitations(session: AsyncSession, user_id: UUID) -> list[dict]:
+async def list_my_invitations(session: AsyncSession, user_id: UUID) -> list[dict[str, Any]]:
     """Invitations this member sent or received.
 
     The private note is decrypted only for the two parties, which is why the
@@ -371,7 +375,7 @@ async def list_my_invitations(session: AsyncSession, user_id: UUID) -> list[dict
         .all()
     )
     now = _now()
-    items: list[dict] = []
+    items: list[dict[str, Any]] = []
     for row in rows:
         expired = row["status"] == InvitationStatus.PENDING and is_invitation_expired(
             expires_at=row["expires_at"], now=now
@@ -401,8 +405,8 @@ async def list_my_invitations(session: AsyncSession, user_id: UUID) -> list[dict
 
 
 async def respond_to_invitation(
-    session: AsyncSession, *, invitation_id: UUID, user_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, invitation_id: UUID, user_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Accept or reject. The *only* path that can create an active binding.
 
     The invitation row is locked first, so two taps on "accept" resolve to one
@@ -564,7 +568,7 @@ async def respond_to_invitation(
 
 async def cancel_invitation(
     session: AsyncSession, *, invitation_id: UUID, user_id: UUID
-) -> dict:
+) -> dict[str, Any]:
     couples_enabled()
     row = (
         (
@@ -613,7 +617,7 @@ async def cancel_invitation(
     return {"invitation_id": str(invitation_id), "status": InvitationStatus.CANCELLED.value}
 
 
-async def expire_invitations(session: AsyncSession) -> dict:
+async def expire_invitations(session: AsyncSession) -> dict[str, Any]:
     """Background sweep. Expiry is also evaluated on read, so this is hygiene."""
 
     couples_enabled()
@@ -624,7 +628,7 @@ async def expire_invitations(session: AsyncSession) -> dict:
         )
     )
     await session.commit()
-    return {"expired": int(result.rowcount or 0)}
+    return {"expired": int(int(getattr(result, "rowcount", 0) or 0) or 0)}
 
 
 # ---------------------------------------------------------------------------
@@ -632,7 +636,7 @@ async def expire_invitations(session: AsyncSession) -> dict:
 # ---------------------------------------------------------------------------
 
 
-async def get_my_relationship(session: AsyncSession, user_id: UUID) -> dict:
+async def get_my_relationship(session: AsyncSession, user_id: UUID) -> dict[str, Any]:
     couples_enabled()
     row = (
         (
@@ -668,7 +672,7 @@ async def _unbind(
     actor_id: UUID | None,
     actor_kind: str,
     reason: str | None,
-) -> dict:
+) -> dict[str, Any]:
     row = (
         (
             await session.execute(
@@ -683,9 +687,7 @@ async def _unbind(
         .first()
     )
     if row is None:
-        raise VavError(
-            "COUPLE_RELATIONSHIP_NOT_FOUND", "Relationship not found.", status_code=404
-        )
+        raise VavError("COUPLE_RELATIONSHIP_NOT_FOUND", "Relationship not found.", status_code=404)
     members = [UUID(str(row["user_low_id"])), UUID(str(row["user_high_id"]))]
     try:
         plan = plan_unbind(
@@ -763,7 +765,7 @@ async def _unbind(
 
 async def unbind_my_relationship(
     session: AsyncSession, *, user_id: UUID, reason: str | None
-) -> dict:
+) -> dict[str, Any]:
     """Either partner may end a binding alone.
 
     Deliberately asymmetric with binding: requiring both signatures to leave
@@ -787,7 +789,7 @@ async def unbind_my_relationship(
 
 async def admin_unbind_relationship(
     session: AsyncSession, *, relationship_id: UUID, actor_id: UUID, reason: str
-) -> dict:
+) -> dict[str, Any]:
     couples_enabled()
     return await _unbind(
         session,
@@ -798,7 +800,9 @@ async def admin_unbind_relationship(
     )
 
 
-async def list_binding_events(session: AsyncSession, *, relationship_id: UUID) -> list[dict]:
+async def list_binding_events(
+    session: AsyncSession, *, relationship_id: UUID
+) -> list[dict[str, Any]]:
     rows = (
         (
             await session.execute(
@@ -820,7 +824,9 @@ async def list_binding_events(session: AsyncSession, *, relationship_id: UUID) -
 # ---------------------------------------------------------------------------
 
 
-async def create_scope_version(session: AsyncSession, *, actor_id: UUID, payload: dict) -> dict:
+async def create_scope_version(
+    session: AsyncSession, *, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     scope_enabled()
     version_id = uuid4()
     await session.execute(
@@ -842,8 +848,8 @@ async def create_scope_version(session: AsyncSession, *, actor_id: UUID, payload
 
 
 async def add_scope_question(
-    session: AsyncSession, *, version_id: UUID, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, version_id: UUID, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Author one question. The shipped bank is empty by design (DEC-001)."""
 
     scope_enabled()
@@ -958,7 +964,7 @@ async def _load_version_spec(session: AsyncSession, version_id: UUID) -> ScopeVe
 
 async def publish_scope_version(
     session: AsyncSession, *, version_id: UUID, actor_id: UUID
-) -> dict:
+) -> dict[str, Any]:
     """Publish only once all five dimensions are actually authored."""
 
     scope_enabled()
@@ -974,7 +980,7 @@ async def publish_scope_version(
         ),
         {"actor": str(actor_id), "id": str(version_id)},
     )
-    if result.rowcount == 0:
+    if int(getattr(result, "rowcount", 0) or 0) == 0:
         raise VavError(
             "SCOPE_VERSION_NOT_DRAFT", "Only a draft version can be published.", status_code=409
         )
@@ -982,7 +988,7 @@ async def publish_scope_version(
     return {"version_id": str(version_id), "status": ScopeVersionStatus.PUBLISHED.value}
 
 
-async def list_scope_versions(session: AsyncSession) -> list[dict]:
+async def list_scope_versions(session: AsyncSession) -> list[dict[str, Any]]:
     rows = (
         (
             await session.execute(
@@ -1003,7 +1009,9 @@ async def list_scope_versions(session: AsyncSession) -> list[dict]:
 # ---------------------------------------------------------------------------
 
 
-async def _load_free_benefit(session: AsyncSession, key: str, members: tuple[UUID, UUID]) -> FreeBenefitState:
+async def _load_free_benefit(
+    session: AsyncSession, key: str, members: tuple[UUID, UUID]
+) -> FreeBenefitState:
     """Load (or create) the pair's free-benefit ledger under a row lock.
 
     The row is created on first use with ``granted=1`` and never deleted, which
@@ -1036,12 +1044,20 @@ async def _load_free_benefit(session: AsyncSession, key: str, members: tuple[UUI
         .mappings()
         .first()
     )
+    if row is None:
+        raise VavError(
+            "SCOPE_FREE_BENEFIT_NOT_FOUND",
+            "The pair free-assessment benefit could not be loaded.",
+            status_code=500,
+        )
     return FreeBenefitState(
         pair_key=key, granted=int(row["granted"]), consumed=int(row["consumed"])
     )
 
 
-async def start_scope_assessment(session: AsyncSession, *, user_id: UUID, payload: dict) -> dict:
+async def start_scope_assessment(
+    session: AsyncSession, *, user_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     scope_enabled()
     relationship = (
         (
@@ -1166,7 +1182,7 @@ async def start_scope_assessment(session: AsyncSession, *, user_id: UUID, payloa
 
 async def _assessment_for_member(
     session: AsyncSession, assessment_id: UUID, user_id: UUID, *, lock: bool = False
-) -> dict:
+) -> dict[str, Any]:
     suffix = " FOR UPDATE OF a" if lock else ""
     row = (
         (
@@ -1174,7 +1190,8 @@ async def _assessment_for_member(
                 text(
                     "SELECT a.id,a.relationship_id,a.pair_key,a.version_id,a.state,r.user_low_id,r.user_high_id,r.state AS relationship_state "
                     "FROM scope_assessments a JOIN couple_relationships r ON r.id=a.relationship_id "
-                    "WHERE a.id=:id AND (r.user_low_id=:user_id OR r.user_high_id=:user_id)" + suffix
+                    "WHERE a.id=:id AND (r.user_low_id=:user_id OR r.user_high_id=:user_id)"
+                    + suffix
                 ),
                 {"id": str(assessment_id), "user_id": str(user_id)},
             )
@@ -1189,7 +1206,7 @@ async def _assessment_for_member(
 
 async def get_scope_assessment(
     session: AsyncSession, *, assessment_id: UUID, user_id: UUID
-) -> dict:
+) -> dict[str, Any]:
     """The member's own view.
 
     Returns the caller's own draft answers and *only the progress* of their
@@ -1214,7 +1231,7 @@ async def get_scope_assessment(
     )
     mine: dict[str, int] = {}
     my_status = ParticipantState.NOT_STARTED.value
-    partners: list[dict] = []
+    partners: list[dict[str, Any]] = []
     for row in rows:
         owner_id = UUID(str(row["user_id"]))
         if owner_id == user_id:
@@ -1239,7 +1256,7 @@ async def get_scope_assessment(
 
 async def read_my_raw_answers(
     session: AsyncSession, *, assessment_id: UUID, user_id: UUID, owner_id: UUID
-) -> dict:
+) -> dict[str, Any]:
     """Explicit raw-answer read, guarded by the domain seal.
 
     Exists as its own endpoint so the seal has a single, obvious choke point
@@ -1265,8 +1282,8 @@ async def read_my_raw_answers(
 
 
 async def save_scope_answers(
-    session: AsyncSession, *, assessment_id: UUID, user_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, assessment_id: UUID, user_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Autosave a draft or seal a submission.
 
     A sealed submission is final: reopening it would let a member watch the
@@ -1300,9 +1317,7 @@ async def save_scope_answers(
         .first()
     )
     if current is None:
-        raise VavError(
-            "SCOPE_PARTICIPANT_NOT_FOUND", "You are not a participant.", status_code=404
-        )
+        raise VavError("SCOPE_PARTICIPANT_NOT_FOUND", "You are not a participant.", status_code=404)
     if current["status"] == ParticipantState.SUBMITTED:
         raise VavError(
             "SCOPE_SUBMISSION_SEALED",
@@ -1351,7 +1366,7 @@ async def save_scope_answers(
     return result
 
 
-async def _try_complete(session: AsyncSession, *, assessment_id: UUID) -> dict:
+async def _try_complete(session: AsyncSession, *, assessment_id: UUID) -> dict[str, Any]:
     """Evaluate the completion barrier and, if open, score and report.
 
     Called after every submission. Until both partners are in, this returns
@@ -1372,9 +1387,7 @@ async def _try_complete(session: AsyncSession, *, assessment_id: UUID) -> dict:
         .all()
     )
     states = {UUID(str(row["user_id"])): row["status"] for row in rows}
-    readiness = evaluate_report_readiness(
-        expected_members=list(states), states=states
-    )
+    readiness = evaluate_report_readiness(expected_members=list(states), states=states)
     if not readiness.ready:
         return {
             "report_ready": False,
@@ -1393,6 +1406,12 @@ async def _try_complete(session: AsyncSession, *, assessment_id: UUID) -> dict:
         .mappings()
         .first()
     )
+    if header is None:
+        raise VavError(
+            "SCOPE_ASSESSMENT_NOT_FOUND",
+            "Scope assessment not found.",
+            status_code=404,
+        )
     try:
         validate_assessment_transition(header["state"], AssessmentState.COMPLETED)
     except CoupleRuleError as error:
@@ -1467,7 +1486,9 @@ async def _try_complete(session: AsyncSession, *, assessment_id: UUID) -> dict:
     return {"report_ready": True, "reason_code": readiness.reason_code}
 
 
-async def get_scope_report(session: AsyncSession, *, assessment_id: UUID, user_id: UUID) -> dict:
+async def get_scope_report(
+    session: AsyncSession, *, assessment_id: UUID, user_id: UUID
+) -> dict[str, Any]:
     """Return the report to a participant.
 
     ``scores`` is the deterministic block re-derivable from the sealed answers;
@@ -1520,8 +1541,8 @@ async def get_scope_report(session: AsyncSession, *, assessment_id: UUID, user_i
 
 
 async def attach_scope_advice(
-    session: AsyncSession, *, assessment_id: UUID, actor_id: UUID, payload: dict
-) -> dict:
+    session: AsyncSession, *, assessment_id: UUID, actor_id: UUID, payload: dict[str, Any]
+) -> dict[str, Any]:
     """Store the AI narrative in its own columns, never inside ``scores``."""
 
     scope_enabled()
@@ -1569,7 +1590,9 @@ async def attach_scope_advice(
     return {"assessment_id": str(assessment_id), "advice_status": "generated"}
 
 
-async def admin_list_relationships(session: AsyncSession, *, state: str | None) -> list[dict]:
+async def admin_list_relationships(
+    session: AsyncSession, *, state: str | None
+) -> list[dict[str, Any]]:
     rows = (
         (
             await session.execute(
@@ -1587,7 +1610,7 @@ async def admin_list_relationships(session: AsyncSession, *, state: str | None) 
     return [dict(row) for row in rows]
 
 
-async def admin_free_benefit(session: AsyncSession, *, key: str) -> dict:
+async def admin_free_benefit(session: AsyncSession, *, key: str) -> dict[str, Any]:
     """Support view: why did this pair not get a free assessment?"""
 
     row = (

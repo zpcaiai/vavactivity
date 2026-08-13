@@ -51,9 +51,7 @@ async def my_selection(
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return success(
-        await service.get_my_selection(
-            session, activity_id=activity_id, user_id=principal.user.id
-        ),
+        await service.get_my_selection(session, activity_id=activity_id, user_id=principal.user.id),
         request_id_from_request(request),
     )
 

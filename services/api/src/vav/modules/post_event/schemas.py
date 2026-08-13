@@ -32,7 +32,9 @@ class SelectionPolicyRequest(_Base):
 
 
 class PassReasonOptionRequest(_Base):
-    reason_code: Annotated[str, Field(min_length=2, max_length=64, pattern=r"^[a-z][a-z0-9_]{1,63}$")]
+    reason_code: Annotated[
+        str, Field(min_length=2, max_length=64, pattern=r"^[a-z][a-z0-9_]{1,63}$")
+    ]
     sort_order: Annotated[int, Field(ge=0, le=999)] = 0
     requires_note: bool = False
     is_active: bool = True
@@ -146,7 +148,9 @@ class SurveyReopenRequest(_Base):
 
 
 class LetterTemplateRequest(_Base):
-    template_code: Annotated[str, Field(min_length=2, max_length=128, pattern=r"^[a-z][a-z0-9_-]*$")]
+    template_code: Annotated[
+        str, Field(min_length=2, max_length=128, pattern=r"^[a-z][a-z0-9_-]*$")
+    ]
     semantic_version: Annotated[str, Field(min_length=1, max_length=32)]
     locale: Annotated[str, Field(min_length=2, max_length=16)]
     outcome: Literal["mutual_match", "no_match", "not_eligible"]

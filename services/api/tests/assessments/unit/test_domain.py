@@ -112,9 +112,7 @@ def test_publishing_a_version_without_a_license_reference_is_rejected() -> None:
     """The rule the whole framework exists for (ASSESS-001)."""
 
     with pytest.raises(AssessmentRuleError) as excinfo:
-        ensure_version_publishable(
-            _version(license=_license(license_reference=None)), now=NOW
-        )
+        ensure_version_publishable(_version(license=_license(license_reference=None)), now=NOW)
     assert excinfo.value.code == "ASSESSMENT_LICENSE_REFERENCE_REQUIRED"
     with pytest.raises(AssessmentRuleError) as blank:
         ensure_version_publishable(_version(license=_license(license_reference="   ")), now=NOW)
@@ -158,9 +156,7 @@ def test_an_unverified_reference_is_not_enough() -> None:
 
 def test_a_verification_timestamp_in_the_future_is_refused() -> None:
     with pytest.raises(AssessmentRuleError) as excinfo:
-        ensure_license_recorded(
-            _license(license_verified_at=NOW + timedelta(days=1)), now=NOW
-        )
+        ensure_license_recorded(_license(license_verified_at=NOW + timedelta(days=1)), now=NOW)
     assert excinfo.value.code == "ASSESSMENT_LICENSE_VERIFIED_IN_FUTURE"
 
 
@@ -331,9 +327,7 @@ def test_revoked_expired_and_exhausted_entitlements_are_refused() -> None:
         ensure_entitlement_usable(_entitlement(status=EntitlementStatus.REVOKED), now=NOW)
     assert revoked.value.code == "ASSESSMENT_ENTITLEMENT_REVOKED"
     with pytest.raises(AssessmentRuleError) as expired:
-        ensure_entitlement_usable(
-            _entitlement(expires_at=NOW - timedelta(seconds=1)), now=NOW
-        )
+        ensure_entitlement_usable(_entitlement(expires_at=NOW - timedelta(seconds=1)), now=NOW)
     assert expired.value.code == "ASSESSMENT_ENTITLEMENT_EXPIRED"
     with pytest.raises(AssessmentRuleError) as exhausted:
         ensure_entitlement_usable(_entitlement(attempts_consumed=1), now=NOW)
@@ -342,9 +336,7 @@ def test_revoked_expired_and_exhausted_entitlements_are_refused() -> None:
 
 def test_naive_expiry_is_rejected_rather_than_assumed_utc() -> None:
     with pytest.raises(AssessmentRuleError) as excinfo:
-        ensure_entitlement_usable(
-            _entitlement(expires_at=datetime(2026, 8, 1, 0, 0)), now=NOW
-        )
+        ensure_entitlement_usable(_entitlement(expires_at=datetime(2026, 8, 1, 0, 0)), now=NOW)
     assert excinfo.value.code == "ASSESSMENT_NAIVE_DATETIME"
 
 
@@ -392,9 +384,7 @@ def test_scoring_is_reproducible_and_uses_the_versions_own_dimensions() -> None:
 
 
 def test_reverse_scored_items_are_mirrored() -> None:
-    version = _version(
-        questions=(_question(1, "alpha", reverse_scored=True), _question(3, "beta"))
-    )
+    version = _version(questions=(_question(1, "alpha", reverse_scored=True), _question(3, "beta")))
     scores = score_attempt(version, {"q1": 5, "q3": 5})
     assert scores.dimensions[0].normalized == Decimal("0.00")
     assert scores.dimensions[1].normalized == Decimal("100.00")
@@ -402,9 +392,7 @@ def test_reverse_scored_items_are_mirrored() -> None:
 
 def test_report_payload_separates_scores_from_ai_advice() -> None:
     scores = score_attempt(_version(), {"q1": 3, "q2": 3, "q3": 3})
-    advice = AdviceBlock(
-        body="narrative", model_code="m1", prompt_version="p1", generated_at=NOW
-    )
+    advice = AdviceBlock(body="narrative", model_code="m1", prompt_version="p1", generated_at=NOW)
     payload = assemble_report_payload(scores=scores, advice=advice, generated_at=NOW)
     assert set(payload) == {"scores", "advice"}
     assert payload["scores"]["deterministic"] is True
@@ -514,13 +502,9 @@ def test_unknown_refund_trigger_is_refused() -> None:
 
 
 def test_self_service_refund_window_is_time_boxed() -> None:
-    ensure_refund_window_open(
-        purchased_at=NOW - timedelta(hours=10), now=NOW, window_hours=72
-    )
+    ensure_refund_window_open(purchased_at=NOW - timedelta(hours=10), now=NOW, window_hours=72)
     with pytest.raises(AssessmentRuleError) as closed:
-        ensure_refund_window_open(
-            purchased_at=NOW - timedelta(hours=100), now=NOW, window_hours=72
-        )
+        ensure_refund_window_open(purchased_at=NOW - timedelta(hours=100), now=NOW, window_hours=72)
     assert closed.value.code == "ASSESSMENT_REFUND_WINDOW_CLOSED"
     with pytest.raises(AssessmentRuleError) as disabled:
         ensure_refund_window_open(purchased_at=NOW, now=NOW, window_hours=0)

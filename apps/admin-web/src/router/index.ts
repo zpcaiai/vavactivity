@@ -11,12 +11,14 @@ import {
   notificationSectionPermissions,
   privacySectionPermissions,
   processSectionPermissions,
+  postEventSectionPermissions,
   qualitySectionPermissions,
   recommendationSectionPermissions,
   relationshipSectionPermissions,
   safetySectionPermissions,
   skillSectionPermissions,
-  systemSectionPermissions
+  systemSectionPermissions,
+  usabilitySectionPermissions
 } from "@/navigation/admin-nav";
 import { useAccessStore } from "@/stores/access";
 
@@ -53,6 +55,8 @@ const MembershipManagementPage = () => import("@/pages/MembershipManagementPage.
 const TrustSafetyManagementPage = () => import("@/pages/TrustSafetyManagementPage.vue");
 const SystemOperationsPage = () => import("@/pages/SystemOperationsPage.vue");
 const SkillManagementPage = () => import("@/pages/SkillManagementPage.vue");
+const UsabilityManagementPage = () => import("@/pages/UsabilityManagementPage.vue");
+const PostEventManagementPage = () => import("@/pages/PostEventManagementPage.vue");
 const QualityManagementPage = () => import("@/pages/QualityManagementPage.vue");
 const DesignSystemManagementPage = () => import("@/pages/DesignSystemManagementPage.vue");
 const ExperienceManagementPage = () => import("@/pages/ExperienceManagementPage.vue");
@@ -452,6 +456,22 @@ export const router = createRouter({
           component: SkillManagementPage,
           meta: { title: "Skill 控制台", permission: skillSectionPermissions[section], skillSection: section }
         })),
+        ...Object.keys(usabilitySectionPermissions).map((section) => ({
+          path: `usability/${section}`,
+          name: `admin-usability-${section}`,
+          component: UsabilityManagementPage,
+          meta: { title: "可用性控制台", permission: usabilitySectionPermissions[section], usabilitySection: section }
+        })),
+        ...Object.keys(postEventSectionPermissions).map((section) => ({
+          path: `post-event/${section}`,
+          name: `admin-post-event-${section}`,
+          component: PostEventManagementPage,
+          meta: {
+            title: "活动后闭环",
+            permission: postEventSectionPermissions[section],
+            postEventSection: section
+          }
+        })),
         ...Object.keys(qualitySectionPermissions).map((section) => ({
           path: `quality/${section}`,
           name: `admin-quality-${section}`,
@@ -601,10 +621,12 @@ export {
   interactionSectionPermissions,
   membershipSectionPermissions,
   processSectionPermissions,
+  postEventSectionPermissions,
   qualitySectionPermissions,
   recommendationSectionPermissions,
   relationshipSectionPermissions,
   safetySectionPermissions,
   skillSectionPermissions,
-  systemSectionPermissions
+  systemSectionPermissions,
+  usabilitySectionPermissions
 };
