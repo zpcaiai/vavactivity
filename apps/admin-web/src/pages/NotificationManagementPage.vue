@@ -1,3 +1,82 @@
+<script lang="ts">
+export type TemplateReleaseStatus =
+  | "draft"
+  | "in_review"
+  | "approved"
+  | "active"
+  | "superseded"
+  | "revoked";
+
+export type TemplateReleaseAction =
+  | "submit-review"
+  | "approve"
+  | "activate"
+  | "rollback"
+  | "revoke"
+  | "preview"
+  | "test-send";
+
+type TemplateReleaseActionPolicy = {
+  action: TemplateReleaseAction;
+  label: string;
+  statuses: readonly TemplateReleaseStatus[] | "all";
+  permission?: string;
+  type?: "success" | "danger";
+};
+
+export const TEMPLATE_RELEASE_ACTION_POLICY: readonly TemplateReleaseActionPolicy[] = [
+  {
+    action: "submit-review",
+    label: "送审",
+    statuses: ["draft"],
+    permission: "notifications.templates.update"
+  },
+  {
+    action: "approve",
+    label: "批准",
+    statuses: ["in_review"],
+    permission: "notifications.templates.approve"
+  },
+  {
+    action: "activate",
+    label: "激活",
+    statuses: ["approved"],
+    permission: "notifications.templates.activate",
+    type: "success"
+  },
+  {
+    action: "rollback",
+    label: "回滚",
+    statuses: ["approved", "superseded"],
+    permission: "notifications.templates.rollback",
+    type: "danger"
+  },
+  {
+    action: "revoke",
+    label: "撤销",
+    statuses: ["active", "superseded"],
+    permission: "notifications.templates.rollback"
+  },
+  { action: "preview", label: "预览", statuses: "all" },
+  {
+    action: "test-send",
+    label: "测试发送",
+    statuses: "all",
+    permission: "notifications.templates.test_send"
+  }
+];
+
+export function getTemplateReleaseActions(
+  status: string,
+  hasPermission: (permission: string) => boolean
+) {
+  return TEMPLATE_RELEASE_ACTION_POLICY.filter((policy) =>
+    (policy.statuses === "all" || policy.statuses.includes(status as TemplateReleaseStatus))
+    && (!policy.permission || hasPermission(policy.permission))
+  );
+}
+</script>
+
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
@@ -15,7 +94,7 @@ type Dashboard = {
   provider_status: string;
 };
 type Template = { id: string; template_code: string; internal_name: string; category: string; purpose: string; status?: string; release_count: number; active_count: number };
-type TemplateRelease = { id: string; semantic_version: string; locale: string; channel: string; status: string; checksum_sha256?: string; created_at: string; approved_at?: string | null; activated_at?: string | null };
+type TemplateRelease = { id: string; semantic_version: string; locale: string; channel: string; status: TemplateReleaseStatus; checksum_sha256?: string; created_at: string; approved_at?: string | null; activated_at?: string | null };
 type TemplateDetail = { definition: Record<string, unknown>; releases: TemplateRelease[] };
 type RenderedPreview = Record<string, unknown>;
 type Subscription = { id: string; subscription_code: string; source_event_type: string; source_event_version: number; template_code: string; recipient_resolver_code: string; status: string };
@@ -109,10 +188,6 @@ const previewDialog = ref({ open: false, release_id: "", variables: "{}", recipi
 
 const canCreateTemplate = computed(() => auth.hasPermission("notifications.templates.create"));
 const canUpdateTemplate = computed(() => auth.hasPermission("notifications.templates.update"));
-const canApproveTemplate = computed(() => auth.hasPermission("notifications.templates.approve"));
-const canActivateTemplate = computed(() => auth.hasPermission("notifications.templates.activate"));
-const canRollbackTemplate = computed(() => auth.hasPermission("notifications.templates.rollback"));
-const canTestSend = computed(() => auth.hasPermission("notifications.templates.test_send"));
 
 function parseVariables(value: string, field: string) {
   try {
@@ -245,6 +320,18 @@ async function releaseAction(item: TemplateRelease, action: "submit-review" | "a
   } finally {
     busy.value = false;
   }
+}
+
+function templateReleaseActions(status: TemplateReleaseStatus) {
+  return getTemplateReleaseActions(status, (permission) => auth.hasPermission(permission));
+}
+
+function runTemplateReleaseAction(item: TemplateRelease, action: TemplateReleaseAction) {
+  if (action === "preview" || action === "test-send") {
+    openPreview(item, action);
+    return;
+  }
+  void releaseAction(item, action);
 }
 
 function openPreview(item: TemplateRelease, mode: "preview" | "test-send") {
@@ -868,54 +955,13 @@ onMounted(() => {
           >
             <template #default="scope">
               <el-button
-                v-if="canUpdateTemplate && scope.row.status === 'draft'"
+                v-for="actionDefinition in templateReleaseActions(scope.row.status)"
+                :key="actionDefinition.action"
                 size="small"
-                @click="releaseAction(scope.row, 'submit-review')"
+                :type="actionDefinition.type"
+                @click="runTemplateReleaseAction(scope.row, actionDefinition.action)"
               >
-                送审
-              </el-button>
-              <el-button
-                v-if="canApproveTemplate && scope.row.status === 'in_review'"
-                size="small"
-                @click="releaseAction(scope.row, 'approve')"
-              >
-                批准
-              </el-button>
-              <el-button
-                v-if="canActivateTemplate && scope.row.status === 'approved'"
-                size="small"
-                type="success"
-                @click="releaseAction(scope.row, 'activate')"
-              >
-                激活
-              </el-button>
-              <el-button
-                v-if="canRollbackTemplate && scope.row.status === 'active'"
-                size="small"
-                type="danger"
-                @click="releaseAction(scope.row, 'rollback')"
-              >
-                回滚
-              </el-button>
-              <el-button
-                v-if="canRollbackTemplate && ['draft','in_review','approved'].includes(scope.row.status)"
-                size="small"
-                @click="releaseAction(scope.row, 'revoke')"
-              >
-                撤销
-              </el-button>
-              <el-button
-                size="small"
-                @click="openPreview(scope.row, 'preview')"
-              >
-                预览
-              </el-button>
-              <el-button
-                v-if="canTestSend"
-                size="small"
-                @click="openPreview(scope.row, 'test-send')"
-              >
-                测试发送
+                {{ actionDefinition.label }}
               </el-button>
             </template>
           </el-table-column>
@@ -1130,7 +1176,7 @@ onMounted(() => {
         </el-button>
       </template>
     </el-dialog>
-</section>
+  </section>
 </template>
 
 <style scoped>

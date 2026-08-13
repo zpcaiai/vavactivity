@@ -2,9 +2,14 @@ import "@vav/design-tokens/tokens.css";
 import "@vav/ui-core/styles.css";
 import "element-plus/es/components/alert/style/css";
 import "element-plus/es/components/button/style/css";
+import "element-plus/es/components/card/style/css";
+import "element-plus/es/components/checkbox/style/css";
+import "element-plus/es/components/collapse/style/css";
 import "element-plus/es/components/date-picker/style/css";
 import "element-plus/es/components/descriptions/style/css";
 import "element-plus/es/components/dialog/style/css";
+import "element-plus/es/components/divider/style/css";
+import "element-plus/es/components/drawer/style/css";
 import "element-plus/es/components/empty/style/css";
 import "element-plus/es/components/form/style/css";
 import "element-plus/es/components/icon/style/css";
@@ -14,18 +19,27 @@ import "element-plus/es/components/loading/style/css";
 import "element-plus/es/components/menu/style/css";
 import "element-plus/es/components/pagination/style/css";
 import "element-plus/es/components/select/style/css";
+import "element-plus/es/components/switch/style/css";
 import "element-plus/es/components/table/style/css";
 import "element-plus/es/components/tabs/style/css";
 import "element-plus/es/components/tag/style/css";
+import "element-plus/es/components/time-select/style/css";
 import "./assets/main.css";
 
 import {
   ElAlert,
   ElButton,
+  ElCard,
+  ElCheckbox,
+  ElCheckboxGroup,
+  ElCollapse,
+  ElCollapseItem,
   ElDatePicker,
   ElDescriptions,
   ElDescriptionsItem,
   ElDialog,
+  ElDivider,
+  ElDrawer,
   ElEmpty,
   ElForm,
   ElFormItem,
@@ -38,11 +52,13 @@ import {
   ElOption,
   ElPagination,
   ElSelect,
+  ElSwitch,
   ElTabPane,
   ElTable,
   ElTableColumn,
   ElTabs,
-  ElTag
+  ElTag,
+  ElTimeSelect
 } from "element-plus";
 import { createPinia } from "pinia";
 import { createApp } from "vue";
@@ -59,10 +75,17 @@ app.use(router);
 [
   ElAlert,
   ElButton,
+  ElCard,
+  ElCheckbox,
+  ElCheckboxGroup,
+  ElCollapse,
+  ElCollapseItem,
   ElDatePicker,
   ElDescriptions,
   ElDescriptionsItem,
   ElDialog,
+  ElDivider,
+  ElDrawer,
   ElEmpty,
   ElForm,
   ElFormItem,
@@ -74,11 +97,13 @@ app.use(router);
   ElOption,
   ElPagination,
   ElSelect,
+  ElSwitch,
   ElTabPane,
   ElTable,
   ElTableColumn,
   ElTabs,
-  ElTag
+  ElTag,
+  ElTimeSelect
 ].forEach((component) => app.component(component.name ?? "", component));
 app.directive("loading", ElLoading.directive);
 app.directive("permission", permission);

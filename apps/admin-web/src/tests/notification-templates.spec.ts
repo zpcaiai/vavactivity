@@ -4,6 +4,11 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
+import {
+  getTemplateReleaseActions,
+  type TemplateReleaseStatus,
+} from "../pages/NotificationManagementPage.vue";
+
 const srcDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 function page() {
@@ -25,22 +30,71 @@ describe("notification template publishing closure", () => {
     expect(source).toContain("/admin/notifications/templates/${templateId}/releases");
     expect(source).toContain("/admin/notifications/template-releases/${item.id}/${action}");
     for (const action of ["submit-review", "approve", "activate", "revoke", "rollback"]) {
-      expect(source).toContain(`'${action}'`);
+      expect(source).toContain(`action: "${action}"`);
     }
   });
 
-  it("gates each step behind the permission that step needs", () => {
+  it("matches every release status to the backend action matrix", () => {
+    const statuses: readonly TemplateReleaseStatus[] = [
+      "draft",
+      "in_review",
+      "approved",
+      "active",
+      "superseded",
+      "revoked",
+    ];
+    const expected: Record<TemplateReleaseStatus, string[]> = {
+      draft: ["submit-review", "preview", "test-send"],
+      in_review: ["approve", "preview", "test-send"],
+      approved: ["activate", "rollback", "preview", "test-send"],
+      active: ["revoke", "preview", "test-send"],
+      superseded: ["rollback", "revoke", "preview", "test-send"],
+      revoked: ["preview", "test-send"],
+    };
+
+    for (const status of statuses) {
+      expect(
+        getTemplateReleaseActions(status, () => true).map(({ action }) => action),
+      ).toEqual(expected[status]);
+    }
+  });
+
+  it("gates lifecycle actions and test-send behind their backend permissions", () => {
+    const actions = (status: TemplateReleaseStatus, permissions: string[]) =>
+      getTemplateReleaseActions(status, (permission) => permissions.includes(permission))
+        .map(({ action }) => action);
+
+    for (const status of [
+      "draft",
+      "in_review",
+      "approved",
+      "active",
+      "superseded",
+      "revoked",
+    ] as const) {
+      expect(actions(status, [])).toEqual(["preview"]);
+      expect(actions(status, ["notifications.templates.test_send"])).toContain("test-send");
+    }
+
+    expect(actions("draft", ["notifications.templates.update"]))
+      .toEqual(["submit-review", "preview"]);
+    expect(actions("in_review", ["notifications.templates.approve"]))
+      .toEqual(["approve", "preview"]);
+    expect(actions("approved", ["notifications.templates.activate"]))
+      .toEqual(["activate", "preview"]);
+    expect(actions("approved", ["notifications.templates.rollback"]))
+      .toEqual(["rollback", "preview"]);
+    expect(actions("active", ["notifications.templates.rollback"]))
+      .toEqual(["revoke", "preview"]);
+    expect(actions("superseded", ["notifications.templates.rollback"]))
+      .toEqual(["rollback", "revoke", "preview"]);
+  });
+
+  it("renders buttons from the tested policy instead of duplicating status checks", () => {
     const source = page();
 
-    for (const permission of [
-      "notifications.templates.update",
-      "notifications.templates.approve",
-      "notifications.templates.activate",
-      "notifications.templates.rollback",
-      "notifications.templates.test_send",
-    ]) {
-      expect(source).toContain(permission);
-    }
+    expect(source).toContain("v-for=\"actionDefinition in templateReleaseActions(scope.row.status)\"");
+    expect(source).toContain("runTemplateReleaseAction(scope.row, actionDefinition.action)");
   });
 
   it("requires the plain-text body every channel falls back to", () => {
