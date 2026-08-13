@@ -75,6 +75,15 @@ def test_business_showcase_reuses_the_test_users_active_cart() -> None:
     assert '_id(f"cart-item:{cart_id}:{index}")' in source
 
 
+def test_business_showcase_repairs_owned_rows_before_counting_coverage() -> None:
+    source = Path("services/api/src/vav/cli/seed_test_showcase.py").read_text(encoding="utf-8")
+
+    assert "registration_number=EXCLUDED.registration_number" in source
+    assert "UPDATE recommendation_items SET status='ready'" in source
+    assert "JOIN carts c ON c.id=i.cart_id" in source
+    assert '"cart": _id("cart")' not in source
+
+
 def test_neon_staging_runs_complete_admin_showcase_after_migrations() -> None:
     workflow = yaml.safe_load(Path(".github/workflows/backend-ci.yml").read_text(encoding="utf-8"))
     steps = workflow["jobs"]["neon-migrations"]["steps"]
