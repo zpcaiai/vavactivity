@@ -59,6 +59,13 @@ def test_seed_manifest_registers_admin_showcase_as_non_production_data() -> None
     assert "vav.cli.seed_admin_showcase" not in production_prefix
 
 
+def test_business_showcase_pins_every_published_content_revision() -> None:
+    source = Path("services/api/src/vav/cli/seed_test_showcase.py").read_text(encoding="utf-8")
+
+    assert source.count("published_at,published_revision_number)") == 3
+    assert source.count("published_revision_number=COALESCE(") == 3
+
+
 def test_neon_staging_runs_complete_admin_showcase_after_migrations() -> None:
     workflow = yaml.safe_load(Path(".github/workflows/backend-ci.yml").read_text(encoding="utf-8"))
     steps = workflow["jobs"]["neon-migrations"]["steps"]
