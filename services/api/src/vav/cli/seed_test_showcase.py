@@ -124,9 +124,10 @@ async def _seed_public_content(session: AsyncSession) -> None:
         entry_id = await session.scalar(
             text(
                 "INSERT INTO content_entries "
-                "(id,entry_type,internal_name,canonical_slug,status,default_locale,visibility,author_id,published_by,published_at) "
-                "VALUES (:id,'page',:name,:slug,'published','zh-CN','public',:actor,:actor,now()) "
+                "(id,entry_type,internal_name,canonical_slug,status,default_locale,visibility,author_id,published_by,published_at,published_revision_number) "
+                "VALUES (:id,'page',:name,:slug,'published','zh-CN','public',:actor,:actor,now(),1) "
                 "ON CONFLICT (entry_type,canonical_slug) DO UPDATE SET status='published',visibility='public',"
+                "published_revision_number=COALESCE(content_entries.published_revision_number,GREATEST(content_entries.current_version,1)),"
                 "published_by=EXCLUDED.published_by,published_at=COALESCE(content_entries.published_at,now()),updated_at=now() "
                 "WHERE content_entries.internal_name LIKE 'System page:%' "
                 "OR content_entries.internal_name LIKE 'Test showcase page:%' "
@@ -184,9 +185,11 @@ async def _seed_public_content(session: AsyncSession) -> None:
         entry_id = await session.scalar(
             text(
                 "INSERT INTO content_entries "
-                "(id,entry_type,internal_name,canonical_slug,status,default_locale,visibility,author_id,published_by,published_at) "
-                "VALUES (:id,'article',:title,:slug,'published','zh-CN','public',:actor,:actor,now()) "
-                "ON CONFLICT (entry_type,canonical_slug) DO UPDATE SET status='published',visibility='public',updated_at=now() "
+                "(id,entry_type,internal_name,canonical_slug,status,default_locale,visibility,author_id,published_by,published_at,published_revision_number) "
+                "VALUES (:id,'article',:title,:slug,'published','zh-CN','public',:actor,:actor,now(),1) "
+                "ON CONFLICT (entry_type,canonical_slug) DO UPDATE SET status='published',visibility='public',"
+                "published_revision_number=COALESCE(content_entries.published_revision_number,GREATEST(content_entries.current_version,1)),"
+                "published_by=EXCLUDED.published_by,published_at=COALESCE(content_entries.published_at,now()),updated_at=now() "
                 "RETURNING id"
             ),
             {
@@ -264,9 +267,11 @@ async def _seed_public_content(session: AsyncSession) -> None:
         entry_id = await session.scalar(
             text(
                 "INSERT INTO content_entries "
-                "(id,entry_type,internal_name,canonical_slug,status,default_locale,visibility,author_id,published_by,published_at) "
-                "VALUES (:id,'testimonial',:title,:slug,'published','zh-CN','public',:actor,:actor,now()) "
-                "ON CONFLICT (entry_type,canonical_slug) DO UPDATE SET status='published',visibility='public',updated_at=now() "
+                "(id,entry_type,internal_name,canonical_slug,status,default_locale,visibility,author_id,published_by,published_at,published_revision_number) "
+                "VALUES (:id,'testimonial',:title,:slug,'published','zh-CN','public',:actor,:actor,now(),1) "
+                "ON CONFLICT (entry_type,canonical_slug) DO UPDATE SET status='published',visibility='public',"
+                "published_revision_number=COALESCE(content_entries.published_revision_number,GREATEST(content_entries.current_version,1)),"
+                "published_by=EXCLUDED.published_by,published_at=COALESCE(content_entries.published_at,now()),updated_at=now() "
                 "RETURNING id"
             ),
             {
