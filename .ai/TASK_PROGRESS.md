@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-last_updated: 2026-08-13T22:00:30+08:00
+last_updated: 2026-08-13T22:24:22+08:00
 repository: /Users/stephen/Documents/Projects/python/vavactivity
 canonical: true
 ---
@@ -50,8 +50,7 @@ so another agent can continue without guessing.
 
 - ID: `ci-closure-and-frontend-integration`
 - Status: `COMPLETED` for the approved CI closure and split-repository publish
-  scope; backend Draft PR 5 and frontend PR 11 are ready for review with green
-  checks
+  scope; backend PR 5 and frontend PR 11 are ready for review with green checks
 - Owner: Codex, incorporating reviewed concurrent Claude Code formatting and
   Gitleaks-ignore changes
 - Objective: clear backend PR 4 Ruff and Gitleaks failures, include the two
@@ -59,8 +58,10 @@ so another agent can continue without guessing.
   Code/Codex shared ledger, and open a new frontend integration PR for commits
   `c539120` and `c379b16`.
 - Branch: `codex/ai-coordination-followup`
-- Snapshot commit: `75d1e64ce3cb2b7495c4e0c70367164bd7a0ef27`, matching
-  `origin/codex/ai-coordination-followup`.
+- Snapshot basis: merged backend PR 4 at
+  `bee990d35d2b6c0d8115b5845e9a0b9db26f3119`; follow-up implementation commit
+  `b8ff0797c2786898470a0df7299a93618538a9de`. The current ledger commit cannot
+  self-record its own SHA; query PR 5 for the live branch head.
 - Scope: the pushed Ruff/format, exact Gitleaks-fingerprint, and production
   object-storage credential fixes; two admin Vue indentation fixes;
   `AGENTS.md`, `CLAUDE.md`, and `.ai/`; frontend branch
@@ -75,18 +76,19 @@ so another agent can continue without guessing.
   Coordination files and two admin indentation corrections were committed as
   `9e250ec` on the old branch, then isolated onto post-merge `main` as
   `b8ff0797c2786898470a0df7299a93618538a9de` on
-  `codex/ai-coordination-followup`; it is pushed and covered by backend Draft
-  PR 5. Frontend commits `c539120` and `c379b16` are pushed and covered by Draft
-  PR 11.
+  `codex/ai-coordination-followup`; it is pushed and covered by backend PR 5.
+  Frontend commits `c539120` and `c379b16` are pushed and covered by PR 11.
 - Remote CI: backend PR 4 is fully green at `8967e4f`: Backend CI, Secret Scan,
   Integration CI, Docker Build, Security Tests, assembly contracts, and
   migration compatibility all passed. Frontend PR 11 targets `main` at
   `c379b16`; Frontend CI passed install, lint, typecheck, tests, and build,
-  Vercel reported success, and the PR is ready for review. Backend Draft PR 5
-  targets post-merge `main` at `75d1e64`; Ruff, format, full mypy, migrations,
-  deterministic seed, the complete API suite, migration-head verification,
-  Gitleaks, Integration CI, Security Tests, assembly contracts, and migration
-  compatibility all passed.
+  Vercel reported success, and the PR is ready for review. Backend PR 5 targets
+  post-merge `main`; its current head must be obtained from GitHub rather than
+  self-recorded here. Ruff, format, full mypy, migrations, deterministic seed,
+  the complete API suite, migration-head verification, Gitleaks, Integration
+  CI, Security Tests, assembly contracts, and migration compatibility passed
+  before this ledger-only follow-up. A push that changes this file triggers a
+  new head and must be observed again before merge.
 - Remaining gates: review/merge backend Draft PR 5 and frontend Draft PR 11;
   production deployment,
   browser/device acceptance, and certification remain `NOT_CERTIFIED`.
