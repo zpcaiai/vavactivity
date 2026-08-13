@@ -75,7 +75,9 @@ class AssessmentVersion(Base):
     licensor_name: Mapped[str | None] = mapped_column(String(255))
     license_note: Mapped[str | None] = mapped_column(Text)
     question_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
-    price_minor_units: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
+    price_minor_units: Mapped[int] = mapped_column(
+        Integer, nullable=False, server_default=text("0")
+    )
     currency: Mapped[str] = mapped_column(String(3), nullable=False, server_default=text("'CNY'"))
     published_by: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), ForeignKey("users.id"))
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
@@ -161,9 +163,7 @@ class AssessmentEntitlement(Base):
     version_id: Mapped[UUID] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("assessment_versions.id"), nullable=False
     )
-    status: Mapped[str] = mapped_column(
-        String(16), nullable=False, server_default=text("'active'")
-    )
+    status: Mapped[str] = mapped_column(String(16), nullable=False, server_default=text("'active'"))
     attempts_granted: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("1"))
     attempts_consumed: Mapped[int] = mapped_column(
         Integer, nullable=False, server_default=text("0")

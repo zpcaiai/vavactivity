@@ -250,16 +250,16 @@ class SurveyQuestion(Base):
 
     id: Mapped[UUID] = uuid_pk()
     definition_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), ForeignKey("survey_definitions.id", ondelete="CASCADE"), nullable=False
+        PGUUID(as_uuid=True),
+        ForeignKey("survey_definitions.id", ondelete="CASCADE"),
+        nullable=False,
     )
     question_code: Mapped[str] = mapped_column(String(64), nullable=False)
     question_type: Mapped[str] = mapped_column(String(32), nullable=False)
     prompt: Mapped[str] = mapped_column(Text, nullable=False)
     help_text: Mapped[str | None] = mapped_column(Text)
     is_required: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("true"))
-    per_subject: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("false")
-    )
+    per_subject: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
     position: Mapped[int] = mapped_column(Integer, nullable=False)
     config: Mapped[dict] = mapped_column(JSONB, nullable=False, server_default=text("'{}'::jsonb"))
     created_at: Mapped[datetime] = created_at()

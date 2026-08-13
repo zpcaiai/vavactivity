@@ -1,0 +1,3 @@
+# Test-only false positives; keep each exception pinned to its exact finding.
+9c4c2760c79b4fd20052e27d8bcaf269a58f93b9:services/api/tests/checkin_operations/unit/test_verify_scripts.py:generic-api-key:164
+a84299bb2370128d9bddb9775b9051080f7a8fa4:services/api/tests/profile_media/unit/test_domain.py:generic-api-key:420
