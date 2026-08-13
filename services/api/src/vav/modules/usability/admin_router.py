@@ -63,7 +63,7 @@ async def complete_uat(
 async def save_draft(
     payload: DraftSave,
     request: Request,
-    principal: AuthenticatedPrincipal = Depends(require_permission("usability.drafts.manage")),
+    principal: AuthenticatedPrincipal = Depends(require_permission("usability.drafts.write")),
     session: AsyncSession = Depends(get_database_session),
 ) -> dict[str, Any]:
     return _ok(await service.save_draft(session, principal.user.id, payload), request)
