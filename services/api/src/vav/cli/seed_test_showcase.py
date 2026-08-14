@@ -1745,7 +1745,7 @@ async def _seed_recommendations(session: AsyncSession, user_id: UUID, profile_id
                     "generated_at,activated_at,expires_at,generation_report) "
                     "SELECT :user,COALESCE(MAX(batch_number),0)+1,'supplemental',:strategy,:projection,:preference,:privacy,"
                     "'active',3,0,:seed,:period,:key,now(),now(),now()+interval '30 days',"
-                    "'{\"fixture\"\\:true,\"cohort\"\\:\"ready\"}'::jsonb FROM recommendation_batches WHERE user_id=:user "
+                    '\'{"fixture"\\:true,"cohort"\\:"ready"}\'::jsonb FROM recommendation_batches WHERE user_id=:user '
                     "ON CONFLICT (user_id,idempotency_key) DO UPDATE SET strategy_id=EXCLUDED.strategy_id,"
                     "profile_projection_version=EXCLUDED.profile_projection_version,preference_version=EXCLUDED.preference_version,"
                     "privacy_settings_version=EXCLUDED.privacy_settings_version,status='active',requested_size=3,"
