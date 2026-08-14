@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-last_updated: 2026-08-14T13:20:47+08:00
+last_updated: 2026-08-14T13:31:00+08:00
 repository: /Users/stephen/Documents/Projects/python/vavactivity
 canonical: true
 ---
@@ -103,6 +103,33 @@ snapshot. Their presence is not proof that every associated external gate ran.
 - `9c4c276` — `feat: complete member journeys and production gates`
 
 ## Completion log
+
+### 2026-08-14 — Notification controls main-integration verification
+
+- Status: `COMPLETED` for the requested functionality and main-integration
+  scope; no second merge was necessary.
+- Notification release-control fix `ee398cf` is an ancestor of current
+  `origin/main` through merged PR 4 (`bee990d`). The four owned files are
+  unchanged between `ee398cf` and the current `main` implementation.
+- Exact-code validation at `ee398cf`: targeted notification and Element Plus
+  tests passed `10/10`; the full admin suite passed `137/137`; ESLint,
+  typecheck, build, and diff checks passed. Browser UAT confirmed the drawer
+  rendered all 14 versions and lifecycle actions matched active and superseded
+  states. A new local package-manager rerun is `NOT_RUN` because the ELMOS
+  exclusive disk window is still active.
+- PR 4's Backend CI, Docker Build, Integration CI, Secret Scan, Security Tests,
+  assembly contracts, and migration compatibility all passed before merge.
+- `admin/usability-closure` now has one later unique commit, `9e250ec`, whose
+  meaningful difference is an outdated coordination ledger; merging it would
+  conflict with and regress the current task record, so it was intentionally
+  not merged.
+- Local `main` was fast-forwarded to the remote tip. No business-code commit
+  was needed in this verification pass; this ledger entry is pushed directly
+  to `main`, with its containing commit identified by Git history rather than
+  self-recording its own SHA.
+- Current post-merge Neon and runtime-image scan failures belong to later
+  showcase and image work, not the unchanged notification fix. Production
+  deployment and certification remain `NOT_CERTIFIED`.
 
 ### 2026-08-14 — GitHub main and shared-ledger synchronization
 
