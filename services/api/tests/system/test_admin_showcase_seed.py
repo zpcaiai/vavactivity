@@ -105,7 +105,7 @@ def test_business_showcase_refreshes_candidate_pairs_before_ready_cohort() -> No
     source = Path("services/api/src/vav/cli/seed_test_showcase.py").read_text(encoding="utf-8")
 
     assert "await recommendation_service.generate_candidates" in source
-    assert "test-showcase:recommendation-ready" in source
+    assert 'f"{SHOWCASE_PREFIX}:recommendation-ready"' in source
 
 
 def test_neon_staging_runs_complete_admin_showcase_after_migrations() -> None:
