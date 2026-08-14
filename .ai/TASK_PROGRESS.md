@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-last_updated: 2026-08-14T00:26:51+08:00
+last_updated: 2026-08-14T11:35:00+08:00
 repository: /Users/stephen/Documents/Projects/python/vavactivity
 canonical: true
 ---
@@ -48,50 +48,41 @@ so another agent can continue without guessing.
 
 ## Current task
 
-- ID: `ci-closure-and-frontend-integration`
-- Status: `COMPLETED` for the approved CI closure, split-repository publish,
-  and merge scope; backend PR 5 and frontend PR 11 are merged into `main`
-- Owner: Codex, incorporating reviewed concurrent Claude Code formatting and
-  Gitleaks-ignore changes
-- Objective: clear backend PR 4 Ruff and Gitleaks failures, include the two
-  admin indentation corrections, restore the versioned Claude
-  Code/Codex shared ledger, integrate frontend commits `c539120` and `c379b16`,
-  and merge the approved backend/frontend pull requests.
-- Branch: completed records and evidence wording are merged on backend `main`
-- Snapshot basis: backend PR 4 merged as
-  `bee990d35d2b6c0d8115b5845e9a0b9db26f3119`; backend PR 5 head
-  `97bfe85a6e8914b16a06797c7c85644a743c84f7` merged as
-  `74785173ca617233f5e6876869c0c5d18c138c5c`; frontend PR 11 head
-  `c379b16acb810b9a9450b19e5ad77d32789b460e` merged as
-  `bc4840caf3f96f0fd166cdef8521e4f5ab51dde7`.
-- Scope: the pushed Ruff/format, exact Gitleaks-fingerprint, and production
-  object-storage credential fixes; two admin Vue indentation fixes;
-  `AGENTS.md`, `CLAUDE.md`, and `.ai/`; frontend commits `c539120` and
-  `c379b16`.
-- Validation: backend PR 5 head `97bfe85` passed Backend CI (Ruff, format,
-  mypy, migrations, deterministic seed, complete API suite, and migration-head
-  verification), Gitleaks, Integration CI, Security Tests, assembly contracts,
-  and migration compatibility. Frontend PR 11 head `c379b16` passed install,
-  lint, typecheck, tests, build, and Vercel. `origin/main` in each repository
-  was fetched after merge and verified to contain its exact PR head. Heavy
-  local suites remained intentionally `NOT_RUN` during the shared low-disk
-  window because current remote CI supplied the merge evidence.
-- Commit/push state: backend PR 4, PR 5, ledger PR 8, and evidence-wording PR 9
-  are `MERGED`; frontend PR 11 is `MERGED`. Backend `origin/main` contains all
-  of those heads; frontend `origin/main` resolved to `bc4840c` at post-merge
-  verification. Use Git history for later unrelated `main` advances rather
-  than making this ledger self-record its own merge SHA.
-- Remote CI: `PASSED` for every reported non-conditional backend PR 5 and
-  frontend PR 11 check; GitHub reported no branch-protection required checks.
-  The conditional backend `Apply migrations to Neon` job was `SKIPPED` by its
-  workflow condition and was not a required merge check.
-- Remaining gates: production deployment, browser/device acceptance, customer
-  acceptance, and certification remain `NOT_CERTIFIED`.
-- Next action: no repository merge action remains. Run deployment and external
-  acceptance/certification only under a separately authorized release scope.
-- Blockers: none for lightweight Git/CI work. Docker builds, large local test
-  suites, package-manager builds, generators, pruning, and cleanup remain
-  paused until the separate disk-window owner explicitly releases them.
+- ID: `showcase-recommendation-neon-closure`
+- Status: `IN_PROGRESS`
+- Owner: Codex
+- Objective: make the all-role staging showcase repeatable under real
+  recommendation safety rules, merge PR 13 into backend `main`, and verify the
+  post-merge Neon migration/showcase job.
+- Branch: remote `codex/showcase-recommendation-cohorts`; this recovery
+  worktree is detached at `e8e815b915357a2e92ca0824d94cf18985f4b20c` because
+  the pre-reboot `/tmp` worktree no longer exists.
+- Snapshot commit: `e8e815b915357a2e92ca0824d94cf18985f4b20c`.
+- Scope: `services/api/src/vav/cli/seed_recommendation_fixtures.py`,
+  `services/api/src/vav/cli/seed_test_showcase.py`,
+  `services/api/tests/system/test_admin_showcase_seed.py`, and this ledger.
+- Validation: PR 13 head `e8e815b` passed Ruff, formatting, mypy, migrations,
+  deterministic integration seeding, 1756 API tests, Docker Build,
+  Integration CI, Secret Scan, Security Tests, assembly contracts, and
+  migration compatibility. Backend CI is `FAILED` only because one new static
+  contract expected a literal expanded f-string value; result was `1 failed,
+  1756 passed, 6 skipped`. Local heavy suites remain `NOT_RUN` during the ELMOS
+  exclusive disk window.
+- Commit/push state: implementation commits `acb0b2f` and `e8e815b` are
+  `PUSHED`; PR 13 is open. The one-line contract correction and ledger update
+  are `NOT_PUSHED`.
+- Remote CI: six non-backend PR gates are `PASSED`; Backend CI requires the
+  one-line test-contract correction before rerun. Neon remains conditional and
+  has not run for the failing PR head.
+- Remaining gates: PR merge and post-merge Neon staging showcase are
+  `IN_PROGRESS`. Production deployment, browser/device acceptance, independent
+  security authorization, HA/DR, owner approvals, and immutable 24h/7d/30d
+  windows remain `NOT_CERTIFIED`.
+- Next action: correct the static assertion without running local pytest, push
+  through SSH, wait for all remote gates, merge PR 13, then verify main Neon.
+- Blockers: ELMOS owns the host disk window; local pytest, Docker,
+  package-manager builds, generators, pruning, and cleanup are paused until
+  `RELEASED`.
 
 ## Recent repository history observed
 

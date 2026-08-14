@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from vav.cli import seed_admin_showcase
+from vav.cli import seed_admin_showcase, seed_recommendation_fixtures, seed_test_showcase
 
 
 @pytest.mark.asyncio
@@ -79,9 +79,33 @@ def test_business_showcase_repairs_owned_rows_before_counting_coverage() -> None
     source = Path("services/api/src/vav/cli/seed_test_showcase.py").read_text(encoding="utf-8")
 
     assert "registration_number=EXCLUDED.registration_number" in source
-    assert "UPDATE recommendation_items SET status='ready'" in source
+    assert "ON CONFLICT (recommendation_batch_id,recommended_user_id) DO UPDATE SET" in source
+    assert "recommendation-ready-item" in source
     assert "JOIN carts c ON c.id=i.cart_id" in source
     assert '"cart": _id("cart")' not in source
+
+
+def test_business_showcase_separates_ready_match_and_skip_recommendation_cohorts() -> None:
+    ready = set(seed_test_showcase.READY_RECOMMENDATION_EMAILS)
+    matched = set(seed_test_showcase.MATCHED_RECOMMENDATION_EMAILS)
+    skipped = set(seed_test_showcase.SKIPPED_RECOMMENDATION_EMAILS)
+    fixture_emails = {
+        f"recommendation-fixture-{fixture['key']}@example.com"
+        for fixture in seed_recommendation_fixtures.FIXTURES
+    }
+
+    assert len(ready) == len(matched) == len(skipped) == 3
+    assert ready.isdisjoint(matched)
+    assert ready.isdisjoint(skipped)
+    assert matched.isdisjoint(skipped)
+    assert ready | matched | skipped <= fixture_emails
+
+
+def test_business_showcase_refreshes_candidate_pairs_before_ready_cohort() -> None:
+    source = Path("services/api/src/vav/cli/seed_test_showcase.py").read_text(encoding="utf-8")
+
+    assert "await recommendation_service.generate_candidates" in source
+    assert 'f"{SHOWCASE_PREFIX}:recommendation-ready"' in source
 
 
 def test_neon_staging_runs_complete_admin_showcase_after_migrations() -> None:

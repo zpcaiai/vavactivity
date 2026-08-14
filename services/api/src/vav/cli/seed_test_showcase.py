@@ -56,6 +56,21 @@ from vav.modules.trust_safety.crypto import encrypt_sensitive as encrypt_safety
 
 PROTECTED_ENVIRONMENTS = frozenset({"production", "dr"})
 SHOWCASE_PREFIX = "test-showcase"
+READY_RECOMMENDATION_EMAILS = (
+    "recommendation-fixture-michael@example.com",
+    "recommendation-fixture-samuel@example.com",
+    "recommendation-fixture-isaac@example.com",
+)
+MATCHED_RECOMMENDATION_EMAILS = (
+    "recommendation-fixture-jonathan@example.com",
+    "recommendation-fixture-daniel@example.com",
+    "recommendation-fixture-peter@example.com",
+)
+SKIPPED_RECOMMENDATION_EMAILS = (
+    "recommendation-fixture-hannah@example.com",
+    "recommendation-fixture-mei@example.com",
+    "recommendation-fixture-grace@example.com",
+)
 
 
 def _id(key: str) -> UUID:
@@ -822,13 +837,7 @@ async def _seed_activity_experience(session: AsyncSession, user_id: UUID) -> Non
                     "SELECT id,email FROM users WHERE email=ANY(CAST(:emails AS citext[])) "
                     "ORDER BY array_position(CAST(:emails AS citext[]),email)"
                 ),
-                {
-                    "emails": [
-                        "recommendation-fixture-jonathan@example.com",
-                        "recommendation-fixture-daniel@example.com",
-                        "recommendation-fixture-peter@example.com",
-                    ]
-                },
+                {"emails": list(MATCHED_RECOMMENDATION_EMAILS)},
             )
         ).mappings()
     )
@@ -1669,7 +1678,9 @@ async def _seed_dating_profile(session: AsyncSession, user_id: UUID) -> UUID:
 
 async def _seed_recommendations(session: AsyncSession, user_id: UUID, profile_id: UUID) -> None:
     await rebuild_projection(session, profile_id)
-    await recommendation_service.rebuild_pool_entry(session, user_id)
+    viewer_entry = await recommendation_service.rebuild_pool_entry(session, user_id)
+    if viewer_entry is None or not viewer_entry["eligible"]:
+        raise RuntimeError("The test account is not eligible for recommendations.")
     await session.execute(
         text(
             "INSERT INTO recommendation_user_settings "
@@ -1690,31 +1701,13 @@ async def _seed_recommendations(session: AsyncSession, user_id: UUID, profile_id
         ),
         {"user": user_id},
     )
+    strategy = await recommendation_service.active_strategy(session)
+    await recommendation_service.generate_candidates(session, user_id, strategy=strategy)
     try:
         await recommendation_batches.generate_batch(session, user_id, requested_size=3)
     except VavError as error:
         if error.code not in {"RECOMMENDATION_DAILY_LIMIT_REACHED"}:
             raise
-    batch = (
-        (
-            await session.execute(
-                text(
-                    "SELECT * FROM recommendation_batches WHERE user_id=:user AND status='active' "
-                    "ORDER BY batch_number DESC LIMIT 1"
-                ),
-                {"user": user_id},
-            )
-        )
-        .mappings()
-        .first()
-    )
-    if batch is None:
-        raise RuntimeError("The test account recommendation batch was not created.")
-    target_emails = (
-        "recommendation-fixture-jonathan@example.com",
-        "recommendation-fixture-daniel@example.com",
-        "recommendation-fixture-peter@example.com",
-    )
     candidates = list(
         (
             await session.execute(
@@ -1736,45 +1729,50 @@ async def _seed_recommendations(session: AsyncSession, user_id: UUID, profile_id
                     "WHERE u.email=ANY(CAST(:emails AS citext[])) "
                     "ORDER BY array_position(CAST(:emails AS citext[]),u.email)"
                 ),
-                {"viewer": user_id, "emails": list(target_emails)},
+                {"viewer": user_id, "emails": list(READY_RECOMMENDATION_EMAILS)},
             )
         ).mappings()
     )
-    for candidate in candidates:
-        existing = await session.scalar(
-            text(
-                "SELECT id FROM recommendation_items WHERE recommendation_batch_id=:batch "
-                "AND recommended_user_id=:candidate"
-            ),
-            {"batch": batch["id"], "candidate": candidate["user_id"]},
-        )
-        if existing is not None:
+    if len(candidates) != len(READY_RECOMMENDATION_EMAILS):
+        raise RuntimeError("Three independent ready-recommendation fixture members are required.")
+    batch = (
+        (
             await session.execute(
                 text(
-                    "UPDATE recommendation_items SET status='ready',available_from=now(),expires_at=:expires,"
-                    "exposed_at=NULL,viewed_at=NULL,invalidated_at=NULL,invalidation_reason=NULL "
-                    "WHERE id=:id"
+                    "INSERT INTO recommendation_batches "
+                    "(user_id,batch_number,batch_type,strategy_id,profile_projection_version,preference_version,"
+                    "privacy_settings_version,status,requested_size,generated_size,ranking_seed,period_key,idempotency_key,"
+                    "generated_at,activated_at,expires_at,generation_report) "
+                    "SELECT :user,COALESCE(MAX(batch_number),0)+1,'supplemental',:strategy,:projection,:preference,:privacy,"
+                    "'active',3,0,:seed,:period,:key,now(),now(),now()+interval '30 days',"
+                    '\'{"fixture"\\:true,"cohort"\\:"ready"}\'::jsonb FROM recommendation_batches WHERE user_id=:user '
+                    "ON CONFLICT (user_id,idempotency_key) DO UPDATE SET strategy_id=EXCLUDED.strategy_id,"
+                    "profile_projection_version=EXCLUDED.profile_projection_version,preference_version=EXCLUDED.preference_version,"
+                    "privacy_settings_version=EXCLUDED.privacy_settings_version,status='active',requested_size=3,"
+                    "ranking_seed=EXCLUDED.ranking_seed,period_key=EXCLUDED.period_key,generated_at=now(),activated_at=now(),"
+                    "expires_at=EXCLUDED.expires_at,generation_report=EXCLUDED.generation_report RETURNING *"
                 ),
-                {"id": existing, "expires": batch["expires_at"]},
+                {
+                    "user": user_id,
+                    "strategy": strategy["id"],
+                    "projection": viewer_entry["profile_projection_version"],
+                    "preference": viewer_entry["preference_version"],
+                    "privacy": viewer_entry["privacy_settings_version"],
+                    "seed": f"{SHOWCASE_PREFIX}:recommendation-ready",
+                    "period": f"{SHOWCASE_PREFIX}-ready",
+                    "key": f"{SHOWCASE_PREFIX}:recommendation-ready",
+                },
             )
-            continue
-        current_size = int(
-            await session.scalar(
-                text(
-                    "SELECT count(*) FROM recommendation_items WHERE recommendation_batch_id=:batch "
-                    "AND status IN ('ready','exposed','viewed')"
-                ),
-                {"batch": batch["id"]},
-            )
-            or 0
         )
-        if current_size >= 3:
-            break
+        .mappings()
+        .one()
+    )
+    for rank, candidate in enumerate(candidates, start=1):
         candidate_entry = await recommendation_service.pool_entry(
             session, cast(UUID, candidate["user_id"])
         )
         if candidate_entry is None:
-            continue
+            raise RuntimeError("A ready-recommendation fixture is missing its pool entry.")
         visible = await recommendation_batches._visible_snapshot(
             session,
             viewer_id=user_id,
@@ -1790,17 +1788,25 @@ async def _seed_recommendations(session: AsyncSession, user_id: UUID, profile_id
                 "VALUES (:id,:batch,:viewer,:candidate,:pair,:projection,:privacy,:rank,:viewer_score,:candidate_score,"
                 ":combined_score,:confidence,"
                 "CAST(:explanation AS jsonb),CAST(:visible AS jsonb),'ready',now(),:expires) "
-                "ON CONFLICT (recommendation_batch_id,recommended_user_id) DO NOTHING"
+                "ON CONFLICT (recommendation_batch_id,recommended_user_id) DO UPDATE SET "
+                "candidate_pair_id=EXCLUDED.candidate_pair_id,candidate_projection_version=EXCLUDED.candidate_projection_version,"
+                "candidate_privacy_version=EXCLUDED.candidate_privacy_version,rank_position=EXCLUDED.rank_position,"
+                "viewer_to_candidate_score_bps=EXCLUDED.viewer_to_candidate_score_bps,"
+                "candidate_to_viewer_score_bps=EXCLUDED.candidate_to_viewer_score_bps,"
+                "bidirectional_score_bps=EXCLUDED.bidirectional_score_bps,confidence_bps=EXCLUDED.confidence_bps,"
+                "explanation_snapshot=EXCLUDED.explanation_snapshot,visible_profile_snapshot=EXCLUDED.visible_profile_snapshot,"
+                "status='ready',available_from=now(),expires_at=EXCLUDED.expires_at,exposed_at=NULL,viewed_at=NULL,"
+                "invalidated_at=NULL,invalidation_reason=NULL"
             ),
             {
-                "id": _id(f"recommendation-item:{candidate['user_id']}"),
+                "id": _id(f"recommendation-ready-item:{candidate['user_id']}"),
                 "batch": batch["id"],
                 "viewer": user_id,
                 "candidate": candidate["user_id"],
                 "pair": candidate["pair_id"],
                 "projection": candidate_entry["profile_projection_version"],
                 "privacy": candidate_entry["privacy_settings_version"],
-                "rank": current_size + 1,
+                "rank": rank,
                 "viewer_score": candidate["viewer_score"],
                 "candidate_score": candidate["candidate_score"],
                 "combined_score": candidate["combined_score"],
@@ -1873,11 +1879,6 @@ def _canonical_pair(first: UUID, second: UUID) -> tuple[UUID, UUID]:
 
 
 async def _seed_matchmaking_and_relationships(session: AsyncSession, user_id: UUID) -> None:
-    target_emails = (
-        "recommendation-fixture-jonathan@example.com",
-        "recommendation-fixture-daniel@example.com",
-        "recommendation-fixture-peter@example.com",
-    )
     targets = list(
         (
             await session.execute(
@@ -1885,7 +1886,7 @@ async def _seed_matchmaking_and_relationships(session: AsyncSession, user_id: UU
                     "SELECT id,email FROM users WHERE email=ANY(CAST(:emails AS citext[])) "
                     "ORDER BY array_position(CAST(:emails AS citext[]),email)"
                 ),
-                {"emails": list(target_emails)},
+                {"emails": list(MATCHED_RECOMMENDATION_EMAILS)},
             )
         ).mappings()
     )
@@ -2225,11 +2226,6 @@ async def _seed_matchmaking_and_relationships(session: AsyncSession, user_id: UU
                     "snapshot": _json({str(contact_id): "test-showcase"}),
                 },
             )
-    skip_emails = (
-        "recommendation-fixture-hannah@example.com",
-        "recommendation-fixture-mei@example.com",
-        "recommendation-fixture-grace@example.com",
-    )
     skipped_targets = list(
         (
             await session.execute(
@@ -2237,7 +2233,7 @@ async def _seed_matchmaking_and_relationships(session: AsyncSession, user_id: UU
                     "SELECT id,email FROM users WHERE email=ANY(CAST(:emails AS citext[])) "
                     "ORDER BY array_position(CAST(:emails AS citext[]),email)"
                 ),
-                {"emails": list(skip_emails)},
+                {"emails": list(SKIPPED_RECOMMENDATION_EMAILS)},
             )
         ).mappings()
     )
