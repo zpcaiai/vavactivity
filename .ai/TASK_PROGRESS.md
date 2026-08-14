@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-last_updated: 2026-08-14T13:31:00+08:00
+last_updated: 2026-08-14T14:58:41+08:00
 repository: /Users/stephen/Documents/Projects/python/vavactivity
 canonical: true
 ---
@@ -48,48 +48,52 @@ so another agent can continue without guessing.
 
 ## Current task
 
-- ID: `showcase-recommendation-neon-closure`
-- Status: `IN_PROGRESS`; PR 13 is merged, but the post-merge Neon showcase seed
-  and runtime-image vulnerability gates are `FAILED`
+- ID: `user-web-service-first-primary-navigation`
+- Status: `COMPLETED` for the requested local header/footer placement
 - Owner: Codex
-- Objective: make the all-role staging showcase repeatable under real
-  recommendation safety rules, merge PR 13 into backend `main`, and close the
-  post-merge Neon showcase and runtime-image security gates.
-- Branch: backend `main`.
-- Snapshot commit: PR 13 head
-  `99f6ee2485e4783c9c6cc96a3e9232f34586f5a6`, merged as
-  `ca62996dd185b8adf6f36a7d9ae9048574ec2292`.
-- Scope: `services/api/src/vav/cli/seed_recommendation_fixtures.py`,
-  `services/api/src/vav/cli/seed_test_showcase.py`,
-  `services/api/tests/system/test_admin_showcase_seed.py`, and this ledger.
-- Validation: corrected PR 13 head `99f6ee2` completed with seven reported
-  checks `PASSED`; the conditional Neon job was `SKIPPED` on the PR. On merged
-  `main` commit `ca62996`, Backend CI core, Sensitive Domains, and Gitleaks are
-  `PASSED`. The post-merge Neon job applied migrations and verified the live
-  schema successfully, then `FAILED` while seeding deterministic staging
-  showcases with `Three independent ready-recommendation fixture members are
-  required.` Both API and worker images built and produced immutable identity
-  and SBOM evidence, then `FAILED` Trivy because the runtime images contain the
-  dev-only `moto` package and its AWS-key/private-key test fixtures. Local heavy
-  suites remain `NOT_RUN` during the ELMOS exclusive disk window.
-- Commit/push state: implementation commits `acb0b2f`, `e8e815b`, and static
-  contract correction `99f6ee2` are `PUSHED`; PR 13 is `MERGED` as `ca62996`.
-  This ledger correction is `PUSHED` directly to `main`; its containing commit
-  is intentionally identified by Git history rather than self-recording its
-  own SHA.
-- Remote CI: PR 13 checks are closed; on merged `main`, the Neon showcase seed
-  and both runtime-image Trivy jobs are `FAILED`. The release manifest is
-  `SKIPPED` downstream of the image scan failures.
-- Remaining gates: repair and rerun the Neon deterministic showcase seed and
-  runtime-image vulnerability scans. Production deployment, browser/device
-  acceptance, independent security authorization, HA/DR, owner approvals, and
-  immutable 24h/7d/30d windows remain `NOT_CERTIFIED`.
-- Next action: in a separately validated remediation, provide three independent
-  ready-recommendation fixture members and keep dev-only `moto` out of runtime
-  images, then rerun the failed GitHub gates.
+- Objective: make the `vavactivityWeb` C-end primary header use the existing
+  service-first navigation whose leading destinations are Activities, Courses,
+  Human Counseling, and Services, instead of allowing a legacy CMS menu to
+  replace it; About VAV and Contact must live in the footer rather than the
+  primary header.
+- Branch: frontend `main` at
+  `3f657ef027e83866e81f8eba30b1ada551c74bbf`; this canonical ledger remains on
+  backend `main`.
+- Scope: sibling frontend
+  `apps/user-web/src/layouts/PublicLayout.vue`,
+  `apps/user-web/src/navigation/ia.ts`, three user-web locale files,
+  `apps/user-web/src/tests/public-layout-auth.test.ts`, and this ledger.
+- Validation: `public-layout-auth.test.ts` passed `2/2`; ESLint passed for the
+  changed layout, IA, and test; direct `vue-tsc --noEmit -p tsconfig.json`
+  passed; i18n parity passed for three locales and 829 keys; `git diff --check`
+  passed. The regression asserts the first four labels and locale-prefixed
+  hrefs, proves the legacy CMS menu is not requested, proves About VAV and
+  Partnership Contact are absent from the header, and verifies their footer
+  links.
+- Commit/push state: frontend commit `3f657ef027e83866e81f8eba30b1ada551c74bbf`
+  is `PUSHED` to `vavactivityWeb/main`; local HEAD, `origin/main`, and the live
+  GitHub ref matched after push. This ledger update is `PUSHED` directly to
+  backend `main`, with its containing commit identified by Git history rather
+  than self-recording its own SHA.
+- Remote CI: frontend checks triggered by `3f657ef` are not yet terminal at
+  this ledger snapshot.
+- Remaining gates: full frontend suite, production build, browser/device UAT,
+  deployment, and external certification are `NOT_RUN` or `NOT_CERTIFIED`.
+- Next action: observe the remote checks for frontend commit `3f657ef`; run the
+  deferred full local suite/build after the resource owner releases the disk
+  window.
 - Blockers: ELMOS owns the host disk window; local pytest, Docker,
   package-manager builds, generators, pruning, and cleanup are paused until
   `RELEASED`.
+
+## Open follow-ups
+
+- `showcase-recommendation-neon-closure` remains `IN_PROGRESS`: PR 13 is merged
+  as `ca62996`, but the post-merge deterministic showcase seed failed because
+  three independent ready-recommendation fixture members were unavailable, and
+  both runtime-image Trivy jobs failed because dev-only `moto` fixtures were in
+  the images. Those failures require a separate remediation and rerun; all
+  external certification gates remain `NOT_CERTIFIED`.
 
 ## Recent repository history observed
 
@@ -103,6 +107,28 @@ snapshot. Their presence is not proof that every associated external gate ran.
 - `9c4c276` — `feat: complete member journeys and production gates`
 
 ## Completion log
+
+### 2026-08-14 — C-end service-first primary navigation
+
+- Status: `COMPLETED` for local implementation and focused validation.
+- `PublicLayout` now renders the existing `publicIa` product navigation as the
+  C-end header authority, so Activities, Courses, Human Counseling, and
+  Services are the first four destinations and the legacy CMS seed menu cannot
+  replace them.
+- About VAV was removed from `publicIa`; About VAV and Partnership Contact now
+  appear in the footer company group only and route to `/about` and `/contact`.
+- Added a regression test for exact simplified-Chinese order and the
+  `/zh-CN/activities`, `/zh-CN/courses`, `/zh-CN/counseling`, and
+  `/zh-CN/services` hrefs; it also verifies that `main_navigation` is not
+  requested for the product header.
+- Focused Vitest passed `2/2`, changed-file ESLint passed, direct Vue TypeScript
+  checking passed, i18n parity passed for three locales and 829 keys, and both
+  repository diff checks passed.
+- Commit `3f657ef027e83866e81f8eba30b1ada551c74bbf` is `PUSHED` to frontend
+  `main`, with local, tracking, and live remote refs verified equal. This
+  ledger follow-up is pushed separately to backend `main`.
+- Full suite/build and browser/deployment evidence remain deferred or
+  `NOT_CERTIFIED`.
 
 ### 2026-08-14 — Notification controls main-integration verification
 
