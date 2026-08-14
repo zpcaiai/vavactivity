@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-last_updated: 2026-08-14T11:35:00+08:00
+last_updated: 2026-08-14T13:20:47+08:00
 repository: /Users/stephen/Documents/Projects/python/vavactivity
 canonical: true
 ---
@@ -49,37 +49,44 @@ so another agent can continue without guessing.
 ## Current task
 
 - ID: `showcase-recommendation-neon-closure`
-- Status: `IN_PROGRESS`
+- Status: `IN_PROGRESS`; PR 13 is merged, but the post-merge Neon showcase seed
+  and runtime-image vulnerability gates are `FAILED`
 - Owner: Codex
 - Objective: make the all-role staging showcase repeatable under real
-  recommendation safety rules, merge PR 13 into backend `main`, and verify the
-  post-merge Neon migration/showcase job.
-- Branch: remote `codex/showcase-recommendation-cohorts`; this recovery
-  worktree is detached at `e8e815b915357a2e92ca0824d94cf18985f4b20c` because
-  the pre-reboot `/tmp` worktree no longer exists.
-- Snapshot commit: `e8e815b915357a2e92ca0824d94cf18985f4b20c`.
+  recommendation safety rules, merge PR 13 into backend `main`, and close the
+  post-merge Neon showcase and runtime-image security gates.
+- Branch: backend `main`.
+- Snapshot commit: PR 13 head
+  `99f6ee2485e4783c9c6cc96a3e9232f34586f5a6`, merged as
+  `ca62996dd185b8adf6f36a7d9ae9048574ec2292`.
 - Scope: `services/api/src/vav/cli/seed_recommendation_fixtures.py`,
   `services/api/src/vav/cli/seed_test_showcase.py`,
   `services/api/tests/system/test_admin_showcase_seed.py`, and this ledger.
-- Validation: PR 13 head `e8e815b` passed Ruff, formatting, mypy, migrations,
-  deterministic integration seeding, 1756 API tests, Docker Build,
-  Integration CI, Secret Scan, Security Tests, assembly contracts, and
-  migration compatibility. Backend CI is `FAILED` only because one new static
-  contract expected a literal expanded f-string value; result was `1 failed,
-  1756 passed, 6 skipped`. Local heavy suites remain `NOT_RUN` during the ELMOS
-  exclusive disk window.
-- Commit/push state: implementation commits `acb0b2f` and `e8e815b` are
-  `PUSHED`; PR 13 is open. The one-line contract correction and ledger update
-  are `NOT_PUSHED`.
-- Remote CI: six non-backend PR gates are `PASSED`; Backend CI requires the
-  one-line test-contract correction before rerun. Neon remains conditional and
-  has not run for the failing PR head.
-- Remaining gates: PR merge and post-merge Neon staging showcase are
-  `IN_PROGRESS`. Production deployment, browser/device acceptance, independent
-  security authorization, HA/DR, owner approvals, and immutable 24h/7d/30d
-  windows remain `NOT_CERTIFIED`.
-- Next action: correct the static assertion without running local pytest, push
-  through SSH, wait for all remote gates, merge PR 13, then verify main Neon.
+- Validation: corrected PR 13 head `99f6ee2` completed with seven reported
+  checks `PASSED`; the conditional Neon job was `SKIPPED` on the PR. On merged
+  `main` commit `ca62996`, Backend CI core, Sensitive Domains, and Gitleaks are
+  `PASSED`. The post-merge Neon job applied migrations and verified the live
+  schema successfully, then `FAILED` while seeding deterministic staging
+  showcases with `Three independent ready-recommendation fixture members are
+  required.` Both API and worker images built and produced immutable identity
+  and SBOM evidence, then `FAILED` Trivy because the runtime images contain the
+  dev-only `moto` package and its AWS-key/private-key test fixtures. Local heavy
+  suites remain `NOT_RUN` during the ELMOS exclusive disk window.
+- Commit/push state: implementation commits `acb0b2f`, `e8e815b`, and static
+  contract correction `99f6ee2` are `PUSHED`; PR 13 is `MERGED` as `ca62996`.
+  This ledger correction is `PUSHED` directly to `main`; its containing commit
+  is intentionally identified by Git history rather than self-recording its
+  own SHA.
+- Remote CI: PR 13 checks are closed; on merged `main`, the Neon showcase seed
+  and both runtime-image Trivy jobs are `FAILED`. The release manifest is
+  `SKIPPED` downstream of the image scan failures.
+- Remaining gates: repair and rerun the Neon deterministic showcase seed and
+  runtime-image vulnerability scans. Production deployment, browser/device
+  acceptance, independent security authorization, HA/DR, owner approvals, and
+  immutable 24h/7d/30d windows remain `NOT_CERTIFIED`.
+- Next action: in a separately validated remediation, provide three independent
+  ready-recommendation fixture members and keep dev-only `moto` out of runtime
+  images, then rerun the failed GitHub gates.
 - Blockers: ELMOS owns the host disk window; local pytest, Docker,
   package-manager builds, generators, pruning, and cleanup are paused until
   `RELEASED`.
@@ -96,6 +103,20 @@ snapshot. Their presence is not proof that every associated external gate ran.
 - `9c4c276` — `feat: complete member journeys and production gates`
 
 ## Completion log
+
+### 2026-08-14 — GitHub main and shared-ledger synchronization
+
+- Status: `COMPLETED` for the requested direct-`main` publication and `.ai`
+  evidence update; the product gates listed in `Current task` remain
+  `IN_PROGRESS`.
+- Fast-forwarded the backend checkout to GitHub `main` merge `ca62996`, which
+  contains PR 13 head `99f6ee2`; no frontend files or repository were changed.
+- Replaced the stale “PR open / Neon not run” record with the verified merged
+  state and the exact post-merge Neon and Trivy failure boundaries.
+- Validation for this ledger-only change: `git diff --check`, staged-path
+  inspection, commit creation, direct `main` push, and remote-ref equality.
+- External production, browser/device, customer, security-authorization, HA/DR,
+  and elapsed-observation certification remain `NOT_CERTIFIED`.
 
 ### 2026-08-13 — Backend CI closure and split-repository merge
 
