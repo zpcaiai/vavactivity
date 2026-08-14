@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-last_updated: 2026-08-14T14:58:41+08:00
+last_updated: 2026-08-14T17:52:00+08:00
 repository: /Users/stephen/Documents/Projects/python/vavactivity
 canonical: true
 ---
@@ -48,52 +48,118 @@ so another agent can continue without guessing.
 
 ## Current task
 
-- ID: `user-web-service-first-primary-navigation`
-- Status: `COMPLETED` for the requested local header/footer placement
-- Owner: Codex
-- Objective: make the `vavactivityWeb` C-end primary header use the existing
-  service-first navigation whose leading destinations are Activities, Courses,
-  Human Counseling, and Services, instead of allowing a legacy CMS menu to
-  replace it; About VAV and Contact must live in the footer rather than the
-  primary header.
-- Branch: frontend `main` at
-  `3f657ef027e83866e81f8eba30b1ada551c74bbf`; this canonical ledger remains on
-  backend `main`.
-- Scope: sibling frontend
-  `apps/user-web/src/layouts/PublicLayout.vue`,
-  `apps/user-web/src/navigation/ia.ts`, three user-web locale files,
-  `apps/user-web/src/tests/public-layout-auth.test.ts`, and this ledger.
-- Validation: `public-layout-auth.test.ts` passed `2/2`; ESLint passed for the
-  changed layout, IA, and test; direct `vue-tsc --noEmit -p tsconfig.json`
-  passed; i18n parity passed for three locales and 829 keys; `git diff --check`
-  passed. The regression asserts the first four labels and locale-prefixed
-  hrefs, proves the legacy CMS menu is not requested, proves About VAV and
-  Partnership Contact are absent from the header, and verifies their footer
-  links.
-- Commit/push state: frontend commit `3f657ef027e83866e81f8eba30b1ada551c74bbf`
-  is `PUSHED` to `vavactivityWeb/main`; local HEAD, `origin/main`, and the live
-  GitHub ref matched after push. This ledger update is `PUSHED` directly to
-  backend `main`, with its containing commit identified by Git history rather
-  than self-recording its own SHA.
-- Remote CI: frontend checks triggered by `3f657ef` are not yet terminal at
-  this ledger snapshot.
-- Remaining gates: full frontend suite, production build, browser/device UAT,
-  deployment, and external certification are `NOT_RUN` or `NOT_CERTIFIED`.
-- Next action: observe the remote checks for frontend commit `3f657ef`; run the
-  deferred full local suite/build after the resource owner releases the disk
-  window.
-- Blockers: ELMOS owns the host disk window; local pytest, Docker,
-  package-manager builds, generators, pruning, and cleanup are paused until
-  `RELEASED`.
+- ID: `cend-feature-port-and-hero-background`
+- Status: `IN_PROGRESS` — backend is pushed; the frontend half is complete and
+  validated locally but is `NOT_COMMITTED`.
+- Owner: Claude
+- Objective: implement the batch of requirements at code level, then make the
+  six resulting C-end features actually reachable by a member and put the
+  couple photograph behind the C-end background surfaces.
+- Branches: backend `main` at `0149c7c` (clean, in sync with `origin/main`);
+  frontend `main` at `3f657ef` with an uncommitted working tree.
+
+### Backend — `PUSHED`
+
+- Business code, migrations and tests landed in `9c4c276`
+  (`feat: complete member journeys and production gates`) and `1f76f21`
+  (`feat(profile-media): harden storage and capacity release`). The migration
+  chain now runs to `20260813_0112`, 112 revisions in total.
+- Validation: full suite `1700 passed / 1 failed`. The single failure needs a
+  live MinIO endpoint and is environmental, not a code defect. Failure
+  attribution for the earlier red run was carried out in full — 22 missing seed
+  manifests, 7 missing validator script, 2 cwd-relative paths, 1 MinIO, and 3
+  genuinely mine, all three fixed.
+- Migrations: `PASSED`. 110 revisions applied from an empty database, the
+  re-run proved idempotent, and downgrade-then-re-upgrade was exercised three
+  times against deliberately oversold capacity data.
+- `20260812_0106` was rewritten after a real run on this machine failed with
+  `activity_capacity_counters_check`. The original backfill derived a capacity
+  ceiling stricter than the platform's own rule in `catalog/inventory.py`; it
+  now honours `inventory_policy` and `overselling_allowed`, and writes an
+  `activity_capacity_events` row per genuine oversell instead of silently
+  clamping.
+- `20260812_0107`'s downgrade recreated `ai_human_escalations` with
+  `created_at` where migration 0103 defines `opened_at`, so a partial rollback
+  followed by a retry failed on `column e.opened_at does not exist`. The
+  downgrade now matches 0103 column for column.
+- The `last_four_hmac` backfill was run for real with `--apply`. Running it
+  surfaced two defects a unit test would not have: an uncaught `VavError` from
+  `decrypt_private` aborted the whole job on one corrupt ciphertext, and
+  predicate-only paging re-read unfixable rows every batch. Both fixed; paging
+  is now keyset.
+- `content_entries.current_version` carried two incompatible meanings and could
+  be reproduced into a `UniqueViolation` in three writes. Migration
+  `20260813_0110` splits head-of-history from the live revision.
+
+### Frontend — `NOT_COMMITTED`
+
+- Six features existed only in the backend repository's retired `apps/` mirror
+  and had never been deployed: `post-event`, `matchmaking-access`,
+  `discovery`, `couples`, `assessments`, `member-dashboard`. Their backends are
+  live; only the pages were missing. All 32 files plus router, IA and locale
+  wiring were ported into `vavactivityWeb`.
+- Router, IA and locale files were merged key by key rather than copied.
+  `vavactivityWeb` already carried the service-first navigation change from
+  `3f657ef` and a `follows` entry the backend mirror does not have; a file-level
+  copy would have silently reverted both.
+- `apps/README.md` was added to the backend repository declaring `apps/` a
+  retired mirror, so the same six features cannot be stranded again.
+- The couple photograph now backs `.home-hero-image` at full strength, `body`
+  as a masked ambient wash at a tenth opacity, and `.product-card-art` beneath
+  the brand gradient. Encoded to WebP: 1.47 MB PNG to 40 KB, 97% smaller, and
+  it now loads on every page.
+- Two contrast defects were found and fixed while verifying: the hero `h1` sat
+  at 1.01:1 and `.journey-section` body copy at 1.12:1. A control build proved
+  the hero defect pre-existed the photograph rather than being caused by it.
+- Validation: 85 frontend tests passed, i18n parity passed for three locales
+  and 1141 keys, `vue-tsc` reported 0 errors, ESLint reported 0, production
+  build succeeded. A control test proved the new routes are registered — a
+  bogus path renders the 404 page while every ported path renders the login
+  gate.
+- Commit/push state: `NOT_COMMITTED`. Six modified files and eight new paths
+  are sitting in the `vavactivityWeb` working tree.
+
+- Next action: commit and push the `vavactivityWeb` working tree, then run
+  browser UAT on the ported routes.
+- Blockers: none technical. All external certification gates remain
+  `NOT_CERTIFIED`.
 
 ## Open follow-ups
 
 - `showcase-recommendation-neon-closure` remains `IN_PROGRESS`: PR 13 is merged
   as `ca62996`, but the post-merge deterministic showcase seed failed because
-  three independent ready-recommendation fixture members were unavailable, and
-  both runtime-image Trivy jobs failed because dev-only `moto` fixtures were in
-  the images. Those failures require a separate remediation and rerun; all
-  external certification gates remain `NOT_CERTIFIED`.
+  three independent ready-recommendation fixture members were unavailable. That
+  failure requires a separate remediation and rerun; all external certification
+  gates remain `NOT_CERTIFIED`.
+
+- The runtime-image Trivy failure's recorded cause is wrong and the entry above
+  no longer states it. `moto[s3]` is declared in `[dependency-groups] dev`, and
+  the `production` stage of `infra/docker/backend.Dockerfile` runs
+  `uv sync --frozen --all-packages --no-dev`. Replaying both stages of that
+  Dockerfile against the repository's own `pyproject.toml` and `uv.lock`
+  confirmed `--all-groups` installs `moto` in the `base` layer and `--no-dev`
+  prunes it back out, so it is not in the production venv. What the production
+  stage does still carry is `/app/pyproject.toml` and `/app/uv.lock`, inherited
+  from `base` — a manifest Trivy parses as a language-specific lockfile and
+  which lists every dev dependency whether or not it is installed. That is the
+  most probable mechanism and it has NOT been confirmed: Trivy could not be
+  fetched in this environment, so no scan was run. Next check: scan the built
+  production image, and if the lockfile is the source, stop shipping build
+  manifests in the runtime stage rather than suppressing the finding.
+
+- The visual-regression baselines were checked and are `NOT_AFFECTED` by the
+  background work. `tests/ui/visual.spec.ts` is run by
+  `playwright.ui.config.ts`, whose `webServer` serves `@vav/design-system` on
+  port 4178 — not `user-web`. That app's `main.ts` imports only
+  `@vav/design-tokens`, `@vav/ui-core` and its own `catalog.css`, none of which
+  were touched, and opening `desktop-light-chromium-darwin.png` confirms the
+  baseline is the design-system catalogue page. No `--update-snapshots` run is
+  needed. An earlier claim in conversation that all four baselines would fail
+  was wrong.
+
+- Pre-existing and unrelated to this work: at a 768px viewport on the dark
+  theme, `.ai-prompt-card` overlaps the "开始认识" button. Not introduced here
+  and not fixed here.
 
 ## Recent repository history observed
 
@@ -107,6 +173,28 @@ snapshot. Their presence is not proof that every associated external gate ran.
 - `9c4c276` — `feat: complete member journeys and production gates`
 
 ## Completion log
+
+### 2026-08-14 — C-end feature port, hero background and backend closure
+
+- Status: `IN_PROGRESS`. The backend half is complete and pushed; the frontend
+  half is complete and locally validated but `NOT_COMMITTED`.
+- Six previously-undeployed C-end features were ported into the deployed
+  frontend repository, so live backends stopped being unreachable.
+- The couple photograph was applied to three C-end background surfaces with a
+  different treatment for each, because the page runs the light token set and
+  the photograph is a dark dusk shot; two contrast defects found along the way
+  were fixed.
+- Backend evidence: full suite `1700 passed / 1 failed` (MinIO-dependent), 110
+  migrations applied from empty, idempotent re-run, and three
+  downgrade/re-upgrade cycles on oversold data.
+- Three defects were found only by executing rather than by reading: the
+  capacity backfill's ceiling, the `0107` downgrade's column name, and the two
+  `last_four_hmac` backfill bugs. Each is recorded under `Current task`.
+- Two claims made earlier in conversation were checked and retracted here: the
+  visual baselines are not affected, and the Trivy failure is not explained by
+  `moto` being installed in the production image.
+- Browser/device UAT, deployment and external certification remain `NOT_RUN` or
+  `NOT_CERTIFIED`.
 
 ### 2026-08-14 — C-end service-first primary navigation
 
