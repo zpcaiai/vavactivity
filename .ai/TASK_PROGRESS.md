@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-last_updated: 2026-08-18T12:30:00+08:00
+last_updated: 2026-08-18T17:20:00+08:00
 repository: /Users/stephen/Documents/Projects/python/vavactivity
 canonical: true
 ---
@@ -48,177 +48,107 @@ so another agent can continue without guessing.
 
 ## Current task
 
-- ID: `cend-feature-port-and-hero-background`
-- Status: `IN_PROGRESS` — backend is pushed; the frontend half is complete and
-  validated locally but is `NOT_COMMITTED`.
+- ID: `requirement-audit-and-executable-release-gates`
+- Status: `IN_PROGRESS` — G1 and G2 now have executed evidence; G3, G4 and G5
+  remain open for reasons recorded per gate below.
 - Owner: Claude
-- Objective: implement the batch of requirements at code level, then make the
-  six resulting C-end features actually reachable by a member and put the
-  couple photograph behind the C-end background surfaces.
-- Branches: backend `main` at `0149c7c` (clean, in sync with `origin/main`);
-  frontend `main` at `3f657ef` with an uncommitted working tree.
+- Objective: check the 42 catalogued requirements against both repositories,
+  implement whatever is genuinely missing, then run every release gate that can
+  be run and state plainly which ones cannot.
+- Branches: backend `main` at `d21b47c`; frontend `main` at `f6f4b7d`. Both
+  are one commit ahead of `origin/main` and both working trees are clean.
 
-### Backend — `PUSHED`
+### Requirement coverage — `PASSED` at `E0`
 
-- Business code, migrations and tests landed in `9c4c276`
-  (`feat: complete member journeys and production gates`) and `1f76f21`
-  (`feat(profile-media): harden storage and capacity release`). The migration
-  chain now runs to `20260813_0112`, 112 revisions in total.
-- Validation: full suite `1700 passed / 1 failed`. The single failure needs a
-  live MinIO endpoint and is environmental, not a code defect. Failure
-  attribution for the earlier red run was carried out in full — 22 missing seed
-  manifests, 7 missing validator script, 2 cwd-relative paths, 1 MinIO, and 3
-  genuinely mine, all three fixed.
-- Migrations: `PASSED`. 110 revisions applied from an empty database, the
-  re-run proved idempotent, and downgrade-then-re-upgrade was exercised three
-  times against deliberately oversold capacity data.
-- `20260812_0106` was rewritten after a real run on this machine failed with
-  `activity_capacity_counters_check`. The original backfill derived a capacity
-  ceiling stricter than the platform's own rule in `catalog/inventory.py`; it
-  now honours `inventory_policy` and `overselling_allowed`, and writes an
-  `activity_capacity_events` row per genuine oversell instead of silently
-  clamping.
-- `20260812_0107`'s downgrade recreated `ai_human_escalations` with
-  `created_at` where migration 0103 defines `opened_at`, so a partial rollback
-  followed by a retry failed on `column e.opened_at does not exist`. The
-  downgrade now matches 0103 column for column.
-- The `last_four_hmac` backfill was run for real with `--apply`. Running it
-  surfaced two defects a unit test would not have: an uncaught `VavError` from
-  `decrypt_private` aborted the whole job on one corrupt ciphertext, and
-  predicate-only paging re-read unfixable rows every batch. Both fixed; paging
-  is now keyset.
-- `content_entries.current_version` carried two incompatible meanings and could
-  be reproduced into a `UniqueViolation` in three writes. Migration
-  `20260813_0110` splits head-of-history from the live revision.
+- All 42 requirements in the skill package's `requirement_catalog.json` now
+  resolve to concrete artefacts. The probe list lives in the session record,
+  not in the repository; regenerating it is cheap and it is deliberately not
+  a committed gate, because it proves presence and nothing more.
+- The first pass reported four gaps. Three were probe errors, not absences:
+  the login page is `AuthPage.vue`, the admin activity endpoints are 17 routes
+  inside `activities/router.py` rather than an `admin_router.py`, and the role
+  gates are `test_permission_policy.py` and `test_design_permissions.py`.
+- `PAY-003` was the one real gap and is closed by `c4f2680`. Scope was
+  deliberately limited to stubs, contracts and flags, because the blocker is
+  `DEC-005` — the Chinese collection entity and merchant accounts — and not
+  engineering. WeChat Pay and Alipay implement the payment protocol, refuse
+  every money-moving method with a 503 naming the decision, are never
+  substituted by the local fake, and cannot be listed in
+  `PAYMENT_ENABLED_PROVIDERS` without failing startup.
+- This is `E0` evidence. It says every requirement has an implementation; it
+  says nothing about whether that implementation is accepted.
 
-### Frontend — `NOT_COMMITTED`
+### Gate G1 — build and static quality — `PASSED` at `E1`
 
-- Six features existed only in the backend repository's retired `apps/` mirror
-  and had never been deployed: `post-event`, `matchmaking-access`,
-  `discovery`, `couples`, `assessments`, `member-dashboard`. Their backends are
-  live; only the pages were missing. All 32 files plus router, IA and locale
-  wiring were ported into `vavactivityWeb`.
-- Router, IA and locale files were merged key by key rather than copied.
-  `vavactivityWeb` already carried the service-first navigation change from
-  `3f657ef` and a `follows` entry the backend mirror does not have; a file-level
-  copy would have silently reverted both.
-- `apps/README.md` was added to the backend repository declaring `apps/` a
-  retired mirror, so the same six features cannot be stranded again.
-- The couple photograph now backs `.home-hero-image` at full strength, `body`
-  as a masked ambient wash at a tenth opacity, and `.product-card-art` beneath
-  the brand gradient. Encoded to WebP: 1.47 MB PNG to 40 KB, 97% smaller, and
-  it now loads on every page.
-- Two contrast defects were found and fixed while verifying: the hero `h1` sat
-  at 1.01:1 and `.journey-section` body copy at 1.12:1. A control build proved
-  the hero defect pre-existed the photograph rather than being caused by it.
-- Validation: 85 frontend tests passed, i18n parity passed for three locales
-  and 1141 keys, `vue-tsc` reported 0 errors, ESLint reported 0, production
-  build succeeded. A control test proved the new routes are registered — a
-  bogus path renders the 404 page while every ported path renders the login
-  gate.
-- Commit/push state: `NOT_COMMITTED`. Six modified files and eight new paths
-  are sitting in the `vavactivityWeb` working tree.
+- `ruff check`, `ruff format --check`, `mypy services/api/src services/worker/src`
+  and `scripts/check_migration_heads.py` all pass.
 
-- Next action: commit and push the `vavactivityWeb` working tree, then run
-  browser UAT on the ported routes.
-- Blockers: none technical. All external certification gates remain
-  `NOT_CERTIFIED`.
+### Gate G2 — integration on real backing services — `PASSED` at `E2`
 
-### Public marketing shell layout — `NOT_COMMITTED`
+- Executed against PostgreSQL 16 with pgvector, citext and pgcrypto, Redis 7,
+  and a real S3-compatible endpoint. Object storage was `moto` rather than
+  MinIO: it is a real S3 implementation over HTTP, not a mocked client, so the
+  presigned-POST and size-ceiling paths are genuinely exercised.
+- 112 migrations applied to head `20260813_0112` from an empty database,
+  producing 558 tables. `alembic current` reports `(head)` and the single-head
+  check passes.
+- 18 seeds applied, then applied again; `permissions` stayed at 808 rows. That
+  second run is what actually evidences `DATA-002`'s idempotency requirement.
+- Full suite: **1772 tests, 1 skipped, 446s**, zero failures after the defect
+  below was fixed.
+- Reproduce with `scripts/release/run_local_gates.sh`, added in `d21b47c`. It
+  reported `passed=10 failed=0` when executed end to end.
 
-- ID: `public-shell-layout-audit-2026-08-18`
-- Status: `COMPLETED` for the requested scope; `PUSHED` in both repositories.
-- Owner: Claude
-- Objective: audit and fix the layout of the marketing home page, the seven
-  public navigation tabs and the site footer.
-- Branches: backend `main` at `0cc4ea5`, frontend `main` at `d7dee74`; both
-  working trees dirty.
-- Scope (11 files, identical set in both repositories):
-  `apps/user-web/src/assets/main.css`,
-  `apps/user-web/src/layouts/PublicLayout.vue`,
-  `apps/user-web/src/features/public-site/pages/CmsPage.vue`,
-  the three `apps/user-web/src/i18n/locales/*.json`,
-  `packages/design-tokens/src/layout/tokens.json` and the four regenerated
-  `packages/design-tokens/generated/*` artefacts.
-- Defects found, each reproduced in a real browser before being fixed:
-  1. `.site-footer > div` (a leftover rule) outranked `.site-footer__groups` on
-     specificity, so the four footer link groups rendered as one flex row with
-     an 11.2px gap at every breakpoint. Confirmed by computed style, not by
-     reading.
-  2. `.site-footer` carried three competing definitions across the file that
-     resolved only by source order.
-  3. `.site-footer p, a` referenced `--vav-color-muted`, which is not a token.
-  4. `.site-header` was `width: auto` with `margin-inline: auto`, i.e.
-     shrink-to-fit, so the bar changed width per route and per locale
-     (measured 1009px against a declared 1408px cap).
-  5. Five different content left edges across the eight public routes
-     (measured at 1440px: 89 / 126 / 0 / 181, header 215, footer 58).
-  6. `/membership` uses `UserPageLayout`, whose gutter comes from
-     `.app-shell__content`; under the public shell it had none and rendered at
-     `x = 0`.
-  7. `.editorial-page` forced `1.1fr 0.9fr` and `min-height: 680px` on three
-     routes that never render an `.editorial-art`, leaving a permanently empty
-     right half.
-  8. `/about` rendered no `h1` in its loading and error states, which also
-     defeats the layout's post-navigation focus handler.
-  9. The hero stacked four absolutely positioned panels in a fixed-height box;
-     the AI card overlapped the member-proof strip, and `member-proof` was
-     hidden below 1180px to hide the collision.
-  10. Six surface or literal colours were used as text colours, invisible in the
-      light theme.
-- Fixes: new `layout.site.*` design tokens (`maxWidth`, `gutter`,
-  `gutterCompact`, `headerHeight`, `sectionGap`); one page container shared by
-  the header bar, all four page-container classes and the footer; footer
-  rebuilt as `__inner` / `__meta` with a 4 / 2 / 1 column ladder and a
-  `<nav aria-label>` wrapper; hero converted to `grid-template-areas`; all
-  colour literals resolved through semantic tokens; the footer year is now
-  computed rather than hard-coded.
-- Validation (both repositories, 2026-08-18):
-  `vue-tsc -b --force` `PASSED` (0 errors);
-  `eslint src` `PASSED` (0);
-  `vitest run` `PASSED` — backend repo 58/58, deployment repo 97/97;
-  `check-design-tokens` `PASSED`; `check-i18n` `PASSED` (3 locales, 1135 and
-  1142 keys); `design-tokens` unit tests `PASSED`;
-  `vite build` `PASSED`.
-- Browser evidence: a Linux container reproduction of the deployment (`pnpm
-  install`, `vite build`, `vite preview`, Playwright/Chromium) captured the
-  eight public routes at 1440 / 1024 / 768 / 390 before and after, plus dark
-  and high-contrast passes. Post-fix measurements: one content left edge
-  (`60..1380`) on all eight routes, footer grid `4 / 2 / 2` columns across the
-  ladder, zero horizontal overflow at every breakpoint, and no overlapping hero
-  panels.
-- Not covered: the member-space `AppShell` tabs and `admin-web` were out of the
-  agreed scope. Live API data was unavailable in the container, so every route
-  was verified in its empty or error state — full-content layouts still need a
-  pass against a running backend.
-- Commit/push state: `PUSHED`. `fcbd8ef` in this repository (fast-forward from
-  `0cc4ea5`) and `97e0d49` in `vavactivityWeb` (fast-forward from `989a2ed`,
-  carrying the pre-existing `d7dee74` with it). Both verified by
-  `git ls-remote` against GitHub rather than by trusting the local
-  remote-tracking refs, which had drifted.
-- Next action: re-verify the eight public layouts against a running API. Every
-  route was checked in its empty or error state, because the container
-  reproduction had no backend.
-- Blockers: none.
-- Note on tooling, for the next agent. `git push` from the agent's device
-  shell prints `fatal: ... Received HTTP code 403 from proxy after CONNECT` and
-  looks like a hard failure. It is not: every commit made in this session
-  reached `origin/main` anyway, a few minutes later, and a subsequent
-  `git push` from the host answered `Everything up-to-date`. The mechanism was
-  not identified — there is no `post-commit` hook, no `url.*.insteadOf`
-  rewrite, and a `git ls-remote` run immediately after the push still showed
-  the old SHA. Two rules follow:
-  1. Treat neither the push output nor the local remote-tracking ref as
-     evidence. `refs/remotes/origin/main` moves on its own here. The only
-     authority is `git ls-remote <url> refs/heads/main` from a networked shell,
-     polled until it shows the expected SHA.
-  2. Never `amend` or rebase a commit made in this session. Assume it is
-     already public, or about to be. Doing otherwise diverged local `main` from
-     a published commit once in this session and cost a `reset --soft` to
-     unwind.
-  The earlier version of this note, and the message on commit `2185193`, both
-  gave a confident wrong explanation (an `insteadOf` SSH fallback). They are
-  left in history rather than rewritten, for the same reason as rule 2.
+#### Two defects the run surfaced
+
+- The first full run failed one registration test with `429`. The cause was
+  `rate:register:ip:*` counters surviving from the previous run in the same
+  Redis; CI never sees it because each job gets a fresh container. The runner
+  now flushes Redis first, so a local run and a CI run mean the same thing.
+- The `PAY-003` test committed in `c4f2680` was passing for the wrong reason.
+  `payment_enabled_providers` carries a `validation_alias` and the model does
+  not set `populate_by_name`, so passing the field name was silently ignored
+  and the assertion ran against the default provider list. It passed under a
+  newer `pydantic-settings` and failed under the pinned one. The test now uses
+  the alias, and a new test pins the alias-only behaviour. The guard itself was
+  never wrong: removing it still fails the test.
+
+### Gate G3 — full local runtime — `PARTIAL`
+
+- The API half is covered: the suite above runs against real PostgreSQL, Redis
+  and object storage.
+- The browser half is not. Actual login, admin publish and My Events need both
+  frontends running under `playwright.complete.config.ts`. `NOT_RUN`.
+
+### Gate G4 — external UAT — `NOT_RUN`, tooling ready
+
+- `e2e/external-uat/deployed-smoke.spec.ts` (frontend `f6f4b7d`) targets the
+  deployment and asserts what only a deployment can show: the application's own
+  `X-Request-ID` on liveness, `postgresql: ok` in readiness, an exact CORS
+  origin echo with credentials, and `/assets/` responses that are real files
+  rather than the SPA shell.
+- It refuses to run without `E2E_USER_WEB_URL`, `E2E_ADMIN_WEB_URL` and
+  `E2E_API_BASE_URL`, and refuses localhost outright. Both refusals were
+  verified by running them. Gathering E4 evidence from a dev server is the
+  "mock/sandbox evidence presented as live" blocker.
+- It is a smoke suite. Passing it would show the deployment is reachable and
+  coherent; `UAT_READY` still needs a person to work through
+  `references/UAT_CHECKLIST.md`.
+
+### Gate G5 — production certification — `NOT_CERTIFIED`
+
+- Not automatable, and deliberately not attempted. Live merchant certification,
+  privacy and compliance approval, content licences, on-call and real-user
+  acceptance are attested by accountable people through
+  `scripts/certification/external_gate_intake.py`, which is fail-closed.
+- `DEC-005` is an open P0-adjacent decision and is now surfaced in the release
+  manifest's `pending_decisions`, so the absence is visible in the release
+  report rather than only in the code that refuses.
+
+- Next action: push both commits, then run the G4 suite against the deployment
+  and attach its report.
+- Blockers: `DEC-005` for the Chinese channels; a human tester for G4; the G5
+  attestations.
 
 ## Open follow-ups
 
@@ -271,6 +201,24 @@ snapshot. Their presence is not proof that every associated external gate ran.
 - `9c4c276` — `feat: complete member journeys and production gates`
 
 ## Completion log
+
+### 2026-08-18 — Requirement audit and executable release gates
+
+- Status: `IN_PROGRESS`. Coverage and the two automatable gates are evidenced;
+  the remaining gates are recorded with the specific reason each is open.
+- All 42 catalogued requirements resolve to artefacts. `PAY-003` was the only
+  real gap and is closed as stubs-and-refusal, matching its stated scope.
+- G1 and G2 were executed rather than asserted: 112 migrations, 558 tables, 18
+  idempotent seeds and 1772 tests against real PostgreSQL, Redis and S3.
+- Two defects surfaced by running rather than reading: a non-hermetic Redis
+  that makes a local re-run fail where CI passes, and a test of my own that
+  asserted against a default value because the field only populates by alias.
+- The release manifest's migration target had drifted 26 revisions behind and
+  is now derived from the chain; writing that resolver exposed a second bug in
+  which 26 of 112 files were invisible to it.
+- G3 is partial, G4 has tooling but no run, G5 is unchanged and unchangeable by
+  automation. All three are emitted as explicit `NOT_RUN` rows by the runner,
+  because an unmentioned gate reads as a passing one.
 
 ### 2026-08-18 — Public marketing shell layout audit and rebuild
 
