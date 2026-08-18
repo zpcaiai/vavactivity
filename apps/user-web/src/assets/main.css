@@ -1525,7 +1525,7 @@ textarea::placeholder {
   display: grid;
   gap: var(--vav-space-4);
   margin-inline: auto;
-  max-width: var(--page-max, var(--vav-layout-site-max-width));
+  max-width: none;
   padding: var(--vav-space-4) var(--vav-layout-site-gutter-compact);
   width: 100%;
 }
@@ -1550,7 +1550,11 @@ textarea::placeholder {
   grid-template-rows: 1fr auto auto;
   min-block-size: min(46rem, calc(100vh - 6rem));
   overflow: hidden;
-  padding: clamp(6rem, 11vw, 8.5rem) clamp(1.5rem, 4vw, 4rem) clamp(2rem, 4vw, 3.5rem);
+  padding-block: clamp(6rem, 11vw, 8.5rem) clamp(2rem, 4vw, 3.5rem);
+  /* The card is inset from the viewport by the compact gutter, so its own
+     padding makes up the difference and the headline lands on the same
+     baseline as every other page and the footer. */
+  padding-inline: calc(var(--vav-layout-site-gutter) - var(--vav-layout-site-gutter-compact));
   position: relative;
   row-gap: clamp(1.25rem, 2.5vw, 2rem);
 }
@@ -2108,7 +2112,11 @@ textarea::placeholder {
  * max-width / padding pair.
  * ---------------------------------------------------------------------- */
 .site-shell > main > * {
-  --page-max: var(--vav-layout-site-max-width);
+  /* The public pages run edge to edge; only the gutter holds content off the
+     viewport. `--vav-layout-site-max-width` still caps the header bar, and it
+     is still the fallback for these same container classes when they are used
+     inside AppShell, which supplies its own width. */
+  --page-max: none;
   --page-gutter: var(--vav-layout-site-gutter);
 }
 
@@ -2123,7 +2131,7 @@ textarea::placeholder {
 .site-footer__inner,
 .site-footer__meta {
   margin-inline: auto;
-  max-width: var(--vav-layout-site-max-width);
+  max-width: none;
   padding-inline: var(--vav-layout-site-gutter);
   width: 100%;
 }
@@ -2220,7 +2228,7 @@ textarea::placeholder {
  * scoped `[data-width]` rule in @vav/ui-user. */
 .site-shell > main > .v-user-page.v-user-page {
   margin-inline: auto;
-  max-inline-size: var(--vav-layout-site-max-width);
+  max-inline-size: none;
   padding-block: clamp(2.5rem, 5vw, 4.5rem) 0;
   padding-inline: var(--vav-layout-site-gutter);
   width: 100%;
@@ -2238,7 +2246,8 @@ textarea::placeholder {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto;
     min-block-size: 0;
-    padding: clamp(5rem, 14vw, 7rem) clamp(1.25rem, 4vw, 2rem) clamp(1.75rem, 4vw, 2.5rem);
+    padding-block: clamp(5rem, 14vw, 7rem) clamp(1.75rem, 4vw, 2.5rem);
+    padding-inline: calc(var(--vav-layout-site-gutter) - var(--vav-layout-site-gutter-compact));
     row-gap: var(--vav-space-8);
   }
 
