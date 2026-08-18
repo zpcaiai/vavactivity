@@ -200,15 +200,25 @@ so another agent can continue without guessing.
   route was checked in its empty or error state, because the container
   reproduction had no backend.
 - Blockers: none.
-- Note on tooling, for the next agent: the agent's device shell has no network
-  at all — `git push` there always fails with `403 from proxy after CONNECT`.
-  Both commits above reached GitHub from the host, not from the agent, and the
-  local remote-tracking refs moved as a side effect of that host push, which is
-  easy to misread as the agent's own push having worked. Always confirm with
-  `git ls-remote` from a networked shell. Reading a ref as authoritative here
-  once led to amending a commit that was already public.
-- `fd7328b` (this ledger update) is `NOT_PUSHED` and needs `git push origin
-  main` from the host.
+- Note on tooling, for the next agent. `git push` from the agent's device
+  shell prints `fatal: ... Received HTTP code 403 from proxy after CONNECT` and
+  looks like a hard failure. It is not: every commit made in this session
+  reached `origin/main` anyway, a few minutes later, and a subsequent
+  `git push` from the host answered `Everything up-to-date`. The mechanism was
+  not identified — there is no `post-commit` hook, no `url.*.insteadOf`
+  rewrite, and a `git ls-remote` run immediately after the push still showed
+  the old SHA. Two rules follow:
+  1. Treat neither the push output nor the local remote-tracking ref as
+     evidence. `refs/remotes/origin/main` moves on its own here. The only
+     authority is `git ls-remote <url> refs/heads/main` from a networked shell,
+     polled until it shows the expected SHA.
+  2. Never `amend` or rebase a commit made in this session. Assume it is
+     already public, or about to be. Doing otherwise diverged local `main` from
+     a published commit once in this session and cost a `reset --soft` to
+     unwind.
+  The earlier version of this note, and the message on commit `2185193`, both
+  gave a confident wrong explanation (an `insteadOf` SSH fallback). They are
+  left in history rather than rewritten, for the same reason as rule 2.
 
 ## Open follow-ups
 
