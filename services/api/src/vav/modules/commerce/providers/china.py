@@ -84,9 +84,7 @@ class _PendingChinaProvider:
     #: the channel's status without special-casing it.
     environment = "pending_decision"
 
-    async def create_payment(
-        self, request: CreateProviderPaymentRequest
-    ) -> ProviderPaymentResult:
+    async def create_payment(self, request: CreateProviderPaymentRequest) -> ProviderPaymentResult:
         raise ChinaChannelPendingDecision(self.name, "create a payment")
 
     async def create_refund(self, request: ProviderRefundRequest) -> ProviderRefundResult:

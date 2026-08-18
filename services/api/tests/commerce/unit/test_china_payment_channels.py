@@ -88,18 +88,38 @@ def test_factory_returns_the_stub_rather_than_the_local_fake() -> None:
         assert provider.environment == "pending_decision"
 
 
+def test_settings_only_populate_by_alias() -> None:
+    """Guards the two tests below, which would otherwise assert nothing.
+
+    ``payment_enabled_providers`` carries ``validation_alias`` and the model
+    does not set ``populate_by_name``, so passing the *field name* is silently
+    ignored and the default list is used instead. A first draft of these tests
+    did exactly that: it constructed ``Settings(payment_enabled_providers=...)``,
+    never actually enabled the channel, and still passed — for the wrong
+    reason. Asserting the alias-only behaviour keeps that mistake from
+    reappearing quietly.
+    """
+
+    field = Settings.model_fields["payment_enabled_providers"]
+    assert field.validation_alias == "PAYMENT_ENABLED_PROVIDERS"
+    assert not Settings.model_config.get("populate_by_name")
+    ignored = Settings(payment_enabled_providers=["stripe", "wechat_pay"])
+    assert ignored.payment_enabled_providers == ["stripe", "paypal"]
+
+
 def test_configuration_refuses_to_offer_the_channels_at_all() -> None:
     # The checkout builds its buttons from `payment_enabled_providers`, so a
     # name that cannot be listed cannot become a button. Startup is also a far
-    # better place to fail than a member's payment.
+    # better place to fail than a member's payment. The alias is used here
+    # because it is also how a deployment actually sets this.
     for name in ("wechat_pay", "alipay"):
         with pytest.raises(ValueError) as raised:
-            Settings(payment_enabled_providers=["stripe", name])
+            Settings(PAYMENT_ENABLED_PROVIDERS=["stripe", name])
         assert CHINA_PAYMENT_DECISION in str(raised.value)
 
 
 def test_the_supported_channels_are_unaffected() -> None:
-    settings = Settings(payment_enabled_providers=["stripe", "paypal"])
+    settings = Settings(PAYMENT_ENABLED_PROVIDERS=["stripe", "paypal"])
     assert settings.payment_enabled_providers == ["stripe", "paypal"]
 
 
