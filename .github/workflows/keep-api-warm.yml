@@ -1,0 +1,61 @@
+# Keep the deployed API from cold-starting.
+#
+# The hosting plan suspends an idle web service after about 15 minutes. The
+# next visitor then pays the wake-up cost, and while the platform is bringing
+# the process back it serves its own error page — which carries no CORS
+# headers, so a browser reports it as a network/CORS failure rather than as
+# "starting". That is exactly how a cold start once got misdiagnosed as a
+# cross-origin problem.
+#
+# Pinging /health/live more often than the idle window keeps the service warm.
+# GitHub's scheduler is best-effort and routinely runs late, so the interval is
+# set well below the window rather than exactly at it; even so this is a
+# mitigation, not a guarantee. An external uptime monitor is more reliable, and
+# a paid instance removes the problem entirely.
+#
+# Note: GitHub disables scheduled workflows in repositories with no activity
+# for 60 days. If the pings stop, check that first.
+name: Keep API Warm
+
+on:
+  schedule: [{cron: "*/10 * * * *"}]
+  workflow_dispatch:
+
+permissions: {contents: read}
+
+concurrency:
+  group: keep-api-warm
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping the liveness endpoint
+        env:
+          # Override in repository variables to point at a different deployment.
+          API_BASE_URL: ${{ vars.API_BASE_URL || 'https://vav-platform-api.onrender.com/api/v1' }}
+        shell: bash
+        run: |
+          set -uo pipefail
+          url="${API_BASE_URL%/}/health/live"
+
+          # A suspended instance can take tens of seconds to answer, so the
+          # first attempt is given a long timeout rather than being retried
+          # immediately — retrying a cold start just starts a second wait.
+          for attempt in 1 2 3; do
+            # `%{http_code}` already prints 000 when the transfer never got a
+            # response, so appending another `|| echo 000` produced "000000"
+            # and the success comparison could never match a real failure.
+            code="$(curl -sS -o /tmp/body.json -w '%{http_code}' --max-time 90 "$url" || true)"
+            code="${code:-000}"
+            if [ "$code" = "200" ]; then
+              echo "awake after attempt ${attempt}: $(cat /tmp/body.json)"
+              exit 0
+            fi
+            echo "attempt ${attempt}: HTTP ${code}"
+            [ "$attempt" -lt 3 ] && sleep 15
+          done
+
+          echo "::error::${url} did not return 200 after 3 attempts (last HTTP ${code})."
+          exit 1
