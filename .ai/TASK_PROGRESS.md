@@ -127,7 +127,7 @@ so another agent can continue without guessing.
 ### Public marketing shell layout — `NOT_COMMITTED`
 
 - ID: `public-shell-layout-audit-2026-08-18`
-- Status: `COMPLETED` for the requested scope; `NOT_COMMITTED` in both repos.
+- Status: `COMPLETED` for the requested scope; `PUSHED` in both repositories.
 - Owner: Claude
 - Objective: audit and fix the layout of the marketing home page, the seven
   public navigation tabs and the site footer.
@@ -191,9 +191,24 @@ so another agent can continue without guessing.
   agreed scope. Live API data was unavailable in the container, so every route
   was verified in its empty or error state — full-content layouts still need a
   pass against a running backend.
-- Commit/push state: `NOT_COMMITTED` in both repositories.
-- Next action: commit both working trees, then re-verify against a running API.
+- Commit/push state: `PUSHED`. `fcbd8ef` in this repository (fast-forward from
+  `0cc4ea5`) and `97e0d49` in `vavactivityWeb` (fast-forward from `989a2ed`,
+  carrying the pre-existing `d7dee74` with it). Both verified by
+  `git ls-remote` against GitHub rather than by trusting the local
+  remote-tracking refs, which had drifted.
+- Next action: re-verify the eight public layouts against a running API. Every
+  route was checked in its empty or error state, because the container
+  reproduction had no backend.
 - Blockers: none.
+- Note on tooling, for the next agent: the agent's device shell has no network
+  at all — `git push` there always fails with `403 from proxy after CONNECT`.
+  Both commits above reached GitHub from the host, not from the agent, and the
+  local remote-tracking refs moved as a side effect of that host push, which is
+  easy to misread as the agent's own push having worked. Always confirm with
+  `git ls-remote` from a networked shell. Reading a ref as authoritative here
+  once led to amending a commit that was already public.
+- `fd7328b` (this ledger update) is `NOT_PUSHED` and needs `git push origin
+  main` from the host.
 
 ## Open follow-ups
 
@@ -249,7 +264,8 @@ snapshot. Their presence is not proof that every associated external gate ran.
 
 ### 2026-08-18 — Public marketing shell layout audit and rebuild
 
-- Status: `COMPLETED` locally, `NOT_COMMITTED`.
+- Status: `COMPLETED` and `PUSHED` — `fcbd8ef` here, `97e0d49` in
+  `vavactivityWeb`.
 - Ten layout and contrast defects on the home page, the seven public tabs and
   the footer were reproduced in a real browser, fixed, and re-verified at four
   breakpoints in three themes. The footer group grid, the shrink-to-fit header
