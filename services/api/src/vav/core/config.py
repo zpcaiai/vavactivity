@@ -1779,6 +1779,23 @@ class Settings(BaseSettings):
             raise ValueError("production cannot enable the local payment fake")
         if self.payment_environment == "live" and self.environment != "production":
             raise ValueError("live payments require the production application environment")
+        # WeChat Pay and Alipay are blocked on DEC-005 — the Chinese collection
+        # entity and merchant accounts are undecided. Refusing at startup is
+        # what keeps the promise that no unsupported channel is ever offered:
+        # the checkout builds its buttons from this list, so a name that cannot
+        # be listed cannot become a button. Failing here also beats failing at
+        # a member's payment, which is where a runtime-only guard would fire.
+        china_channels = sorted(
+            name
+            for name in self.payment_enabled_providers
+            if name.casefold() in {"wechat_pay", "alipay", "wechatpay", "wechat"}
+        )
+        if china_channels:
+            raise ValueError(
+                "WeChat Pay and Alipay cannot be enabled until DEC-005 assigns the "
+                "Chinese collection entity and merchant accounts; remove "
+                f"{', '.join(china_channels)} from PAYMENT_ENABLED_PROVIDERS"
+            )
         if production_like and self.course_video_provider == "fake_private":
             raise ValueError("production must configure a real private course video provider")
         if production_like and self.counseling_meeting_provider == "fake":
