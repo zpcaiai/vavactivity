@@ -63,7 +63,9 @@ watch(() => route.params.locale, () => void load());
         </p>
         <h2>{{ course.title }}</h2>
         <p>{{ course.summary }}</p>
-        <p>{{ course.estimated_duration_minutes ?? "—" }} 分钟</p>
+        <p v-if="course.estimated_duration_minutes">
+          {{ course.estimated_duration_minutes }} 分钟
+        </p>
         <RouterLink :to="`/${String(route.params.locale)}/courses/${course.slug}`">
           查看课程
         </RouterLink>

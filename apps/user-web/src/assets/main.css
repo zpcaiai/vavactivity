@@ -383,14 +383,64 @@ select {
 .cms-hero,
 .cms-call-to-action,
 .cms-collection {
-  margin: 2rem 0;
-  padding: 2rem;
-  background: var(--vav-color-surface-soft);
+  border: 1px solid var(--vav-color-border);
+  border-radius: var(--vav-radius-md);
+  margin: 0;
+  padding: clamp(1.5rem, 3vw, 2rem);
 }
 
-.cms-rich-text,
+.cms-hero h2,
+.cms-call-to-action h2 {
+  font-size: var(--vav-font-size-lg);
+  margin: 0 0 var(--vav-space-2);
+}
+
+.cms-hero p,
+.cms-call-to-action p {
+  color: var(--vav-color-text-muted);
+  margin: 0;
+  max-width: 60ch;
+}
+
+.cms-call-to-action .primary-button { margin-block-start: var(--vav-space-4); }
+
+.cms-rich-text {
+  display: grid;
+  gap: var(--vav-space-4);
+  max-width: var(--vav-layout-content-reading);
+}
+
+.cms-rich-text h3 { font-size: var(--vav-font-size-lg); margin: 0; }
+
+/* The quote block shipped with no styling at all: the text ran the full width
+   of the container and the `<cite>` trailed inline off the last line. */
+.home-cms-content blockquote,
+.cms-page blockquote {
+  border-inline-start: 3px solid var(--vav-color-action-primary);
+  display: grid;
+  gap: var(--vav-space-2);
+  margin: 0;
+  max-width: var(--vav-layout-content-reading);
+  padding-inline-start: var(--vav-space-5);
+}
+
+.home-cms-content blockquote p,
+.cms-page blockquote p {
+  font-size: var(--vav-font-size-lg);
+  line-height: var(--vav-line-height-relaxed);
+  margin: 0;
+}
+
+.home-cms-content blockquote cite,
+.cms-page blockquote cite {
+  color: var(--vav-color-text-muted);
+  font-size: var(--vav-font-size-sm);
+  font-style: normal;
+}
+
 .cms-rich-text p {
-  line-height: 1.85;
+  line-height: var(--vav-line-height-relaxed);
+  margin: 0;
 }
 
 .cms-media-placeholder {
@@ -402,7 +452,9 @@ select {
 }
 
 .cms-content-image {
-  border-radius: var(--radius-lg);
+  /* `--radius-lg` is not defined anywhere; the declaration was simply invalid
+     and the image rendered square. */
+  border-radius: var(--vav-radius-lg);
   display: block;
   height: auto;
   max-width: 100%;
@@ -426,16 +478,19 @@ select {
 
 .editorial-grid {
   display: grid;
-  gap: 1.5rem;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-top: 3rem;
+  gap: var(--vav-space-6);
+  grid-template-columns: repeat(auto-fill, minmax(min(24rem, 100%), 1fr));
+  margin-top: clamp(2rem, 4vw, 3rem);
 }
 
 .editorial-grid article {
-  background: white;
+  background: var(--vav-color-surface-raised);
   border: 1px solid var(--vav-color-border);
   border-radius: var(--vav-radius-lg);
-  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--vav-space-3);
+  padding: clamp(1.5rem, 2.5vw, 2rem);
 }
 
 .catalog-heading {
@@ -461,20 +516,83 @@ select {
   min-width: 9rem;
 }
 
+/* Both grids were pinned to a fixed column count at every viewport — three
+ * 100px columns on a phone. `auto-fill` with a `min()` floor lets them drop to
+ * one column instead of crushing the cards. */
 .product-grid {
   display: grid;
-  gap: 1.5rem;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--vav-space-6);
+  grid-template-columns: repeat(auto-fill, minmax(min(20rem, 100%), 1fr));
 }
 
+/* `.product-card` was written for the `art + body` structure, where the body
+ * supplies the padding. The catalog pages render bare `<article>` children
+ * instead, so the card had no padding at all: the copy sat on the border and
+ * `min-height: 27rem` spread five equal rows down a 432px box. */
 .product-card {
-  background: white;
+  background: var(--vav-color-surface-raised);
   border: 1px solid var(--vav-color-border);
   border-radius: var(--vav-radius-lg);
   display: grid;
-  min-height: 27rem;
   overflow: hidden;
 }
+
+.product-card:has(> .product-card-art) {
+  grid-template-rows: auto 1fr;
+  min-height: 27rem;
+}
+
+/* Cards that carry a `.product-card-body` get their padding and typography
+ * from it. Cards whose children sit directly on the article — the catalog
+ * pages in this repository do exactly that — had neither, so the copy sat on
+ * the border and `min-height: 27rem` spread five equal rows down the box. */
+.product-card:not(:has(> .product-card-body)) {
+  /* Flex, not grid: the grid rows stretched with the row height and left the
+     call-to-action floating in the middle of the shorter cards. In a column
+     flex the link takes `margin-block-start: auto` and every card in a row
+     lands its link on the same line. */
+  display: flex;
+  flex-direction: column;
+  gap: var(--vav-space-3);
+  min-height: 0;
+  padding: clamp(1.25rem, 2vw, 1.75rem);
+}
+
+.product-card:not(:has(> .product-card-body)) > h2,
+.editorial-grid article > h2 {
+  font-size: var(--vav-font-size-lg);
+  line-height: var(--vav-line-height-tight);
+  margin: 0;
+}
+
+.product-card:not(:has(> .product-card-body)) > p,
+.editorial-grid article > p {
+  color: var(--vav-color-text-muted);
+  margin: 0;
+}
+
+.product-card:not(:has(> .product-card-body)) > p.eyebrow,
+.editorial-grid article > p.eyebrow { color: var(--vav-color-action-primary); }
+.product-card:not(:has(> .product-card-body)) > p strong { color: var(--vav-color-text); }
+
+.product-card:not(:has(> .product-card-body)) > a,
+.editorial-grid article > a {
+  align-items: center;
+  align-self: flex-start;
+  margin-block-start: auto;
+  color: var(--vav-color-action-primary);
+  display: inline-flex;
+  font-size: var(--vav-font-size-sm);
+  font-weight: var(--vav-font-weight-semibold);
+  gap: var(--vav-space-2);
+  min-block-size: var(--vav-component-touch-target-minimum);
+  text-decoration: none;
+}
+
+.product-card:not(:has(> .product-card-body)) > a:hover,
+.product-card:not(:has(> .product-card-body)) > a:focus-visible,
+.editorial-grid article > a:hover,
+.editorial-grid article > a:focus-visible { text-decoration: underline; }
 
 .product-card-art {
   align-items: end;
@@ -1026,15 +1144,18 @@ select {
 .journey-section {
   background: var(--vav-color-ink);
   color: var(--vav-color-on-action);
-  padding: 7rem clamp(1.25rem, 7vw, 8rem);
+  padding-block: clamp(4rem, 8vw, 7rem);
+  padding-inline: var(--card-inset);
 }
 
+/* The section already sits inside the page container, so a second 1200px cap
+ * with `margin-inline: auto` only pushed the copy off the shared baseline —
+ * 120px instead of 58px at a 1440 viewport. */
 .section-heading {
   display: grid;
-  gap: 1rem 4rem;
-  grid-template-columns: 1fr 1fr;
-  margin: 0 auto 4rem;
-  max-width: 1200px;
+  gap: 1rem clamp(2rem, 4vw, 4rem);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  margin: 0 0 clamp(2.5rem, 5vw, 4rem);
 }
 
 .section-heading .eyebrow {
@@ -1057,9 +1178,8 @@ select {
 .journey-grid {
   display: grid;
   gap: 1px;
-  grid-template-columns: repeat(3, 1fr);
-  margin: 0 auto;
-  max-width: 1200px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
 }
 
 .journey-grid article {
@@ -1522,6 +1642,16 @@ textarea::placeholder {
 }
 
 .home-experience {
+  /* Every direct child is a full-bleed card inset from the viewport by
+     `gutter-compact`. `--card-inset` is what each card adds back so its text
+     lands on the same baseline as the tab pages and the footer. The `max()`
+     floor matters below ~500px, where the site gutter has already bottomed out
+     at `gutter-compact` and the difference would otherwise be zero. */
+  --card-inset: max(
+    var(--vav-space-4),
+    calc(var(--vav-layout-site-gutter) - var(--vav-layout-site-gutter-compact))
+  );
+
   display: grid;
   gap: var(--vav-space-4);
   margin-inline: auto;
@@ -1551,10 +1681,7 @@ textarea::placeholder {
   min-block-size: min(46rem, calc(100vh - 6rem));
   overflow: hidden;
   padding-block: clamp(6rem, 11vw, 8.5rem) clamp(2rem, 4vw, 3.5rem);
-  /* The card is inset from the viewport by the compact gutter, so its own
-     padding makes up the difference and the headline lands on the same
-     baseline as every other page and the footer. */
-  padding-inline: calc(var(--vav-layout-site-gutter) - var(--vav-layout-site-gutter-compact));
+  padding-inline: var(--card-inset);
   position: relative;
   row-gap: clamp(1.25rem, 2.5vw, 2rem);
 }
@@ -1855,10 +1982,17 @@ textarea::placeholder {
   background: var(--vav-color-surface-soft);
 }
 
+/* `margin-inline: auto` on a grid item is shrink-to-fit, not centring: this
+ * section collapsed to its content width (938px measured at a 1440 viewport)
+ * and floated at x=251, unrelated to any other element on the page. */
 .home-cms-content {
-  margin: 1rem auto 0;
-  max-width: 1320px;
-  padding: 3rem clamp(1.25rem, 5vw, 5rem) 5rem;
+  display: grid;
+  gap: var(--vav-space-6);
+  margin: 0;
+  max-width: none;
+  padding-block: clamp(2.5rem, 5vw, 4rem);
+  padding-inline: var(--card-inset);
+  width: 100%;
 }
 
 .cms-hero,
@@ -1936,10 +2070,6 @@ textarea::placeholder {
 }
 
 @media (max-width: 700px) {
-  .home-experience {
-    padding: 0.5rem;
-  }
-
   .home-hero-image {
     background-position: 67% top;
   }
@@ -1981,7 +2111,8 @@ textarea::placeholder {
 
   .journey-section {
     border-radius: 1.25rem;
-    padding: 4rem 1.25rem;
+    padding-block: clamp(2.5rem, 8vw, 4rem);
+    padding-inline: var(--card-inset);
   }
 }
 
@@ -2247,7 +2378,7 @@ textarea::placeholder {
     grid-template-rows: auto;
     min-block-size: 0;
     padding-block: clamp(5rem, 14vw, 7rem) clamp(1.75rem, 4vw, 2.5rem);
-    padding-inline: calc(var(--vav-layout-site-gutter) - var(--vav-layout-site-gutter-compact));
+    padding-inline: var(--card-inset);
     row-gap: var(--vav-space-8);
   }
 

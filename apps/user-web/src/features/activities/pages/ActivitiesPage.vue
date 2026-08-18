@@ -6,6 +6,23 @@ import { useI18n } from "vue-i18n";
 import { activityApi, type PublicActivity } from "../api";
 
 const route = useRoute();
+
+/**
+ * `toLocaleString()` with no locale follows the *browser*, so a zh-CN page
+ * printed "9/12/2026, 7:06:40 AM". Format against the route locale, and drop
+ * the seconds — a start time does not need them.
+ */
+function formatStartsAt(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString(String(route.params.locale ?? "zh-CN"), {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
 const { t } = useI18n();
 const activities = ref<PublicActivity[]>([]);
 const loading = ref(true);
@@ -66,7 +83,7 @@ watch(() => route.params.locale, () => void load());
         <h2>{{ activity.title }}</h2>
         <p>{{ activity.summary }}</p>
         <p>
-          <strong>{{ new Date(activity.starts_at).toLocaleString() }}</strong>
+          <strong>{{ formatStartsAt(activity.starts_at) }}</strong>
           · {{ activity.timezone }}
         </p>
         <RouterLink :to="`/${String(route.params.locale)}/activities/${activity.slug}`">

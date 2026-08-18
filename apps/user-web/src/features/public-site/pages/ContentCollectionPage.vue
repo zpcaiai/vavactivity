@@ -7,6 +7,23 @@ import { listArticles, listTestimonials } from "../api/content";
 import type { PublicContent } from "../types";
 
 const route = useRoute();
+
+/**
+ * The card eyebrow used to print `item.locale` — "ZH-CN" on every card, which
+ * says nothing to a reader. The publication date is the useful thing a
+ * collection card can carry there.
+ */
+function publishedOn(item: PublicContent): string {
+  if (!item.published_at) return "";
+  const date = new Date(item.published_at);
+  return Number.isNaN(date.getTime())
+    ? ""
+    : date.toLocaleDateString(String(route.params.locale ?? "zh-CN"), {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    });
+}
 const locale = computed(() => String(route.params.locale ?? "zh-CN"));
 const kind = computed(() => String(route.meta.collectionType ?? "articles"));
 const title = computed(() => kind.value === "testimonials" ? "幸福见证" : "文章");
@@ -71,7 +88,7 @@ watch([locale, kind], () => void load());
         :key="item.id"
       >
         <p class="eyebrow">
-          {{ item.locale }}
+          {{ publishedOn(item) }}
         </p>
         <h2>{{ item.title }}</h2>
         <p>{{ item.excerpt }}</p>
