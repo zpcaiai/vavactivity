@@ -386,6 +386,7 @@ select {
   border: 1px solid var(--vav-color-border);
   border-radius: var(--vav-radius-md);
   margin: 0;
+  max-width: var(--vav-layout-content-standard);
   padding: clamp(1.5rem, 3vw, 2rem);
 }
 
@@ -1986,6 +1987,13 @@ textarea::placeholder {
  * section collapsed to its content width (938px measured at a 1440 viewport)
  * and floated at x=251, unrelated to any other element on the page. */
 .home-cms-content {
+  /* The hero and the journey section are both full-bleed cards; the CMS blocks
+     used to sit loose on the page background underneath them, reading as
+     leftovers rather than as the page's third section. Same card language,
+     same baseline. */
+  background: linear-gradient(145deg, var(--vav-color-surface), var(--vav-color-surface) 66%, var(--vav-color-surface-soft));
+  border: 1px solid var(--vav-color-border);
+  border-radius: 1.75rem;
   display: grid;
   gap: var(--vav-space-6);
   margin: 0;
@@ -2108,6 +2116,8 @@ textarea::placeholder {
   .needs-grid a {
     min-height: 5.5rem;
   }
+
+  .home-cms-content { border-radius: 1.25rem; }
 
   .journey-section {
     border-radius: 1.25rem;
