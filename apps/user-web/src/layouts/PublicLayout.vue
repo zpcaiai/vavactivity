@@ -16,6 +16,7 @@ const auth = useAuthStore();
 const { publicLinks, locale, localePath } = useAppNavigation();
 
 const menuOpen = ref(false);
+const currentYear = new Date().getFullYear();
 const configuredLinks = ref<PublicNavigationItem[]>([]);
 
 const routePaths: Record<string, string> = {
@@ -215,39 +216,46 @@ watch(
     </main>
 
     <footer class="site-footer">
-      <div class="site-footer__brand">
-        <span
-          class="site-header__mark"
-          aria-hidden="true"
-        >V</span>
-        <div>
-          <strong>VAV</strong>
-          <p>{{ t("brand.promise") }}</p>
+      <div class="site-footer__inner">
+        <div class="site-footer__brand">
+          <span
+            class="site-header__mark"
+            aria-hidden="true"
+          >V</span>
+          <div>
+            <strong>VAV</strong>
+            <p>{{ t("brand.promise") }}</p>
+          </div>
         </div>
-      </div>
 
-      <div class="site-footer__groups">
-        <section
-          v-for="group in footerGroups"
-          :key="group.key"
+        <nav
+          class="site-footer__groups"
+          :aria-label="t('footer.navigation')"
         >
-          <h2>{{ group.label }}</h2>
-          <ul>
-            <li
-              v-for="link in group.links"
-              :key="link.to"
-            >
-              <RouterLink :to="link.to">
-                {{ link.label }}
-              </RouterLink>
-            </li>
-          </ul>
-        </section>
+          <section
+            v-for="group in footerGroups"
+            :key="group.key"
+          >
+            <h2>{{ group.label }}</h2>
+            <ul>
+              <li
+                v-for="link in group.links"
+                :key="link.to"
+              >
+                <RouterLink :to="link.to">
+                  {{ link.label }}
+                </RouterLink>
+              </li>
+            </ul>
+          </section>
+        </nav>
       </div>
 
-      <p class="site-footer__legal">
-        © 2026 VAV · {{ t("footer.legal") }}
-      </p>
+      <div class="site-footer__meta">
+        <p class="site-footer__legal">
+          © {{ currentYear }} VAV · {{ t("footer.legal") }}
+        </p>
+      </div>
     </footer>
   </div>
 </template>

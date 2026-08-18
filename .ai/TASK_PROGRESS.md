@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-last_updated: 2026-08-14T17:52:00+08:00
+last_updated: 2026-08-18T12:30:00+08:00
 repository: /Users/stephen/Documents/Projects/python/vavactivity
 canonical: true
 ---
@@ -124,6 +124,77 @@ so another agent can continue without guessing.
 - Blockers: none technical. All external certification gates remain
   `NOT_CERTIFIED`.
 
+### Public marketing shell layout — `NOT_COMMITTED`
+
+- ID: `public-shell-layout-audit-2026-08-18`
+- Status: `COMPLETED` for the requested scope; `NOT_COMMITTED` in both repos.
+- Owner: Claude
+- Objective: audit and fix the layout of the marketing home page, the seven
+  public navigation tabs and the site footer.
+- Branches: backend `main` at `0cc4ea5`, frontend `main` at `d7dee74`; both
+  working trees dirty.
+- Scope (11 files, identical set in both repositories):
+  `apps/user-web/src/assets/main.css`,
+  `apps/user-web/src/layouts/PublicLayout.vue`,
+  `apps/user-web/src/features/public-site/pages/CmsPage.vue`,
+  the three `apps/user-web/src/i18n/locales/*.json`,
+  `packages/design-tokens/src/layout/tokens.json` and the four regenerated
+  `packages/design-tokens/generated/*` artefacts.
+- Defects found, each reproduced in a real browser before being fixed:
+  1. `.site-footer > div` (a leftover rule) outranked `.site-footer__groups` on
+     specificity, so the four footer link groups rendered as one flex row with
+     an 11.2px gap at every breakpoint. Confirmed by computed style, not by
+     reading.
+  2. `.site-footer` carried three competing definitions across the file that
+     resolved only by source order.
+  3. `.site-footer p, a` referenced `--vav-color-muted`, which is not a token.
+  4. `.site-header` was `width: auto` with `margin-inline: auto`, i.e.
+     shrink-to-fit, so the bar changed width per route and per locale
+     (measured 1009px against a declared 1408px cap).
+  5. Five different content left edges across the eight public routes
+     (measured at 1440px: 89 / 126 / 0 / 181, header 215, footer 58).
+  6. `/membership` uses `UserPageLayout`, whose gutter comes from
+     `.app-shell__content`; under the public shell it had none and rendered at
+     `x = 0`.
+  7. `.editorial-page` forced `1.1fr 0.9fr` and `min-height: 680px` on three
+     routes that never render an `.editorial-art`, leaving a permanently empty
+     right half.
+  8. `/about` rendered no `h1` in its loading and error states, which also
+     defeats the layout's post-navigation focus handler.
+  9. The hero stacked four absolutely positioned panels in a fixed-height box;
+     the AI card overlapped the member-proof strip, and `member-proof` was
+     hidden below 1180px to hide the collision.
+  10. Six surface or literal colours were used as text colours, invisible in the
+      light theme.
+- Fixes: new `layout.site.*` design tokens (`maxWidth`, `gutter`,
+  `gutterCompact`, `headerHeight`, `sectionGap`); one page container shared by
+  the header bar, all four page-container classes and the footer; footer
+  rebuilt as `__inner` / `__meta` with a 4 / 2 / 1 column ladder and a
+  `<nav aria-label>` wrapper; hero converted to `grid-template-areas`; all
+  colour literals resolved through semantic tokens; the footer year is now
+  computed rather than hard-coded.
+- Validation (both repositories, 2026-08-18):
+  `vue-tsc -b --force` `PASSED` (0 errors);
+  `eslint src` `PASSED` (0);
+  `vitest run` `PASSED` — backend repo 58/58, deployment repo 97/97;
+  `check-design-tokens` `PASSED`; `check-i18n` `PASSED` (3 locales, 1135 and
+  1142 keys); `design-tokens` unit tests `PASSED`;
+  `vite build` `PASSED`.
+- Browser evidence: a Linux container reproduction of the deployment (`pnpm
+  install`, `vite build`, `vite preview`, Playwright/Chromium) captured the
+  eight public routes at 1440 / 1024 / 768 / 390 before and after, plus dark
+  and high-contrast passes. Post-fix measurements: one content left edge
+  (`60..1380`) on all eight routes, footer grid `4 / 2 / 2` columns across the
+  ladder, zero horizontal overflow at every breakpoint, and no overlapping hero
+  panels.
+- Not covered: the member-space `AppShell` tabs and `admin-web` were out of the
+  agreed scope. Live API data was unavailable in the container, so every route
+  was verified in its empty or error state — full-content layouts still need a
+  pass against a running backend.
+- Commit/push state: `NOT_COMMITTED` in both repositories.
+- Next action: commit both working trees, then re-verify against a running API.
+- Blockers: none.
+
 ## Open follow-ups
 
 - `showcase-recommendation-neon-closure` remains `IN_PROGRESS`: PR 13 is merged
@@ -157,9 +228,11 @@ so another agent can continue without guessing.
   needed. An earlier claim in conversation that all four baselines would fail
   was wrong.
 
-- Pre-existing and unrelated to this work: at a 768px viewport on the dark
-  theme, `.ai-prompt-card` overlaps the "开始认识" button. Not introduced here
-  and not fixed here.
+- `RESOLVED` 2026-08-18 — the 768px dark-theme collision between
+  `.ai-prompt-card` and the "开始认识" button is gone. The hero no longer stacks
+  absolutely positioned panels, so the class of defect is gone with it.
+  Re-measured at 768px in the dark theme in both repositories: no pair of hero
+  panels intersects.
 
 ## Recent repository history observed
 
@@ -173,6 +246,22 @@ snapshot. Their presence is not proof that every associated external gate ran.
 - `9c4c276` — `feat: complete member journeys and production gates`
 
 ## Completion log
+
+### 2026-08-18 — Public marketing shell layout audit and rebuild
+
+- Status: `COMPLETED` locally, `NOT_COMMITTED`.
+- Ten layout and contrast defects on the home page, the seven public tabs and
+  the footer were reproduced in a real browser, fixed, and re-verified at four
+  breakpoints in three themes. The footer group grid, the shrink-to-fit header
+  bar and the five competing page gutters were the structural ones.
+- The same 11-file change set was applied to both repositories, but the
+  deployment repository's own versions were patched in place rather than
+  overwritten: it had already diverged (hero photograph, payment locale keys,
+  a flex-column hero below 980px) and a file-level copy would have reverted
+  that work. Two of the ten defects were already fixed there.
+- Validation: see the current-task entry above. All local gates passed in both
+  repositories; remote CI, browser/device UAT and production certification
+  remain `NOT_RUN` / `NOT_CERTIFIED`.
 
 ### 2026-08-14 — C-end feature port, hero background and backend closure
 

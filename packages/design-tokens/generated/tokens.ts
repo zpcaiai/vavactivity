@@ -279,6 +279,13 @@ export const tokens = {
       "gutter": "{space.6}",
       "gutterCompact": "{space.4}"
     },
+    "site": {
+      "maxWidth": "82.5rem",
+      "gutter": "clamp(1.25rem, 4vw, 4.5rem)",
+      "gutterCompact": "1.25rem",
+      "headerHeight": "4.5rem",
+      "sectionGap": "clamp(3rem, 6vw, 6rem)"
+    },
     "zIndex": {
       "base": "0",
       "sticky": "100",

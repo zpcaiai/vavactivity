@@ -51,19 +51,7 @@ watch([slug, locale], () => void load());
 
 <template>
   <section class="editorial-page cms-page">
-    <p
-      v-if="loading"
-      role="status"
-    >
-      正在加载…
-    </p>
-    <p
-      v-else-if="error"
-      role="alert"
-    >
-      {{ error }}
-    </p>
-    <article v-else-if="content">
+    <article v-if="content">
       <p class="eyebrow">
         {{ content.fallback_used ? "LOCALE FALLBACK" : "VAV" }}
       </p>
@@ -73,15 +61,35 @@ watch([slug, locale], () => void load());
       </p>
       <ContentRenderer :blocks="content.content_blocks" />
     </article>
+
+    <!-- Loading and error used to replace the whole page, which left these
+         routes with no `h1` at all — the layout's post-navigation focus
+         handler targets `#main-content h1`, and the page collapsed to a single
+         centred line. The heading now renders in every state. -->
     <article v-else>
       <p class="eyebrow">
         {{ t(`pages.${String(route.meta.copyKey)}.eyebrow`) }}
       </p>
       <h1>{{ fallbackTitle }}</h1>
-      <p>{{ fallbackBody }}</p>
-      <p class="draft-notice">
-        正式运营内容尚未发布；当前仅显示明确标记的产品说明。
+      <p
+        v-if="loading"
+        role="status"
+      >
+        {{ t("common.loading") }}
       </p>
+      <p
+        v-else-if="error"
+        class="form-error"
+        role="alert"
+      >
+        {{ error }}
+      </p>
+      <template v-else>
+        <p>{{ fallbackBody }}</p>
+        <p class="draft-notice">
+          正式运营内容尚未发布；当前仅显示明确标记的产品说明。
+        </p>
+      </template>
     </article>
   </section>
 </template>
