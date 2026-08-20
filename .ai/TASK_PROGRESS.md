@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-last_updated: 2026-08-20T14:04:06+08:00
+last_updated: 2026-08-20T14:10:37+08:00
 repository: /Users/stephen/Documents/Projects/python/vavactivity
 canonical: true
 ---
@@ -55,7 +55,7 @@ so another agent can continue without guessing.
 - Objective: check the 42 catalogued requirements against both repositories,
   implement whatever is genuinely missing, then run every release gate that can
   be run and state plainly which ones cannot.
-- Branches: backend `main` base `ffbaf7b` before this ledger-only update;
+- Branches: backend `main` base `a186573` before the runtime-image fix;
   frontend `main` at `11399e0`. The frontend equals `origin/main` and is clean;
   this ledger update's backend commit is identified by the containing Git
   history because a commit cannot record its own SHA.
@@ -84,6 +84,10 @@ so another agent can continue without guessing.
 
 - `ruff check`, `ruff format --check`, `mypy services/api/src services/worker/src`
   and `scripts/check_migration_heads.py` all pass.
+- Remote run `32338136402` built and pushed both production images, then Trivy
+  failed both because `moto` was actually installed in `/app/.venv`; this is a
+  current image-security `FAILED` result, separate from the earlier E1 source
+  checks. The base image now syncs `--no-dev`; remote revalidation is pending.
 
 ### Gate G2 — integration on real backing services — `PASSED` at `E2`
 
@@ -196,7 +200,8 @@ so another agent can continue without guessing.
   manifest's `pending_decisions`, so the absence is visible in the release
   report rather than only in the code that refuses.
 
-- Next action: after ELMOS sends `RELEASED`, repair and locally reproduce the
+- Next action: verify the remote production-image scan after the `--no-dev`
+  base-layer correction. After ELMOS sends `RELEASED`, repair and reproduce the
   stale Complete E2E UI expectations and the full-profile PostgreSQL connection
   exhaustion, then rerun remote Complete E2E. In parallel, attest the exact
   Render backend SHA/image and supply a disposable non-production UAT target
@@ -214,20 +219,16 @@ so another agent can continue without guessing.
   failure requires a separate remediation and rerun; all external certification
   gates remain `NOT_CERTIFIED`.
 
-- The runtime-image Trivy failure's recorded cause is wrong and the entry above
-  no longer states it. `moto[s3]` is declared in `[dependency-groups] dev`, and
-  the `production` stage of `infra/docker/backend.Dockerfile` runs
-  `uv sync --frozen --all-packages --no-dev`. Replaying both stages of that
-  Dockerfile against the repository's own `pyproject.toml` and `uv.lock`
-  confirmed `--all-groups` installs `moto` in the `base` layer and `--no-dev`
-  prunes it back out, so it is not in the production venv. What the production
-  stage does still carry is `/app/pyproject.toml` and `/app/uv.lock`, inherited
-  from `base` — a manifest Trivy parses as a language-specific lockfile and
-  which lists every dev dependency whether or not it is installed. That is the
-  most probable mechanism and it has NOT been confirmed: Trivy could not be
-  fetched in this environment, so no scan was run. Next check: scan the built
-  production image, and if the lockfile is the source, stop shipping build
-  manifests in the runtime stage rather than suppressing the finding.
+- `CONFIRMED` 2026-08-20 — runtime-image Trivy run `32338136402` disproved the
+  previous lockfile-only hypothesis. Both production images contained the
+  installed package path `/app/.venv/lib/python3.12/site-packages/moto`: Trivy
+  found one synthetic AWS access-key pattern and the two private keys shipped
+  by `moto_proxy`, then exited 1. `moto[s3]` belongs only to the root `dev`
+  dependency group. The production stage inherited a base venv created with
+  `--all-groups`; relying on its later `--no-dev` sync to prune that environment
+  was unsafe and observably failed. The base stage now installs only `--no-dev`
+  dependencies, while the development stage still explicitly syncs
+  `--all-groups`. No Trivy suppression was added. Remote scan is `IN_PROGRESS`.
 
 - The visual-regression baselines were checked and are `NOT_AFFECTED` by the
   background work. `tests/ui/visual.spec.ts` is run by
@@ -257,6 +258,19 @@ snapshot. Their presence is not proof that every associated external gate ran.
 - `9c4c276` — `feat: complete member journeys and production gates`
 
 ## Completion log
+
+### 2026-08-20 — Production image development-dependency isolation
+
+- Status: `IN_PROGRESS`. API and worker production images built and pushed in
+  run `32338136402`, but both Trivy jobs failed on installed `moto` test
+  material; the release-manifest job was consequently skipped.
+- Replaced the base-layer `uv sync --all-groups` with `--no-dev`. Development
+  images retain their later explicit `--all-groups` sync, while production no
+  longer inherits a dev-populated venv. This changes dependency composition,
+  not scanner policy; no finding was ignored or allowlisted.
+- Local Docker validation remains `NOT_RUN` under the ELMOS exclusive disk
+  window. The pushed production builds and Trivy scans are the named validation
+  path for this change.
 
 ### 2026-08-20 — External UAT evidence and portable harness
 

@@ -19,8 +19,9 @@ COPY services/worker/pyproject.toml ./services/worker/pyproject.toml
 COPY services/skill-runtime/pyproject.toml ./services/skill-runtime/pyproject.toml
 COPY packages/skill-sdk-python/pyproject.toml ./packages/skill-sdk-python/pyproject.toml
 
+# Production inherits this venv. Development adds its groups in its own stage.
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --all-packages --all-groups --no-install-workspace
+    uv sync --frozen --all-packages --no-dev --no-install-workspace
 
 FROM base AS development
 
