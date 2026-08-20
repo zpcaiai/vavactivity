@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-last_updated: 2026-08-18T17:20:00+08:00
+last_updated: 2026-08-20T14:04:06+08:00
 repository: /Users/stephen/Documents/Projects/python/vavactivity
 canonical: true
 ---
@@ -49,14 +49,16 @@ so another agent can continue without guessing.
 ## Current task
 
 - ID: `requirement-audit-and-executable-release-gates`
-- Status: `IN_PROGRESS` — G1 and G2 now have executed evidence; G3, G4 and G5
-  remain open for reasons recorded per gate below.
-- Owner: Claude
+- Status: `IN_PROGRESS` — G1 and G2 have executed evidence; G3 and G4 are
+  `PARTIAL`, and G5 remains `NOT_CERTIFIED` for the reasons recorded below.
+- Owner: Codex, continuing Claude's recorded gate run
 - Objective: check the 42 catalogued requirements against both repositories,
   implement whatever is genuinely missing, then run every release gate that can
   be run and state plainly which ones cannot.
-- Branches: backend `main` at `d21b47c`; frontend `main` at `f6f4b7d`. Both
-  are one commit ahead of `origin/main` and both working trees are clean.
+- Branches: backend `main` base `ffbaf7b` before this ledger-only update;
+  frontend `main` at `11399e0`. The frontend equals `origin/main` and is clean;
+  this ledger update's backend commit is identified by the containing Git
+  history because a commit cannot record its own SHA.
 
 ### Requirement coverage — `PASSED` at `E0`
 
@@ -118,22 +120,71 @@ so another agent can continue without guessing.
 - The API half is covered: the suite above runs against real PostgreSQL, Redis
   and object storage.
 - The browser half is not. Actual login, admin publish and My Events need both
-  frontends running under `playwright.complete.config.ts`. `NOT_RUN`.
+  frontends running under `playwright.complete.config.ts`. Ports 5173, 5174 and
+  8000 were all closed when rechecked on 2026-08-20. It remains `NOT_RUN`:
+  the ELMOS exclusive disk window has not sent `RELEASED`, so no local Docker,
+  pytest, pnpm/npm build or service stack was started.
 
-### Gate G4 — external UAT — `NOT_RUN`, tooling ready
+### Gate G4 — external UAT — `PARTIAL`
 
-- `e2e/external-uat/deployed-smoke.spec.ts` (frontend `f6f4b7d`) targets the
-  deployment and asserts what only a deployment can show: the application's own
-  `X-Request-ID` on liveness, `postgresql: ok` in readiness, an exact CORS
-  origin echo with credentials, and `/assets/` responses that are real files
-  rather than the SPA shell.
-- It refuses to run without `E2E_USER_WEB_URL`, `E2E_ADMIN_WEB_URL` and
-  `E2E_API_BASE_URL`, and refuses localhost outright. Both refusals were
-  verified by running them. Gathering E4 evidence from a dev server is the
-  "mock/sandbox evidence presented as live" blocker.
-- It is a smoke suite. Passing it would show the deployment is reachable and
-  coherent; `UAT_READY` still needs a person to work through
-  `references/UAT_CHECKLIST.md`.
+- Exact commands were run from `vavactivityWeb` with direct networking and
+  system Chrome. Cold smoke:
+
+  `E2E_USER_WEB_URL=https://vavactivity.vercel.app E2E_ADMIN_WEB_URL=https://vavactivity.vercel.app/admin E2E_API_BASE_URL=https://vav-platform-api.onrender.com/api/v1 E2E_PROXY_SERVER=none UAT_EVIDENCE_SCOPE=production_vercel_render UAT_ARTIFACT_DIR=test-results/external-uat-20260820-11399e0 PLAYWRIGHT_CHANNEL=chrome node_modules/.bin/playwright test --config playwright.external-uat.config.ts e2e/external-uat/deployed-smoke.spec.ts`
+
+  Hot smoke after the catalog/readiness warm-up:
+
+  `E2E_USER_WEB_URL=https://vavactivity.vercel.app E2E_ADMIN_WEB_URL=https://vavactivity.vercel.app/admin E2E_API_BASE_URL=https://vav-platform-api.onrender.com/api/v1 E2E_PROXY_SERVER=none UAT_EVIDENCE_SCOPE=production_vercel_render UAT_ARTIFACT_DIR=test-results/external-uat-20260820-11399e0-warm PLAYWRIGHT_CHANNEL=chrome node_modules/.bin/playwright test --config playwright.external-uat.config.ts e2e/external-uat/deployed-smoke.spec.ts`
+
+  The final safe-subset command used the same three target URLs plus
+  `UAT_PROXY_SERVER=none UAT_VIDEO=off UAT_TESTER=Codex`, frontend commit
+  `11399e09a243bea25b6d993e7be3e85fcb547602`, backend commit `UNVERIFIED`,
+  artifact directory `test-results/uat-20260820-11399e0-readonly-green`, and:
+
+  `node_modules/.bin/playwright test --config playwright.uat.config.ts e2e/uat/uat-auth-001-account-path.spec.ts e2e/uat/uat-core-001-public-access.spec.ts e2e/uat/uat-preflight.spec.ts --grep 'invalid password|protected API route|protected page|anonymous visitor can open|public event list|published event detail|user app, the API|PostgreSQL and Redis|write-mutating'`
+
+- Vercel production deployment
+  `vavactivity-5mo9x00ay-zpchoney-6160s-projects.vercel.app` is `Ready`, owns
+  the `vavactivity.vercel.app` alias and is the successful Vercel status for
+  frontend `11399e09a243bea25b6d993e7be3e85fcb547602`. The public Render API
+  does not expose a Git SHA or immutable image digest, so its backend commit is
+  `UNVERIFIED`; repository `main` is not being presented as the deployed build.
+- The new-deployment cold smoke ran desktop Chrome and Pixel 7 emulation with
+  production writes disabled: **12 passed / 2 failed in 2.9 minutes**. Both
+  failures were readiness: PostgreSQL stayed `unavailable` through the retry
+  budget, while Redis was explicitly `disabled`. Liveness, CORS, anonymous
+  data protection, both frontend entries, asset coherence and protected-route
+  redirect all passed. Evidence JSON SHA-256:
+  `058f9fccd3a0ca3604b8486e77d5edbef6768046e2048ed9f49dd3cb591d3b51`.
+- A real public catalog request then returned 200 in 11.2 seconds and five
+  readiness probes returned 200 with `postgresql=ok`. The exact-deployment hot
+  rerun passed **14/14 in 20.0 seconds**. Evidence JSON SHA-256:
+  `f54786ad53ddfa6ce6073acc2cd09b6b3110ab2bb63c982a9979688d6931beec`.
+  This passes hot deployment coherence but does not erase the cold-start
+  reliability finding.
+- The production-safe anonymous UAT subset passed **9/9 in 51.9 seconds** on
+  the same deployment: invalid-login refusal, protected API/page, homepage,
+  public list/detail, user/API/OpenAPI reachability, dependency reporting and
+  the explicit no-write guard. Evidence JSON SHA-256:
+  `28779dc082e18cc48f70560f294d9a66cbf8b5e557e96d49791a487bd6e175fa`.
+- Frontend `11399e0` also makes the external UAT harness portable: system
+  Chrome selection, validated direct/no-proxy mode, optional video and a
+  pathname-only protected-route assertion. The committed evidence boundary is
+  `vavactivityWeb/docs/acceptance/g4-external-uat-20260820.md`.
+- Remote state for `11399e0`: frontend lint/test, both production builds,
+  release-identity validation and Vercel deployment all passed. Complete E2E
+  run `32336200760` remains `FAILED`: **9 passed / 19 failed / 27 did not run**
+  in 21.9 minutes. It first exposed stale UI expectations (for example the CMS
+  test expects raw `published` while the UI renders localized `已发布`), then
+  PostgreSQL connection exhaustion caused `TooManyConnectionsError` failures.
+  Previous-main run `32129613645` at `4569ff6` had the same counts, first CMS
+  failure and connection-exhaustion cascade. The harness-only four-file diff
+  did not introduce it, but the current commit's Complete E2E gate is not green.
+- Full G4 remains open. It needs a real draft slug, member/member-2/admin/staff
+  identities, a disposable non-production write target with authorization,
+  four operator attestations, and human acceptance. Production write paths
+  were neither authorized nor executed; physical-device evidence is
+  `NOT_RUN`.
 
 ### Gate G5 — production certification — `NOT_CERTIFIED`
 
@@ -145,10 +196,15 @@ so another agent can continue without guessing.
   manifest's `pending_decisions`, so the absence is visible in the release
   report rather than only in the code that refuses.
 
-- Next action: push both commits, then run the G4 suite against the deployment
-  and attach its report.
-- Blockers: `DEC-005` for the Chinese channels; a human tester for G4; the G5
-  attestations.
+- Next action: after ELMOS sends `RELEASED`, repair and locally reproduce the
+  stale Complete E2E UI expectations and the full-profile PostgreSQL connection
+  exhaustion, then rerun remote Complete E2E. In parallel, attest the exact
+  Render backend SHA/image and supply a disposable non-production UAT target
+  plus the named identities/data and write approval for the remaining G4 cases.
+- Blockers: Render deployment identity; `UAT_DRAFT_ACTIVITY_SLUG`; the four UAT
+  roles and writable non-production fixture data; human/operator attestations;
+  the branch-existing Complete E2E failures; `DEC-005`; and the remaining G5
+  certifications.
 
 ## Open follow-ups
 
@@ -201,6 +257,32 @@ snapshot. Their presence is not proof that every associated external gate ran.
 - `9c4c276` — `feat: complete member journeys and production gates`
 
 ## Completion log
+
+### 2026-08-20 — External UAT evidence and portable harness
+
+- Status: `IN_PROGRESS`. G4 advanced from `NOT_RUN` to `PARTIAL`; the named
+  authenticated, write-path, operator, physical-device and human evidence is
+  still absent and G5 remains `NOT_CERTIFIED`.
+- Inspected the existing Vercel production deployment without redeploying or
+  promoting it, then ran the production-safe smoke against the Vercel user and
+  admin entries plus the Render API. Cold readiness failed `2/14`; after a real
+  database-backed request, readiness was stable and the hot rerun passed
+  `14/14`. The cold failure remains an availability finding.
+- Ran the executable anonymous UAT subset on frontend `11399e0`: `9/9` passed,
+  and the production guard confirmed write-mutating cases were disabled. A
+  wider prior selection remains blocked on a real non-public activity slug.
+- Fixed four harness-only defects in frontend commit `11399e0` and pushed it to
+  `origin/main`. Vercel deployed that exact commit to production and attached a
+  successful commit status. No application business logic or production data
+  was changed.
+- Remote frontend, release-identity and both production build checks passed.
+  Complete E2E failed with `9 passed / 19 failed / 27 did not run`; the prior
+  main run had the exact same failure boundary. Stale localized-UI assertions
+  precede a PostgreSQL `TooManyConnectionsError` cascade, so CI remains
+  explicitly `FAILED` and needs a separate local-runtime repair after release.
+- G3 browser journeys remain `NOT_RUN` because the local service ports were
+  closed and the ELMOS exclusive disk window is still active. No local Docker,
+  pytest or package-manager build was started.
 
 ### 2026-08-18 — Requirement audit and executable release gates
 
