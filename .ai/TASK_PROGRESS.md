@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-last_updated: 2026-08-20T14:10:37+08:00
+last_updated: 2026-08-20T14:40:44+08:00
 repository: /Users/stephen/Documents/Projects/python/vavactivity
 canonical: true
 ---
@@ -55,7 +55,7 @@ so another agent can continue without guessing.
 - Objective: check the 42 catalogued requirements against both repositories,
   implement whatever is genuinely missing, then run every release gate that can
   be run and state plainly which ones cannot.
-- Branches: backend `main` base `a186573` before the runtime-image fix;
+- Branches: backend `main` at `c8f648a` before this final ledger update;
   frontend `main` at `11399e0`. The frontend equals `origin/main` and is clean;
   this ledger update's backend commit is identified by the containing Git
   history because a commit cannot record its own SHA.
@@ -84,10 +84,11 @@ so another agent can continue without guessing.
 
 - `ruff check`, `ruff format --check`, `mypy services/api/src services/worker/src`
   and `scripts/check_migration_heads.py` all pass.
-- Remote run `32338136402` built and pushed both production images, then Trivy
-  failed both because `moto` was actually installed in `/app/.venv`; this is a
-  current image-security `FAILED` result, separate from the earlier E1 source
-  checks. The base image now syncs `--no-dev`; remote revalidation is pending.
+- Remote run `32338136402` built both production images, then Trivy failed both
+  because `moto` was installed in `/app/.venv`. Commit `c8f648a` changed the
+  inherited base venv to `--no-dev`; follow-up run `32338636472` built and
+  scanned both API and worker images successfully, with no `moto`, HIGH,
+  CRITICAL or secret result. Current image security is `PASSED`.
 
 ### Gate G2 — integration on real backing services — `PASSED` at `E2`
 
@@ -200,24 +201,27 @@ so another agent can continue without guessing.
   manifest's `pending_decisions`, so the absence is visible in the release
   report rather than only in the code that refuses.
 
-- Next action: verify the remote production-image scan after the `--no-dev`
-  base-layer correction. After ELMOS sends `RELEASED`, repair and reproduce the
-  stale Complete E2E UI expectations and the full-profile PostgreSQL connection
-  exhaustion, then rerun remote Complete E2E. In parallel, attest the exact
-  Render backend SHA/image and supply a disposable non-production UAT target
-  plus the named identities/data and write approval for the remaining G4 cases.
+- Next action: after ELMOS sends `RELEASED`, repair and reproduce the stale
+  Complete E2E UI expectations and the full-profile PostgreSQL connection
+  exhaustion, then rerun remote Complete E2E. Repair the three-member
+  ready-recommendation showcase fixture and rerun Neon. In parallel, attest the
+  exact Render backend SHA/image and supply a disposable non-production UAT
+  target plus the named identities/data and write approval for remaining G4.
 - Blockers: Render deployment identity; `UAT_DRAFT_ACTIVITY_SLUG`; the four UAT
   roles and writable non-production fixture data; human/operator attestations;
-  the branch-existing Complete E2E failures; `DEC-005`; and the remaining G5
-  certifications.
+  the branch-existing Complete E2E failures; three independent
+  ready-recommendation fixture members for Neon; `DEC-005`; and the remaining
+  G5 certifications.
 
 ## Open follow-ups
 
 - `showcase-recommendation-neon-closure` remains `IN_PROGRESS`: PR 13 is merged
-  as `ca62996`, but the post-merge deterministic showcase seed failed because
-  three independent ready-recommendation fixture members were unavailable. That
-  failure requires a separate remediation and rerun; all external certification
-  gates remain `NOT_CERTIFIED`.
+  as `ca62996`. Current run `32338636506` passed Backend CI and reached the
+  staging showcase only after Neon connection validation, unique-head check,
+  migration application and live-schema verification succeeded. The showcase
+  then failed at `seed_test_showcase.py:1737` with `Three independent
+  ready-recommendation fixture members are required.` This is the same recorded
+  fixture blocker, not a migration failure; remediation and rerun remain due.
 
 - `CONFIRMED` 2026-08-20 — runtime-image Trivy run `32338136402` disproved the
   previous lockfile-only hypothesis. Both production images contained the
@@ -228,7 +232,9 @@ so another agent can continue without guessing.
   `--all-groups`; relying on its later `--no-dev` sync to prune that environment
   was unsafe and observably failed. The base stage now installs only `--no-dev`
   dependencies, while the development stage still explicitly syncs
-  `--all-groups`. No Trivy suppression was added. Remote scan is `IN_PROGRESS`.
+  `--all-groups`. No Trivy suppression was added. Commit `c8f648a` passed both
+  production builds and Trivy scans in run `32338636472`; the scan log contains
+  no `moto`, HIGH, CRITICAL or secret finding. This follow-up is `RESOLVED`.
 
 - The visual-regression baselines were checked and are `NOT_AFFECTED` by the
   background work. `tests/ui/visual.spec.ts` is run by
@@ -261,16 +267,21 @@ snapshot. Their presence is not proof that every associated external gate ran.
 
 ### 2026-08-20 — Production image development-dependency isolation
 
-- Status: `IN_PROGRESS`. API and worker production images built and pushed in
-  run `32338136402`, but both Trivy jobs failed on installed `moto` test
-  material; the release-manifest job was consequently skipped.
+- Status: `COMPLETED` and `PUSHED` in backend commit `c8f648a`.
+- API and worker production images built and pushed in run `32338136402`, but
+  both Trivy jobs failed on installed `moto` test material.
 - Replaced the base-layer `uv sync --all-groups` with `--no-dev`. Development
   images retain their later explicit `--all-groups` sync, while production no
   longer inherits a dev-populated venv. This changes dependency composition,
   not scanner policy; no finding was ignored or allowlisted.
 - Local Docker validation remains `NOT_RUN` under the ELMOS exclusive disk
-  window. The pushed production builds and Trivy scans are the named validation
-  path for this change.
+  window. Remote run `32338636472` is the named validation: both production
+  image builds and both Trivy scans passed, with no matching finding in the
+  scan logs. Gitleaks, sensitive-domain checks, Backend CI and ping also passed.
+- Neon migration/live-schema steps passed in run `32338636506`; the subsequent
+  showcase seed failed on the pre-existing three-member recommendation fixture
+  blocker. `release-manifest` was conditionally skipped. Neither is being
+  represented as a successful full release gate.
 
 ### 2026-08-20 — External UAT evidence and portable harness
 
