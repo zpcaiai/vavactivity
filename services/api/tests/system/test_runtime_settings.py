@@ -77,7 +77,20 @@ def test_complete_render_production_baseline_is_accepted() -> None:
     settings = Settings(_env_file=None, **production_values())
 
     assert settings.environment == "production"
+    assert settings.database_pool_size == 5
+    assert settings.database_max_overflow == 10
     assert settings.payment_test_fake_enabled is False
+
+
+def test_database_pool_limits_are_configurable() -> None:
+    settings = Settings(
+        _env_file=None,
+        DATABASE_POOL_SIZE=2,
+        DATABASE_MAX_OVERFLOW=0,
+    )
+
+    assert settings.database_pool_size == 2
+    assert settings.database_max_overflow == 0
 
 
 @pytest.mark.parametrize("value", [None, "http://media.example"])

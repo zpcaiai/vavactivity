@@ -41,6 +41,18 @@ class Settings(BaseSettings):
         validation_alias="DATABASE_URL",
         repr=False,
     )
+    database_pool_size: int = Field(
+        default=5,
+        ge=1,
+        le=100,
+        validation_alias="DATABASE_POOL_SIZE",
+    )
+    database_max_overflow: int = Field(
+        default=10,
+        ge=0,
+        le=100,
+        validation_alias="DATABASE_MAX_OVERFLOW",
+    )
     redis_url: str | None = Field(
         default=None,
         validation_alias="REDIS_URL",

@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-last_updated: 2026-08-20T15:06:06+08:00
+last_updated: 2026-08-20T16:03:46+08:00
 repository: /Users/stephen/Documents/Projects/python/vavactivity
 canonical: true
 ---
@@ -49,24 +49,24 @@ so another agent can continue without guessing.
 ## Current task
 
 - ID: `complete-e2e-stabilization`
-- Status: `IN_PROGRESS` — remote Complete E2E run `32336200760` is `FAILED`
-  with `9 passed / 19 failed / 27 did not run`; the first failures are UI
-  assertion/locator drift and the later cascade is PostgreSQL connection
-  exhaustion.
+- Status: `IN_PROGRESS` — remote Complete E2E run `32342952439` improved to
+  `14 passed / 21 failed / 20 did not run`, but hit the 45-minute job timeout.
+  The first failures are remaining UI assertion/locator drift; PostgreSQL
+  connection exhaustion still begins later in the run.
 - Owner: Codex
 - Objective: repair the deterministic UI drift, cap development worker
   connection amplification, and iterate the remote Complete E2E workflow as
   far toward `PASSED` as current infrastructure evidence allows.
-- Branches: backend `main` at `9b3b377` and frontend `main` at `11399e0`; both
-  equal `origin/main` and were clean at task start.
+- Branches: backend `main` at pushed `f10755d` plus a scoped uncommitted pool-cap
+  follow-up, and frontend `main` at pushed `2954420` with a clean worktree.
 - Scope: frontend Complete E2E specs and their directly related UI contracts;
   backend development Compose worker sizing used by the workflow. The ELMOS
   exclusive disk window remains active, so local Docker, pytest, and pnpm/npm
   builds are deferred until an exact `RELEASED`; lightweight static checks and
   remote GitHub CI may continue.
-- Next action: inspect the first seven non-resource failures, fix stable UI
-  contracts, cap full-profile Celery concurrency, then publish scoped split-repo
-  commits and use fresh Complete E2E runs to expose the next failure frontier.
+- Next action: publish the explicit development SQLAlchemy pool cap, update the
+  remaining current-UI assertions and run Complete E2E without retries so all
+  55 tests reach a result inside the job window.
 
 ### Complete E2E stabilization — `IN_PROGRESS`
 
@@ -75,14 +75,22 @@ so another agent can continue without guessing.
   catalog, counseling, AI, and registration success copy. From the notification
   retry onward, fixture CLIs fail with
   `asyncpg.exceptions.TooManyConnectionsError: sorry, too many clients already`.
-- Backend remediation: all six development Compose Celery services now declare
-  `--concurrency=1`; a contract test requires the bound on every development
-  worker so GitHub runner CPU-count changes cannot silently amplify database
-  clients again.
-- Frontend remediation in the sibling repository updates eight E2E specs to the
-  current localized status text and current counseling/AI tab names. The privacy
-  registration assertion was updated proactively because it reused the same
-  removed success copy and had not run in the failed baseline.
+- Backend remediation round 1, commit `f10755d` (`PUSHED`): all six development
+  Compose Celery services declare `--concurrency=1`; a contract test requires
+  the bound on every development worker so GitHub runner CPU-count changes
+  cannot silently amplify database clients again.
+- Frontend remediation round 1, commit `2954420` (`PUSHED`), updates eight E2E
+  specs to current localized text and navigation. Frontend CI run `32342952369`
+  is `PASSED` for install, lint, typecheck, unit tests and production build.
+- Complete E2E run `32342952439` checked out backend `f10755d` and reached
+  `14 passed / 21 failed / 20 did not run` before the 45-minute job timeout
+  cancelled it after 41.1 minutes of Playwright execution. The first new
+  `TooManyConnectionsError` appeared at `2026-08-20T07:33:31Z`; concurrency 1
+  delayed but did not eliminate per-process SQLAlchemy pool amplification.
+- Backend remediation round 2 (`IN_PROGRESS`, `NOT_PUSHED`) adds validated
+  `DATABASE_POOL_SIZE` and `DATABASE_MAX_OVERFLOW` settings. Development Compose
+  defaults every API/worker process to pool size 2 with zero overflow, while
+  production-compatible defaults remain 5 and 10.
 - Lightweight validation at 2026-08-20T15:18:00+08:00: backend Ruff check and
   format check `PASSED`; PyYAML inspection found exactly six development workers
   and all six contain `--concurrency=1`; `git diff --check` is `PASSED` in both
@@ -90,9 +98,13 @@ so another agent can continue without guessing.
   checkout has no `node_modules`, and dependency installation is deferred during
   the active ELMOS exclusive disk window. Docker Compose execution and pytest
   are likewise `NOT_RUN` until `RELEASED`.
-- Commit/push state: backend and frontend changes are `NOT_PUSHED`. The backend
-  connection fix must land first so a subsequently triggered frontend Complete
-  E2E run checks out the corrected backend SHA.
+- Round-2 lightweight validation at `2026-08-20T16:03:46+08:00`: Ruff check and
+  format check `PASSED`; PyYAML and Settings probes confirmed six bounded workers,
+  development pool `2 + 0` and configurable runtime settings; `git diff --check`
+  is `PASSED`. Pytest and local Compose remain `NOT_RUN` during the ELMOS
+  exclusive disk window.
+- Commit/push state: round-1 backend `f10755d` and frontend `2954420` are
+  `PUSHED`; round-2 connection-pool work is `NOT_PUSHED`.
 
 ### Requirement coverage — `PASSED` at `E0`
 

@@ -86,6 +86,12 @@ def test_development_workers_bound_database_connection_amplification() -> None:
     document = yaml.safe_load(
         (ROOT / "deploy/compose/docker-compose.dev.yml").read_text(encoding="utf-8")
     )
+    example_environment = dict(
+        line.split("=", 1)
+        for line in (ROOT / ".env.example").read_text(encoding="utf-8").splitlines()
+        if line and not line.startswith("#") and "=" in line
+    )
+    backend_environment = document["x-backend-environment"]
     services: dict[str, dict[str, Any]] = document["services"]
     worker_commands = {
         name: service.get("command", [])
@@ -94,6 +100,10 @@ def test_development_workers_bound_database_connection_amplification() -> None:
     }
 
     assert worker_commands
+    assert backend_environment["DATABASE_POOL_SIZE"] == "${DATABASE_POOL_SIZE:-2}"
+    assert backend_environment["DATABASE_MAX_OVERFLOW"] == "${DATABASE_MAX_OVERFLOW:-0}"
+    assert example_environment["DATABASE_POOL_SIZE"] == "2"
+    assert example_environment["DATABASE_MAX_OVERFLOW"] == "0"
     for command in worker_commands.values():
         assert "--concurrency=1" in command
 
