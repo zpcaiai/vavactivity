@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-last_updated: 2026-08-20T16:03:46+08:00
+last_updated: 2026-08-20T17:10:26+08:00
 repository: /Users/stephen/Documents/Projects/python/vavactivity
 canonical: true
 ---
@@ -49,26 +49,27 @@ so another agent can continue without guessing.
 ## Current task
 
 - ID: `complete-e2e-stabilization`
-- Status: `IN_PROGRESS` — remote Complete E2E run `32342952439` improved to
-  `14 passed / 21 failed / 20 did not run`, but hit the 45-minute job timeout.
-  The first failures are remaining UI assertion/locator drift; PostgreSQL
-  connection exhaustion still begins later in the run.
+- Status: `COMPLETED` — remote Complete E2E run `32351228005` is `PASSED`
+  with `55 passed / 0 failed / 0 did not run` in 7.8 minutes of Playwright
+  execution. Its log contains no `TooManyConnectionsError` or `too many
+  clients` result.
 - Owner: Codex
 - Objective: repair the deterministic UI drift, cap development worker
   connection amplification, and iterate the remote Complete E2E workflow as
   far toward `PASSED` as current infrastructure evidence allows.
-- Branches: backend `main` at pushed `f10755d` plus a scoped uncommitted pool-cap
-  follow-up, and frontend `main` at pushed `2954420` with a clean worktree.
+- Branches: backend `main` contains pushed task-code commit `b55ee83` plus this
+  documentation-only completion record; frontend `main` is at pushed
+  `d1a30a5`. After the final ledger push, both repository heads equal their
+  `origin/main` refs and both worktrees are clean.
 - Scope: frontend Complete E2E specs and their directly related UI contracts;
   backend development Compose worker sizing used by the workflow. The ELMOS
   exclusive disk window remains active, so local Docker, pytest, and pnpm/npm
   builds are deferred until an exact `RELEASED`; lightweight static checks and
   remote GitHub CI may continue.
-- Next action: publish the explicit development SQLAlchemy pool cap, update the
-  remaining current-UI assertions and run Complete E2E without retries so all
-  55 tests reach a result inside the job window.
+- Next action: none for this task. The separate mutable Neon staging showcase
+  fixture failure remains an explicit backend release-gate gap.
 
-### Complete E2E stabilization — `IN_PROGRESS`
+### Complete E2E stabilization — `COMPLETED`
 
 - Remote baseline: frontend run `32336200760` ended `FAILED` with `9 passed / 19
   failed / 27 did not run`. Failures 1–7 reproduce UI contract drift in CMS,
@@ -87,10 +88,22 @@ so another agent can continue without guessing.
   cancelled it after 41.1 minutes of Playwright execution. The first new
   `TooManyConnectionsError` appeared at `2026-08-20T07:33:31Z`; concurrency 1
   delayed but did not eliminate per-process SQLAlchemy pool amplification.
-- Backend remediation round 2 (`IN_PROGRESS`, `NOT_PUSHED`) adds validated
+- Backend remediation round 2, commit `b55ee83` (`PUSHED`), adds validated
   `DATABASE_POOL_SIZE` and `DATABASE_MAX_OVERFLOW` settings. Development Compose
-  defaults every API/worker process to pool size 2 with zero overflow, while
-  production-compatible defaults remain 5 and 10.
+  and `.env.example` default every API/worker process to pool size 2 with zero
+  overflow, while production-compatible application defaults remain 5 and 10.
+- Frontend remediation round 2, commit `d8e78a6` (`PUSHED`), aligns counseling,
+  AI, notification and routed dating-profile journeys with current UI contracts.
+  Complete E2E sets `PLAYWRIGHT_RETRIES=0` so deterministic failures cannot
+  consume the 45-minute window before later tests execute.
+- Complete E2E run `32347239770` is `FAILED` with `45 passed / 10 failed / 0 did
+  not run` in 9.3 minutes. No `TooManyConnectionsError` or `too many clients`
+  string appears in the completed job log. The ten failures are two scoped
+  dating-profile locator ambiguities, two matchmaking title/link drifts, two
+  current public-page title drifts, and four duplicate admin heading locators.
+- Frontend remediation round 3, commit `7bb0fb4` (`PUSHED`), scopes duplicate
+  status/link/heading locators and aligns matchmaking, membership and privacy
+  text with the current routed pages.
 - Lightweight validation at 2026-08-20T15:18:00+08:00: backend Ruff check and
   format check `PASSED`; PyYAML inspection found exactly six development workers
   and all six contain `--concurrency=1`; `git diff --check` is `PASSED` in both
@@ -103,8 +116,38 @@ so another agent can continue without guessing.
   development pool `2 + 0` and configurable runtime settings; `git diff --check`
   is `PASSED`. Pytest and local Compose remain `NOT_RUN` during the ELMOS
   exclusive disk window.
-- Commit/push state: round-1 backend `f10755d` and frontend `2954420` are
-  `PUSHED`; round-2 connection-pool work is `NOT_PUSHED`.
+- Commit/push state: round-1 backend `f10755d` and frontend `2954420`, plus
+  round-2 backend `b55ee83` and frontend `d8e78a6`, are all `PUSHED`; remote
+  branch SHAs were verified. Backend Security Tests `32347217509`, Build Scan
+  `32347217636` and Secret Scan `32347217495` are `PASSED`; Backend CI
+  `32347217646` is `FAILED` only because its separate `Apply migrations to
+  Neon` job failed while seeding mutable staging showcase data with `Three
+  independent ready-recommendation fixture members are required.` Its backend
+  job, including Ruff, format, mypy, migrations and full pytest, is `PASSED`.
+  Frontend Build Scan `32347239489` and
+  Frontend CI `32347239655` are `PASSED`; Complete E2E `32347239770` is `FAILED`
+  only on the ten named UI assertions above.
+- Round-3 frontend runs Build Scan `32348700800`, Frontend CI `32348700755` and
+  are `PASSED`; Complete E2E `32348700496` is `FAILED` with `54 passed / 1
+  failed / 0 did not run`. Its single failure is a 60-second wait for the removed
+  `保存档案` label; the current page and localization source use `保存资料` and
+  success text `资料已保存并生成新版本。`.
+- Frontend remediation round 4, commit `8547e09` (`PUSHED`), updates that final
+  locator and scopes the success status to the current localized message.
+- Round-4 Build Scan `32350062546` and Frontend CI `32350062560` are `PASSED`;
+  Complete E2E `32350062722` is `FAILED`
+  with `54 passed / 1 failed / 0 did not run`. The only failure is the removed
+  select-style `隐私模式` locator; the routed page now renders `严格` as a radio
+  option and `允许平台用户搜索到我` as a disabled checkbox.
+- Frontend remediation round 5, commit `d1a30a5` (`PUSHED`), aligns both current
+  privacy controls and proactively updates the later AI-memory checkbox label.
+- Round-5 Build Scan `32351228050`, Frontend CI `32351228064` and Complete E2E
+  `32351228005` are all `PASSED` on full frontend SHA
+  `d1a30a56cd00446f7e9aad80281ca4fd61ba642f`. Frontend CI passed dependency
+  installation, lint, typecheck, unit tests and both production builds. Complete
+  E2E passed all `55/55` journeys in 7.8 minutes with no PostgreSQL connection
+  exhaustion signature. This closes the baseline failure state of `9 passed /
+  19 failed / 27 did not run`.
 
 ### Requirement coverage — `PASSED` at `E0`
 
@@ -310,6 +353,31 @@ snapshot. Their presence is not proof that every associated external gate ran.
 - `9c4c276` — `feat: complete member journeys and production gates`
 
 ## Completion log
+
+### 2026-08-20 — Complete E2E stabilization
+
+- Status: `COMPLETED`. Frontend Complete E2E run `32351228005` passed all
+  `55/55` journeys on commit `d1a30a5`, improving the original run
+  `32336200760` from `9 passed / 19 failed / 27 did not run` to
+  `55 passed / 0 failed / 0 did not run`.
+- Backend commits `f10755d` and `b55ee83` cap all six development worker
+  processes at concurrency 1 and bound each development SQLAlchemy pool to
+  `2 + 0`; frontend commits `2954420`, `d8e78a6`, `7bb0fb4`, `8547e09` and
+  `d1a30a5` align the Complete E2E assertions with the current routed UI.
+  All task-owned code commits are `PUSHED`, and both repository heads equal
+  their `origin/main` refs.
+- Round-5 Build Scan `32351228050`, Frontend CI `32351228064`, and Complete E2E
+  `32351228005` are `PASSED`. Frontend CI covers install, lint, typecheck, unit
+  tests and production builds; the E2E log reports `55 passed (7.8m)` and no
+  PostgreSQL connection-exhaustion signature.
+- Backend CI run `32347217646` has a `PASSED` backend job, including Ruff,
+  format, mypy, migrations and full pytest. The overall workflow remains
+  `FAILED` only on the separate mutable Neon staging showcase seed requirement
+  for three independent ready-recommendation fixture members; that release gate
+  is not represented as passed by this task.
+- Local Docker, pytest and pnpm/npm build remain `NOT_RUN` because the ELMOS
+  exclusive disk window has not sent `RELEASED`; no prohibited local heavy work
+  was started. Remote CI is the named validation evidence for this completion.
 
 ### 2026-08-20 — Production image development-dependency isolation
 
