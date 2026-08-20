@@ -53,12 +53,9 @@ def _route_queue(task_name: str) -> str:
 
 
 def test_every_registered_and_scheduled_task_routes_to_deployed_workers() -> None:
-    registered = {
-        name for name in celery_app.tasks if name.startswith("vav.")
-    }
+    registered = {name for name in celery_app.tasks if name.startswith("vav.")}
     scheduled = {
-        definition["task"]
-        for definition in celery_app.conf.beat_schedule.values()
+        definition["task"] for definition in celery_app.conf.beat_schedule.values()
     }
     assert scheduled <= registered
 
@@ -83,6 +80,22 @@ def test_routing_keeps_sensitive_and_domain_workloads_isolated() -> None:
     assert _route_queue("vav.safety.escalate_cases") == "safety"
     assert _route_queue("vav.recommendations.generate_batches") == "recommendations"
     assert _route_queue("vav.future.unmapped_task") == "default"
+
+
+def test_development_workers_bound_database_connection_amplification() -> None:
+    document = yaml.safe_load(
+        (ROOT / "deploy/compose/docker-compose.dev.yml").read_text(encoding="utf-8")
+    )
+    services: dict[str, dict[str, Any]] = document["services"]
+    worker_commands = {
+        name: service.get("command", [])
+        for name, service in services.items()
+        if name == "worker" or name.startswith("worker-")
+    }
+
+    assert worker_commands
+    for command in worker_commands.values():
+        assert "--concurrency=1" in command
 
 
 def test_privacy_worker_retries_incomplete_erasure_plans() -> None:

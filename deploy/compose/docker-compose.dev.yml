@@ -109,7 +109,7 @@ services:
 
   worker:
     <<: *worker
-    command: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, --hostname=default@%h, "--queues=default,commerce,activities,courses,counseling,knowledge"]
+    command: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, --concurrency=1, --hostname=default@%h, "--queues=default,commerce,activities,courses,counseling,knowledge"]
     healthcheck:
       test: [CMD-SHELL, "celery --app vav_worker.celery_app:celery_app inspect ping --timeout 5 | grep -q pong"]
       interval: 20s
@@ -119,27 +119,27 @@ services:
   worker-ai:
     <<: *worker
     profiles: [workers, full]
-    command: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, --hostname=ai@%h, "--queues=ai,knowledge,recommendations"]
+    command: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, --concurrency=1, --hostname=ai@%h, "--queues=ai,knowledge,recommendations"]
 
   worker-notifications:
     <<: *worker
     profiles: [workers, full]
-    command: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, --hostname=notifications@%h, --queues=notifications]
+    command: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, --concurrency=1, --hostname=notifications@%h, --queues=notifications]
 
   worker-privacy:
     <<: *worker
     profiles: [workers, full]
-    command: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, --hostname=privacy@%h, --queues=privacy]
+    command: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, --concurrency=1, --hostname=privacy@%h, --queues=privacy]
 
   worker-safety:
     <<: *worker
     profiles: [workers, full]
-    command: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, --hostname=safety@%h, --queues=safety]
+    command: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, --concurrency=1, --hostname=safety@%h, --queues=safety]
 
   worker-media:
     <<: *worker
     profiles: [workers, full]
-    command: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, --hostname=media@%h, --queues=media]
+    command: [celery, --app, vav_worker.celery_app:celery_app, worker, --loglevel=INFO, --concurrency=1, --hostname=media@%h, --queues=media]
 
   scheduler:
     <<: *worker

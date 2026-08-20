@@ -1,6 +1,6 @@
 ---
 schema_version: 1
-last_updated: 2026-08-20T14:40:44+08:00
+last_updated: 2026-08-20T15:06:06+08:00
 repository: /Users/stephen/Documents/Projects/python/vavactivity
 canonical: true
 ---
@@ -48,17 +48,51 @@ so another agent can continue without guessing.
 
 ## Current task
 
-- ID: `requirement-audit-and-executable-release-gates`
-- Status: `IN_PROGRESS` — G1 and G2 have executed evidence; G3 and G4 are
-  `PARTIAL`, and G5 remains `NOT_CERTIFIED` for the reasons recorded below.
-- Owner: Codex, continuing Claude's recorded gate run
-- Objective: check the 42 catalogued requirements against both repositories,
-  implement whatever is genuinely missing, then run every release gate that can
-  be run and state plainly which ones cannot.
-- Branches: backend `main` at `c8f648a` before this final ledger update;
-  frontend `main` at `11399e0`. The frontend equals `origin/main` and is clean;
-  this ledger update's backend commit is identified by the containing Git
-  history because a commit cannot record its own SHA.
+- ID: `complete-e2e-stabilization`
+- Status: `IN_PROGRESS` — remote Complete E2E run `32336200760` is `FAILED`
+  with `9 passed / 19 failed / 27 did not run`; the first failures are UI
+  assertion/locator drift and the later cascade is PostgreSQL connection
+  exhaustion.
+- Owner: Codex
+- Objective: repair the deterministic UI drift, cap development worker
+  connection amplification, and iterate the remote Complete E2E workflow as
+  far toward `PASSED` as current infrastructure evidence allows.
+- Branches: backend `main` at `9b3b377` and frontend `main` at `11399e0`; both
+  equal `origin/main` and were clean at task start.
+- Scope: frontend Complete E2E specs and their directly related UI contracts;
+  backend development Compose worker sizing used by the workflow. The ELMOS
+  exclusive disk window remains active, so local Docker, pytest, and pnpm/npm
+  builds are deferred until an exact `RELEASED`; lightweight static checks and
+  remote GitHub CI may continue.
+- Next action: inspect the first seven non-resource failures, fix stable UI
+  contracts, cap full-profile Celery concurrency, then publish scoped split-repo
+  commits and use fresh Complete E2E runs to expose the next failure frontier.
+
+### Complete E2E stabilization — `IN_PROGRESS`
+
+- Remote baseline: frontend run `32336200760` ended `FAILED` with `9 passed / 19
+  failed / 27 did not run`. Failures 1–7 reproduce UI contract drift in CMS,
+  catalog, counseling, AI, and registration success copy. From the notification
+  retry onward, fixture CLIs fail with
+  `asyncpg.exceptions.TooManyConnectionsError: sorry, too many clients already`.
+- Backend remediation: all six development Compose Celery services now declare
+  `--concurrency=1`; a contract test requires the bound on every development
+  worker so GitHub runner CPU-count changes cannot silently amplify database
+  clients again.
+- Frontend remediation in the sibling repository updates eight E2E specs to the
+  current localized status text and current counseling/AI tab names. The privacy
+  registration assertion was updated proactively because it reused the same
+  removed success copy and had not run in the failed baseline.
+- Lightweight validation at 2026-08-20T15:18:00+08:00: backend Ruff check and
+  format check `PASSED`; PyYAML inspection found exactly six development workers
+  and all six contain `--concurrency=1`; `git diff --check` is `PASSED` in both
+  repositories. Frontend ESLint/Playwright list are `NOT_RUN` because this clean
+  checkout has no `node_modules`, and dependency installation is deferred during
+  the active ELMOS exclusive disk window. Docker Compose execution and pytest
+  are likewise `NOT_RUN` until `RELEASED`.
+- Commit/push state: backend and frontend changes are `NOT_PUSHED`. The backend
+  connection fix must land first so a subsequently triggered frontend Complete
+  E2E run checks out the corrected backend SHA.
 
 ### Requirement coverage — `PASSED` at `E0`
 
